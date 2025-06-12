@@ -1,15 +1,16 @@
 import "root:/modules/common"
 import QtQuick
 import QtQuick.Controls
+import QtQuick.Layouts
 
-TextArea {
+Label {
     renderType: Text.NativeRendering
-    selectedTextColor: Appearance.m3colors.m3onSecondaryContainer
-    selectionColor: Appearance.colors.colSecondaryContainer
-    placeholderTextColor: Appearance.m3colors.m3outline
+    verticalAlignment: Text.AlignVCenter
     font {
+        hintingPreference: Font.PreferFullHinting
         family: Appearance?.font.family.main ?? "sans-serif"
         pixelSize: Appearance?.font.pixelSize.small ?? 15
-        hintingPreference: Font.PreferFullHinting
     }
+    color: Appearance?.m3colors.m3onBackground ?? "black"
+    linkColor: Appearance?.m3colors.m3primary
 }
