@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 
+QUICKSHELL_CONFIG_NAME="ii"
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
-CONFIG_DIR="$XDG_CONFIG_HOME/quickshell"
+CONFIG_DIR="$XDG_CONFIG_HOME/quickshell/$QUICKSHELL_CONFIG_NAME"
 CACHE_DIR="$XDG_CACHE_HOME/quickshell"
 STATE_DIR="$XDG_STATE_HOME/quickshell"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MATUGEN_DIR="$XDG_CONFIG_HOME/matugen"
-terminalscheme="$XDG_CONFIG_HOME/quickshell/scripts/terminal/scheme-base.json"
+terminalscheme="$SCRIPT_DIR/terminal/scheme-base.json"
 
 handle_kde_material_you_colors() {
     # Map $type_flag to allowed scheme variants for kde-material-you-colors-wrapper.sh
@@ -297,7 +298,7 @@ main() {
                 ;;
             --noswitch)
                 noswitch_flag="1"
-                imgpath=$(swww query | awk -F 'image: ' '{print $2}')
+                imgpath=$(swww query | head -1 | awk -F 'image: ' '{print $2}')
                 shift
                 ;;
             *)
@@ -330,7 +331,7 @@ main() {
 
     # Only prompt for wallpaper if not using --color and not using --noswitch and no imgpath set
     if [[ -z "$imgpath" && -z "$color_flag" && -z "$noswitch_flag" ]]; then
-        cd "$(xdg-user-dir PICTURES)/Wallpapers" 2>/dev/null || cd "$(xdg-user-dir PICTURES)" || return 1
+        cd "$(xdg-user-dir PICTURES)/Wallpapers/showcase" 2>/dev/null || cd "$(xdg-user-dir PICTURES)/Wallpapers" 2>/dev/null || cd "$(xdg-user-dir PICTURES)" || return 1
         imgpath="$(kdialog --getopenfilename . --title 'Choose wallpaper')"
     fi
 

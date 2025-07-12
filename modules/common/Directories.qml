@@ -16,7 +16,8 @@ Singleton {
     readonly property string downloads: StandardPaths.standardLocations(StandardPaths.DownloadLocation)[0]
     
     // Other dirs used by the shell, without "file://"
-    property string scriptPath: FileUtils.trimFileProtocol(`${Directories.config}/quickshell/scripts`)
+    property string assetsPath: Quickshell.configPath("assets")
+    property string scriptPath: Quickshell.configPath("scripts")
     property string favicons: FileUtils.trimFileProtocol(`${Directories.cache}/media/favicons`)
     property string coverArt: FileUtils.trimFileProtocol(`${Directories.cache}/media/coverart`)
     property string booruPreviews: FileUtils.trimFileProtocol(`${Directories.cache}/media/boorus`)
@@ -30,17 +31,20 @@ Singleton {
     property string notificationsPath: FileUtils.trimFileProtocol(`${Directories.cache}/notifications/notifications.json`)
     property string generatedMaterialThemePath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/colors.json`)
     property string cliphistDecode: FileUtils.trimFileProtocol(`/tmp/quickshell/media/cliphist`)
+    property string screenshotTemp: "/tmp/quickshell/media/screenshot"
     property string wallpaperSwitchScriptPath: FileUtils.trimFileProtocol(`${Directories.scriptPath}/colors/switchwall.sh`)
-    property string defaultAiPrompts: FileUtils.trimFileProtocol(`${Directories.config}/quickshell/defaults/ai/prompts`)
+    property string defaultAiPrompts: Quickshell.configPath("defaults/ai/prompts")
     property string userAiPrompts: FileUtils.trimFileProtocol(`${Directories.shellConfig}/ai/prompts`)
+    property string aiChats: FileUtils.trimFileProtocol(`${Directories.state}/user/ai/chats`)
     // Cleanup on init
     Component.onCompleted: {
-        Quickshell.execDetached(["bash", "-c", `mkdir -p '${shellConfig}'`])
-        Quickshell.execDetached(["bash", "-c", `mkdir -p '${favicons}'`])
+        Quickshell.execDetached(["mkdir", "-p", `${shellConfig}`])
+        Quickshell.execDetached(["mkdir", "-p", `${favicons}`])
         Quickshell.execDetached(["bash", "-c", `rm -rf '${coverArt}'; mkdir -p '${coverArt}'`])
         Quickshell.execDetached(["bash", "-c", `rm -rf '${booruPreviews}'; mkdir -p '${booruPreviews}'`])
         Quickshell.execDetached(["bash", "-c", `mkdir -p '${booruDownloads}' && mkdir -p '${booruDownloadsNsfw}'`])
         Quickshell.execDetached(["bash", "-c", `rm -rf '${latexOutput}'; mkdir -p '${latexOutput}'`])
         Quickshell.execDetached(["bash", "-c", `rm -rf '${cliphistDecode}'; mkdir -p '${cliphistDecode}'`])
+        Quickshell.execDetached(["mkdir", "-p", `${aiChats}`])
     }
 }

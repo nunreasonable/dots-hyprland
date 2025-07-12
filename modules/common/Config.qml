@@ -63,6 +63,7 @@ Singleton {
             }
 
             property JsonObject appearance: JsonObject {
+                property bool extraBackgroundTint: true
                 property int fakeScreenRounding: 2 // 0: None | 1: Always | 2: When not fullscreen
                 property bool transparency: false
                 property JsonObject palette: JsonObject {
@@ -117,10 +118,18 @@ Singleton {
                     property bool monochromeIcons: true
                 }
                 property JsonObject workspaces: JsonObject {
+                    property bool monochromeIcons: true
                     property int shown: 10
                     property bool showAppIcons: true
                     property bool alwaysShowNumbers: false
                     property int showNumberDelay: 300 // milliseconds
+                }
+                property JsonObject weather: JsonObject {
+                    property bool enable: false
+                    property bool enableGPS: true // gps based location
+                    property string city: "" // When 'enableGPS' is false
+                    property bool useUSCS: false // Instead of metric (SI) units
+                    property int fetchInterval: 10 // minutes
                 }
             }
 
@@ -133,8 +142,9 @@ Singleton {
 
             property JsonObject dock: JsonObject {
                 property bool enable: false
+                property bool monochromeIcons: true
                 property real height: 60
-                property real hoverRegionHeight: 3
+                property real hoverRegionHeight: 2
                 property bool pinnedOnStartup: false
                 property bool hoverToReveal: true // When false, only reveals on empty workspace
                 property list<string> pinnedApps: [ // IDs of pinned entries
@@ -201,7 +211,7 @@ Singleton {
             property JsonObject time: JsonObject {
                 // https://doc.qt.io/qt-6/qtime.html#toString
                 property string format: "hh:mm"
-                property string dateFormat: "dddd, dd/MM"
+                property string dateFormat: "ddd, dd/MM"
             }
 
             property JsonObject windows: JsonObject {
@@ -211,6 +221,10 @@ Singleton {
 
             property JsonObject hacks: JsonObject {
                 property int arbitraryRaceConditionDelay: 20 // milliseconds
+            }
+
+            property JsonObject screenshotTool: JsonObject {
+                property bool showContentRegions: true
             }
         }
     }

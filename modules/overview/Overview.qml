@@ -34,9 +34,9 @@ Scope {
             mask: Region {
                 item: GlobalStates.overviewOpen ? columnLayout : null
             }
-            HyprlandWindow.visibleMask: Region {
-                item: GlobalStates.overviewOpen ? columnLayout : null
-            }
+            // HyprlandWindow.visibleMask: Region { // Buggy with scaled monitors
+            //     item: GlobalStates.overviewOpen ? columnLayout : null
+            // }
 
 
             anchors {

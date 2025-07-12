@@ -173,14 +173,7 @@ Item {
                     id: workspaceButtonBackground
                     implicitWidth: workspaceButtonWidth
                     implicitHeight: workspaceButtonWidth
-                    property var biggestWindow: {
-                        const windowsInThisWorkspace = HyprlandData.windowList.filter(w => w.workspace.id == button.workspaceValue)
-                        return windowsInThisWorkspace.reduce((maxWin, win) => {
-                            const maxArea = (maxWin?.size?.[0] ?? 0) * (maxWin?.size?.[1] ?? 0)
-                            const winArea = (win?.size?.[0] ?? 0) * (win?.size?.[1] ?? 0)
-                            return winArea > maxArea ? win : maxWin
-                        }, null)
-                    }
+                    property var biggestWindow: HyprlandData.biggestWindowForWorkspace(button.workspaceValue)
                     property var mainAppIconSource: Quickshell.iconPath(AppSearch.guessIcon(biggestWindow?.class), "image-missing")
 
                     StyledText { // Workspace number text
@@ -206,6 +199,7 @@ Item {
                         }
                     }
                     Rectangle { // Dot instead of ws number
+                        id: wsDot
                         opacity: (Config.options?.bar.workspaces.alwaysShowNumbers
                             || GlobalStates.workspaceShowNumbers
                             || (Config.options?.bar.workspaces.showAppIcons && workspaceButtonBackground.biggestWindow)
@@ -255,6 +249,25 @@ Item {
                             }
                             Behavior on implicitSize {
                                 animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                            }
+                        }
+
+                        Loader {
+                            active: Config.options.bar.workspaces.monochromeIcons
+                            anchors.fill: mainAppIcon
+                            sourceComponent: Item {
+                                Desaturate {
+                                    id: desaturatedIcon
+                                    visible: false // There's already color overlay
+                                    anchors.fill: parent
+                                    source: mainAppIcon
+                                    desaturation: 0.8
+                                }
+                                ColorOverlay {
+                                    anchors.fill: desaturatedIcon
+                                    source: desaturatedIcon
+                                    color: ColorUtils.transparentize(wsDot.color, 0.9)
+                                }
                             }
                         }
                     }

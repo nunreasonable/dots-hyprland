@@ -19,7 +19,7 @@ Item {
     readonly property var toplevels: ToplevelManager.toplevels
     readonly property int workspacesShown: Config.options.overview.rows * Config.options.overview.columns
     readonly property int workspaceGroup: Math.floor((monitor.activeWorkspace?.id - 1) / workspacesShown)
-    property bool monitorIsFocused: (Hyprland.focusedMonitor?.id == monitor.id)
+    property bool monitorIsFocused: (Hyprland.focusedMonitor?.name == monitor.name)
     property var windows: HyprlandData.windowList
     property var windowByAddress: HyprlandData.windowByAddress
     property var windowAddresses: HyprlandData.addresses
@@ -63,6 +63,8 @@ Item {
         implicitHeight: workspaceColumnLayout.implicitHeight + padding * 2
         radius: Appearance.rounding.screenRounding * root.scale + padding
         color: Appearance.colors.colLayer0
+        border.width: 1
+        border.color: Appearance.m3colors.m3outlineVariant
 
         ColumnLayout { // Workspaces
             id: workspaceColumnLayout
@@ -148,9 +150,10 @@ Item {
                         // console.log(JSON.stringify(ToplevelManager.toplevels.values.map(t => t), null, 2))
                         return ToplevelManager.toplevels.values.filter((toplevel) => {
                             const address = `0x${toplevel.HyprlandToplevel.address}`
-                            // console.log(`Checking window with address: ${address}`)
                             var win = windowByAddress[address]
-                            return (root.workspaceGroup * root.workspacesShown < win?.workspace?.id && win?.workspace?.id <= (root.workspaceGroup + 1) * root.workspacesShown)
+                            const inWorkspaceGroup = (root.workspaceGroup * root.workspacesShown < win?.workspace?.id && win?.workspace?.id <= (root.workspaceGroup + 1) * root.workspacesShown)
+                            const inMonitor = root.monitor.id === win.monitor
+                            return inWorkspaceGroup && inMonitor;
                         })
                     }
                 }
@@ -160,7 +163,7 @@ Item {
                     property var address: `0x${modelData.HyprlandToplevel.address}`
                     windowData: windowByAddress[address]
                     toplevel: modelData
-                    monitorData: root.monitorData
+                    monitorData: HyprlandData.monitors[monitorId]
                     scale: root.scale
                     availableWorkspaceWidth: root.workspaceImplicitWidth
                     availableWorkspaceHeight: root.workspaceImplicitHeight
@@ -169,11 +172,12 @@ Item {
                     property var monitor: HyprlandData.monitors[monitorId]
 
                     property bool atInitPosition: (initX == x && initY == y)
-                    restrictToWorkspace: Drag.active || atInitPosition
 
                     property int workspaceColIndex: (windowData?.workspace.id - 1) % Config.options.overview.columns
                     property int workspaceRowIndex: Math.floor((windowData?.workspace.id - 1) % root.workspacesShown / Config.options.overview.columns)
-                    xOffset: (root.workspaceImplicitWidth + workspaceSpacing) * workspaceColIndex - (monitor?.x * root.scale)
+                    xOffset: {
+                        return (root.workspaceImplicitWidth + workspaceSpacing) * workspaceColIndex - (monitor?.x * root.scale)
+                    }
                     yOffset: (root.workspaceImplicitHeight + workspaceSpacing) * workspaceRowIndex - (monitor?.y * root.scale)
 
                     Timer {
@@ -184,7 +188,6 @@ Item {
                         onTriggered: {
                             window.x = Math.round(Math.max((windowData?.at[0] - monitorData?.reserved[0]) * root.scale, 0) + xOffset)
                             window.y = Math.round(Math.max((windowData?.at[1] - monitorData?.reserved[1]) * root.scale, 0) + yOffset)
-                            // console.log(`[OverviewWindow] Updated position for window ${windowData?.address} to (${window.x}, ${window.y})`)
                         }
                     }
 

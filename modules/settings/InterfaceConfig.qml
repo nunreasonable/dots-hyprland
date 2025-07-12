@@ -11,38 +11,58 @@ ContentPage {
         title: "Policies"
 
         ConfigRow {
-            ColumnLayout { // Weeb policy
+            ColumnLayout {
+                // Weeb policy
                 ContentSubsectionLabel {
                     text: "Weeb"
                 }
                 ConfigSelectionArray {
                     currentValue: Config.options.policies.weeb
                     configOptionName: "policies.weeb"
-                    onSelected: (newValue) => {
+                    onSelected: newValue => {
                         Config.options.policies.weeb = newValue;
                     }
                     options: [
-                        { displayName: "No", value: 0 },
-                        { displayName: "Yes", value: 1 },
-                        { displayName: "Closet", value: 2 }
+                        {
+                            displayName: "No",
+                            value: 0
+                        },
+                        {
+                            displayName: "Yes",
+                            value: 1
+                        },
+                        {
+                            displayName: "Closet",
+                            value: 2
+                        }
                     ]
                 }
             }
 
-            ColumnLayout { // AI policy
+            ColumnLayout {
+                // AI policy
                 ContentSubsectionLabel {
                     text: "AI"
                 }
                 ConfigSelectionArray {
                     currentValue: Config.options.policies.ai
                     configOptionName: "policies.ai"
-                    onSelected: (newValue) => {
+                    onSelected: newValue => {
                         Config.options.policies.ai = newValue;
                     }
                     options: [
-                        { displayName: "No", value: 0 },
-                        { displayName: "Yes", value: 1 },
-                        { displayName: "Local only", value: 2 }
+                        {
+                            displayName: "No",
+                            value: 0
+                        },
+                        {
+                            displayName: "Yes",
+                            value: 1
+                        },
+                        {
+                            displayName: "Local only",
+                            value: 2
+                        }
                     ]
                 }
             }
@@ -55,13 +75,22 @@ ContentPage {
         ConfigSelectionArray {
             currentValue: Config.options.bar.cornerStyle
             configOptionName: "bar.cornerStyle"
-            onSelected: (newValue) => {
+            onSelected: newValue => {
                 Config.options.bar.cornerStyle = newValue;
             }
             options: [
-                { displayName: "Hug", value: 0 },
-                { displayName: "Float", value: 1 },
-                { displayName: "Plain rectangle", value: 2 }
+                {
+                    displayName: "Hug",
+                    value: 0
+                },
+                {
+                    displayName: "Float",
+                    value: 1
+                },
+                {
+                    displayName: "Plain rectangle",
+                    value: 2
+                }
             ]
         }
 
@@ -182,7 +211,18 @@ ContentPage {
                     Config.options.bar.workspaces.showNumberDelay = value;
                 }
             }
-        }   
+        }
+
+        ContentSubsection {
+            title: "Weather"
+            ConfigSwitch {
+                text: "Enable"
+                checked: Config.options.bar.weather.enable
+                onCheckedChanged: {
+                    Config.options.bar.weather.enable = checked;
+                }
+            }
+        }
     }
 
     ContentSection {
@@ -237,6 +277,50 @@ ContentPage {
     }
 
     ContentSection {
+        title: "Dock"
+
+        ConfigSwitch {
+            text: "Enable"
+            checked: Config.options.dock.enable
+            onCheckedChanged: {
+                Config.options.dock.enable = checked;
+            }
+        }
+
+        ConfigRow {
+            uniform: true
+            ConfigSwitch {
+                text: "Hover to reveal"
+                checked: Config.options.dock.hoverToReveal
+                onCheckedChanged: {
+                    Config.options.dock.hoverToReveal = checked;
+                }
+            }
+            ConfigSwitch {
+                text: "Pinned on startup"
+                checked: Config.options.dock.pinnedOnStartup
+                onCheckedChanged: {
+                    Config.options.dock.pinnedOnStartup = checked;
+                }
+            }
+        }
+    }
+
+    ContentSection {
+        title: "On-screen display"
+        ConfigSpinBox {
+            text: "Timeout (ms)"
+            value: Config.options.osd.timeout
+            from: 100
+            to: 3000
+            stepSize: 100
+            onValueChanged: {
+                Config.options.osd.timeout = value;
+            }
+        }
+    }
+
+    ContentSection {
         title: "Overview"
         ConfigSpinBox {
             text: "Scale (%)"
@@ -271,6 +355,20 @@ ContentPage {
                 }
             }
         }
-        
+    }
+
+    ContentSection {
+        title: "Screenshot tool"
+
+        ConfigSwitch {
+            text: 'Show regions of potential interest'
+            checked: Config.options.screenshotTool.showContentRegions
+            onCheckedChanged: {
+                Config.options.screenshotTool.showContentRegions = checked;
+            }
+            StyledToolTip {
+                content: "Such regions could be images or parts of the screen that have some containment.\nMight not always be accurate.\nThis is done with an image processing algorithm run locally and no AI is used."
+            }
+        }        
     }
 }

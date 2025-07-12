@@ -1,3 +1,4 @@
+import "root:/services"
 import "root:/modules/common"
 import "root:/modules/common/widgets"
 import "root:/services/"
@@ -11,6 +12,10 @@ Item {
     required property var bar
     readonly property HyprlandMonitor monitor: Hyprland.monitorFor(bar.screen)
     readonly property Toplevel activeWindow: ToplevelManager.activeToplevel
+
+    property string activeWindowAddress: `0x${activeWindow.HyprlandToplevel.address}`
+    property bool focusingThisMonitor: HyprlandData.activeWorkspace.monitor == monitor.name
+    property var biggestWindow: HyprlandData.biggestWindowForWorkspace(HyprlandData.monitors[root.monitor.id].activeWorkspace.id)
 
     implicitWidth: colLayout.implicitWidth
 
@@ -27,7 +32,10 @@ Item {
             font.pixelSize: Appearance.font.pixelSize.smaller
             color: Appearance.colors.colSubtext
             elide: Text.ElideRight
-            text: root.activeWindow?.activated ? root.activeWindow?.appId : Translation.tr("Desktop")
+            text: root.focusingThisMonitor && root.activeWindow?.activated && root.biggestWindow ? 
+                root.activeWindow?.appId :
+                (root.biggestWindow?.class) ?? Translation.tr("Desktop")
+
         }
 
         StyledText {
@@ -35,7 +43,9 @@ Item {
             font.pixelSize: Appearance.font.pixelSize.small
             color: Appearance.colors.colOnLayer0
             elide: Text.ElideRight
-            text: root.activeWindow?.activated ? root.activeWindow?.title : `${Translation.tr("Workspace")} ${monitor.activeWorkspace?.id}`
+            text: root.focusingThisMonitor && root.activeWindow?.activated && root.biggestWindow ? 
+                root.activeWindow?.title :
+                (root.biggestWindow?.title) ?? `${Translation.tr("Workspace")} ${monitor.activeWorkspace?.id}`
         }
 
     }
