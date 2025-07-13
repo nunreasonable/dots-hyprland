@@ -1,16 +1,26 @@
 #!/usr/bin/env bash
 
+QUICKSHELL_CONFIG_NAME="ii"
 XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
 XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
-CONFIG_DIR="$XDG_CONFIG_HOME/quickshell"
+CONFIG_DIR="$XDG_CONFIG_HOME/quickshell/$QUICKSHELL_CONFIG_NAME"
 CACHE_DIR="$XDG_CACHE_HOME/quickshell"
 STATE_DIR="$XDG_STATE_HOME/quickshell"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 MATUGEN_DIR="$XDG_CONFIG_HOME/matugen"
-terminalscheme="$XDG_CONFIG_HOME/quickshell/scripts/terminal/scheme-base.json"
+terminalscheme="$SCRIPT_DIR/terminal/scheme-base.json"
 
 handle_kde_material_you_colors() {
+    # Check if Qt app theming is enabled in config
+    CONFIG_FILE="$XDG_CONFIG_HOME/illogical-impulse/config.json"
+    if [ -f "$CONFIG_FILE" ]; then
+        enable_qt_apps=$(jq -r '.appearance.wallpaperTheming.enableQtApps' "$CONFIG_FILE")
+        if [ "$enable_qt_apps" == "false" ]; then
+            return
+        fi
+    fi
+
     # Map $type_flag to allowed scheme variants for kde-material-you-colors-wrapper.sh
     local kde_scheme_variant=""
     case "$type_flag" in
@@ -44,6 +54,7 @@ post_process() {
     local screen_width="$1"
     local screen_height="$2"
     local wallpaper_path="$3"
+
 
     handle_kde_material_you_colors &
 
@@ -241,6 +252,16 @@ switch() {
 
     pre_process "$mode_flag"
 
+    # Check if app and shell theming is enabled in config
+    CONFIG_FILE="$XDG_CONFIG_HOME/illogical-impulse/config.json"
+    if [ -f "$CONFIG_FILE" ]; then
+        enable_apps_shell=$(jq -r '.appearance.wallpaperTheming.enableAppsAndShell' "$CONFIG_FILE")
+        if [ "$enable_apps_shell" == "false" ]; then
+            echo "App and shell theming disabled, skipping matugen and color generation"
+            return
+        fi
+    fi
+
     matugen "${matugen_args[@]}"
     source "$(eval echo $ILLOGICAL_IMPULSE_VIRTUAL_ENV)/bin/activate"
     python3 "$SCRIPT_DIR/generate_colors_material.py" "${generate_colors_material_args[@]}" \
@@ -297,7 +318,7 @@ main() {
                 ;;
             --noswitch)
                 noswitch_flag="1"
-                imgpath=$(swww query | awk -F 'image: ' '{print $2}')
+                imgpath=$(swww query | head -1 | awk -F 'image: ' '{print $2}')
                 shift
                 ;;
             *)

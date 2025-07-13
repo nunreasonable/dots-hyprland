@@ -22,7 +22,7 @@ import "./services/"
 
 ShellRoot {
     id: root
-    property string screenshotDir: "/tmp/quickshell/media/screenshot"
+    property string screenshotDir: Directories.screenshotTemp
     property color overlayColor: "#77111111"
     property color genericContentColor: Qt.alpha(root.overlayColor, 0.9)
     property color genericContentForeground: "#ddffffff"
@@ -81,6 +81,7 @@ ShellRoot {
                 Loader {
                     id: regionIconLoader
                     active: regionRect.showIcon
+                    visible: active
                     sourceComponent: IconImage {
                         implicitSize: Appearance.font.pixelSize.larger
                         source: Quickshell.iconPath(AppSearch.guessIcon(regionRect.text), "image-missing")
@@ -517,7 +518,7 @@ ShellRoot {
                     // Image regions
                     Repeater {
                         model: ScriptModel {
-                            values: panelWindow.imageRegions
+                            values: Config.options.screenshotTool.showContentRegions ? panelWindow.imageRegions : []
                         }
                         delegate: TargetRegion {
                             z: 4

@@ -18,7 +18,7 @@ ContentPage {
     Process {
         id: konachanWallProc
         property string status: ""
-        command: ["bash", "-c", FileUtils.trimFileProtocol(`${Directories.config}/quickshell/scripts/colors/random_konachan_wall.sh`)]
+        command: ["bash", "-c", FileUtils.trimFileProtocol(`${Directories.scriptPath}/colors/random_konachan_wall.sh`)]
         stdout: SplitParser {
             onRead: data => {
                 console.log(`Konachan wall proc output: ${data}`);
@@ -50,6 +50,7 @@ ContentPage {
                 configOptionName: "appearance.palette.type"
                 onSelected: (newValue) => {
                     Config.options.appearance.palette.type = newValue;
+                    Quickshell.execDetached(["bash", "-c", `${Directories.wallpaperSwitchScriptPath} --noswitch`])
                 }
                 options: [
                     {"value": "auto", "displayName": "Auto"},
