@@ -1,7 +1,7 @@
 pragma Singleton
 pragma ComponentBehavior: Bound
 
-import "root:/modules/common"
+import qs.modules.common
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -34,7 +34,7 @@ Singleton {
 
     Timer {
         id: delayedFileRead
-        interval: ConfigOptions?.hacks?.arbitraryRaceConditionDelay ?? 100
+        interval: Config.options?.hacks?.arbitraryRaceConditionDelay ?? 100
         repeat: false
         running: false
         onTriggered: {

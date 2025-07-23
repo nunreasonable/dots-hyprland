@@ -1,8 +1,7 @@
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
-import "root:/modules/common/"
-import "root:/modules/common/widgets/"
+import qs.modules.common
+import qs.modules.common.widgets
 
 RippleButton {
     id: root
@@ -14,6 +13,12 @@ RippleButton {
         parent.expanded = !parent.expanded;
     }
     buttonRadius: Appearance.rounding.full
+
+    rotation: root.parent.expanded ? 0 : -180
+    Behavior on rotation {
+        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+    }
+
     contentItem: MaterialSymbol {
         id: icon
         anchors.centerIn: parent

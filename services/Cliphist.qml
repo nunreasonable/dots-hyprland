@@ -3,15 +3,15 @@ pragma ComponentBehavior: Bound
 
 import "root:/modules/common/functions/fuzzysort.js" as Fuzzy
 import "root:/modules/common/functions/levendist.js" as Levendist
-import "root:/modules/common"
-import "root:/"
+import qs.modules.common
+import qs.modules.common.functions
 import QtQuick
 import Quickshell
 import Quickshell.Io
 
 Singleton {
     id: root
-    property bool sloppySearch: ConfigOptions?.search.sloppy ?? false
+    property bool sloppySearch: Config.options?.search.sloppy ?? false
     property real scoreThreshold: 0.2
     property list<string> entries: []
     readonly property var preparedEntries: entries.map(a => ({
@@ -42,6 +42,28 @@ Singleton {
         readProc.running = true
     }
 
+    function copy(entry) {
+        Quickshell.execDetached(["bash", "-c", `echo '${StringUtils.shellSingleQuoteEscape(entry)}' | cliphist decode | wl-copy`]);
+    }
+
+    Process {
+        id: deleteProc
+        property string entry: ""
+        command: ["bash", "-c", `echo '${StringUtils.shellSingleQuoteEscape(deleteProc.entry)}' | cliphist delete`]
+        function deleteEntry(entry) {
+            deleteProc.entry = entry;
+            deleteProc.running = true;
+            deleteProc.entry = "";
+        }
+        onExited: (exitCode, exitStatus) => {
+            root.refresh();
+        }
+    }
+
+    function deleteEntry(entry) {
+        deleteProc.deleteEntry(entry);
+    }
+
     Connections {
         target: Quickshell
         function onClipboardTextChanged() {
@@ -51,7 +73,7 @@ Singleton {
 
     Timer {
         id: delayedUpdateTimer
-        interval: ConfigOptions.hacks.arbitraryRaceConditionDelay
+        interval: Config.options.hacks.arbitraryRaceConditionDelay
         repeat: false
         onTriggered: {
             root.refresh()

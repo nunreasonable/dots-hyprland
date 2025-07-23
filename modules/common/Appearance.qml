@@ -1,6 +1,6 @@
 import QtQuick
 import Quickshell
-import "root:/modules/common/functions/color_utils.js" as ColorUtils
+import qs.modules.common.functions
 pragma Singleton
 pragma ComponentBehavior: Bound
 
@@ -16,8 +16,8 @@ Singleton {
     property string syntaxHighlightingTheme
 
     // Extremely conservative transparency values for consistency and readability
-    property real transparency: ConfigOptions?.appearance.transparency ? (m3colors.darkmode ? 0.1 : 0) : 0
-    property real contentTransparency: ConfigOptions?.appearance.transparency ? (m3colors.darkmode ? 0.55 : 0) : 0
+    property real transparency: Config.options?.appearance.transparency ? (m3colors.darkmode ? 0.1 : 0.07) : 0
+    property real contentTransparency: Config.options?.appearance.transparency ? (m3colors.darkmode ? 0.55 : 0.55) : 0
 
     m3colors: QtObject {
         property bool darkmode: false
@@ -100,7 +100,7 @@ Singleton {
 
     colors: QtObject {
         property color colSubtext: m3colors.m3outline
-        property color colLayer0: ColorUtils.transparentize(m3colors.m3background, root.transparency)
+        property color colLayer0: ColorUtils.mix(ColorUtils.transparentize(m3colors.m3background, root.transparency), m3colors.m3primary, Config.options.appearance.extraBackgroundTint ? 0.99 : 1)
         property color colOnLayer0: m3colors.m3onBackground
         property color colLayer0Hover: ColorUtils.transparentize(ColorUtils.mix(colLayer0, colOnLayer0, 0.9, root.contentTransparency))
         property color colLayer0Active: ColorUtils.transparentize(ColorUtils.mix(colLayer0, colOnLayer0, 0.8, root.contentTransparency))
@@ -126,11 +126,12 @@ Singleton {
         property color colPrimaryContainer: m3colors.m3primaryContainer
         property color colPrimaryContainerHover: ColorUtils.mix(colors.colPrimaryContainer, colLayer1Hover, 0.7)
         property color colPrimaryContainerActive: ColorUtils.mix(colors.colPrimaryContainer, colLayer1Active, 0.6)
+        property color colOnPrimaryContainer: m3colors.m3onPrimaryContainer
         property color colSecondary: m3colors.m3secondary
         property color colSecondaryHover: ColorUtils.mix(m3colors.m3secondary, colLayer1Hover, 0.85)
         property color colSecondaryActive: ColorUtils.mix(m3colors.m3secondary, colLayer1Active, 0.4)
-        property color colSecondaryContainer: ColorUtils.transparentize(m3colors.m3secondaryContainer, root.contentTransparency)
-        property color colSecondaryContainerHover: ColorUtils.mix(m3colors.m3secondaryContainer, colLayer1Hover, 0.6)
+        property color colSecondaryContainer: m3colors.m3secondaryContainer
+        property color colSecondaryContainerHover: ColorUtils.mix(m3colors.m3secondaryContainer, m3colors.m3onSecondaryContainer, 0.90)
         property color colSecondaryContainerActive: ColorUtils.mix(m3colors.m3secondaryContainer, colLayer1Active, 0.54)
         property color colOnSecondaryContainer: m3colors.m3onSecondaryContainer
         property color colSurfaceContainerLow: ColorUtils.transparentize(m3colors.m3surfaceContainerLow, root.contentTransparency)
@@ -167,10 +168,11 @@ Singleton {
             property string iconNerd: "SpaceMono NF"
             property string monospace: "JetBrains Mono NF"
             property string reading: "Readex Pro"
+            property string expressive: "Space Grotesk"
         }
         property QtObject pixelSize: QtObject {
             property int smallest: 10
-            property int smaller: 13
+            property int smaller: 12
             property int small: 15
             property int normal: 16
             property int large: 17
@@ -187,16 +189,22 @@ Singleton {
         readonly property list<real> expressiveSlowSpatial: [0.39, 1.29, 0.35, 0.98, 1, 1] // Default, 650ms
         readonly property list<real> expressiveEffects: [0.34, 0.80, 0.34, 1.00, 1, 1] // Default, 200ms
         readonly property list<real> emphasized: [0.05, 0, 2 / 15, 0.06, 1 / 6, 0.4, 5 / 24, 0.82, 0.25, 1, 1, 1]
+        readonly property list<real> emphasizedFirstHalf: [0.05, 0, 2 / 15, 0.06, 1 / 6, 0.4, 5 / 24, 0.82]
+        readonly property list<real> emphasizedLastHalf: [5 / 24, 0.82, 0.25, 1, 1, 1]
         readonly property list<real> emphasizedAccel: [0.3, 0, 0.8, 0.15, 1, 1]
         readonly property list<real> emphasizedDecel: [0.05, 0.7, 0.1, 1, 1, 1]
         readonly property list<real> standard: [0.2, 0, 0, 1, 1, 1]
         readonly property list<real> standardAccel: [0.3, 0, 1, 1, 1, 1]
         readonly property list<real> standardDecel: [0, 0, 0, 1, 1, 1]
+        readonly property real expressiveFastSpatialDuration: 350
+        readonly property real expressiveDefaultSpatialDuration: 500
+        readonly property real expressiveSlowSpatialDuration: 650
+        readonly property real expressiveEffectsDuration: 200
     }
 
     animation: QtObject {
         property QtObject elementMove: QtObject {
-            property int duration: 500
+            property int duration: animationCurves.expressiveDefaultSpatialDuration
             property int type: Easing.BezierSpline
             property list<real> bezierCurve: animationCurves.expressiveDefaultSpatial
             property int velocity: 650
@@ -242,7 +250,7 @@ Singleton {
             }
         }
         property QtObject elementMoveFast: QtObject {
-            property int duration: 200
+            property int duration: animationCurves.expressiveEffectsDuration
             property int type: Easing.BezierSpline
             property list<real> bezierCurve: animationCurves.expressiveEffects
             property int velocity: 850
@@ -281,8 +289,10 @@ Singleton {
     }
 
     sizes: QtObject {
-        property real barHeight: 40
-        property real barCenterSideModuleWidth: ConfigOptions?.bar.verbose ? 360 : 140
+        property real baseBarHeight: 40
+        property real barHeight: Config.options.bar.cornerStyle === 1 ? 
+            (baseBarHeight + Appearance.sizes.hyprlandGapsOut * 2) : baseBarHeight
+        property real barCenterSideModuleWidth: Config.options?.bar.verbose ? 360 : 140
         property real barCenterSideModuleWidthShortened: 280
         property real barCenterSideModuleWidthHellaShortened: 190
         property real barShortenScreenWidthThreshold: 1200 // Shorten if screen width is at most this value

@@ -1,23 +1,23 @@
-import "root:/"
-import "root:/services"
-import "root:/modules/common"
-import "root:/modules/common/widgets"
-import "root:/modules/common/functions/string_utils.js" as StringUtils
+import qs
+import qs.services
+import qs.modules.common
+import qs.modules.common.widgets
+import qs.modules.common.functions
 import "./quickToggles/"
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
-import QtQuick.Effects
 import Qt5Compat.GraphicalEffects
 import Quickshell.Io
 import Quickshell
-import Quickshell.Widgets
 import Quickshell.Wayland
 import Quickshell.Hyprland
 
 Scope {
+    id: root
     property int sidebarWidth: Appearance.sizes.sidebarWidth
-    property int sidebarPadding: 15
+    property int sidebarPadding: 12
+    property string settingsQmlPath: Quickshell.shellPath("settings.qml")
 
     PanelWindow {
         id: sidebarRoot
@@ -86,12 +86,14 @@ Scope {
                     implicitHeight: parent.height - Appearance.sizes.hyprlandGapsOut * 2
                     implicitWidth: sidebarWidth - Appearance.sizes.hyprlandGapsOut * 2
                     color: Appearance.colors.colLayer0
+                    border.width: 1
+                    border.color: Appearance.m3colors.m3outlineVariant
                     radius: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
 
                     ColumnLayout {
-                        spacing: sidebarPadding
                         anchors.fill: parent
                         anchors.margins: sidebarPadding
+                        spacing: sidebarPadding
 
                         RowLayout {
                             Layout.fillHeight: false
@@ -119,7 +121,7 @@ Scope {
                             StyledText {
                                 font.pixelSize: Appearance.font.pixelSize.normal
                                 color: Appearance.colors.colOnLayer0
-                                text: StringUtils.format(qsTr("Uptime: {0}"), DateTime.uptime)
+                                text: Translation.tr("Uptime: %1").arg(DateTime.uptime)
                                 textFormat: Text.MarkdownText
                             }
 
@@ -136,18 +138,18 @@ Scope {
                                         Quickshell.reload(true)
                                     }
                                     StyledToolTip {
-                                        content: qsTr("Reload Hyprland & Quickshell")
+                                        content: Translation.tr("Reload Hyprland & Quickshell")
                                     }
                                 }
                                 QuickToggleButton {
                                     toggled: false
                                     buttonIcon: "settings"
                                     onClicked: {
-                                        Hyprland.dispatch(`exec ${ConfigOptions.apps.settings}`)
-                                        Hyprland.dispatch(`global quickshell:sidebarRightClose`)
+                                        Hyprland.dispatch("global quickshell:sidebarRightClose")
+                                        Quickshell.execDetached(["qs", "-p", root.settingsQmlPath])
                                     }
                                     StyledToolTip {
-                                        content: qsTr("Plasma Settings")
+                                        content: Translation.tr("Settings")
                                     }
                                 }
                                 QuickToggleButton {
@@ -157,7 +159,7 @@ Scope {
                                         Hyprland.dispatch("global quickshell:sessionOpen")
                                     }
                                     StyledToolTip {
-                                        content: qsTr("Session")
+                                        content: Translation.tr("Session")
                                     }
                                 }
                             }
@@ -174,6 +176,8 @@ Scope {
                             NightLight {}
                             GameMode {}
                             IdleInhibitor {}
+                            EasyEffectsToggle {}
+                            CloudflareWarp {}
                         }
 
                         // Center widget group
@@ -218,7 +222,7 @@ Scope {
 
     GlobalShortcut {
         name: "sidebarRightToggle"
-        description: qsTr("Toggles right sidebar on press")
+        description: "Toggles right sidebar on press"
 
         onPressed: {
             GlobalStates.sidebarRightOpen = !GlobalStates.sidebarRightOpen;
@@ -227,7 +231,7 @@ Scope {
     }
     GlobalShortcut {
         name: "sidebarRightOpen"
-        description: qsTr("Opens right sidebar on press")
+        description: "Opens right sidebar on press"
 
         onPressed: {
             GlobalStates.sidebarRightOpen = true;
@@ -236,7 +240,7 @@ Scope {
     }
     GlobalShortcut {
         name: "sidebarRightClose"
-        description: qsTr("Closes right sidebar on press")
+        description: "Closes right sidebar on press"
 
         onPressed: {
             GlobalStates.sidebarRightOpen = false;

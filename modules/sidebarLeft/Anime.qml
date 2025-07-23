@@ -1,19 +1,15 @@
-import "root:/"
-import "root:/services"
-import "root:/modules/common"
-import "root:/modules/common/widgets"
+import qs
+import qs.services
+import qs.modules.common
+import qs.modules.common.widgets
+import qs.modules.common.functions
 import "root:/modules/common/functions/fuzzysort.js" as Fuzzy
-import "root:/modules/common/functions/string_utils.js" as StringUtils
-import "root:/modules/common/functions/file_utils.js" as FileUtils
 import "./anime/"
-import Qt.labs.platform
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
-import Quickshell.Io
 import Quickshell
-import Quickshell.Hyprland
 
 Item {
     id: root
@@ -39,21 +35,21 @@ Item {
     property var allCommands: [
         {
             name: "mode",
-            description: qsTr("Set the current API provider"),
+            description: Translation.tr("Set the current API provider"),
             execute: (args) => {
                 Booru.setProvider(args[0]);
             }
         },
         {
             name: "clear",
-            description: qsTr("Clear the current list of images"),
+            description: Translation.tr("Clear the current list of images"),
             execute: () => {
                 Booru.clearResponses();
             }
         },
         {
             name: "next",
-            description: qsTr("Get the next page of results"),
+            description: Translation.tr("Get the next page of results"),
             execute: () => {
                 if (root.responses.length > 0) {
                     const lastResponse = root.responses[root.responses.length - 1];
@@ -63,16 +59,16 @@ Item {
         },
         {
             name: "safe",
-            description: qsTr("Disable NSFW content"),
+            description: Translation.tr("Disable NSFW content"),
             execute: () => {
-                PersistentStateManager.setState("booru.allowNsfw", false);
+                Persistent.states.booru.allowNsfw = false;
             }
         },
         {
             name: "lewd",
-            description: qsTr("Allow NSFW content"),
+            description: Translation.tr("Allow NSFW content"),
             execute: () => {
-                PersistentStateManager.setState("booru.allowNsfw", true);
+                Persistent.states.booru.allowNsfw = true;
             }
         },
     ]
@@ -86,7 +82,7 @@ Item {
             if (commandObj) {
                 commandObj.execute(args);
             } else {
-                Booru.addSystemMessage(qsTr("Unknown command: ") + command);
+                Booru.addSystemMessage(Translation.tr("Unknown command: ") + command);
             }
         }
         else if (inputText.trim() == "+") {
@@ -106,7 +102,7 @@ Item {
                     break;
                 }
             }
-            Booru.makeRequest(tagList, PersistentStates.booru.allowNsfw, ConfigOptions.sidebar.booru.limit, pageIndex);
+            Booru.makeRequest(tagList, Persistent.states.booru.allowNsfw, Config.options.sidebar.booru.limit, pageIndex);
         }
     }
 
@@ -208,7 +204,7 @@ Item {
                         font.family: Appearance.font.family.title
                         color: Appearance.m3colors.m3outline
                         horizontalAlignment: Text.AlignHCenter
-                        text: qsTr("Anime boorus")
+                        text: Translation.tr("Anime boorus")
                     }
                 }
             }
@@ -245,39 +241,15 @@ Item {
                         font.pixelSize: Appearance.font.pixelSize.smaller
                         color: Appearance.m3colors.m3inverseOnSurface
                         wrapMode: Text.Wrap
-                        text: StringUtils.format(qsTr("{0} queries pending"), Booru.runningRequests)
+                        text: Translation.tr("%1 queries pending").arg(Booru.runningRequests)
                     }
                 }
             }
         }
 
-        Item { // Tag suggestion description
-            visible: tagDescriptionText.text.length > 0
-            Layout.fillWidth: true
-            implicitHeight: tagDescriptionBackground.implicitHeight
-
-            Rectangle {
-                id: tagDescriptionBackground
-                color: Appearance.colors.colTooltip
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                implicitHeight: tagDescriptionText.implicitHeight + 5 * 2
-                radius: Appearance.rounding.verysmall
-
-                StyledText {
-                    id: tagDescriptionText
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
-                    anchors.verticalCenter: parent.verticalCenter
-                    font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colOnTooltip
-                    wrapMode: Text.Wrap
-                    text: root.suggestionList[tagSuggestions.selectedIndex]?.description ?? ""
-                }
-            }
+        DescriptionBox { // Tag suggestion description
+            text: root.suggestionList[tagSuggestions.selectedIndex]?.description ?? ""
+            showArrows: root.suggestionList.length > 1
         }
 
         FlowButtonGroup { // Tag suggestions
@@ -295,7 +267,7 @@ Item {
                 }
                 delegate: ApiCommandButton {
                     id: tagButton
-                    colBackground: tagSuggestions.selectedIndex === index ? Appearance.colors.colLayer2Hover : Appearance.colors.colLayer2
+                    colBackground: tagSuggestions.selectedIndex === index ? Appearance.colors.colSecondaryContainerHover : Appearance.colors.colSecondaryContainer
                     bounce: false
                     contentItem: RowLayout {
                         anchors.centerIn: parent
@@ -303,7 +275,7 @@ Item {
                         StyledText {
                             Layout.fillWidth: false
                             font.pixelSize: Appearance.font.pixelSize.small
-                            color: Appearance.m3colors.m3onSurface
+                            color: Appearance.colors.colOnSecondaryContainer
                             horizontalAlignment: Text.AlignRight
                             text: modelData.displayName ?? modelData.name
                         }
@@ -311,7 +283,7 @@ Item {
                             Layout.fillWidth: false
                             visible: modelData.count !== undefined
                             font.pixelSize: Appearance.font.pixelSize.smaller
-                            color: Appearance.m3colors.m3outline
+                            color: Appearance.colors.colOnSecondaryContainer
                             horizontalAlignment: Text.AlignLeft
                             text: modelData.count ?? ""
                         }
@@ -381,7 +353,7 @@ Item {
                     padding: 10
                     color: activeFocus ? Appearance.m3colors.m3onSurface : Appearance.m3colors.m3onSurfaceVariant
                     renderType: Text.NativeRendering
-                    placeholderText: StringUtils.format(qsTr('Enter tags, or "{0}" for commands'), root.commandPrefix)
+                    placeholderText: Translation.tr('Enter tags, or "%1" for commands').arg(root.commandPrefix)
 
                     background: null
 
@@ -544,9 +516,10 @@ Item {
                         id: toolTip
                         extraVisibleCondition: false
                         alternativeVisibleCondition: mouseArea.containsMouse // Show tooltip when hovered
-                        // content: qsTr("The current API used. Endpoint: ") + Booru.providers[Booru.currentProvider].url + qsTr("\nSet with /mode PROVIDER")
-                        content: StringUtils.format(qsTr("Current API endpoint: {0}\nSet it with {1}mode PROVIDER"), 
-                            Booru.providers[Booru.currentProvider].url, root.commandPrefix)
+                        // content: Translation.tr("The current API used. Endpoint: ") + Booru.providers[Booru.currentProvider].url + Translation.tr("\nSet with /mode PROVIDER")
+                        content: Translation.tr("Current API endpoint: %1\nSet it with %2mode PROVIDER")
+                            .arg(Booru.providers[Booru.currentProvider].url)
+                            .arg(root.commandPrefix)
                     }
 
                     MouseArea {
@@ -586,17 +559,17 @@ Item {
                             Layout.alignment: Qt.AlignVCenter
                             font.pixelSize: Appearance.font.pixelSize.smaller
                             color: nsfwSwitch.enabled ? Appearance.colors.colOnLayer1 : Appearance.m3colors.m3outline
-                            text: qsTr("Allow NSFW")
+                            text: Translation.tr("Allow NSFW")
                         }
                         StyledSwitch {
                             id: nsfwSwitch
                             enabled: Booru.currentProvider !== "zerochan"
                             scale: 0.6
                             Layout.alignment: Qt.AlignVCenter
-                            checked: (PersistentStates.booru.allowNsfw && Booru.currentProvider !== "zerochan")
+                            checked: (Persistent.states.booru.allowNsfw && Booru.currentProvider !== "zerochan")
                             onCheckedChanged: {
                                 if (!nsfwSwitch.enabled) return;
-                                PersistentStateManager.setState("booru.allowNsfw", checked)
+                                Persistent.states.booru.allowNsfw = checked;
                             }
                         }
                     }
@@ -610,7 +583,6 @@ Item {
                         id: commandRepeater
                         model: commandButtonsRow.commandsShown
                         delegate: ApiCommandButton {
-                            id: tagButton
                             property string commandRepresentation: `${root.commandPrefix}${modelData.name}`
                             buttonText: commandRepresentation
                             colBackground: Appearance.colors.colLayer2

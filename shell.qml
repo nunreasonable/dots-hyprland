@@ -6,10 +6,11 @@
 //@ pragma Env QT_SCALE_FACTOR=1
 
 import "./modules/common/"
-import "./modules/backgroundWidgets/"
+import "./modules/background/"
 import "./modules/bar/"
 import "./modules/cheatsheet/"
 import "./modules/dock/"
+import "./modules/lock/"
 import "./modules/mediaControls/"
 import "./modules/notificationPopup/"
 import "./modules/onScreenDisplay/"
@@ -30,9 +31,10 @@ ShellRoot {
     // Enable/disable modules here. False = not loaded at all, so rest assured
     // no unnecessary stuff will take up memory if you decide to only use, say, the overview.
     property bool enableBar: true
-    property bool enableBackgroundWidgets: true
+    property bool enableBackground: true
     property bool enableCheatsheet: true
-    property bool enableDock: false
+    property bool enableDock: true
+    property bool enableLock: true
     property bool enableMediaControls: true
     property bool enableNotificationPopup: true
     property bool enableOnScreenDisplayBrightness: true
@@ -47,17 +49,17 @@ ShellRoot {
 
     // Force initialization of some singletons
     Component.onCompleted: {
-        MaterialThemeLoader.reapplyTheme()
-        ConfigLoader.loadConfig()
-        PersistentStateManager.loadStates()
         Cliphist.refresh()
         FirstRunExperience.load()
+        Hyprsunset.load()
+        MaterialThemeLoader.reapplyTheme()
     }
 
     LazyLoader { active: enableBar; component: Bar {} }
-    LazyLoader { active: enableBackgroundWidgets; component: BackgroundWidgets {} }
+    LazyLoader { active: enableBackground; component: Background {} }
     LazyLoader { active: enableCheatsheet; component: Cheatsheet {} }
-    LazyLoader { active: enableDock; component: Dock {} }
+    LazyLoader { active: enableDock && Config.options.dock.enable; component: Dock {} }
+    LazyLoader { active: enableLock; component: Lock {} }
     LazyLoader { active: enableMediaControls; component: MediaControls {} }
     LazyLoader { active: enableNotificationPopup; component: NotificationPopup {} }
     LazyLoader { active: enableOnScreenDisplayBrightness; component: OnScreenDisplayBrightness {} }

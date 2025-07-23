@@ -1,15 +1,13 @@
-import "root:/"
-import "root:/services"
-import "root:/modules/common"
-import "root:/modules/common/widgets"
-import "root:/modules/common/functions/string_utils.js" as StringUtils
+import qs
+import qs.services
+import qs.modules.common
+import qs.modules.common.widgets
+import qs.modules.common.functions
 import "./translator/"
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
-import Quickshell.Hyprland
 
 /**
  * Translator widget with the `trans` commandline tool.
@@ -23,8 +21,8 @@ Item {
     property string translatedText: ""
     property list<string> languages: []
     // Options
-    property string targetLanguage: ConfigOptions.language.translator.targetLanguage
-    property string sourceLanguage: ConfigOptions.language.translator.sourceLanguage
+    property string targetLanguage: Config.options.language.translator.targetLanguage
+    property string sourceLanguage: Config.options.language.translator.sourceLanguage
     property string hostLanguage: targetLanguage
 
     property bool showLanguageSelector: false
@@ -43,7 +41,7 @@ Item {
 
     Timer {
         id: translateTimer
-        interval: ConfigOptions.sidebar.translator.delay
+        interval: Config.options.sidebar.translator.delay
         repeat: false
         onTriggered: () => {
             if (root.inputField.text.trim().length > 0) {
@@ -123,7 +121,7 @@ Item {
                 TextCanvas { // Content translation
                     id: outputCanvas
                     isInput: false
-                    placeholderText: qsTr("Translation goes here...")
+                    placeholderText: Translation.tr("Translation goes here...")
                     property bool hasTranslation: (root.translatedText.trim().length > 0)
                     text: hasTranslation ? root.translatedText : ""
                     GroupButton {
@@ -155,8 +153,8 @@ Item {
                             color: searchButton.enabled ? Appearance.colors.colOnLayer1 : Appearance.colors.colSubtext
                         }
                         onClicked: {
-                            let url = ConfigOptions.search.engineBaseUrl + outputCanvas.displayedText;
-                            for (let site of ConfigOptions.search.excludedSites) {
+                            let url = Config.options.search.engineBaseUrl + outputCanvas.displayedText;
+                            for (let site of Config.options.search.excludedSites) {
                                 url += ` -site:${site}`;
                             }
                             Qt.openUrlExternally(url);
@@ -178,7 +176,7 @@ Item {
         TextCanvas { // Content input
             id: inputCanvas
             isInput: true
-            placeholderText: qsTr("Enter text to translate...")
+            placeholderText: Translation.tr("Enter text to translate...")
             onInputTextChanged: {
                 translateTimer.restart();
             }
@@ -223,7 +221,7 @@ Item {
         z: 9999
         sourceComponent: SelectionDialog {
             id: languageSelectorDialog
-            titleText: qsTr("Select Language")
+            titleText: Translation.tr("Select Language")
             items: root.languages
             defaultChoice: root.languageSelectorTarget ? root.targetLanguage : root.sourceLanguage
             onCanceled: () => {
@@ -235,10 +233,10 @@ Item {
 
                 if (root.languageSelectorTarget) {
                     root.targetLanguage = result;
-                    ConfigLoader.setConfigValueAndSave("language.translator.targetLanguage", result); // Save to config
+                    Config.options.language.translator.targetLanguage = result; // Save to config
                 } else {
                     root.sourceLanguage = result;
-                    ConfigLoader.setConfigValueAndSave("language.translator.sourceLanguage", result); // Save to config
+                    Config.options.language.translator.sourceLanguage = result; // Save to config
                 }
 
                 translateTimer.restart(); // Restart translation after language change

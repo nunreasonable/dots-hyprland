@@ -1,16 +1,13 @@
-import "root:/modules/common"
-import "root:/modules/common/widgets"
-import "root:/services"
-import "root:/modules/common/functions/string_utils.js" as StringUtils
-import "root:/modules/common/functions/file_utils.js" as FileUtils
-import Qt5Compat.GraphicalEffects
+import qs.modules.common
+import qs.modules.common.widgets
+import qs.services
+import qs
+import qs.modules.common.functions
 import QtQuick
 import QtQuick.Layouts
-import QtQuick.Controls
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Mpris
-import Quickshell.Widgets
 import Quickshell.Wayland
 import Quickshell.Hyprland
 
@@ -54,7 +51,9 @@ Scope {
             for (let j = i + 1; j < players.length; ++j) {
                 let p2 = players[j];
                 if (p1.trackTitle && p2.trackTitle &&
-                    (p1.trackTitle.includes(p2.trackTitle) || p2.trackTitle.includes(p1.trackTitle))) {
+                    (p1.trackTitle.includes(p2.trackTitle) 
+                        || p2.trackTitle.includes(p1.trackTitle))
+                        || (p1.position - p2.position <= 2 && p1.length - p2.length <= 2)) {
                     group.push(j);
                 }
             }
@@ -77,7 +76,7 @@ Scope {
                 root.visualizerPoints = [];
             }
         }
-        command: ["cava", "-p", `${FileUtils.trimFileProtocol(Directories.config)}/quickshell/scripts/cava/raw_output_config.txt`]
+        command: ["cava", "-p", `${FileUtils.trimFileProtocol(Directories.scriptPath)}/cava/raw_output_config.txt`]
         stdout: SplitParser {
             onRead: data => {
                 // Parse `;`-separated values into the visualizerPoints array
@@ -106,8 +105,8 @@ Scope {
             WlrLayershell.namespace: "quickshell:mediaControls"
 
             anchors {
-                top: !ConfigOptions.bar.bottom
-                bottom: ConfigOptions.bar.bottom
+                top: !Config.options.bar.bottom
+                bottom: Config.options.bar.bottom
                 left: true
             }
             mask: Region {
@@ -158,7 +157,7 @@ Scope {
 
     GlobalShortcut {
         name: "mediaControlsToggle"
-        description: qsTr("Toggles media controls on press")
+        description: "Toggles media controls on press"
 
         onPressed: {
             if (!mediaControlsLoader.active && Mpris.players.values.filter(player => isRealPlayer(player)).length === 0) {
@@ -170,7 +169,7 @@ Scope {
     }
     GlobalShortcut {
         name: "mediaControlsOpen"
-        description: qsTr("Opens media controls on press")
+        description: "Opens media controls on press"
 
         onPressed: {
             mediaControlsLoader.active = true;
@@ -179,7 +178,7 @@ Scope {
     }
     GlobalShortcut {
         name: "mediaControlsClose"
-        description: qsTr("Closes media controls on press")
+        description: "Closes media controls on press"
 
         onPressed: {
             mediaControlsLoader.active = false;

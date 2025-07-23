@@ -1,18 +1,15 @@
-import "root:/"
-import "root:/services"
-import "root:/modules/common"
-import "root:/modules/common/widgets"
+import qs
+import qs.services
+import qs.modules.common
+import qs.modules.common.widgets
 import "./aiChat/"
 import "root:/modules/common/functions/fuzzysort.js" as Fuzzy
-import "root:/modules/common/functions/string_utils.js" as StringUtils
-import "root:/modules/common/functions/file_utils.js" as FileUtils
+import qs.modules.common.functions
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
-import Quickshell.Io
 import Quickshell
-import Quickshell.Hyprland
 
 Item {
     id: root
@@ -44,21 +41,25 @@ Item {
     property var allCommands: [
         {
             name: "model",
-            description: qsTr("Choose model"),
+            description: Translation.tr("Choose model"),
             execute: (args) => {
                 Ai.setModel(args[0]);
             }
         },
         {
-            name: "clear",
-            description: qsTr("Clear chat history"),
-            execute: () => {
-                Ai.clearMessages();
+            name: "prompt",
+            description: Translation.tr("Set the system prompt for the model."),
+            execute: (args) => {
+                if (args.length === 0 || args[0] === "get") {
+                    Ai.printPrompt();
+                    return;
+                }
+                Ai.loadPrompt(args.join(" ").trim());
             }
         },
         {
             name: "key",
-            description: qsTr("Set API key"),
+            description: Translation.tr("Set API key"),
             execute: (args) => {
                 if (args[0] == "get") {
                     Ai.printApiKey()
@@ -68,8 +69,39 @@ Item {
             }
         },
         {
+            name: "save",
+            description: Translation.tr("Save chat"),
+            execute: (args) => {
+                const joinedArgs = args.join(" ")
+                if (joinedArgs.trim().length == 0) {
+                    Ai.addMessage(`Usage: ${root.commandPrefix}save CHAT_NAME`, Ai.interfaceRole);
+                    return;
+                }
+                Ai.saveChat(joinedArgs)
+            }
+        },
+        {
+            name: "load",
+            description: Translation.tr("Load chat"),
+            execute: (args) => {
+                const joinedArgs = args.join(" ")
+                if (joinedArgs.trim().length == 0) {
+                    Ai.addMessage(`Usage: ${root.commandPrefix}load CHAT_NAME`, Ai.interfaceRole);
+                    return;
+                }
+                Ai.loadChat(joinedArgs)
+            }
+        },
+        {
+            name: "clear",
+            description: Translation.tr("Clear chat history"),
+            execute: () => {
+                Ai.clearMessages();
+            }
+        },
+        {
             name: "temp",
-            description: qsTr("Set temperature (randomness) of the model. Values range between 0 to 2 for Gemini, 0 to 1 for other models. Default is 0.5."),
+            description: Translation.tr("Set temperature (randomness) of the model. Values range between 0 to 2 for Gemini, 0 to 1 for other models. Default is 0.5."),
             execute: (args) => {
                 // console.log(args)
                 if (args.length == 0 || args[0] == "get") {
@@ -82,7 +114,7 @@ Item {
         },
         {
             name: "test",
-            description: qsTr("Markdown test"),
+            description: Translation.tr("Markdown test"),
             execute: () => {
                 Ai.addMessage(`
 <think>
@@ -94,7 +126,7 @@ Mowe uwu wem ipsum!
 ### Formatting
 
 - *Italic*, \`Monospace\`, **Bold**, [Link](https://example.com)
-- Arch lincox icon <img src="/home/end/.config/quickshell/assets/icons/arch-symbolic.svg" height="${Appearance.font.pixelSize.small}"/>
+- Arch lincox icon <img src="${Quickshell.shellPath("assets/icons/arch-symbolic.svg")}" height="${Appearance.font.pixelSize.small}"/>
 
 ### Table
 
@@ -148,7 +180,7 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
             if (commandObj) {
                 commandObj.execute(args);
             } else {
-                Ai.addMessage(qsTr("Unknown command: ") + command, Ai.interfaceRole);
+                Ai.addMessage(Translation.tr("Unknown command: ") + command, Ai.interfaceRole);
             }
         }
         else {
@@ -235,7 +267,7 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
                         font.family: Appearance.font.family.title
                         color: Appearance.m3colors.m3outline
                         horizontalAlignment: Text.AlignHCenter
-                        text: qsTr("Large language models")
+                        text: Translation.tr("Large language models")
                     }
                     StyledText {
                         id: widgetDescriptionText
@@ -244,39 +276,15 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
                         color: Appearance.m3colors.m3outline
                         horizontalAlignment: Text.AlignLeft
                         wrapMode: Text.Wrap
-                        text: qsTr("Type /key to get started with online models\nCtrl+O to expand the sidebar\nCtrl+P to detach sidebar into a window")
+                        text: Translation.tr("Type /key to get started with online models\nCtrl+O to expand the sidebar\nCtrl+P to detach sidebar into a window")
                     }
                 }
             }
         }
 
-        Item { // Suggestion description
-            visible: descriptionText.text.length > 0
-            Layout.fillWidth: true
-            implicitHeight: descriptionBackground.implicitHeight
-
-            Rectangle {
-                id: descriptionBackground
-                color: Appearance.colors.colTooltip
-                anchors.left: parent.left
-                anchors.right: parent.right
-                anchors.verticalCenter: parent.verticalCenter
-                implicitHeight: descriptionText.implicitHeight + 5 * 2
-                radius: Appearance.rounding.verysmall
-
-                StyledText {
-                    id: descriptionText
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.leftMargin: 10
-                    anchors.rightMargin: 10
-                    anchors.verticalCenter: parent.verticalCenter
-                    font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colOnTooltip
-                    wrapMode: Text.Wrap
-                    text: root.suggestionList[suggestions.selectedIndex]?.description ?? ""
-                }
-            }
+        DescriptionBox {
+            text: root.suggestionList[suggestions.selectedIndex]?.description ?? ""
+            showArrows: root.suggestionList.length > 1
         }
 
         FlowButtonGroup { // Suggestions
@@ -294,7 +302,7 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
                 }
                 delegate: ApiCommandButton {
                     id: commandButton
-                    colBackground: suggestions.selectedIndex === index ? Appearance.colors.colLayer2Hover : Appearance.colors.colLayer2
+                    colBackground: suggestions.selectedIndex === index ? Appearance.colors.colSecondaryContainerHover : Appearance.colors.colSecondaryContainer
                     bounce: false
                     contentItem: StyledText {
                         font.pixelSize: Appearance.font.pixelSize.small
@@ -366,16 +374,16 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
                     Layout.fillWidth: true
                     padding: 10
                     color: activeFocus ? Appearance.m3colors.m3onSurface : Appearance.m3colors.m3onSurfaceVariant
-                    placeholderText: StringUtils.format(qsTr('Message the model... "{0}" for commands'), root.commandPrefix)
+                    placeholderText: Translation.tr('Message the model... "%1" for commands').arg(root.commandPrefix)
 
                     background: null
 
                     onTextChanged: { // Handle suggestions
-                        if(messageInputField.text.length === 0) {
+                        if (messageInputField.text.length === 0) {
                             root.suggestionQuery = ""
                             root.suggestionList = []
                             return
-                        } else if(messageInputField.text.startsWith(`${root.commandPrefix}model`)) {
+                        } else if (messageInputField.text.startsWith(`${root.commandPrefix}model`)) {
                             root.suggestionQuery = messageInputField.text.split(" ")[1] ?? ""
                             const modelResults = Fuzzy.go(root.suggestionQuery, Ai.modelList.map(model => {
                                 return {
@@ -391,6 +399,62 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
                                     name: `${messageInputField.text.trim().split(" ").length == 1 ? (root.commandPrefix + "model ") : ""}${model.target}`,
                                     displayName: `${Ai.models[model.target].name}`,
                                     description: `${Ai.models[model.target].description}`,
+                                }
+                            })
+                        } else if (messageInputField.text.startsWith(`${root.commandPrefix}prompt`)) {
+                            root.suggestionQuery = messageInputField.text.split(" ")[1] ?? ""
+                            const promptFileResults = Fuzzy.go(root.suggestionQuery, Ai.promptFiles.map(file => {
+                                return {
+                                    name: Fuzzy.prepare(file),
+                                    obj: file,
+                                }
+                            }), {
+                                all: true,
+                                key: "name"
+                            })
+                            root.suggestionList = promptFileResults.map(file => {
+                                return {
+                                    name: `${messageInputField.text.trim().split(" ").length == 1 ? (root.commandPrefix + "prompt ") : ""}${file.target}`,
+                                    displayName: `${FileUtils.trimFileExt(FileUtils.fileNameForPath(file.target))}`,
+                                    description: Translation.tr("Load prompt from %1").arg(file.target),
+                                }
+                            })
+                        } else if (messageInputField.text.startsWith(`${root.commandPrefix}save`)) {
+                            root.suggestionQuery = messageInputField.text.split(" ")[1] ?? ""
+                            const promptFileResults = Fuzzy.go(root.suggestionQuery, Ai.savedChats.map(file => {
+                                return {
+                                    name: Fuzzy.prepare(file),
+                                    obj: file,
+                                }
+                            }), {
+                                all: true,
+                                key: "name"
+                            })
+                            root.suggestionList = promptFileResults.map(file => {
+                                const chatName = FileUtils.trimFileExt(FileUtils.fileNameForPath(file.target)).trim()
+                                return {
+                                    name: `${messageInputField.text.trim().split(" ").length == 1 ? (root.commandPrefix + "save ") : ""}${chatName}`,
+                                    displayName: `${chatName}`,
+                                    description: Translation.tr("Save chat to %1").arg(chatName),
+                                }
+                            })
+                        } else if (messageInputField.text.startsWith(`${root.commandPrefix}load`)) {
+                            root.suggestionQuery = messageInputField.text.split(" ")[1] ?? ""
+                            const promptFileResults = Fuzzy.go(root.suggestionQuery, Ai.savedChats.map(file => {
+                                return {
+                                    name: Fuzzy.prepare(file),
+                                    obj: file,
+                                }
+                            }), {
+                                all: true,
+                                key: "name"
+                            })
+                            root.suggestionList = promptFileResults.map(file => {
+                                const chatName = FileUtils.trimFileExt(FileUtils.fileNameForPath(file.target)).trim()
+                                return {
+                                    name: `${messageInputField.text.trim().split(" ").length == 1 ? (root.commandPrefix + "load ") : ""}${chatName}`,
+                                    displayName: `${chatName}`,
+                                    description: Translation.tr(`Load chat from %1`).arg(file.target),
                                 }
                             })
                         } else if(messageInputField.text.startsWith(root.commandPrefix)) {
@@ -510,8 +574,9 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
                         id: toolTip
                         extraVisibleCondition: false
                         alternativeVisibleCondition: mouseArea.containsMouse // Show tooltip when hovered
-                        content: StringUtils.format(qsTr("Current model: {0}\nSet it with {1}model MODEL"), 
-                            Ai.getModel().name, root.commandPrefix)
+                        content: Translation.tr("Current model: %1\nSet it with %2model MODEL")
+                            .arg(Ai.getModel().name)
+                            .arg(root.commandPrefix)
                     }
 
                     MouseArea {

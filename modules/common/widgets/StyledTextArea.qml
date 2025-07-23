@@ -1,7 +1,10 @@
-import "root:/modules/common"
+import qs.modules.common
 import QtQuick
 import QtQuick.Controls
 
+/**
+ * Does not include visual layout, but includes the easily neglected colors.
+ */
 TextArea {
     renderType: Text.NativeRendering
     selectedTextColor: Appearance.m3colors.m3onSecondaryContainer

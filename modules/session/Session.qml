@@ -1,12 +1,13 @@
-import "root:/modules/common"
-import "root:/modules/common/widgets"
-import "root:/modules/common/functions/color_utils.js" as ColorUtils
+import qs.modules.common
+import qs
+import qs.services
+import qs.modules.common.widgets
+import qs.modules.common.functions
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
-import Quickshell.Widgets
 import Quickshell.Wayland
 import Quickshell.Hyprland
 
@@ -14,9 +15,24 @@ Scope {
     id: root
     property var focusedScreen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)
 
+    function closeAllWindows() {
+        HyprlandData.windowList.map(w => w.pid).forEach((pid) => {
+            Quickshell.execDetached(["kill", pid]);
+        });
+    }
+
     Loader {
         id: sessionLoader
         active: false
+
+        Connections {
+            target: GlobalStates
+            function onScreenLockedChanged() {
+                if (GlobalStates.screenLocked) {
+                    sessionLoader.active = false;
+                }
+            }
+        }
 
         sourceComponent: PanelWindow { // Session menu
             id: sessionRoot
@@ -70,15 +86,14 @@ Scope {
                         font.family: Appearance.font.family.title
                         font.pixelSize: Appearance.font.pixelSize.title
                         font.weight: Font.DemiBold
-                        text: qsTr("Session")
+                        text: Translation.tr("Session")
                     }
 
                     StyledText { // Small instruction
                         Layout.alignment: Qt.AlignHCenter
                         horizontalAlignment: Text.AlignHCenter
-                        font.family: Appearance.font.family.title
                         font.pixelSize: Appearance.font.pixelSize.normal
-                        text: qsTr("Arrow keys to navigate, Enter to select\nEsc or click anywhere to cancel")
+                        text: Translation.tr("Arrow keys to navigate, Enter to select\nEsc or click anywhere to cancel")
                     }
                 }
 
@@ -91,8 +106,8 @@ Scope {
                         id: sessionLock
                         focus: sessionRoot.visible
                         buttonIcon: "lock"
-                        buttonText: qsTr("Lock")
-                        onClicked:  { Hyprland.dispatch("exec loginctl lock-session"); sessionRoot.hide() }
+                        buttonText: Translation.tr("Lock")
+                        onClicked:  { Quickshell.execDetached(["loginctl", "lock-session"]); sessionRoot.hide() }
                         onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
                         KeyNavigation.right: sessionSleep
                         KeyNavigation.down: sessionHibernate
@@ -100,8 +115,8 @@ Scope {
                     SessionActionButton {
                         id: sessionSleep
                         buttonIcon: "dark_mode"
-                        buttonText: qsTr("Sleep")
-                        onClicked:  { Hyprland.dispatch("exec systemctl suspend || loginctl suspend"); sessionRoot.hide() }
+                        buttonText: Translation.tr("Sleep")
+                        onClicked:  { Quickshell.execDetached(["bash", "-c", "systemctl suspend || loginctl suspend"]); sessionRoot.hide() }
                         onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
                         KeyNavigation.left: sessionLock
                         KeyNavigation.right: sessionLogout
@@ -110,8 +125,8 @@ Scope {
                     SessionActionButton {
                         id: sessionLogout
                         buttonIcon: "logout"
-                        buttonText: qsTr("Logout")
-                        onClicked: { Hyprland.dispatch("exec pkill Hyprland"); sessionRoot.hide() }
+                        buttonText: Translation.tr("Logout")
+                        onClicked: { root.closeAllWindows(); Quickshell.execDetached(["pkill", "Hyprland"]); sessionRoot.hide() }
                         onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
                         KeyNavigation.left: sessionSleep
                         KeyNavigation.right: sessionTaskManager
@@ -120,8 +135,8 @@ Scope {
                     SessionActionButton {
                         id: sessionTaskManager
                         buttonIcon: "browse_activity"
-                        buttonText: qsTr("Task Manager")
-                        onClicked:  { Hyprland.dispatch(`exec ${ConfigOptions.apps.taskManager}`); sessionRoot.hide() }
+                        buttonText: Translation.tr("Task Manager")
+                        onClicked:  { Quickshell.execDetached(["bash", "-c", `${Config.options.apps.taskManager}`]); sessionRoot.hide() }
                         onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
                         KeyNavigation.left: sessionLogout
                         KeyNavigation.down: sessionFirmwareReboot
@@ -130,8 +145,8 @@ Scope {
                     SessionActionButton {
                         id: sessionHibernate
                         buttonIcon: "downloading"
-                        buttonText: qsTr("Hibernate")
-                        onClicked:  { Hyprland.dispatch("exec systemctl hibernate || loginctl hibernate"); sessionRoot.hide() }
+                        buttonText: Translation.tr("Hibernate")
+                        onClicked:  { Quickshell.execDetached(["bash", "-c", `systemctl hibernate || loginctl hibernate`]); sessionRoot.hide() }
                         onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
                         KeyNavigation.up: sessionLock
                         KeyNavigation.right: sessionShutdown
@@ -139,8 +154,8 @@ Scope {
                     SessionActionButton {
                         id: sessionShutdown
                         buttonIcon: "power_settings_new"
-                        buttonText: qsTr("Shutdown")
-                        onClicked:  { Hyprland.dispatch("exec systemctl poweroff || loginctl poweroff"); sessionRoot.hide() }
+                        buttonText: Translation.tr("Shutdown")
+                        onClicked:  { root.closeAllWindows(); Quickshell.execDetached(["bash", "-c", `systemctl poweroff || loginctl poweroff`]); sessionRoot.hide() }
                         onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
                         KeyNavigation.left: sessionHibernate
                         KeyNavigation.right: sessionReboot
@@ -149,8 +164,8 @@ Scope {
                     SessionActionButton {
                         id: sessionReboot
                         buttonIcon: "restart_alt"
-                        buttonText: qsTr("Reboot")
-                        onClicked:  { Hyprland.dispatch("exec reboot || loginctl reboot"); sessionRoot.hide() }
+                        buttonText: Translation.tr("Reboot")
+                        onClicked:  { root.closeAllWindows(); Quickshell.execDetached(["bash", "-c", `reboot || loginctl reboot`]); sessionRoot.hide() }
                         onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
                         KeyNavigation.left: sessionShutdown
                         KeyNavigation.right: sessionFirmwareReboot
@@ -159,8 +174,8 @@ Scope {
                     SessionActionButton {
                         id: sessionFirmwareReboot
                         buttonIcon: "settings_applications"
-                        buttonText: qsTr("Reboot to firmware settings")
-                        onClicked:  { Hyprland.dispatch("exec systemctl reboot --firmware-setup || loginctl reboot --firmware-setup"); sessionRoot.hide() }
+                        buttonText: Translation.tr("Reboot to firmware settings")
+                        onClicked:  { root.closeAllWindows(); Quickshell.execDetached(["bash", "-c", `systemctl reboot --firmware-setup || loginctl reboot --firmware-setup`]); sessionRoot.hide() }
                         onFocusChanged: { if (focus) sessionRoot.subtitle = buttonText }
                         KeyNavigation.up: sessionTaskManager
                         KeyNavigation.left: sessionReboot
@@ -209,7 +224,7 @@ Scope {
 
     GlobalShortcut {
         name: "sessionToggle"
-        description: qsTr("Toggles session screen on press")
+        description: "Toggles session screen on press"
 
         onPressed: {
             sessionLoader.active = !sessionLoader.active;
@@ -218,7 +233,7 @@ Scope {
 
     GlobalShortcut {
         name: "sessionOpen"
-        description: qsTr("Opens session screen on press")
+        description: "Opens session screen on press"
 
         onPressed: {
             sessionLoader.active = true;

@@ -1,20 +1,17 @@
-import "root:/modules/common"
-import "root:/modules/common/widgets"
-import "root:/services"
+import qs.modules.common
+import qs.modules.common.widgets
+import qs.services
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
-import Quickshell.Io
-import Quickshell.Services.UPower
 
 Item {
     id: root
-    property bool borderless: ConfigOptions.bar.borderless
+    property bool borderless: Config.options.bar.borderless
     readonly property var chargeState: Battery.chargeState
     readonly property bool isCharging: Battery.isCharging
     readonly property bool isPluggedIn: Battery.isPluggedIn
     readonly property real percentage: Battery.percentage
-    readonly property bool isLow: percentage <= ConfigOptions.battery.low / 100
+    readonly property bool isLow: percentage <= Config.options.battery.low / 100
     readonly property color batteryLowBackground: Appearance.m3colors.darkmode ? Appearance.m3colors.m3error : Appearance.m3colors.m3errorContainer
     readonly property color batteryLowOnBackground: Appearance.m3colors.darkmode ? Appearance.m3colors.m3errorContainer : Appearance.m3colors.m3error
 
@@ -42,6 +39,7 @@ Item {
         }
 
         CircularProgress {
+            enableAnimation: false
             Layout.alignment: Qt.AlignVCenter
             lineWidth: 2
             value: percentage

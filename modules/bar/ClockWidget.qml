@@ -1,13 +1,13 @@
-import "root:/modules/common"
-import "root:/modules/common/widgets"
-import "root:/services"
+import qs.modules.common
+import qs.modules.common.widgets
+import qs.services
 import QtQuick
 import QtQuick.Layouts
 
 Item {
     id: root
-    property bool borderless: ConfigOptions.bar.borderless
-    property bool showDate: ConfigOptions.bar.verbose
+    property bool borderless: Config.options.bar.borderless
+    property bool showDate: Config.options.bar.verbose
     implicitWidth: rowLayout.implicitWidth
     implicitHeight: 32
 

@@ -1,7 +1,7 @@
 pragma Singleton
 pragma ComponentBehavior: Bound
 
-import "root:/modules/common"
+import qs.modules.common
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -53,7 +53,7 @@ Singleton {
 
                 previousCpuStats = { total, idle }
             }
-            interval = ConfigOptions?.resources?.updateInterval ?? 3000
+            interval = Config.options?.resources?.updateInterval ?? 3000
         }
 	}
 

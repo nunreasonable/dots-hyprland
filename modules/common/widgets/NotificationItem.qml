@@ -1,16 +1,10 @@
-import "root:/modules/common"
-import "root:/services"
-import "root:/modules/common/functions/string_utils.js" as StringUtils
-import "root:/modules/common/functions/color_utils.js" as ColorUtils
-import "./notification_utils.js" as NotificationUtils
-import Qt5Compat.GraphicalEffects
+import qs
+import qs.modules.common
+import qs.services
+import qs.modules.common.functions
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Effects
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Io
-import Quickshell.Widgets
 import Quickshell.Hyprland
 import Quickshell.Services.Notifications
 
@@ -76,7 +70,7 @@ Item { // Notification item area
             easing.bezierCurve: Appearance.animation.elementMove.bezierCurve
         }
         onFinished: () => {
-            Notifications.discardNotification(notificationObject.id);
+            Notifications.discardNotification(notificationObject.notificationId);
         }
     }
 
@@ -94,12 +88,6 @@ Item { // Notification item area
             }
         }
 
-        onPressAndHold: (mouse) => {
-            if (mouse.button === Qt.LeftButton) {
-                Hyprland.dispatch(`exec wl-copy '${StringUtils.shellSingleQuoteEscape(notificationObject.body)}'`)
-                notificationSummaryText.text = String.format(qsTr("{0} (copied)"), notificationObject.summary)
-            }
-        }
         onDraggingChanged: () => {
             if (dragging) {
                 root.qmlParent.dragIndex = root.index ?? root.parent.children.indexOf(root);
@@ -187,13 +175,15 @@ Item { // Notification item area
                 StyledText {
                     opacity: !root.expanded ? 1 : 0
                     visible: opacity > 0
+                    Layout.fillWidth: true
                     Behavior on opacity {
                         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                     }
-                    Layout.fillWidth: true
                     font.pixelSize: root.fontSize
                     color: Appearance.colors.colSubtext
                     elide: Text.ElideRight
+                    wrapMode: Text.Wrap // Needed for proper eliding????
+                    maximumLineCount: 1
                     textFormat: Text.StyledText
                     text: {
                         return processNotificationBody(notificationObject.body, notificationObject.appName || notificationObject.summary).replace(/\n/g, "<br/>")
@@ -218,7 +208,7 @@ Item { // Notification item area
                     elide: Text.ElideRight
                     textFormat: Text.RichText
                     text: {
-                        return `<style>img{max-width:${notificationBodyText.width}px;}</style>` + 
+                        return `<style>img{max-width:${300 /* binding to notificationBodyText.width would cause a binding loop */}px;}</style>` + 
                                `${processNotificationBody(notificationObject.body, notificationObject.appName || notificationObject.summary).replace(/\n/g, "<br/>")}`
                     }
 
@@ -226,12 +216,8 @@ Item { // Notification item area
                         Qt.openUrlExternally(link)
                         Hyprland.dispatch("global quickshell:sidebarRightClose")
                     }
-                    MouseArea {
-                        anchors.fill: parent
-                        acceptedButtons: Qt.NoButton // Only for hover
-                        hoverEnabled: true
-                        cursorShape: parent.hoveredLink !== "" ? Qt.PointingHandCursor : Qt.ArrowCursor
-                    }
+                    
+                    PointingHandLinkHover {}
                 }
 
                 Flickable { // Notification actions
@@ -257,7 +243,7 @@ Item { // Notification item area
 
                         NotificationActionButton {
                             Layout.fillWidth: true
-                            buttonText: qsTr("Close")
+                            buttonText: Translation.tr("Close")
                             urgency: notificationObject.urgency
                             implicitWidth: (notificationObject.actions.length == 0) ? ((actionsFlickable.width - actionRowLayout.spacing) / 2) : 
                                 (contentItem.implicitWidth + leftPadding + rightPadding)
@@ -283,7 +269,7 @@ Item { // Notification item area
                                 buttonText: modelData.text
                                 urgency: notificationObject.urgency
                                 onClicked: {
-                                    Notifications.attemptInvokeAction(notificationObject.id, modelData.identifier);
+                                    Notifications.attemptInvokeAction(notificationObject.notificationId, modelData.identifier);
                                 }
                             }
                         }
@@ -295,7 +281,7 @@ Item { // Notification item area
                                 (contentItem.implicitWidth + leftPadding + rightPadding)
 
                             onClicked: {
-                                Hyprland.dispatch(`exec wl-copy '${StringUtils.shellSingleQuoteEscape(notificationObject.body)}'`)
+                                Quickshell.clipboardText = notificationObject.body
                                 copyIcon.text = "inventory"
                                 copyIconTimer.restart()
                             }

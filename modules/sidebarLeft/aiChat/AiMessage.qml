@@ -1,19 +1,13 @@
-import "root:/"
-import "root:/services"
-import "root:/modules/common"
-import "root:/modules/common/widgets"
-import "../"
-import "root:/modules/common/functions/string_utils.js" as StringUtils
+import qs
+import qs.services
+import qs.modules.common
+import qs.modules.common.widgets
+import qs.modules.common.functions
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell.Io
 import Quickshell
-import Quickshell.Widgets
-import Quickshell.Wayland
-import Quickshell.Hyprland
-import Qt5Compat.GraphicalEffects
-import org.kde.syntaxhighlighting
 
 Rectangle {
     id: root
@@ -121,11 +115,8 @@ Rectangle {
                             height: Appearance.font.pixelSize.large
                             source: messageData?.role == 'assistant' ? Ai.models[messageData?.model].icon :
                                 messageData?.role == 'user' ? 'linux-symbolic' : 'desktop-symbolic'
-                        }
-                        ColorOverlay {
-                            visible: modelIcon.visible
-                            anchors.fill: modelIcon
-                            source: modelIcon
+
+                            colorize: true
                             color: Appearance.m3colors.m3onSecondaryContainer
                         }
 
@@ -151,7 +142,7 @@ Rectangle {
                         color: Appearance.m3colors.m3onSecondaryContainer
                         text: messageData?.role == 'assistant' ? Ai.models[messageData?.model].name :
                             (messageData?.role == 'user' && SystemInfo.username) ? SystemInfo.username :
-                            qsTr("Interface")
+                            Translation.tr("Interface")
                     }
                 }
             }
@@ -173,7 +164,7 @@ Rectangle {
                     text: "visibility_off"
                 }
                 StyledToolTip {
-                    content: qsTr("Not visible to model")
+                    content: Translation.tr("Not visible to model")
                 }
             }
 
@@ -185,7 +176,7 @@ Rectangle {
                     buttonIcon: activated ? "inventory" : "content_copy"
 
                     onClicked: {
-                        Hyprland.dispatch(`exec wl-copy '${StringUtils.shellSingleQuoteEscape(root.messageData?.content)}'`)
+                        Quickshell.clipboardText = root.messageData?.content
                         copyButton.activated = true
                         copyIconTimer.restart()
                     }
@@ -200,7 +191,7 @@ Rectangle {
                     }
                     
                     StyledToolTip {
-                        content: qsTr("Copy")
+                        content: Translation.tr("Copy")
                     }
                 }
                 AiMessageControlButton {
@@ -215,7 +206,7 @@ Rectangle {
                         }
                     }
                     StyledToolTip {
-                        content: root.editing ? qsTr("Save") : qsTr("Edit")
+                        content: root.editing ? Translation.tr("Save") : Translation.tr("Edit")
                     }
                 }
                 AiMessageControlButton {
@@ -226,7 +217,7 @@ Rectangle {
                         root.renderMarkdown = !root.renderMarkdown
                     }
                     StyledToolTip {
-                        content: qsTr("View Markdown source")
+                        content: Translation.tr("View Markdown source")
                     }
                 }
                 AiMessageControlButton {
@@ -236,7 +227,7 @@ Rectangle {
                         Ai.removeMessage(root.messageIndex)
                     }
                     StyledToolTip {
-                        content: qsTr("Delete")
+                        content: Translation.tr("Delete")
                     }
                 }
             }
@@ -247,9 +238,7 @@ Rectangle {
 
             spacing: 0
             Repeater {
-                model: ScriptModel {
-                    values: root.messageBlocks.map((block, index) => index)
-                }
+                model: root.messageBlocks.length
                 delegate: Loader {
                     required property int index
                     property var thisBlock: root.messageBlocks[index]

@@ -1,5 +1,5 @@
-import "root:/modules/common"
-import "root:/modules/common/widgets"
+import qs.modules.common
+import qs.modules.common.widgets
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -11,77 +11,56 @@ Scope {
     id: screenCorners
     readonly property Toplevel activeWindow: ToplevelManager.activeToplevel
 
+    component CornerPanelWindow: PanelWindow {
+        id: cornerPanelWindow
+        visible: (Config.options.appearance.fakeScreenRounding === 1 || (Config.options.appearance.fakeScreenRounding === 2 && !activeWindow?.fullscreen))
+        property var corner
+
+        exclusionMode: ExclusionMode.Ignore
+        mask: Region {
+            item: null
+        }
+        WlrLayershell.namespace: "quickshell:screenCorners"
+        WlrLayershell.layer: WlrLayer.Overlay
+        color: "transparent"
+
+        anchors {
+            top: cornerPanelWindow.corner === RoundCorner.CornerEnum.TopLeft || cornerPanelWindow.corner === RoundCorner.CornerEnum.TopRight
+            left: cornerPanelWindow.corner === RoundCorner.CornerEnum.TopLeft || cornerPanelWindow.corner === RoundCorner.CornerEnum.BottomLeft
+            bottom: cornerPanelWindow.corner === RoundCorner.CornerEnum.BottomLeft || cornerPanelWindow.corner === RoundCorner.CornerEnum.BottomRight
+            right: cornerPanelWindow.corner === RoundCorner.CornerEnum.TopRight || cornerPanelWindow.corner === RoundCorner.CornerEnum.BottomRight
+        }
+
+        implicitWidth: cornerWidget.implicitWidth
+        implicitHeight: cornerWidget.implicitHeight
+        RoundCorner {
+            id: cornerWidget
+            size: Appearance.rounding.screenRounding
+            corner: cornerPanelWindow.corner
+        }
+    }
+
     Variants {
         model: Quickshell.screens
 
-        PanelWindow {
-            visible: (ConfigOptions.appearance.fakeScreenRounding === 1 
-                || (ConfigOptions.appearance.fakeScreenRounding === 2 
-                    && !activeWindow?.fullscreen))
-
-            property var modelData
-
-            screen: modelData
-            exclusionMode: ExclusionMode.Ignore
-            mask: Region {
-                item: null
+        Scope {
+            required property var modelData
+            CornerPanelWindow {
+                screen: modelData
+                corner: RoundCorner.CornerEnum.TopLeft
             }
-            HyprlandWindow.visibleMask: Region {
-                Region {
-                    item: topLeftCorner
-                }
-                Region {
-                    item: topRightCorner
-                }
-                Region {
-                    item: bottomLeftCorner
-                }
-                Region {
-                    item: bottomRightCorner
-                }
+            CornerPanelWindow {
+                screen: modelData
+                corner: RoundCorner.CornerEnum.TopRight
             }
-            WlrLayershell.namespace: "quickshell:screenCorners"
-            WlrLayershell.layer: WlrLayer.Overlay
-            color: "transparent"
-
-            anchors {
-                top: true
-                left: true
-                right: true
-                bottom: true
+            CornerPanelWindow {
+                screen: modelData
+                corner: RoundCorner.CornerEnum.BottomLeft
             }
-
-            RoundCorner {
-                id: topLeftCorner
-                anchors.top: parent.top
-                anchors.left: parent.left
-                size: Appearance.rounding.screenRounding
-                corner: cornerEnum.topLeft
+            CornerPanelWindow {
+                screen: modelData
+                corner: RoundCorner.CornerEnum.BottomRight
             }
-            RoundCorner {
-                id: topRightCorner
-                anchors.top: parent.top
-                anchors.right: parent.right
-                size: Appearance.rounding.screenRounding
-                corner: cornerEnum.topRight
-            }
-            RoundCorner {
-                id: bottomLeftCorner
-                anchors.bottom: parent.bottom
-                anchors.left: parent.left
-                size: Appearance.rounding.screenRounding
-                corner: cornerEnum.bottomLeft
-            }
-            RoundCorner {
-                id: bottomRightCorner
-                anchors.bottom: parent.bottom
-                anchors.right: parent.right
-                size: Appearance.rounding.screenRounding
-                corner: cornerEnum.bottomRight
-            }
-
         }
-
     }
-
 }

@@ -1,8 +1,8 @@
-import "../"
-import "root:/services"
-import "root:/modules/common"
-import "root:/modules/common/widgets"
-import "root:/modules/common/functions/string_utils.js" as StringUtils
+import qs
+import qs.services
+import qs.modules.common
+import qs.modules.common.widgets
+import qs.modules.common.functions
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -15,8 +15,8 @@ QuickToggleButton {
         toggleBluetooth.running = true
     }
     altAction: () => {
-        Hyprland.dispatch(`exec ${ConfigOptions.apps.bluetooth}`)
-            Hyprland.dispatch("global quickshell:sidebarRightClose")
+        Quickshell.execDetached(["bash", "-c", `${Config.options.apps.bluetooth}`])
+        Hyprland.dispatch("global quickshell:sidebarRightClose")
     }
     Process {
         id: toggleBluetooth
@@ -28,9 +28,9 @@ QuickToggleButton {
         }
     }
     StyledToolTip {
-        content: StringUtils.format(qsTr("{0} | Right-click to configure"), 
+        content: Translation.tr("%1 | Right-click to configure").arg(
             (Bluetooth.bluetoothEnabled && Bluetooth.bluetoothDeviceName.length > 0) ? 
-            Bluetooth.bluetoothDeviceName : qsTr("Bluetooth"))
+            Bluetooth.bluetoothDeviceName : Translation.tr("Bluetooth"))
 
     }
 }

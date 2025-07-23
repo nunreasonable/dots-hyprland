@@ -1,13 +1,12 @@
 pragma Singleton
 pragma ComponentBehavior: Bound
 
-import "root:/modules/common/functions/string_utils.js" as StringUtils
-import "root:/modules/common/functions/object_utils.js" as ObjectUtils
-import "root:/modules/common"
-import Quickshell;
-import Quickshell.Io;
-import Qt.labs.platform
-import QtQuick;
+import qs.modules.common.functions as CF
+import qs.modules.common
+import qs
+import Quickshell
+import Quickshell.Io
+import QtQuick
 
 /**
  * Basic service to handle LLM chats. Supports Google's and OpenAI's API formats.
@@ -18,14 +17,14 @@ Singleton {
     readonly property string interfaceRole: "interface"
     readonly property string apiKeyEnvVarName: "API_KEY"
     property Component aiMessageComponent: AiMessageData {}
-    property string systemPrompt: ConfigOptions?.ai?.systemPrompt ?? ""
-    property var messages: []
+    property string systemPrompt: Config.options?.ai?.systemPrompt ?? ""
+    // property var messages: []
     property var messageIDs: []
     property var messageByID: ({})
     readonly property var apiKeys: KeyringStorage.keyringData?.apiKeys ?? {}
     readonly property var apiKeysLoaded: KeyringStorage.loaded
     property var postResponseHook
-    property real temperature: PersistentStates?.ai?.temperature ?? 0.5
+    property real temperature: Persistent.states?.ai?.temperature ?? 0.5
 
     function idForMessage(message) {
         // Generate a unique ID using timestamp and random value
@@ -35,6 +34,11 @@ Singleton {
     function safeModelName(modelName) {
         return modelName.replace(/:/g, "_").replace(/\./g, "_")
     }
+
+    property list<var> defaultPrompts: []
+    property list<var> userPrompts: []
+    property list<var> promptFiles: [...defaultPrompts, ...userPrompts]
+    property list<var> savedChats: []
 
     // Model properties:
     // - name: Name of the model
@@ -53,14 +57,14 @@ Singleton {
         "gemini-2.0-flash-search": {
             "name": "Gemini 2.0 Flash (Search)",
             "icon": "google-gemini-symbolic",
-            "description": qsTr("Online | Google's model\nGives up-to-date information with search."),
+            "description": Translation.tr("Online | Google's model\nGives up-to-date information with search."),
             "homepage": "https://aistudio.google.com",
             "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent",
             "model": "gemini-2.0-flash",
             "requires_key": true,
             "key_id": "gemini",
             "key_get_link": "https://aistudio.google.com/app/apikey",
-            "key_get_description": qsTr("**Pricing**: free. Data used for training.\n\n**Instructions**: Log into Google account, allow AI Studio to create Google Cloud project or whatever it asks, go back and click Get API key"),
+            "key_get_description": Translation.tr("**Pricing**: free. Data used for training.\n\n**Instructions**: Log into Google account, allow AI Studio to create Google Cloud project or whatever it asks, go back and click Get API key"),
             "api_format": "gemini",
             "tools": [
                 {
@@ -71,14 +75,14 @@ Singleton {
         "gemini-2.0-flash-tools": {
             "name": "Gemini 2.0 Flash (Tools)",
             "icon": "google-gemini-symbolic",
-            "description": qsTr("Experimental | Online | Google's model\nCan do a little more but doesn't search quickly"),
+            "description": Translation.tr("Experimental | Online | Google's model\nCan do a little more but doesn't search quickly"),
             "homepage": "https://aistudio.google.com",
             "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:streamGenerateContent",
             "model": "gemini-2.0-flash",
             "requires_key": true,
             "key_id": "gemini",
             "key_get_link": "https://aistudio.google.com/app/apikey",
-            "key_get_description": qsTr("**Pricing**: free. Data used for training.\n\n**Instructions**: Log into Google account, allow AI Studio to create Google Cloud project or whatever it asks, go back and click Get API key"),
+            "key_get_description": Translation.tr("**Pricing**: free. Data used for training.\n\n**Instructions**: Log into Google account, allow AI Studio to create Google Cloud project or whatever it asks, go back and click Get API key"),
             "api_format": "gemini",
             "tools": [
                 {
@@ -116,14 +120,14 @@ Singleton {
         "gemini-2.5-flash-search": {
             "name": "Gemini 2.5 Flash (Search)",
             "icon": "google-gemini-symbolic",
-            "description": qsTr("Online | Google's model\nGives up-to-date information with search."),
+            "description": Translation.tr("Online | Google's model\nGives up-to-date information with search."),
             "homepage": "https://aistudio.google.com",
             "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:streamGenerateContent",
             "model": "gemini-2.5-flash-preview-05-20",
             "requires_key": true,
             "key_id": "gemini",
             "key_get_link": "https://aistudio.google.com/app/apikey",
-            "key_get_description": qsTr("**Pricing**: free. Data used for training.\n\n**Instructions**: Log into Google account, allow AI Studio to create Google Cloud project or whatever it asks, go back and click Get API key"),
+            "key_get_description": Translation.tr("**Pricing**: free. Data used for training.\n\n**Instructions**: Log into Google account, allow AI Studio to create Google Cloud project or whatever it asks, go back and click Get API key"),
             "api_format": "gemini",
             "tools": [
                 {
@@ -134,14 +138,14 @@ Singleton {
         "gemini-2.5-flash-tools": {
             "name": "Gemini 2.5 Flash (Tools)",
             "icon": "google-gemini-symbolic",
-            "description": qsTr("Experimental | Online | Google's model\nCan do a little more but doesn't search quickly"),
+            "description": Translation.tr("Experimental | Online | Google's model\nCan do a little more but doesn't search quickly"),
             "homepage": "https://aistudio.google.com",
             "endpoint": "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-05-20:streamGenerateContent",
             "model": "gemini-2.5-flash-preview-05-20",
             "requires_key": true,
             "key_id": "gemini",
             "key_get_link": "https://aistudio.google.com/app/apikey",
-            "key_get_description": qsTr("**Pricing**: free. Data used for training.\n\n**Instructions**: Log into Google account, allow AI Studio to create Google Cloud project or whatever it asks, go back and click Get API key"),
+            "key_get_description": Translation.tr("**Pricing**: free. Data used for training.\n\n**Instructions**: Log into Google account, allow AI Studio to create Google Cloud project or whatever it asks, go back and click Get API key"),
             "api_format": "gemini",
             "tools": [
                 {
@@ -179,34 +183,33 @@ Singleton {
         "openrouter-llama4-maverick": {
             "name": "Llama 4 Maverick",
             "icon": "ollama-symbolic",
-            "description": StringUtils.format(qsTr("Online via {0} | {1}'s model"), "OpenRouter", "Meta"),
+            "description": Translation.tr("Online via %1 | %2's model").arg("OpenRouter").arg("Meta"),
             "homepage": "https://openrouter.ai/meta-llama/llama-4-maverick:free",
             "endpoint": "https://openrouter.ai/api/v1/chat/completions",
             "model": "meta-llama/llama-4-maverick:free",
             "requires_key": true,
             "key_id": "openrouter",
             "key_get_link": "https://openrouter.ai/settings/keys",
-            "key_get_description": qsTr("**Pricing**: free. Data use policy varies depending on your OpenRouter account settings.\n\n**Instructions**: Log into OpenRouter account, go to Keys on the topright menu, click Create API Key"),
+            "key_get_description": Translation.tr("**Pricing**: free. Data use policy varies depending on your OpenRouter account settings.\n\n**Instructions**: Log into OpenRouter account, go to Keys on the topright menu, click Create API Key"),
         },
         "openrouter-deepseek-r1": {
             "name": "DeepSeek R1",
             "icon": "deepseek-symbolic",
-            "description": StringUtils.format(qsTr("Online via {0} | {1}'s model"), "OpenRouter", "DeepSeek"),
+            "description": Translation.tr("Online via %1 | %2's model").arg("OpenRouter").arg("DeepSeek"),
             "homepage": "https://openrouter.ai/deepseek/deepseek-r1:free",
             "endpoint": "https://openrouter.ai/api/v1/chat/completions",
             "model": "deepseek/deepseek-r1:free",
             "requires_key": true,
             "key_id": "openrouter",
             "key_get_link": "https://openrouter.ai/settings/keys",
-            "key_get_description": qsTr("**Pricing**: free. Data use policy varies depending on your OpenRouter account settings.\n\n**Instructions**: Log into OpenRouter account, go to Keys on the topright menu, click Create API Key"),
+            "key_get_description": Translation.tr("**Pricing**: free. Data use policy varies depending on your OpenRouter account settings.\n\n**Instructions**: Log into OpenRouter account, go to Keys on the topright menu, click Create API Key"),
         },
     }
     property var modelList: Object.keys(root.models)
-    property var currentModelId: PersistentStates?.ai?.model || modelList[0]
+    property var currentModelId: Persistent.states?.ai?.model || modelList[0]
 
     Component.onCompleted: {
-        setModel(currentModelId, false); // Do necessary setup for model
-        getOllamaModels.running = true
+        setModel(currentModelId, false, false); // Do necessary setup for model
     }
 
     function guessModelLogo(model) {
@@ -232,7 +235,8 @@ Singleton {
 
     Process {
         id: getOllamaModels
-        command: ["bash", "-c", `${Directories.config}/quickshell/scripts/ai/show-installed-ollama-models.sh`.replace(/file:\/\//, "")]
+        running: true
+        command: ["bash", "-c", `${Directories.scriptPath}/ai/show-installed-ollama-models.sh`.replace(/file:\/\//, "")]
         stdout: SplitParser {
             onRead: data => {
                 try {
@@ -244,7 +248,7 @@ Singleton {
                         root.models[safeModelName] = {
                             "name": guessModelName(model),
                             "icon": guessModelLogo(model),
-                            "description": StringUtils.format(qsTr("Local Ollama model | {0}"), model),
+                            "description": Translation.tr("Local Ollama model | %1").arg(model),
                             "homepage": `https://ollama.com/library/${model}`,
                             "endpoint": "http://localhost:11434/v1/chat/completions",
                             "model": model,
@@ -260,11 +264,74 @@ Singleton {
         }
     }
 
+    Process {
+        id: getDefaultPrompts
+        running: true
+        command: ["ls", "-1", Directories.defaultAiPrompts]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text.length === 0) return;
+                root.defaultPrompts = text.split("\n")
+                    .filter(fileName => fileName.endsWith(".md") || fileName.endsWith(".txt"))
+                    .map(fileName => `${Directories.defaultAiPrompts}/${fileName}`)
+            }
+        }
+    }
+
+    Process {
+        id: getUserPrompts
+        running: true
+        command: ["ls", "-1", Directories.userAiPrompts]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text.length === 0) return;
+                root.userPrompts = text.split("\n")
+                    .filter(fileName => fileName.endsWith(".md") || fileName.endsWith(".txt"))
+                    .map(fileName => `${Directories.userAiPrompts}/${fileName}`)
+            }
+        }
+    }
+
+    Process {
+        id: getSavedChats
+        running: true
+        command: ["ls", "-1", Directories.aiChats]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (text.length === 0) return;
+                root.savedChats = text.split("\n")
+                    .filter(fileName => fileName.endsWith(".json"))
+                    .map(fileName => `${Directories.aiChats}/${fileName}`)
+            }
+        }
+    }
+
+    FileView {
+        id: promptLoader
+        watchChanges: false;
+        onLoadedChanged: {
+            if (!promptLoader.loaded) return;
+            Config.options.ai.systemPrompt = promptLoader.text();
+            root.addMessage(Translation.tr("Loaded the following system prompt\n\n---\n\n%1").arg(Config.options.ai.systemPrompt), root.interfaceRole);
+        }
+    }
+
+    function printPrompt() {
+        root.addMessage(Translation.tr("The current system prompt is\n\n---\n\n%1").arg(Config.options.ai.systemPrompt), root.interfaceRole);
+    }
+
+    function loadPrompt(filePath) {
+        promptLoader.path = "" // Unload
+        promptLoader.path = filePath; // Load
+        promptLoader.reload();
+    }
+
     function addMessage(message, role) {
         if (message.length === 0) return;
         const aiMessage = aiMessageComponent.createObject(root, {
             "role": role,
             "content": message,
+            "rawContent": message,
             "thinking": false,
             "done": true,
         });
@@ -283,8 +350,8 @@ Singleton {
 
     function addApiKeyAdvice(model) {
         root.addMessage(
-            StringUtils.format(qsTr('To set an API key, pass it with the command\n\nTo view the key, pass "get" with the command<br/>\n\n### For {0}:\n\n**Link**: {1}\n\n{2}'), 
-                model.name, model.key_get_link, model.key_get_description ?? qsTr("<i>No further instruction provided</i>")), 
+            Translation.tr('To set an API key, pass it with the command\n\nTo view the key, pass "get" with the command<br/>\n\n### For %1:\n\n**Link**: %2\n\n%3')
+                .arg(model.name).arg(model.key_get_link).arg(model.key_get_description ?? Translation.tr("<i>No further instruction provided</i>")), 
             Ai.interfaceRole
         );
     }
@@ -293,7 +360,7 @@ Singleton {
         return models[currentModelId];
     }
 
-    function setModel(modelId, feedback = true) {
+    function setModel(modelId, feedback = true, setPersistentState = true) {
         if (!modelId) modelId = ""
         modelId = modelId.toLowerCase()
         if (modelList.indexOf(modelId) !== -1) {
@@ -301,12 +368,15 @@ Singleton {
             // Fetch API keys if needed
             if (model?.requires_key) KeyringStorage.fetchKeyringData();
             // See if policy prevents online models
-            if (ConfigOptions.policies.ai === 2 && !model.endpoint.includes("localhost")) {
-                root.addMessage(StringUtils.format(StringUtils.format("Online models disallowed\n\nControlled by `policies.ai` config option"), model.name), root.interfaceRole);
+            if (Config.options.policies.ai === 2 && !model.endpoint.includes("localhost")) {
+                root.addMessage(
+                    Translation.tr("Online models disallowed\n\nControlled by `policies.ai` config option"),
+                    root.interfaceRole
+                );
                 return;
             }
-            PersistentStateManager.setState("ai.model", modelId);
-            if (feedback) root.addMessage(StringUtils.format(StringUtils.format("Model set to {0}"), model.name), root.interfaceRole);
+            if (setPersistentState) Persistent.states.ai.model = modelId;
+            if (feedback) root.addMessage(Translation.tr("Model set to %1").arg(model.name), root.interfaceRole);
             if (model.requires_key) {
                 // If key not there show advice
                 if (root.apiKeysLoaded && (!root.apiKeys[model.key_id] || root.apiKeys[model.key_id].length === 0)) {
@@ -314,7 +384,7 @@ Singleton {
                 }
             }
         } else {
-            if (feedback) root.addMessage(qsTr("Invalid model. Supported: \n```\n") + modelList.join("\n```\n```\n"), Ai.interfaceRole) + "\n```"
+            if (feedback) root.addMessage(Translation.tr("Invalid model. Supported: \n```\n") + modelList.join("\n```\n```\n"), Ai.interfaceRole) + "\n```"
         }
     }
     
@@ -324,18 +394,18 @@ Singleton {
 
     function setTemperature(value) {
         if (value == NaN || value < 0 || value > 2) {
-            root.addMessage(qsTr("Temperature must be between 0 and 2"), Ai.interfaceRole);
+            root.addMessage(Translation.tr("Temperature must be between 0 and 2"), Ai.interfaceRole);
             return;
         }
-        PersistentStateManager.setState("ai.temperature", value);
+        Persistent.states.ai.temperature = value;
         root.temperature = value;
-        root.addMessage(StringUtils.format(qsTr("Temperature set to {0}"), value), Ai.interfaceRole);
+        root.addMessage(Translation.tr("Temperature set to %1").arg(value), Ai.interfaceRole);
     }
 
     function setApiKey(key) {
         const model = models[currentModelId];
         if (!model.requires_key) {
-            root.addMessage(StringUtils.format(qsTr("{0} does not require an API key"), model.name), Ai.interfaceRole);
+            root.addMessage(Translation.tr("%1 does not require an API key").arg(model.name), Ai.interfaceRole);
             return;
         }
         if (!key || key.length === 0) {
@@ -344,7 +414,7 @@ Singleton {
             return;
         }
         KeyringStorage.setNestedField(["apiKeys", model.key_id], key.trim());
-        root.addMessage(StringUtils.format(qsTr("API key set for {0}"), model.name, Ai.interfaceRole));
+        root.addMessage(Translation.tr("API key set for %1").arg(model.name), Ai.interfaceRole);
     }
 
     function printApiKey() {
@@ -352,17 +422,17 @@ Singleton {
         if (model.requires_key) {
             const key = root.apiKeys[model.key_id];
             if (key) {
-                root.addMessage(StringUtils.format(qsTr("API key:\n\n```txt\n{0}\n```"), key), Ai.interfaceRole);
+                root.addMessage(Translation.tr("API key:\n\n```txt\n%1\n```").arg(key), Ai.interfaceRole);
             } else {
-                root.addMessage(StringUtils.format(qsTr("No API key set for {0}"), model.name), Ai.interfaceRole);
+                root.addMessage(Translation.tr("No API key set for %1").arg(model.name), Ai.interfaceRole);
             }
         } else {
-            root.addMessage(StringUtils.format(qsTr("{0} does not require an API key"), model.name), Ai.interfaceRole);
+            root.addMessage(Translation.tr("%1 does not require an API key").arg(model.name), Ai.interfaceRole);
         }
     }
 
     function printTemperature() {
-        root.addMessage(StringUtils.format(qsTr("Temperature: {0}"), root.temperature), Ai.interfaceRole);
+        root.addMessage(Translation.tr("Temperature: %1").arg(root.temperature), Ai.interfaceRole);
     }
 
     function clearMessages() {
@@ -393,6 +463,7 @@ Singleton {
                 root.postResponseHook();
                 root.postResponseHook = null; // Reset hook after use
             }
+            root.saveChat("lastSession")
         }
 
         function buildGeminiRequestData(model, messages) {
@@ -424,7 +495,7 @@ Singleton {
                     return {
                         "role": geminiApiRoleName,
                         "parts": [{ 
-                            text: message.content,
+                            text: message.rawContent,
                         }]
                     }
                 }),
@@ -449,7 +520,7 @@ Singleton {
                     ...messages.filter(message => (message.role != Ai.interfaceRole)).map(message => {
                         return {
                             "role": message.role,
-                            "content": message.content,
+                            "content": message.rawContent,
                         }
                     }),
                 ],
@@ -481,6 +552,7 @@ Singleton {
                 "role": "assistant",
                 "model": currentModelId,
                 "content": "",
+                "rawContent": "",
                 "thinking": true,
                 "done": false,
             });
@@ -501,7 +573,7 @@ Singleton {
             const requestCommandString = `curl --no-buffer "${endpoint}"`
                 + ` ${headerString}`
                 + ((apiFormat == "gemini") ? "" : ` -H "Authorization: Bearer \$\{${root.apiKeyEnvVarName}\}"`)
-                + ` -d '${StringUtils.shellSingleQuoteEscape(JSON.stringify(data))}'`
+                + ` -d '${CF.StringUtils.shellSingleQuoteEscape(JSON.stringify(data))}'`
             // console.log("Request command: ", requestCommandString);
             requester.command = baseCommand.concat([requestCommandString]);
 
@@ -525,12 +597,15 @@ Singleton {
                     const functionCall = dataJson.candidates[0]?.content?.parts[0]?.functionCall;
                     requester.message.functionName = functionCall.name;
                     requester.message.functionCall = functionCall.name;
-                    requester.message.content += `\n\n[[ Function: ${functionCall.name}(${JSON.stringify(functionCall.args, null, 2)}) ]]\n`;
+                    const newContent = `\n\n[[ Function: ${functionCall.name}(${JSON.stringify(functionCall.args, null, 2)}) ]]\n`
+                    requester.message.rawContent += newContent;
+                    requester.message.content += newContent;
                     root.handleGeminiFunctionCall(functionCall.name, functionCall.args);
                     return
                 }
                 // Normal text response
                 const responseContent = dataJson.candidates[0]?.content?.parts[0]?.text
+                requester.message.rawContent += responseContent;
                 requester.message.content += responseContent;
                 const annotationSources = dataJson.candidates[0]?.groundingMetadata?.groundingChunks?.map(chunk => {
                     return {
@@ -538,7 +613,8 @@ Singleton {
                         "text": chunk?.web?.title,
                         "url": chunk?.web?.uri,
                     }
-                });
+                }) ?? [];
+
                 const annotations = dataJson.candidates[0]?.groundingMetadata?.groundingSupports?.map(citation => {
                     return {
                         "type": "url_citation",
@@ -553,7 +629,8 @@ Singleton {
                 requester.message.annotations = annotations;
                 // console.log(JSON.stringify(requester.message, null, 2));
             } catch (e) {
-                console.log("[AI] Could not parse response from stream: ", e);
+                console.log("[AI] Gemini: Could not parse buffer: ", e);
+                requester.message.rawContent += requester.geminiBuffer;
                 requester.message.content += requester.geminiBuffer
             } finally {
                 requester.geminiBuffer = "";
@@ -595,19 +672,24 @@ Singleton {
             if (responseContent && responseContent.length > 0) {
                 if (requester.isReasoning) {
                     requester.isReasoning = false;
-                    requester.message.content += "\n\n</think>\n\n";
+                    const endBlock = "\n\n</think>\n\n";
+                    requester.message.content += endBlock;
+                    requester.message.rawContent += endBlock;
                 }
                 newContent = dataJson.choices[0]?.delta?.content || dataJson.message.content;
             } else if (responseReasoning && responseReasoning.length > 0) {
                 // console.log("Reasoning content: ", dataJson.choices[0].delta.reasoning);
                 if (!requester.isReasoning) {
                     requester.isReasoning = true;
-                    requester.message.content += "\n\n<think>\n\n";
-                } 
+                    const startBlock = "\n\n<think>\n\n";
+                    requester.message.rawContent += startBlock;
+                    requester.message.content += startBlock;
+                }
                 newContent = dataJson.choices[0].delta.reasoning || dataJson.choices[0].delta.reasoning_content;
             }
 
             requester.message.content += newContent;
+            requester.message.rawContent += newContent;
 
             if (dataJson.done) {
                 requester.markDone();
@@ -630,10 +712,12 @@ Singleton {
                     }
                     else {
                         console.log("Unknown API format: ", requester.apiFormat);
+                        requester.message.rawContent += data;
                         requester.message.content += data;
                     }
                 } catch (e) {
                     console.log("[AI] Could not parse response from stream: ", e);
+                    requester.message.rawContent += data;
                     requester.message.content += data;
                 }
             }
@@ -645,8 +729,9 @@ Singleton {
 
             try { // to parse full response into json for error handling
                 // console.log("Full response: ", requester.message.content + "]"); 
-                const parsedResponse = JSON.parse(requester.message.content + "]");
-                requester.message.content = `\`\`\`json\n${JSON.stringify(parsedResponse, null, 2)}\n\`\`\``;
+                const parsedResponse = JSON.parse(requester.message.rawContent + "]");
+                requester.message.rawContent = `\`\`\`json\n${JSON.stringify(parsedResponse, null, 2)}\n\`\`\``;
+                requester.message.content = requester.message.rawContent;
             } catch (e) { 
                 // console.log("[AI] Could not parse response on exit: ", e);
             }
@@ -667,6 +752,7 @@ Singleton {
         const aiMessage = aiMessageComponent.createObject(root, {
             "role": "user",
             "content": `[[ Output of ${name} ]]`,
+            "rawContent": `[[ Output of ${name} ]]`,
             "functionName": name,
             "functionResponse": output,
             "thinking": false,
@@ -701,23 +787,98 @@ Singleton {
                 root.setModel("gemini-2.0-flash-search", false);
                 root.postResponseHook = () => root.setModel("gemini-2.0-flash-tools", false);
             }
-            addFunctionOutputMessage(name, qsTr("Switched to search mode. Continue with the user's request."))
+            addFunctionOutputMessage(name, Translation.tr("Switched to search mode. Continue with the user's request."))
             requester.makeRequest();
         } else if (name === "get_shell_config") {
-            const configJson = ObjectUtils.toPlainObject(ConfigOptions)
+            const configJson = CF.ObjectUtils.toPlainObject(Config.options)
             addFunctionOutputMessage(name, JSON.stringify(configJson));
             requester.makeRequest();
         } else if (name === "set_shell_config") {
             if (!args.key || !args.value) {
-                addFunctionOutputMessage(name, qsTr("Invalid arguments. Must provide `key` and `value`."));
+                addFunctionOutputMessage(name, Translation.tr("Invalid arguments. Must provide `key` and `value`."));
                 return;
             }
             const key = args.key;
             const value = args.value;
-            ConfigLoader.setLiveConfigValue(key, value);
-            ConfigLoader.saveConfig();
+            Config.setNestedValue(key, value);
         }
-        else root.addMessage(qsTr("Unknown function call: {0}"), "assistant");
+        else root.addMessage(Translation.tr("Unknown function call: %1").arg(name), "assistant");
     }
 
+    function chatToJson() {
+        return root.messageIDs.map(id => {
+            const message = root.messageByID[id]
+            return ({
+                "role": message.role,
+                "rawContent": message.rawContent,
+                "model": message.model,
+                "thinking": false,
+                "done": true,
+                "annotations": message.annotations,
+                "annotationSources": message.annotationSources,
+                "functionName": message.functionName,
+                "functionCall": message.functionCall,
+                "functionResponse": message.functionResponse,
+                "visibleToUser": message.visibleToUser,
+            })
+        })
+    }
+
+    FileView {
+        id: chatSaveFile
+        property string chatName: "chat"
+        path: `${Directories.aiChats}/${chatName}.json`
+        blockLoading: true
+    }
+
+    /**
+     * Saves chat to a JSON list of message objects.
+     * @param chatName name of the chat
+     */
+    function saveChat(chatName) {
+        chatSaveFile.chatName = chatName.trim()
+        const saveContent = JSON.stringify(root.chatToJson())
+        chatSaveFile.setText(saveContent)
+        getSavedChats.running = true;
+    }
+
+    /**
+     * Loads chat from a JSON list of message objects.
+     * @param chatName name of the chat
+     */
+    function loadChat(chatName) {
+        try {
+            chatSaveFile.chatName = chatName.trim()
+            chatSaveFile.reload()
+            const saveContent = chatSaveFile.text()
+            // console.log(saveContent)
+            const saveData = JSON.parse(saveContent)
+            root.clearMessages()
+            root.messageIDs = saveData.map((_, i) => {
+                return i
+            })
+            // console.log(JSON.stringify(messageIDs))
+            for (let i = 0; i < saveData.length; i++) {
+                const message = saveData[i];
+                root.messageByID[i] = root.aiMessageComponent.createObject(root, {
+                    "role": message.role,
+                    "rawContent": message.rawContent,
+                    "content": message.rawContent,
+                    "model": message.model,
+                    "thinking": message.thinking,
+                    "done": message.done,
+                    "annotations": message.annotations,
+                    "annotationSources": message.annotationSources,
+                    "functionName": message.functionName,
+                    "functionCall": message.functionCall,
+                    "functionResponse": message.functionResponse,
+                    "visibleToUser": message.visibleToUser,
+                });
+            }
+        } catch (e) {
+            console.log("[AI] Could not load chat: ", e);
+        } finally {
+            getSavedChats.running = true;
+        }
+    }
 }

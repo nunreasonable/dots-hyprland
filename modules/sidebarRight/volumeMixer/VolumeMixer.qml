@@ -1,12 +1,12 @@
-import "root:/modules/common"
-import "root:/modules/common/widgets"
-import "root:/services"
+import qs.modules.common
+import qs.modules.common.widgets
+import qs.services
+import qs
 import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
-import Quickshell.Widgets
 import Quickshell.Services.Pipewire
 
 
@@ -16,6 +16,10 @@ Item {
     property bool deviceSelectorInput
     property int dialogMargins: 16
     property PwNode selectedDevice
+    readonly property list<PwNode> appPwNodes: Pipewire.nodes.values.filter((node) => {
+        // return node.type == "21" // Alternative, not as clean
+        return node.isSink && node.isStream
+    })
 
     function showDeviceSelectorDialog(input: bool) {
         root.selectedDevice = null
@@ -36,55 +40,36 @@ Item {
         Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            Flickable {
-                id: flickable
-                anchors.fill: parent
-                contentHeight: volumeMixerColumnLayout.height
-
+            ListView {
+                id: listView
+                model: root.appPwNodes
                 clip: true
-                layer.enabled: true
-                layer.effect: OpacityMask {
-                    maskSource: Rectangle {
-                        width: flickable.width
-                        height: flickable.height
-                        radius: Appearance.rounding.normal
-                    }
+                anchors {
+                    fill: parent
+                    topMargin: 10
+                    bottomMargin: 10
                 }
+                spacing: 6
 
-                ColumnLayout {
-                    id: volumeMixerColumnLayout
-                    anchors.top: parent.top
-                    anchors.left: parent.left
-                    anchors.right: parent.right
-                    anchors.margins: 10
-                    spacing: 10
-
-                    // Get a list of nodes that output to the default sink
-                    PwNodeLinkTracker {
-                        id: linkTracker
-                        node: Pipewire.defaultAudioSink
+                delegate: VolumeMixerEntry {
+                    // Layout.fillWidth: true
+                    anchors {
+                        left: parent.left
+                        right: parent.right
+                        leftMargin: 10
+                        rightMargin: 10
                     }
-
-                    Repeater {
-                        model: linkTracker.linkGroups
-
-                        VolumeMixerEntry {
-                            Layout.fillWidth: true
-                            // Get links to the default sinnk
-                            required property PwLinkGroup modelData
-                            // Consider sources that output to the default sink
-                            node: modelData.source
-                        }
-                    }
+                    required property var modelData
+                    node: modelData
                 }
             }
 
             // Placeholder when list is empty
             Item {
-                anchors.fill: flickable
+                anchors.fill: listView
 
                 visible: opacity > 0
-                opacity: (linkTracker.linkGroups.length === 0) ? 1 : 0
+                opacity: (root.appPwNodes.length === 0) ? 1 : 0
 
                 Behavior on opacity {
                     NumberAnimation {
@@ -108,11 +93,20 @@ Item {
                         font.pixelSize: Appearance.font.pixelSize.normal
                         color: Appearance.m3colors.m3outline
                         horizontalAlignment: Text.AlignHCenter
-                        text: qsTr("No audio source")
+                        text: Translation.tr("No audio source")
                     }
                 }
             }
         }
+
+        // Separator
+        Rectangle {
+            color: Appearance.m3colors.m3outlineVariant
+            implicitHeight: 1
+            Layout.fillWidth: true
+        }
+
+
         // Device selector
         ButtonGroup {
             id: deviceSelectorRowLayout
@@ -182,7 +176,7 @@ Item {
                     Layout.alignment: Qt.AlignLeft
                     color: Appearance.m3colors.m3onSurface
                     font.pixelSize: Appearance.font.pixelSize.larger
-                    text: `Select ${root.deviceSelectorInput ? "input" : "output"} device`
+                    text: root.deviceSelectorInput ? Translation.tr("Select input device") : Translation.tr("Select output device")
                 }
 
                 Rectangle {
@@ -262,13 +256,13 @@ Item {
                     Layout.alignment: Qt.AlignRight
 
                     DialogButton {
-                        buttonText: qsTr("Cancel")
+                        buttonText: Translation.tr("Cancel")
                         onClicked: {
                             root.showDeviceSelector = false
                         }
                     }
                     DialogButton {
-                        buttonText: qsTr("OK")
+                        buttonText: Translation.tr("OK")
                         onClicked: {
                             root.showDeviceSelector = false
                             if (root.selectedDevice) {

@@ -1,6 +1,6 @@
-import "root:/services"
-import "root:/modules/common"
-import "root:/modules/common/widgets"
+import qs.services
+import qs.modules.common
+import qs.modules.common.widgets
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -32,10 +32,8 @@ ProgressBar {
         animation: Appearance?.animation.elementMoveEnter.numberAnimation.createObject(this)
     }
     
-    background: Rectangle {
+    background: Item {
         anchors.fill: parent
-        color: "transparent"
-        radius: Appearance?.rounding.full ?? 9999
         implicitHeight: valueBarHeight
         implicitWidth: valueBarWidth
     }

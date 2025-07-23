@@ -1,8 +1,7 @@
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
-import "root:/modules/common/"
-import "root:/modules/common/widgets/"
+import qs.modules.common
+import qs.modules.common.widgets
 
 /**
  * Material 3 FAB.
@@ -16,9 +15,9 @@ RippleButton {
     implicitWidth: Math.max(contentRowLayout.implicitWidth + 10 * 2, baseSize)
     implicitHeight: baseSize
     buttonRadius: Appearance.rounding.small
-    colBackground: Appearance.colors.colSecondaryContainer
-    colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-    colRipple: Appearance.colors.colSecondaryContainerActive
+    colBackground: Appearance.colors.colPrimaryContainer
+    colBackgroundHover: Appearance.colors.colPrimaryContainerHover
+    colRipple: Appearance.colors.colPrimaryContainerActive
     contentItem: RowLayout {
         id: contentRowLayout
         property real horizontalMargins: (root.baseSize - icon.width) / 2
@@ -34,7 +33,7 @@ RippleButton {
             Layout.fillWidth: true
             horizontalAlignment: Text.AlignHCenter
             iconSize: 24
-            color: Appearance.colors.colOnLayer1
+            color: Appearance.colors.colOnPrimaryContainer
             text: root.iconText
         }
         Loader {
@@ -50,7 +49,7 @@ RippleButton {
                         leftMargin: root.elementSpacing
                     }
                     text: root.buttonText
-                    color: Appearance.colors.colOnLayer1
+                    color: Appearance.colors.colOnPrimaryContainer
                     font.pixelSize: 14
                     font.weight: 450
                 }

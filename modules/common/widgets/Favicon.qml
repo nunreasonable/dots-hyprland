@@ -1,16 +1,11 @@
-import "root:/modules/common"
-import "root:/modules/common/widgets"
-import "root:/services"
-import "root:/modules/common/functions/string_utils.js" as StringUtils
-import "root:/modules/common/functions/file_utils.js" as FileUtils
+import qs.modules.common
+import qs.modules.common.widgets
+import qs.services
+import qs.modules.common.functions
 import Qt5Compat.GraphicalEffects
-import Qt.labs.platform
 import QtQuick
-import QtQuick.Controls
-import QtQuick.Layouts
 import Quickshell.Io
 import Quickshell.Widgets
-import Quickshell.Hyprland
 
 IconImage {
     id: root
@@ -18,7 +13,7 @@ IconImage {
     property string displayText
 
     property real size: 32
-    property string downloadUserAgent: ConfigOptions?.networking.userAgent ?? ""
+    property string downloadUserAgent: Config.options?.networking.userAgent ?? ""
     property string faviconDownloadPath: Directories.favicons
     property string domainName: url.includes("vertexaisearch") ? displayText : StringUtils.getDomain(url)
     property string faviconUrl: `https://www.google.com/s2/favicons?domain=${domainName}&sz=32`

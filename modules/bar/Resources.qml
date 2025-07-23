@@ -1,15 +1,12 @@
-import "root:/modules/common"
-import "root:/modules/common/widgets"
-import "root:/services"
+import qs.modules.common
+import qs.modules.common.widgets
+import qs.services
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
-import Quickshell.Io
-import Quickshell.Services.Mpris
 
 Item {
     id: root
-    property bool borderless: ConfigOptions.bar.borderless
+    property bool borderless: Config.options.bar.borderless
     property bool alwaysShowAllResources: false
     implicitWidth: rowLayout.implicitWidth + rowLayout.anchors.leftMargin + rowLayout.anchors.rightMargin
     implicitHeight: 32
@@ -30,7 +27,7 @@ Item {
         Resource {
             iconName: "swap_horiz"
             percentage: ResourceUsage.swapUsedPercentage
-            shown: (ConfigOptions.bar.resources.alwaysShowSwap && percentage > 0) || 
+            shown: (Config.options.bar.resources.alwaysShowSwap && percentage > 0) || 
                 (MprisController.activePlayer?.trackTitle == null) ||
                 root.alwaysShowAllResources
             Layout.leftMargin: shown ? 4 : 0
@@ -39,7 +36,7 @@ Item {
         Resource {
             iconName: "settings_slow_motion"
             percentage: ResourceUsage.cpuUsage
-            shown: ConfigOptions.bar.resources.alwaysShowCpu || 
+            shown: Config.options.bar.resources.alwaysShowCpu || 
                 !(MprisController.activePlayer?.trackTitle?.length > 0) ||
                 root.alwaysShowAllResources
             Layout.leftMargin: shown ? 4 : 0
