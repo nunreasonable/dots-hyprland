@@ -329,10 +329,10 @@ Singleton {
         else if (currentProvider === "waifu.im") {
             var tagsArray = tagString.split(" ");
             tagsArray.forEach(tag => {
-                params.push("included_tags=" + encodeURIComponent(tag));
+                params.push("IncludedTags=" + encodeURIComponent(tag.toLowerCase()));
             });
             params.push("PageSize=" + Math.min(limit, 30)) // Only admin can do > 30
-            params.push("is_nsfw=" + (nsfw ? "null" : "false")) // null is random
+            params.push("IsNsfw=" + (nsfw ? "All" : "False")) // null is random
         }
         else if (currentProvider === "t.alcy.cc") {
             url += tagString
