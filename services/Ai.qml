@@ -357,7 +357,7 @@ Singleton {
 
     Process {
         id: getOllamaModels
-        running: true
+        running: !Platform.isWindows // ls/bash-based lookups; no Windows equivalent yet
         command: ["bash", "-c", `${Directories.scriptPath}/ai/show-installed-ollama-models.sh`.replace(/file:\/\//, "")]
         stdout: SplitParser {
             onRead: data => {
@@ -389,7 +389,7 @@ Singleton {
 
     Process {
         id: getDefaultPrompts
-        running: true
+        running: !Platform.isWindows // ls/bash-based lookups; no Windows equivalent yet
         command: ["ls", "-1", Directories.defaultAiPrompts]
         stdout: StdioCollector {
             onStreamFinished: {
@@ -403,7 +403,7 @@ Singleton {
 
     Process {
         id: getUserPrompts
-        running: true
+        running: !Platform.isWindows // ls/bash-based lookups; no Windows equivalent yet
         command: ["ls", "-1", Directories.userAiPrompts]
         stdout: StdioCollector {
             onStreamFinished: {
@@ -417,7 +417,7 @@ Singleton {
 
     Process {
         id: getSavedChats
-        running: true
+        running: !Platform.isWindows // ls/bash-based lookups; no Windows equivalent yet
         command: ["ls", "-1", Directories.aiChats]
         stdout: StdioCollector {
             onStreamFinished: {

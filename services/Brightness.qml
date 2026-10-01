@@ -55,7 +55,8 @@ Singleton {
 
     onMonitorsChanged: {
         ddcMonitors = [];
-        ddcProc.running = true;
+        // No ddcutil/brightnessctl on Windows yet; see PORTING.md (WMI + DDC/CI)
+        if (!Platform.isWindows) ddcProc.running = true;
     }
 
     function initializeMonitor(i: int): void {

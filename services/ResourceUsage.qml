@@ -61,7 +61,7 @@ Singleton {
 
 	Timer {
 		interval: 1
-        running: true 
+        running: !Platform.isWindows // No /proc on Windows yet; see PORTING.md (GetSystemTimes/PDH)
         repeat: true
 		onTriggered: {
             // Reload files
@@ -107,7 +107,7 @@ Singleton {
             LC_ALL: "C"
         })
         command: ["bash", "-c", "lscpu | grep 'CPU max MHz' | awk '{print $4}'"]
-        running: true
+        running: !Platform.isWindows
         stdout: StdioCollector {
             id: outputCollector
             onStreamFinished: {

@@ -58,10 +58,13 @@ Singleton {
         }
     }
 
-	FileView { 
+	FileView {
         id: themeFileView
         path: Qt.resolvedUrl(root.filePath)
         watchChanges: true
+        // No matugen on Windows yet; a missing file just means "use Appearance's
+        // built-in default palette", not an error worth printing.
+        printErrors: !Platform.isWindows
         onFileChanged: {
             this.reload()
             delayedFileRead.start()

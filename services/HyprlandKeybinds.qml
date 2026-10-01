@@ -21,7 +21,7 @@ Singleton {
         target: Hyprland
 
         function onRawEvent(event) {
-            if (event.name == "configreloaded") {
+            if (event.name == "configreloaded" && !Platform.isWindows) {
                 getKeybinds.running = true
             }
         }
@@ -29,7 +29,7 @@ Singleton {
 
     Process {
         id: getKeybinds
-        running: true
+        running: !Platform.isWindows
         command: ["hyprctl", "binds", "-j"]
         
         stdout: StdioCollector {

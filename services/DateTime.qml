@@ -27,7 +27,7 @@ Singleton {
 
     Timer {
         interval: 10
-        running: true
+        running: !Platform.isWindows // No /proc/uptime on Windows yet; keep the "0h, 0m" default
         repeat: true
         onTriggered: {
             fileUptime.reload();

@@ -26,6 +26,7 @@ Singleton {
     }
 
     function handleFirstRun() {
+        if (Platform.isWindows) return; // No switchwall.sh / qs launcher wrapper on Windows yet
         Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, root.defaultWallpaperPath])
         Quickshell.execDetached(["bash", "-c", `qs -p '${root.welcomeQmlPath}'`])
     }

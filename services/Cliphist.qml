@@ -47,6 +47,7 @@ Singleton {
     }
 
     function refresh() {
+        if (Platform.isWindows) return; // cliphist/wl-copy have no Windows equivalent yet; see PORTING.md
         readProc.buffer = []
         readProc.running = true
     }

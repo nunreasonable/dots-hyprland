@@ -23,6 +23,7 @@ Singleton {
     // Update the layout code according to the layout name (Hyprland gives the name not the code)
     onCurrentLayoutNameChanged: root.updateLayoutCode()
     function updateLayoutCode() {
+        if (Platform.isWindows) return; // No xkb base.lst / hyprctl devices on Windows
         if (cachedLayoutCodes.hasOwnProperty(currentLayoutName)) {
             root.currentLayoutCode = cachedLayoutCodes[currentLayoutName];
         } else {
@@ -75,7 +76,7 @@ Singleton {
     // Find out available layouts and current active layout. Should only be necessary on init
     Process {
         id: fetchLayoutsProc
-        running: true
+        running: !Platform.isWindows
         command: ["hyprctl", "-j", "devices"]
 
         stdout: StdioCollector {

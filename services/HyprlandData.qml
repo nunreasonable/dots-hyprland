@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
+import qs.modules.common
 
 /**
  * Provides access to some Hyprland data not available in Quickshell.Hyprland.
@@ -64,6 +65,9 @@ Singleton {
     }
 
     function updateAll() {
+        // No real Hyprland on Windows yet; leave the data empty (see PORTING.md).
+        // A native window tracker replaces hyprctl polling in a later phase.
+        if (Platform.isWindows) return;
         updateWindowList();
         updateMonitors();
         updateLayers();

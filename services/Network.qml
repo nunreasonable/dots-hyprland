@@ -7,6 +7,7 @@ import Quickshell
 import Quickshell.Io
 import QtQuick
 import qs.services.network
+import qs.modules.common
 
 /**
  * Network service with nmcli.
@@ -54,7 +55,9 @@ Singleton {
                         : "signal_wifi_bad"
 
     // Control
+    // nmcli-backed; no-ops on Windows until the WlanAPI/INetworkListManager backend lands (see PORTING.md)
     function enableWifi(enabled = true): void {
+        if (Platform.isWindows) return;
         const cmd = enabled ? "on" : "off";
         enableWifiProc.exec(["nmcli", "radio", "wifi", cmd]);
     }
@@ -64,11 +67,13 @@ Singleton {
     }
 
     function rescanWifi(): void {
+        if (Platform.isWindows) return;
         wifiScanning = true;
         rescanProcess.running = true;
     }
 
     function connectToWifiNetwork(accessPoint: WifiAccessPoint): void {
+        if (Platform.isWindows) return;
         accessPoint.askingPassword = false;
         root.wifiConnectTarget = accessPoint;
         // We use this instead of `nmcli connection up SSID` because this also creates a connection profile
@@ -77,10 +82,15 @@ Singleton {
     }
 
     function disconnectWifiNetwork(): void {
+        if (Platform.isWindows) return;
         if (active) disconnectProc.exec(["nmcli", "connection", "down", active.ssid]);
     }
 
     function openPublicWifiPortal() {
+        if (Platform.isWindows) {
+            Qt.openUrlExternally("https://nmcheck.gnome.org/");
+            return;
+        }
         Quickshell.execDetached(["xdg-open", "https://nmcheck.gnome.org/"]) // From some StackExchange thread, seems to work
     }
 
@@ -162,7 +172,7 @@ Singleton {
 
     Process {
         id: subscriber
-        running: true
+        running: !Platform.isWindows
         command: ["nmcli", "monitor"]
         stdout: SplitParser {
             onRead: root.update()
@@ -173,7 +183,7 @@ Singleton {
         id: updateConnectionType
         property string buffer
         command: ["sh", "-c", "nmcli -t -f TYPE,STATE d status && nmcli -t -f CONNECTIVITY g"]
-        running: true
+        running: !Platform.isWindows
         function startCheck() {
             buffer = "";
             updateConnectionType.running = true;
@@ -222,7 +232,7 @@ Singleton {
     Process {
         id: updateNetworkName
         command: ["sh", "-c", "nmcli -t -f NAME c show --active | head -1"]
-        running: true
+        running: !Platform.isWindows
         stdout: SplitParser {
             onRead: data => {
                 root.networkName = data;
@@ -232,7 +242,7 @@ Singleton {
 
     Process {
         id: updateNetworkStrength
-        running: true
+        running: !Platform.isWindows
         command: ["sh", "-c", "nmcli -f IN-USE,SIGNAL,SSID device wifi | awk '/^\\*/{if (NR!=1) {print $2}}'"]
         stdout: SplitParser {
             onRead: data => {
@@ -244,7 +254,7 @@ Singleton {
     Process {
         id: wifiStatusProcess
         command: ["nmcli", "radio", "wifi"]
-        Component.onCompleted: running = true
+        Component.onCompleted: running = !Platform.isWindows
         environment: ({
             LANG: "C",
             LC_ALL: "C"
@@ -258,7 +268,7 @@ Singleton {
 
     Process {
         id: getNetworks
-        running: true
+        running: !Platform.isWindows
         command: ["nmcli", "-g", "ACTIVE,SIGNAL,FREQ,SSID,BSSID,SECURITY", "d", "w"]
         environment: ({
             LANG: "C",

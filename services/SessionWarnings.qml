@@ -15,6 +15,7 @@ Singleton {
     function refresh() {
         packageManagerRunning = false;
         downloadRunning = false;
+        if (Platform.isWindows) return; // No pidof-based checks on Windows yet
         detectPackageManagerProc.running = false;
         detectPackageManagerProc.running = true;
         detectDownloadProc.running = false;

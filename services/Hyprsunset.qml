@@ -84,10 +84,12 @@ Singleton {
     }
 
     function startHyprsunset() {
+        if (Platform.isWindows) return; // No hyprsunset/gamma backend yet; see PORTING.md
         Quickshell.execDetached(["bash", "-c", `pidof hyprsunset || hyprsunset`]);
     }
 
     function load() {
+        if (Platform.isWindows) return;
         root.startHyprsunset();
         root.ensureState();
     }
@@ -106,6 +108,7 @@ Singleton {
         root.temperatureActive = true;
 
         // console.log("[Hyprsunset] Enabling");
+        if (Platform.isWindows) return;
         root.startHyprsunset();
         Quickshell.execDetached(["bash", "-c", `hyprctl hyprsunset temperature ${root.colorTemperature}`]);
     }
@@ -113,6 +116,7 @@ Singleton {
     function disableTemperature() {
         root.temperatureActive = false;
         // console.log("[Hyprsunset] Disabling");
+        if (Platform.isWindows) return;
         Quickshell.execDetached(["bash", "-c", `hyprctl hyprsunset temperature ${root.defaultColorTemperature}`]);
     }
 
@@ -121,6 +125,7 @@ Singleton {
 
         root.gammaChangeAttempt();
 
+        if (Platform.isWindows) return;
         root.startHyprsunset();
         Quickshell.execDetached(["bash", "-c", `hyprctl hyprsunset gamma ${root.gamma}`]);
     }
@@ -131,7 +136,7 @@ Singleton {
 
     Process {
         id: fetchProc
-        running: true
+        running: !Platform.isWindows
         command: ["bash", "-c", "hyprctl hyprsunset temperature"]
         stdout: StdioCollector {
             id: stateCollector

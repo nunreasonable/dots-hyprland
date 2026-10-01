@@ -97,7 +97,8 @@ Singleton {
         signal languagesScanned(var languages)
 
         command: ["find", translationScanner.translationsDir, "-name", "*.json", "-exec", "basename", "{}", ".json", ";"]
-        running: true
+        // find(1) isn't the Windows find.exe; just stick with the en_US default (see onExited below)
+        running: !Platform.isWindows
 
         stdout: StdioCollector {
             id: languagesCollector

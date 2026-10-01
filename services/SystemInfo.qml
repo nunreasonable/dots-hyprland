@@ -4,6 +4,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.modules.common
 
 /**
  * Provides some system info: distro, username.
@@ -29,6 +30,18 @@ Singleton {
         running: true
         repeat: false
         onTriggered: {
+            if (Platform.isWindows) {
+                // No /etc/os-release or whoami(1)-shaped output here; set sane
+                // Windows-native values directly instead of polling commands.
+                root.distroName = "Windows";
+                root.distroId = "windows";
+                root.distroIcon = "linux-symbolic"; // No dedicated Windows glyph bundled yet
+                root.logo = root.distroIcon;
+                root.username = Quickshell.env("USERNAME") || "user";
+                root.desktopEnvironment = "Windows";
+                root.windowingSystem = "Win32";
+                return;
+            }
             getUsername.running = true
             fileOsRelease.reload()
             const textOsRelease = fileOsRelease.text()
@@ -99,7 +112,7 @@ Singleton {
 
     Process {
         id: getDesktopEnvironment
-        running: true
+        running: !Platform.isWindows
         command: ["bash", "-c", "echo $XDG_CURRENT_DESKTOP,$WAYLAND_DISPLAY"]
         stdout: StdioCollector {
             id: deCollector
