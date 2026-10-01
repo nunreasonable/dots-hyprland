@@ -260,6 +260,20 @@ Singleton {
         notifFileView.reload()
     }
 
+    /**
+     * Fire-and-forget desktop notification for bits of code that just want to tell
+     * the user something happened (as opposed to the tracked notifications above).
+     * Centralized here so there's a single place to point at a real Windows
+     * notification server once one exists; for now it just logs there.
+     */
+    function sendDesktop(summary, body, extraArgs = []) {
+        if (Platform.isWindows) {
+            console.info(`[Notifications] ${summary}: ${body}`);
+            return;
+        }
+        Quickshell.execDetached(["notify-send", summary, body, ...extraArgs]);
+    }
+
     Component.onCompleted: {
         refresh()
     }

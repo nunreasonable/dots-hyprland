@@ -93,11 +93,11 @@ ColumnLayout {
                         Quickshell.execDetached(["bash", "-c", 
                             `echo '${StringUtils.shellSingleQuoteEscape(segmentContent)}' > '${downloadPath}/code.${segmentLang || "txt"}'`
                         ])
-                        Quickshell.execDetached(["notify-send", 
-                            Translation.tr("Code saved to file"), 
+                        Notifications.sendDesktop(
+                            Translation.tr("Code saved to file"),
                             Translation.tr("Saved to %1").arg(`${downloadPath}/code.${segmentLang || "txt"}`),
-                            "-a", "Shell"
-                        ])
+                            ["-a", "Shell"]
+                        )
                         saveCodeButton.activated = true
                         saveIconTimer.restart()
                     }

@@ -91,7 +91,7 @@ Singleton {
             execute: args => {
                 if (!/^(\d+)/.test(args.trim())) {
                     // Invalid if doesn't start with numbers
-                    Quickshell.execDetached(["notify-send", Translation.tr("Superpaste"), Translation.tr("Usage: <tt>%1superpaste NUM_OF_ENTRIES[i]</tt>\nSupply <tt>i</tt> when you want images\nExamples:\n<tt>%1superpaste 4i</tt> for the last 4 images\n<tt>%1superpaste 7</tt> for the last 7 entries").arg(Config.options.search.prefix.action), "-a", "Shell"]);
+                    Notifications.sendDesktop(Translation.tr("Superpaste"), Translation.tr("Usage: <tt>%1superpaste NUM_OF_ENTRIES[i]</tt>\nSupply <tt>i</tt> when you want images\nExamples:\n<tt>%1superpaste 4i</tt> for the last 4 images\n<tt>%1superpaste 7</tt> for the last 7 entries").arg(Config.options.search.prefix.action), ["-a", "Shell"]);
                     return;
                 }
                 const syntaxMatch = /^(?:(\d+)(i)?)/.exec(args.trim());

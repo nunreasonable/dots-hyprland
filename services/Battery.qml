@@ -2,6 +2,7 @@ pragma Singleton
 
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import Quickshell
 import Quickshell.Services.UPower
 import QtQuick
@@ -52,47 +53,39 @@ Singleton {
 
     onIsLowAndNotChargingChanged: {
         if (!root.available || !isLowAndNotCharging) return;
-        Quickshell.execDetached([
-            "notify-send", 
-            Translation.tr("Low battery"), 
-            Translation.tr("Consider plugging in your device"), 
-            "-u", "critical",
-            "-a", "Shell",
-            "--hint=int:transient:1",
-        ])
+        Notifications.sendDesktop(
+            Translation.tr("Low battery"),
+            Translation.tr("Consider plugging in your device"),
+            ["-u", "critical", "-a", "Shell", "--hint=int:transient:1"]
+        )
 
         if (root.soundEnabled) Audio.playSystemSound("dialog-warning");
     }
 
     onIsCriticalAndNotChargingChanged: {
         if (!root.available || !isCriticalAndNotCharging) return;
-        Quickshell.execDetached([
-            "notify-send", 
-            Translation.tr("Critically low battery"), 
-            Translation.tr("Please charge!\nAutomatic suspend triggers at %1%").arg(Config.options.battery.suspend), 
-            "-u", "critical",
-            "-a", "Shell",
-            "--hint=int:transient:1",
-        ]);
+        Notifications.sendDesktop(
+            Translation.tr("Critically low battery"),
+            Translation.tr("Please charge!\nAutomatic suspend triggers at %1%").arg(Config.options.battery.suspend),
+            ["-u", "critical", "-a", "Shell", "--hint=int:transient:1"]
+        );
 
         if (root.soundEnabled) Audio.playSystemSound("suspend-error");
     }
 
     onIsSuspendingAndNotChargingChanged: {
         if (root.available && isSuspendingAndNotCharging) {
-            Quickshell.execDetached(["bash", "-c", `systemctl suspend || loginctl suspend`]);
+            Session.suspend();
         }
     }
 
     onIsFullAndChargingChanged: {
         if (!root.available || !isFullAndCharging) return;
-        Quickshell.execDetached([
-            "notify-send",
+        Notifications.sendDesktop(
             Translation.tr("Battery full"),
             Translation.tr("Please unplug the charger"),
-            "-a", "Shell",
-            "--hint=int:transient:1",
-        ]);
+            ["-a", "Shell", "--hint=int:transient:1"]
+        );
 
         if (root.soundEnabled) Audio.playSystemSound("complete");
     }

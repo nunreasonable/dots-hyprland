@@ -63,7 +63,7 @@ Singleton {
                 notificationMessage = Translation.tr(`🔴 Focus: %1 minutes`).arg(Math.floor(focusTime / 60));
             }
 
-            Quickshell.execDetached(["notify-send", "Pomodoro", notificationMessage, "-a", "Shell"]);
+            Notifications.sendDesktop("Pomodoro", notificationMessage, ["-a", "Shell"]);
             if (Config.options.sounds.pomodoro) {
                 Audio.playSystemSound("alarm-clock-elapsed")
             }
