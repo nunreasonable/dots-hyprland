@@ -12,10 +12,13 @@ import qs.modules.common
 Singleton {
     id: root
     // You can read these
-    property list<string> layoutCodes: []
+    // On Windows these are bound directly onto WindowsNative.keyboard (Keyboard); the Hyprland
+    // event handling below never fires there (no Hyprland IPC connection), so there's no
+    // imperative write to conflict with the binding.
+    property list<string> layoutCodes: Platform.isWindows ? (WindowsNative.keyboard ? WindowsNative.keyboard.layoutCodes : []) : []
     property var cachedLayoutCodes: ({})
-    property string currentLayoutName: ""
-    property string currentLayoutCode: ""
+    property string currentLayoutName: Platform.isWindows ? (WindowsNative.keyboard ? WindowsNative.keyboard.currentLayoutName : "") : ""
+    property string currentLayoutCode: Platform.isWindows ? (WindowsNative.keyboard ? WindowsNative.keyboard.currentLayoutCode : "") : ""
     // For the service
     property var baseLayoutFilePath: "/usr/share/X11/xkb/rules/base.lst"
     property bool needsLayoutRefresh: false
