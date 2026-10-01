@@ -11,9 +11,8 @@ import Quickshell.Hyprland
 /**
  * A service that provides access to Hyprland keybinds.
  * Uses the `get_keybinds.py` script to parse comments in config files in a certain format and convert to JSON.
- * On Windows, reads the keybinds.json that Quickshell's native hotkeys load
- * (%LOCALAPPDATA%\illogical-impulse\keybinds.json, else defaults/windows/keybinds.json)
- * and converts it to the shape of `hyprctl binds -j`.
+ * On Windows, converts the binds Quickshell's native hotkeys loaded from keybinds.json
+ * to the shape of `hyprctl binds -j`.
  */
 Singleton {
     id: root
@@ -75,9 +74,6 @@ Singleton {
         "enter": "Return", "esc": "Escape", "backspace": "BackSpace", "del": "Delete", "ins": "Insert",
     })
 
-    property string windowsUserText: ""
-    property string windowsDefaultText: ""
-
     function windowsBindToHyprland(bind) {
         var modmask = 0
         var key = ""
@@ -127,40 +123,13 @@ Singleton {
         }
     }
 
-    function updateWindowsKeybinds() {
-        var text = root.windowsUserText.length > 0 ? root.windowsUserText : root.windowsDefaultText
-        if (text.length === 0) return
-        try {
-            root.keybinds = (JSON.parse(text).binds ?? []).map(bind => root.windowsBindToHyprland(bind))
-            root.updateCategories()
-        } catch (e) {
-            console.error("[CheatsheetKeybinds] Error parsing keybinds.json:", e)
-        }
-    }
-
-    // Same lookup order as the native side: the user's file wins and is reloaded on change.
-    FileView {
-        id: windowsUserFile
-        path: Platform.isWindows ? `${String(Quickshell.env("LOCALAPPDATA") ?? "").replace(/\\/g, "/")}/illogical-impulse/keybinds.json` : ""
-        watchChanges: true
-        printErrors: false
-        onFileChanged: reload()
-        onLoaded: {
-            root.windowsUserText = windowsUserFile.text()
-            root.updateWindowsKeybinds()
-        }
-        onLoadFailed: {
-            root.windowsUserText = ""
-            root.updateWindowsKeybinds()
-        }
-    }
-
-    FileView {
-        id: windowsDefaultFile
-        path: Platform.isWindows ? Quickshell.shellPath("defaults/windows/keybinds.json") : ""
-        onLoaded: {
-            root.windowsDefaultText = windowsDefaultFile.text()
-            root.updateWindowsKeybinds()
-        }
+    // The binds Quickshell.Windows' Hotkeys loaded (the user's keybinds.json in
+    // %LOCALAPPDATA%\illogical-impulse, else defaults/windows/keybinds.json), live.
+    readonly property var windowsBinds: Platform.isWindows ? (WindowsNative.hotkeys?.binds ?? []) : []
+    onWindowsBindsChanged: {
+        if (!Platform.isWindows) return
+        root.keybinds = root.windowsBinds.map(bind => root.windowsBindToHyprland(bind))
+        root.updateCategories()
     }
 }
+
