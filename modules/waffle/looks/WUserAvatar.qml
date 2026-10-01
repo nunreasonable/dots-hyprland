@@ -15,8 +15,8 @@ StyledImage {
     id: avatar
     Layout.alignment: Qt.AlignTop
     sourceSize: Qt.size(32, 32)
-    source: Directories.userAvatarPathAccountsService
-    fallbacks: [Directories.userAvatarPathRicersAndWeirdSystems, Directories.userAvatarPathRicersAndWeirdSystems2]
+    source: Platform.isWindows ? Directories.userAvatarPathWindows : Directories.userAvatarPathAccountsService
+    fallbacks: Platform.isWindows ? [] : [Directories.userAvatarPathRicersAndWeirdSystems, Directories.userAvatarPathRicersAndWeirdSystems2]
 
     layer.enabled: true
     layer.effect: OpacityMask {
