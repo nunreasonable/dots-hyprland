@@ -84,12 +84,11 @@ Singleton {
     }
 
     function startHyprsunset() {
-        if (Platform.isWindows) return; // No hyprsunset/gamma backend yet; see PORTING.md
+        if (Platform.isWindows) return; // Windows applies the gamma ramp directly, no daemon to start
         Quickshell.execDetached(["bash", "-c", `pidof hyprsunset || hyprsunset`]);
     }
 
     function load() {
-        if (Platform.isWindows) return;
         root.startHyprsunset();
         root.ensureState();
     }
@@ -108,7 +107,10 @@ Singleton {
         root.temperatureActive = true;
 
         // console.log("[Hyprsunset] Enabling");
-        if (Platform.isWindows) return;
+        if (Platform.isWindows) {
+            WindowsNative.nightLight.enable(root.colorTemperature);
+            return;
+        }
         root.startHyprsunset();
         Quickshell.execDetached(["bash", "-c", `hyprctl hyprsunset temperature ${root.colorTemperature}`]);
     }
@@ -116,7 +118,10 @@ Singleton {
     function disableTemperature() {
         root.temperatureActive = false;
         // console.log("[Hyprsunset] Disabling");
-        if (Platform.isWindows) return;
+        if (Platform.isWindows) {
+            WindowsNative.nightLight.disable();
+            return;
+        }
         Quickshell.execDetached(["bash", "-c", `hyprctl hyprsunset temperature ${root.defaultColorTemperature}`]);
     }
 
@@ -131,6 +136,9 @@ Singleton {
     }
 
     function fetchState() {
+        // Windows: temperatureActive is already kept correct imperatively by
+        // enable/disableTemperature above, nothing external to poll.
+        if (Platform.isWindows) return;
         fetchProc.running = true;
     }
 
@@ -171,6 +179,10 @@ Singleton {
         target: Config.options.light.night
         function onColorTemperatureChanged() {
             if (!root.temperatureActive) return;
+            if (Platform.isWindows) {
+                WindowsNative.nightLight.enable(root.colorTemperature);
+                return;
+            }
             Quickshell.execDetached(["hyprctl", "hyprsunset", "temperature", `${Config.options.light.night.colorTemperature}`]);
         }
     }

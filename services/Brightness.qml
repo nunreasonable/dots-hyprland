@@ -55,8 +55,11 @@ Singleton {
 
     onMonitorsChanged: {
         ddcMonitors = [];
-        // No ddcutil/brightnessctl on Windows yet; see PORTING.md (WMI + DDC/CI)
-        if (!Platform.isWindows) ddcProc.running = true;
+        if (Platform.isWindows) {
+            initializeMonitor(0);
+        } else {
+            ddcProc.running = true;
+        }
     }
 
     function initializeMonitor(i: int): void {
@@ -125,11 +128,42 @@ Singleton {
 
         function initialize() {
             monitor.ready = false;
+            if (Platform.isWindows) {
+                if (!WindowsNative.brightness) {
+                    // WindowsNativeImpl hasn't finished loading yet; try again next tick.
+                    Qt.callLater(() => monitor.initialize());
+                    return;
+                }
+                // Don't talk DDC/CI to the monitor on startup: a query at boot, together with the
+                // monitor's own OSD and the Linux host also using DDC, froze the ASUS VG259Q5A's
+                // firmware. Assume full brightness and only send DDC when the user changes it.
+                monitor.isDdc = true;
+                monitor.rawMaxBrightness = 100;
+                monitor.brightness = 1;
+                monitor.ready = true;
+                root.initializeMonitor(root.monitors.indexOf(monitor) + 1);
+                return;
+            }
             const match = root.ddcMonitors.find(m => m.name === screen.name && !root.monitors.slice(0, root.monitors.indexOf(this)).some(mon => mon.busNum === m.busNum));
             isDdc = !!match;
             busNum = match?.busNum ?? "";
             initProc.command = isDdc ? ["ddcutil", "-b", busNum, "getvcp", "10", "--brief"] : ["sh", "-c", `echo "a b c $(brightnessctl g) $(brightnessctl m)"`];
             initProc.running = true;
+        }
+
+        // Windows: Brightness.query() is async (DDC/WMI run on a worker thread), so the result
+        // comes back as a signal rather than a process exit. A property, since QtObject has no
+        // default property to hold children.
+        readonly property Connections windowsQuery: Connections {
+            target: Platform.isWindows ? WindowsNative.brightness : null
+            function onQueried(screenName, available, queriedIsDdc, queriedBrightness) {
+                if (screenName !== monitor.screen.name) return;
+                monitor.isDdc = queriedIsDdc;
+                monitor.rawMaxBrightness = 100;
+                monitor.brightness = available ? queriedBrightness : 1;
+                monitor.ready = true;
+                root.initializeMonitor(root.monitors.indexOf(monitor) + 1);
+            }
         }
 
         readonly property Process initProc: Process {
@@ -157,6 +191,10 @@ Singleton {
 
         function syncBrightness() {
             const brightnessValue = Math.max(monitor.multipliedBrightness, 0);
+            if (Platform.isWindows) {
+                WindowsNative.brightness.setBrightness(screen.name, monitor.isDdc, brightnessValue);
+                return;
+            }
             if (isDdc) {
                 const rawValueRounded = Math.max(Math.floor(brightnessValue * monitor.rawMaxBrightness), 1);
                 setProc.exec(["ddcutil", "-b", busNum, "setvcp", "10", rawValueRounded]);

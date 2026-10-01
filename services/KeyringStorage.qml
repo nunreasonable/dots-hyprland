@@ -64,12 +64,41 @@ Singleton {
     }
 
     function fetchKeyringData() {
+        if (Platform.isWindows) {
+            if (!WindowsNative.credentials) {
+                Qt.callLater(() => root.fetchKeyringData());
+                return;
+            }
+            const raw = WindowsNative.credentials.read(root.properties.application);
+            if (raw && raw.length > 0) {
+                try {
+                    root.keyringData = JSON.parse(raw);
+                } catch (e) {
+                    console.error("[KeyringStorage] Failed to parse stored credential, reinitializing.");
+                    root.keyringData = {};
+                    saveKeyringData();
+                }
+            } else {
+                root.keyringData = {};
+            }
+            root.loaded = true;
+            return;
+        }
         // console.log("[KeyringStorage] Fetching keyring data...");
         // console.log("[KeyringStorage] getData command:'" + getData.command.join("' '") + "'");
         getData.running = true;
     }
 
     function saveKeyringData() {
+        if (Platform.isWindows) {
+            if (!WindowsNative.credentials) {
+                Qt.callLater(() => root.saveKeyringData());
+                return;
+            }
+            WindowsNative.credentials.write(root.properties.application, JSON.stringify(root.keyringData));
+            root.dataChanged();
+            return;
+        }
         saveData.stdinEnabled = true;
         saveData.running = true;
     }

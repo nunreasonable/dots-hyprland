@@ -25,29 +25,42 @@ Singleton {
     property string collapsedCalendarFormat: Qt.locale().toString(clock.date, "dddd, MMMM dd")
     property string uptime: "0h, 0m"
 
+    function formatUptime(uptimeSeconds) {
+        // Convert seconds to days, hours, and minutes
+        const days = Math.floor(uptimeSeconds / 86400);
+        const hours = Math.floor((uptimeSeconds % 86400) / 3600);
+        const minutes = Math.floor((uptimeSeconds % 3600) / 60);
+
+        // Build the formatted uptime string
+        let formatted = "";
+        if (days > 0)
+            formatted += `${days}d`;
+        if (hours > 0)
+            formatted += `${formatted ? ", " : ""}${hours}h`;
+        if (minutes > 0 || !formatted)
+            formatted += `${formatted ? ", " : ""}${minutes}m`;
+        return formatted;
+    }
+
+    Timer {
+        interval: Config.options?.resources?.updateInterval ?? 3000
+        running: Platform.isWindows
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: {
+            if (WindowsNative.stats) uptime = formatUptime(WindowsNative.stats.uptimeSeconds);
+        }
+    }
+
     Timer {
         interval: 10
-        running: !Platform.isWindows // No /proc/uptime on Windows yet; keep the "0h, 0m" default
+        running: !Platform.isWindows
         repeat: true
         onTriggered: {
             fileUptime.reload();
             const textUptime = fileUptime.text();
             const uptimeSeconds = Number(textUptime.split(" ")[0] ?? 0);
-
-            // Convert seconds to days, hours, and minutes
-            const days = Math.floor(uptimeSeconds / 86400);
-            const hours = Math.floor((uptimeSeconds % 86400) / 3600);
-            const minutes = Math.floor((uptimeSeconds % 3600) / 60);
-
-            // Build the formatted uptime string
-            let formatted = "";
-            if (days > 0)
-                formatted += `${days}d`;
-            if (hours > 0)
-                formatted += `${formatted ? ", " : ""}${hours}h`;
-            if (minutes > 0 || !formatted)
-                formatted += `${formatted ? ", " : ""}${minutes}m`;
-            uptime = formatted;
+            uptime = formatUptime(uptimeSeconds);
             interval = Config.options?.resources?.updateInterval ?? 3000;
         }
     }
