@@ -32,8 +32,12 @@ Item {
             color: Appearance.colors.colSubtext
             elide: Text.ElideRight
             text: root.focusingThisMonitor && root.activeWindow?.activated && root.biggestWindow ? 
-                root.activeWindow?.appId :
-                (root.biggestWindow?.class) ?? Translation.tr("Desktop")
+                (Platform.isWindows
+                    ? (DesktopEntries.heuristicLookup(root.activeWindow?.appId)?.name ?? root.activeWindow?.appId)
+                    : root.activeWindow?.appId) :
+                (Platform.isWindows && root.biggestWindow
+                    ? (DesktopEntries.heuristicLookup(root.biggestWindow.class)?.name ?? root.biggestWindow.class)
+                    : root.biggestWindow?.class) ?? Translation.tr("Desktop")
 
         }
 
