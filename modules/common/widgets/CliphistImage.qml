@@ -48,6 +48,12 @@ Rectangle {
     implicitWidth: imageWidth * scale
 
     Component.onCompleted: {
+        if (Platform.isWindows) {
+            // The native Clipboard history already keeps a persistent PNG per image entry -
+            // no decode step (and nothing to clean up on destruction below).
+            root.source = WindowsNative.clipboard.imagePath(root.entryNumber);
+            return;
+        }
         decodeImageProcess.running = true;
     }
 
@@ -65,6 +71,7 @@ Rectangle {
     }
 
     Component.onDestruction: {
+        if (Platform.isWindows) return;
         Quickshell.execDetached(["bash", "-c", `[ -f '${imageDecodeFilePath}' ] && rm -f '${imageDecodeFilePath}'`]);
     }
 

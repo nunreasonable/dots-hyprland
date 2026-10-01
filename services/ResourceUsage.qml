@@ -11,20 +11,23 @@ import Quickshell.Io
  */
 Singleton {
     id: root
-	property real memoryTotal: 1
-	property real memoryFree: 0
+	// On Windows these start out bound to WindowsNative.stats (SystemStats); the Linux Timer
+	// below imperatively overwrites them every tick, which detaches that binding there (and is
+	// a no-op on Windows, since that Timer never runs there).
+	property real memoryTotal: Platform.isWindows ? (WindowsNative.stats ? WindowsNative.stats.memoryTotalKb : 1) : 1
+	property real memoryFree: Platform.isWindows ? (WindowsNative.stats ? WindowsNative.stats.memoryAvailableKb : 0) : 0
 	property real memoryUsed: memoryTotal - memoryFree
     property real memoryUsedPercentage: memoryUsed / memoryTotal
-    property real swapTotal: 1
-	property real swapFree: 0
+    property real swapTotal: Platform.isWindows ? (WindowsNative.stats ? WindowsNative.stats.swapTotalKb : 1) : 1
+	property real swapFree: Platform.isWindows ? (WindowsNative.stats ? WindowsNative.stats.swapAvailableKb : 0) : 0
 	property real swapUsed: swapTotal - swapFree
     property real swapUsedPercentage: swapTotal > 0 ? (swapUsed / swapTotal) : 0
-    property real cpuUsage: 0
+    property real cpuUsage: Platform.isWindows ? (WindowsNative.stats ? WindowsNative.stats.cpuUsage : 0) : 0
     property var previousCpuStats
 
     property string maxAvailableMemoryString: kbToGbString(ResourceUsage.memoryTotal)
     property string maxAvailableSwapString: kbToGbString(ResourceUsage.swapTotal)
-    property string maxAvailableCpuString: "--"
+    property string maxAvailableCpuString: Platform.isWindows ? (WindowsNative.stats ? WindowsNative.stats.cpuName : "--") : "--"
 
     readonly property int historyLength: Config?.options.resources.historyLength ?? 60
     property list<real> cpuUsageHistory: []
@@ -59,9 +62,19 @@ Singleton {
         updateCpuUsageHistory()
     }
 
+	// Windows: memoryTotal/cpuUsage/etc above are already live bindings onto WindowsNative.stats
+	// (SystemStats samples on its own timer); this just periodically snapshots them into the
+	// history lists the graphs read.
+	Timer {
+		interval: Config.options?.resources?.updateInterval ?? 3000
+		running: Platform.isWindows
+		repeat: true
+		onTriggered: root.updateHistories()
+	}
+
 	Timer {
 		interval: 1
-        running: !Platform.isWindows // No /proc on Windows yet; see PORTING.md (GetSystemTimes/PDH)
+        running: !Platform.isWindows
         repeat: true
 		onTriggered: {
             // Reload files

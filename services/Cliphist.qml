@@ -15,11 +15,18 @@ Singleton {
     property string pressPasteCommand: "ydotool key -d 1 29:1 47:1 47:0 29:0"
     property bool sloppySearch: Config.options?.search.sloppy ?? false
     property real scoreThreshold: 0.2
-    property list<string> entries: []
+    // Windows: live binding onto the native Clipboard history, which already uses the exact
+    // same "<id>\t<text-or-[[ binary data WxH ]]>" format cliphist's own `list` output does.
+    property list<string> entries: Platform.isWindows ? (WindowsNative.clipboard ? WindowsNative.clipboard.entries : []) : []
     readonly property var preparedEntries: entries.map(a => ({
         name: Fuzzy.prepare(`${a.replace(/^\s*\S+\s+/, "")}`),
         entry: a
     }))
+
+    function entryId(entry) {
+        const match = entry.match(/^(\d+)\t/);
+        return match ? parseInt(match[1]) : -1;
+    }
     function fuzzyQuery(search: string): var {
         if (search.trim() === "") {
             return entries;
@@ -47,12 +54,26 @@ Singleton {
     }
 
     function refresh() {
-        if (Platform.isWindows) return; // cliphist/wl-copy have no Windows equivalent yet; see PORTING.md
+        // Windows: `entries` above is already a live binding onto the native history, nothing to do.
+        if (Platform.isWindows) return;
         readProc.buffer = []
         readProc.running = true
     }
 
+    // Ctrl+V, by evdev keycode (KEY_LEFTCTRL=29, KEY_V=47) - same pair Ydotool.qml's
+    // pressPasteCommand sends via ydotool on Linux.
+    function _sendPasteKeystroke() {
+        WindowsNative.input.sendKey(29, true);
+        WindowsNative.input.sendKey(47, true);
+        WindowsNative.input.sendKey(47, false);
+        WindowsNative.input.sendKey(29, false);
+    }
+
     function copy(entry) {
+        if (Platform.isWindows) {
+            WindowsNative.clipboard.copy(root.entryId(entry));
+            return;
+        }
         if (root.cliphistBinary.includes("cliphist")) // Classic cliphist
             Quickshell.execDetached(["bash", "-c", `printf '${StringUtils.shellSingleQuoteEscape(entry)}' | ${root.cliphistBinary} decode | wl-copy`]);
         else { // Stash
@@ -62,11 +83,35 @@ Singleton {
     }
 
     function paste(entry) {
+        // Matches Linux's actual behaviour: this only copies to the clipboard (see wl-paste
+        // above, which just dumps the clipboard back to stdout rather than sending a keystroke).
+        if (Platform.isWindows) {
+            WindowsNative.clipboard.copy(root.entryId(entry));
+            return;
+        }
         if (root.cliphistBinary.includes("cliphist")) // Classic cliphist
             Quickshell.execDetached(["bash", "-c", `printf '${StringUtils.shellSingleQuoteEscape(entry)}' | ${root.cliphistBinary} decode | wl-copy && wl-paste`]);
         else { // Stash
             const entryNumber = entry.split("\t")[0];
             Quickshell.execDetached(["bash", "-c", `${root.cliphistBinary} decode ${entryNumber} | wl-copy; ${root.pressPasteCommand}`]);
+        }
+    }
+
+    property list<string> _pasteQueue: []
+
+    function _advancePasteQueue() {
+        if (root._pasteQueue.length === 0) return;
+        const entry = root._pasteQueue.shift();
+        WindowsNative.clipboard.copy(root.entryId(entry));
+        pasteQueueTimer.restart();
+    }
+
+    Timer {
+        id: pasteQueueTimer
+        interval: Math.max(1, root.pasteDelay * 1000)
+        onTriggered: {
+            root._sendPasteKeystroke();
+            root._advancePasteQueue();
         }
     }
 
@@ -76,6 +121,13 @@ Singleton {
             if (!isImage) return true;
             return entryIsImage(entry);
         }).slice(0, count)
+
+        if (Platform.isWindows) {
+            root._pasteQueue = [...targetEntries].reverse();
+            root._advancePasteQueue();
+            return;
+        }
+
         const pasteCommands = [...targetEntries].reverse().map(entry => `printf '${StringUtils.shellSingleQuoteEscape(entry)}' | ${root.cliphistBinary} decode | wl-copy && sleep ${root.pasteDelay} && ${root.pressPasteCommand}`)
         // Act
         Quickshell.execDetached(["bash", "-c", pasteCommands.join(` && sleep ${root.pasteDelay} && `)]);
@@ -96,6 +148,10 @@ Singleton {
     }
 
     function deleteEntry(entry) {
+        if (Platform.isWindows) {
+            WindowsNative.clipboard.deleteEntry(root.entryId(entry));
+            return;
+        }
         deleteProc.deleteEntry(entry);
     }
 
@@ -108,6 +164,10 @@ Singleton {
     }
 
     function wipe() {
+        if (Platform.isWindows) {
+            WindowsNative.clipboard.wipe();
+            return;
+        }
         wipeProc.running = true;
     }
 
