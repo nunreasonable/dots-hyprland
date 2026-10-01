@@ -65,13 +65,44 @@ Singleton {
     }
 
     function updateAll() {
-        // No real Hyprland on Windows yet; leave the data empty (see PORTING.md).
-        // A native window tracker replaces hyprctl polling in a later phase.
-        if (Platform.isWindows) return;
+        // On Windows the native Hyprland module keeps every object's lastIpcObject live, so the
+        // lists are rebuilt from it instead of asking hyprctl. Events come in bursts; one
+        // rebuild per burst.
+        if (Platform.isWindows) {
+            nativeRefresh.restart();
+            return;
+        }
         updateWindowList();
         updateMonitors();
         updateLayers();
         updateWorkspaces();
+    }
+
+    function updateFromNative() {
+        const windows = Hyprland.toplevels.values.map(t => t.lastIpcObject).filter(w => w.address);
+        let tempWinByAddress = {};
+        for (const win of windows) tempWinByAddress[win.address] = win;
+        root.windowList = windows;
+        root.windowByAddress = tempWinByAddress;
+        root.addresses = windows.map(win => win.address);
+
+        root.monitors = Hyprland.monitors.values.map(m => m.lastIpcObject);
+        root.layers = ({});
+
+        const workspaces = Hyprland.workspaces.values.map(ws => ws.lastIpcObject).filter(ws => ws.id >= 1 && ws.id <= 100);
+        let tempWorkspaceById = {};
+        for (const ws of workspaces) tempWorkspaceById[ws.id] = ws;
+        root.workspaces = workspaces;
+        root.workspaceById = tempWorkspaceById;
+        root.workspaceIds = workspaces.map(ws => ws.id);
+        root.activeWorkspace = Hyprland.focusedWorkspace?.lastIpcObject ?? null;
+    }
+
+    Timer {
+        id: nativeRefresh
+        interval: 0
+        repeat: false
+        onTriggered: root.updateFromNative()
     }
 
     function biggestWindowForWorkspace(workspaceId) {
