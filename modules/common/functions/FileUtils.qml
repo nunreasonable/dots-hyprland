@@ -12,7 +12,8 @@ Singleton {
     function trimFileProtocol(str) {
         let s = str;
         if (typeof s !== "string") s = str.toString(); // Convert to string if it's an url or whatever
-        return s.startsWith("file://") ? s.slice(7) : s;
+        // file:///C:/x on Windows: also drop the slash in front of the drive letter.
+        return s.startsWith("file://") ? s.slice(7).replace(/^\/([A-Za-z]:\/)/, "$1") : s;
     }
 
     /**

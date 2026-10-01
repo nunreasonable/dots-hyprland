@@ -548,7 +548,7 @@ Singleton {
             }
 
             property JsonObject screenRecord: JsonObject {
-                property string savePath: Directories.videos.replace("file://","") // strip "file://"
+                property string savePath: Directories.videos.replace(/^file:\/\/(\/(?=[A-Za-z]:))?/, "") // strip "file://" (and the "/" before a Windows drive)
             }
 
             property JsonObject screenSnip: JsonObject {
