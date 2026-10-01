@@ -145,8 +145,9 @@ Singleton {
         }
 
         // Windows: Brightness.query() is async (DDC/WMI run on a worker thread), so the result
-        // comes back as a signal rather than a process exit.
-        Connections {
+        // comes back as a signal rather than a process exit. A property, since QtObject has no
+        // default property to hold children.
+        readonly property Connections windowsQuery: Connections {
             target: Platform.isWindows ? WindowsNative.brightness : null
             function onQueried(screenName, available, queriedIsDdc, queriedBrightness) {
                 if (screenName !== monitor.screen.name) return;
