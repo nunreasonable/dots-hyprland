@@ -99,8 +99,32 @@ Variants {
 
         // Wallpaper zoom scale
         function updateZoomScale() {
+            if (Platform.isWindows) {
+                // No ImageMagick there; the image header gives the same numbers.
+                const size = WindowsNative.imageTools?.imageSize(bgRoot.wallpaperPath);
+                if (size && size.width > 0 && size.height > 0) bgRoot.applyWallpaperSize(size.width, size.height);
+                return;
+            }
             getWallpaperSizeProc.path = bgRoot.wallpaperPath;
             getWallpaperSizeProc.running = true;
+        }
+        Connections {
+            // The native helpers load asynchronously; the first wallpaper may come before them.
+            target: Platform.isWindows ? WindowsNative : null
+            function onReadyChanged() {
+                if (WindowsNative.ready) bgRoot.updateZoomScale();
+            }
+        }
+        function applyWallpaperSize(width, height) {
+            const [screenWidth, screenHeight] = [bgRoot.screen.width, bgRoot.screen.height];
+            bgRoot.wallpaperWidth = width;
+            bgRoot.wallpaperHeight = height;
+
+            // Perfect image; scale = 1
+            // Small picture; scale > 1; will zoom in the picture
+            // Big picture; scale < 1; will zoom out the picture
+            // Choose max number so every side will fit
+            bgRoot.minSuitableScale = Math.max(screenWidth / width, screenHeight / height);
         }
         Process {
             id: getWallpaperSizeProc
@@ -111,15 +135,7 @@ Variants {
                 onStreamFinished: {
                     const output = wallpaperSizeOutputCollector.text;
                     const [width, height] = output.split(" ").map(Number);
-                    const [screenWidth, screenHeight] = [bgRoot.screen.width, bgRoot.screen.height];
-                    bgRoot.wallpaperWidth = width;
-                    bgRoot.wallpaperHeight = height;
-
-                    // Perfect image; scale = 1
-                    // Small picture; scale > 1; will zoom in the picture
-                    // Big picture; scale < 1; will zoom out the picture
-                    // Choose max number so every side will fit
-                    bgRoot.minSuitableScale = Math.max(screenWidth / width, screenHeight / height);
+                    bgRoot.applyWallpaperSize(width, height);
                 }
             }
         }
