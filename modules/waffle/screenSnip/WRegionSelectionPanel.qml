@@ -68,7 +68,7 @@ PanelWindow {
     })
 
     property string screenshotDir: Directories.screenshotTemp
-    property string screenshotPath: `${root.screenshotDir}/image-${screen.name}`
+    property string screenshotPath: `${root.screenshotDir}/image-${FileUtils.sanitizeFilename(screen.name)}`
     TempScreenshotProcess {
         id: screenshotProc
         running: true

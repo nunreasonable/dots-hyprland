@@ -6,6 +6,7 @@ import Quickshell
 import Quickshell.Wayland
 
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.utils
 import qs.modules.common.widgets
 import qs.services
@@ -33,7 +34,7 @@ PanelWindow {
 
     // Config
     readonly property string screenshotDir: Directories.screenshotTemp
-    readonly property string screenshotPath: `${root.screenshotDir}/image-${screen.name}`
+    readonly property string screenshotPath: `${root.screenshotDir}/image-${FileUtils.sanitizeFilename(screen.name)}`
 
     // Preparation
     property bool screenshotReady: false
