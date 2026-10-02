@@ -6,10 +6,13 @@ import Quickshell.Io
 
 QuickToggleButton {
     id: root
+    // No Hyprland config keywords to flip on Windows (window visuals are DWM's)
+    visible: !Platform.isWindows
     buttonIcon: "gamepad"
     toggled: toggled
 
     onClicked: {
+        if (Platform.isWindows) return;
         root.toggled = !root.toggled
         if (root.toggled) {
             Quickshell.execDetached(["bash", "-c", `hyprctl --batch "keyword animations:enabled 0; keyword decoration:shadow:enabled 0; keyword decoration:blur:enabled 0; keyword general:gaps_in 0; keyword general:gaps_out 0; keyword general:border_size 1; keyword decoration:rounding 0; keyword general:allow_tearing 1"`])
@@ -19,7 +22,7 @@ QuickToggleButton {
     }
     Process {
         id: fetchActiveState
-        running: true
+        running: !Platform.isWindows
         command: ["bash", "-c", `test "$(hyprctl getoption animations:enabled -j | jq ".int")" -ne 0`]
         onExited: (exitCode, exitStatus) => {
             root.toggled = exitCode !== 0 // Inverted because enabled = nonzero exit

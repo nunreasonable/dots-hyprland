@@ -269,7 +269,7 @@ Item {
                 toggled: false
                 buttonIcon: "restart_alt"
                 onClicked: {
-                    Quickshell.execDetached(["hyprctl", "reload"])
+                    if (!Platform.isWindows) Quickshell.execDetached(["hyprctl", "reload"])
                     Quickshell.reload(true);
                 }
                 StyledToolTip {

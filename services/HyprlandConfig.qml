@@ -20,12 +20,15 @@ Singleton {
     readonly property string shellOverridesPath: FileUtils.trimFileProtocol(`${Directories.config}/hypr/hyprland/shellOverrides/main.lua`)
 
     function set(key: string, value: var) {
+        // No Hyprland config to override on Windows (window visuals are DWM's, not ii's).
+        if (Platform.isWindows) return;
         Quickshell.execDetached(["bash", "-c", //
             `${root.configuratorScriptPath} --file ${root.shellOverridesPath} --set "${key}" "${value}"` //
         ])
     }
-    
+
     function setMany(entries: var) {
+        if (Platform.isWindows) return;
         let args = ""
         for (let key in entries) {
             args += `--set "${key}" "${entries[key]}" `
@@ -34,14 +37,16 @@ Singleton {
             `${root.configuratorScriptPath} --file ${root.shellOverridesPath} ${args}` //
         ])
     }
-    
+
     function reset(key: string) {
+        if (Platform.isWindows) return;
         Quickshell.execDetached(["bash", "-c", //
             `${root.configuratorScriptPath} --file ${root.shellOverridesPath} --reset "${key}"` //
         ])
     }
-    
+
     function resetMany(keys: list<string>) {
+        if (Platform.isWindows) return;
         let args = ""
         for (let i = 0; i < keys.length; i++) {
             args += `--reset "${keys[i]}" `
