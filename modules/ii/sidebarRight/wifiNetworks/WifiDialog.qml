@@ -11,6 +11,9 @@ WindowDialog {
     id: root
     backgroundHeight: 600
 
+    Component.onCompleted: Network.setWifiListVisible(true)
+    Component.onDestruction: Network.setWifiListVisible(false)
+
     WindowDialogTitle {
         text: Translation.tr("Connect to Wi-Fi")
     }
@@ -24,6 +27,20 @@ WindowDialog {
         Layout.bottomMargin: -8
         Layout.leftMargin: -Appearance.rounding.large
         Layout.rightMargin: -Appearance.rounding.large
+    }
+    NoticeBox {
+        visible: Network.wifiNeedsLocationPermission
+        Layout.fillWidth: true
+        materialIcon: "location_off"
+        text: Translation.tr("Windows is blocking Wi-Fi network info because Location is off. Turn it on for desktop apps to see and connect to networks.")
+
+        Item {
+            Layout.fillWidth: true
+        }
+        DialogButton {
+            buttonText: Translation.tr("Open Settings")
+            onClicked: Network.openWifiLocationSettings()
+        }
     }
     ListView {
         Layout.fillHeight: true
