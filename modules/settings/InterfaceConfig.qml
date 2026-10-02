@@ -142,6 +142,24 @@ ContentPage {
     }
 
     ContentSection {
+        visible: Platform.isWindows
+        icon: "toolbar"
+        title: Translation.tr("Windows taskbar")
+
+        ConfigSwitch {
+            buttonIcon: "web_traffic"
+            text: Translation.tr("Show only when the cursor touches the bottom edge")
+            checked: Config.options.windowsPort.taskbarHoverOnly
+            onCheckedChanged: {
+                Config.options.windowsPort.taskbarHoverOnly = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Keeps Windows from bringing the taskbar up when an app flashes or nothing else is focused.\nTurns on the taskbar's auto-hide while enabled.")
+            }
+        }
+    }
+
+    ContentSection {
         icon: "lock"
         title: Translation.tr("Lock screen")
         // Windows locks with its own lock screen (LockWorkStation); none of this applies there.

@@ -41,6 +41,7 @@ Singleton {
     readonly property QtObject imageTools: _impl ? _impl.imageTools : null
     readonly property QtObject thumbnailer: _impl ? _impl.thumbnailer : null
     readonly property QtObject fsUtils: _impl ? _impl.fsUtils : null
+    readonly property QtObject taskbar: _impl ? _impl.taskbar : null
     // Still screen capture + file crop (region selector) and Windows.Media.Ocr text recognition.
     readonly property QtObject screenshot: _impl ? _impl.screenshot : null
     readonly property QtObject ocr: _impl ? _impl.ocr : null

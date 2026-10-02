@@ -393,6 +393,13 @@ Singleton {
                 property bool filterDuplicatePlayers: true
             }
 
+            // Windows only.
+            property JsonObject windowsPort: JsonObject {
+                // Windows' taskbar comes up only when the cursor reaches the bottom edge, never
+                // because an app flashed or nothing else had focus (turns its auto-hide on).
+                property bool taskbarHoverOnly: true
+            }
+
             property JsonObject networking: JsonObject {
                 property string userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
             }

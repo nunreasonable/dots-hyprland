@@ -33,6 +33,15 @@ ShellRoot {
     }
 
 
+    // Windows: the taskbar setting belongs to the shell process only (settings and other qs
+    // windows of this config don't touch it).
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.taskbar
+        property: "hoverOnly"
+        value: Config.options.windowsPort.taskbarHoverOnly
+    }
+
     // Panel families
     property list<string> families: ["ii", "waffle"]
     function cyclePanelFamily() {
