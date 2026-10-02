@@ -418,7 +418,8 @@ Singleton {
                             "foreground": "p:onPrimary", "background": "p:primary",
                             "template": "\u{F024B} \u2192 {{ .Path }}",
                             // DOS separators, as Windows paths are shown elsewhere in ii.
-                            "options": { "style": "agnoster_short", "max_depth": 2, "home_icon": "\uF46D", "folder_separator_icon": "\\" },
+                            // The Nerd Font house is wider than its cell and would cover the "\".
+                            "options": { "style": "agnoster_short", "max_depth": 2, "home_icon": "\uF46D ", "folder_separator_icon": "\\" },
                         },
                         {
                             "type": "git", "style": "diamond",
@@ -442,10 +443,11 @@ Singleton {
                     ],
                 },
             ],
+            // Indented like the character line, so collapsed prompts line up with the live one.
             "transient_prompt": {
                 "foreground": "p:primary",
                 "foreground_templates": characterColor,
-                "template": `${character} `,
+                "template": `  ${character} `,
             },
         };
         ohMyPoshOutput.setText(JSON.stringify(theme, null, 2));
