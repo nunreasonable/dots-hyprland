@@ -24,14 +24,32 @@ IconImage {
     Process {
         id: faviconDownloadProcess
         running: false
-        command: ["bash", "-c", `[ -f ${faviconFilePath} ] || curl -s '${root.faviconUrl}' -o '${faviconFilePath}' -L -H 'User-Agent: ${downloadUserAgent}'`]
+        // curl.exe ships with Windows itself; only the "[ -f ]" existence test needs bash,
+        // and that's checked beforehand via WindowsNative.fsUtils instead (see startDownload).
+        command: Platform.isWindows
+            ? ["cmd", "/c", `curl -s "${root.faviconUrl}" -o "${root.faviconFilePath}" -L -H "User-Agent: ${downloadUserAgent}"`]
+            : ["bash", "-c", `[ -f ${faviconFilePath} ] || curl -s '${root.faviconUrl}' -o '${faviconFilePath}' -L -H 'User-Agent: ${downloadUserAgent}'`]
         onExited: (exitCode, exitStatus) => {
             root.urlToLoad = root.faviconFilePath
         }
     }
 
+    function startDownload() {
+        if (Platform.isWindows) {
+            if (!WindowsNative.fsUtils) {
+                Qt.callLater(() => root.startDownload());
+                return;
+            }
+            if (WindowsNative.fsUtils.classify(root.faviconFilePath) === "file") {
+                root.urlToLoad = root.faviconFilePath;
+                return;
+            }
+        }
+        faviconDownloadProcess.running = true;
+    }
+
     Component.onCompleted: {
-        faviconDownloadProcess.running = true
+        root.startDownload();
     }
 
     source: Qt.resolvedUrl(root.urlToLoad)

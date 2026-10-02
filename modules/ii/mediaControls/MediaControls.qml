@@ -55,7 +55,7 @@ Scope {
 
     Process {
         id: cavaProc
-        running: mediaControlsLoader.active
+        running: mediaControlsLoader.active && !Platform.isWindows // No cava build for Windows
         onRunningChanged: {
             if (!cavaProc.running) {
                 root.visualizerPoints = [];
