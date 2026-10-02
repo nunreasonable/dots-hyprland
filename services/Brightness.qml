@@ -136,12 +136,10 @@ Singleton {
                 }
                 // Don't talk DDC/CI to the monitor on startup: a query at boot, together with the
                 // monitor's own OSD and the Linux host also using DDC, froze the ASUS VG259Q5A's
-                // firmware. Assume full brightness and only send DDC when the user changes it.
-                monitor.isDdc = true;
-                monitor.rawMaxBrightness = 100;
-                monitor.brightness = 1;
-                monitor.ready = true;
-                root.initializeMonitor(root.monitors.indexOf(monitor) + 1);
+                // firmware. probe() only asks WMI, which knows laptop panels; anything else is
+                // assumed at full brightness and gets DDC/CI (or software dimming, where DDC/CI
+                // doesn't work) once the user changes it. The answer comes to windowsQuery below.
+                WindowsNative.brightness.probe(monitor.screen.name);
                 return;
             }
             const match = root.ddcMonitors.find(m => m.name === screen.name && !root.monitors.slice(0, root.monitors.indexOf(this)).some(mon => mon.busNum === m.busNum));
