@@ -165,7 +165,11 @@ Singleton {
                 : "scheme-tonal-spot";
         }
 
-        const args = [matugenExe, "-c", Directories.windowsMatugenConfigPath, "-m", darkMode ? "dark" : "light", "-t", schemeType];
+        // --source-color-index 0 (most dominant color) is required whenever an image can
+        // yield more than one candidate source color: without it matugen prompts
+        // interactively, which just hangs/errors ("not a terminal") since nothing reads that
+        // prompt here. switchwall.sh always passes this for the same reason.
+        const args = [matugenExe, "--source-color-index", "0", "-c", Directories.windowsMatugenConfigPath, "-m", darkMode ? "dark" : "light", "-t", schemeType];
         if (hasAccentColor) {
             args.push("color", "hex", accentColor);
         } else {
