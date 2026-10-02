@@ -115,8 +115,12 @@ Singleton {
     }
 
     function playSystemSound(soundName) {
-        // No ffplay build, and no /usr/share/sounds theme, on Windows.
-        if (Platform.isWindows) return;
+        // No ffplay or /usr/share/sounds theme on Windows: the matching Windows sound event,
+        // from the user's sound scheme.
+        if (Platform.isWindows) {
+            WindowsNative.session?.playSystemSound(soundName);
+            return;
+        }
         const ogaPath = `/usr/share/sounds/${root.audioTheme}/stereo/${soundName}.oga`;
         const oggPath = `/usr/share/sounds/${root.audioTheme}/stereo/${soundName}.ogg`;
 

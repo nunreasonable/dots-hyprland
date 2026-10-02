@@ -37,8 +37,12 @@ AppButton {
             {
                 text: Translation.tr("Terminal"),
                 action: () => {
-                    // apps.terminal is a Linux terminal-emulator command; no equivalent set up yet.
-                    if (Platform.isWindows) return;
+                    // apps.terminal is a Linux terminal-emulator command; Windows Terminal ships
+                    // with Windows 11.
+                    if (Platform.isWindows) {
+                        Quickshell.execDetached(["wt"]);
+                        return;
+                    }
                     Quickshell.execDetached(["bash", "-c", Config.options.apps.terminal]);
                 }
             },
