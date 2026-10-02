@@ -364,14 +364,11 @@ Singleton {
             useAcrylic: transparencyOn,
         });
 
-        // -NoLogo: no copyright banner, like config.fish's empty fish_greeting.
         const fragment = {
             profiles: [
-                Object.assign(profileUpdate("{61c54bbd-c2c6-5271-96e7-009a87ff44bf}"), // Windows PowerShell
-                    { commandline: "%SystemRoot%\\System32\\WindowsPowerShell\\v1.0\\powershell.exe -NoLogo" }),
+                profileUpdate("{61c54bbd-c2c6-5271-96e7-009a87ff44bf}"), // Windows PowerShell
                 profileUpdate("{0caa0dad-35be-5f56-a8ff-afceeeaa6101}"), // Command Prompt
-                Object.assign(profileUpdate("{574e775e-4f2a-5b96-ac1e-a2962a402336}"), // PowerShell 7 (pwsh)
-                    { commandline: "pwsh.exe -NoLogo" }),
+                profileUpdate("{574e775e-4f2a-5b96-ac1e-a2962a402336}"), // PowerShell 7 (pwsh)
             ],
             schemes: [scheme],
         };

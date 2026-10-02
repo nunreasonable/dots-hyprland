@@ -23,6 +23,14 @@ doesn't leave a broken profile behind.
 # No greeting: unlike fish (which prints one unless `set fish_greeting` is used), neither
 # PowerShell host prints a startup greeting of its own, so there's nothing to suppress here.
 
+# No greeting, like config.fish's empty fish_greeting: the copyright banner comes before any
+# profile and its -NoLogo switch can't be set from here (Windows Terminal's own settings.json
+# names the command line), so a session that just started, with only the banner on screen,
+# starts from a clear screen.
+if ($Host.Name -eq 'ConsoleHost') {
+    try { if ([Console]::CursorTop -le 3) { [Console]::Clear() } } catch { }
+}
+
 # Prompt: Oh My Posh with ii's theme (generated in the shell's current colors by
 # services/WindowsTerminalTheme.qml), else Starship with ii's starship.toml like on Linux. Both
 # with a transient prompt (the full prompt collapses to the character once a command finishes,
