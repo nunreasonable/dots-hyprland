@@ -126,6 +126,6 @@ Singleton {
 
     FileView {
         id: fileOsRelease
-        path: "/etc/os-release"
+        path: Platform.isWindows ? "" : "/etc/os-release" // see the Windows branch above
     }
 }

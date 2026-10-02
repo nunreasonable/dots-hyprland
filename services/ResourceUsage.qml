@@ -110,8 +110,8 @@ Singleton {
         }
 	}
 
-	FileView { id: fileMeminfo; path: "/proc/meminfo" }
-    FileView { id: fileStat; path: "/proc/stat" }
+	FileView { id: fileMeminfo; path: Platform.isWindows ? "" : "/proc/meminfo" } // stats come from WindowsNative there
+    FileView { id: fileStat; path: Platform.isWindows ? "" : "/proc/stat" }
 
     Process {
         id: findCpuMaxFreqProc

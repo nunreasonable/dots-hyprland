@@ -68,6 +68,6 @@ Singleton {
     FileView {
         id: fileUptime
 
-        path: "/proc/uptime"
+        path: Platform.isWindows ? "" : "/proc/uptime"
     }
 }
