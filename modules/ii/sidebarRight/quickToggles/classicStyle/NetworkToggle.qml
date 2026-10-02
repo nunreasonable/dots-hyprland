@@ -14,7 +14,11 @@ QuickToggleButton {
     buttonIcon: Network.materialSymbol
     onClicked: Network.toggleWifi()
     altAction: () => {
-        Quickshell.execDetached(["bash", "-c", `${Network.ethernet ? Config.options.apps.networkEthernet : Config.options.apps.network}`])
+        if (Platform.isWindows) {
+            WindowsNative.network?.openWifiSettings();
+        } else {
+            Quickshell.execDetached(["bash", "-c", `${Network.ethernet ? Config.options.apps.networkEthernet : Config.options.apps.network}`])
+        }
         GlobalStates.sidebarRightOpen = false
     }
     StyledToolTip {

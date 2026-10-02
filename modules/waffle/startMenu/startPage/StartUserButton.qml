@@ -126,7 +126,11 @@ WBorderlessButton {
                                     anchors.fill: parent
                                     cursorShape: Qt.PointingHandCursor
                                     onClicked: {
-                                        Quickshell.execDetached(["bash", "-c", Config.options.apps.manageUser])
+                                        if (Platform.isWindows) {
+                                            Qt.openUrlExternally("ms-settings:otherusers");
+                                        } else {
+                                            Quickshell.execDetached(["bash", "-c", Config.options.apps.manageUser])
+                                        }
                                         GlobalStates.searchOpen = false;
                                     }
                                 }

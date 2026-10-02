@@ -66,10 +66,16 @@ Item { // Player instance
         }
 
         // Binding does not work in Process
-        coverArtDownloader.targetFile = root.artUrl 
+        coverArtDownloader.targetFile = root.artUrl
         coverArtDownloader.artFilePath = root.artFilePath
         // Download
         root.downloaded = false
+        if (Platform.isWindows && WindowsNative.fsUtils?.classify(root.artFilePath) === "file") {
+            // Already downloaded; curl.exe still exists on Windows but there's no `[ -f ]`
+            // to skip the request, so check with the native helper instead.
+            root.downloaded = true
+            return
+        }
         coverArtDownloader.running = true
     }
 
@@ -77,7 +83,9 @@ Item { // Player instance
         id: coverArtDownloader
         property string targetFile: root.artUrl
         property string artFilePath: root.artFilePath
-        command: [ "bash", "-c", `[ -f ${artFilePath} ] || curl -4 -sSL '${targetFile}' -o '${artFilePath}'` ]
+        command: Platform.isWindows
+            ? ["cmd", "/c", `curl -4 -sSL "${targetFile}" -o "${artFilePath}"`]
+            : ["bash", "-c", `[ -f ${artFilePath} ] || curl -4 -sSL '${targetFile}' -o '${artFilePath}'`]
         onExited: (exitCode, exitStatus) => {
             root.downloaded = true
         }

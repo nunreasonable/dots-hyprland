@@ -47,6 +47,13 @@ Singleton {
             // console.log("Rendering expression: " + expression)
         }
 
+        // No MicroTeX build for Windows; behave the same way Linux does when the binary
+        // isn't installed (signal finished with an image that was never produced).
+        if (Platform.isWindows) {
+            root.renderFinished(hash, imagePath)
+            return [hash, true]
+        }
+
         // 3. If not, render it with MicroTeX and mark as processed
         // console.log(`[LatexRenderer] Rendering expression: ${expression} with hash: ${hash}`)
         // console.log(`                to file: ${imagePath}`)

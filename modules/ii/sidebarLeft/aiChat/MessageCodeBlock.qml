@@ -8,6 +8,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import org.kde.syntaxhighlighting
 
 ColumnLayout {
@@ -90,9 +91,13 @@ ColumnLayout {
 
                     onClicked: {
                         const downloadPath = FileUtils.trimFileProtocol(Directories.downloads)
-                        Quickshell.execDetached(["bash", "-c", 
-                            `echo '${StringUtils.shellSingleQuoteEscape(segmentContent)}' > '${downloadPath}/code.${segmentLang || "txt"}'`
-                        ])
+                        if (Platform.isWindows) {
+                            saveCodeFileView.setText(segmentContent);
+                        } else {
+                            Quickshell.execDetached(["bash", "-c",
+                                `echo '${StringUtils.shellSingleQuoteEscape(segmentContent)}' > '${downloadPath}/code.${segmentLang || "txt"}'`
+                            ])
+                        }
                         Notifications.sendDesktop(
                             Translation.tr("Code saved to file"),
                             Translation.tr("Saved to %1").arg(`${downloadPath}/code.${segmentLang || "txt"}`),
@@ -100,6 +105,11 @@ ColumnLayout {
                         )
                         saveCodeButton.activated = true
                         saveIconTimer.restart()
+                    }
+
+                    FileView {
+                        id: saveCodeFileView
+                        path: Qt.resolvedUrl(`${FileUtils.trimFileProtocol(Directories.downloads)}/code.${segmentLang || "txt"}`)
                     }
 
                     Timer {

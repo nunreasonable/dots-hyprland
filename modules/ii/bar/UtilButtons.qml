@@ -54,8 +54,9 @@ Item {
         }
 
         Loader {
-            active: Config.options.bar.utilButtons.showColorPicker
-            visible: Config.options.bar.utilButtons.showColorPicker
+            // No hyprpicker build for Windows.
+            active: Config.options.bar.utilButtons.showColorPicker && !Platform.isWindows
+            visible: Config.options.bar.utilButtons.showColorPicker && !Platform.isWindows
             sourceComponent: CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter
                 onClicked: Quickshell.execDetached(["hyprpicker", "-a"])
@@ -90,7 +91,7 @@ Item {
             visible: Config.options.bar.utilButtons.showMicToggle
             sourceComponent: CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter
-                onClicked: Quickshell.execDetached(["wpctl", "set-mute", "@DEFAULT_SOURCE@", "toggle"])
+                onClicked: Audio.toggleMicMute()
                 MaterialSymbol {
                     horizontalAlignment: Qt.AlignHCenter
                     fill: 0

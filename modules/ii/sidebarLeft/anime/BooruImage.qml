@@ -173,10 +173,32 @@ Button {
                                 root.showActions = false;
                                 const targetPath = root.imageData.is_nsfw ? root.nsfwPath : root.downloadPath;
                                 const userAgent = Config.options?.networking?.userAgent ?? ""
+                                if (Platform.isWindows) {
+                                    booruDownloadProc.targetPath = targetPath;
+                                    booruDownloadProc.userAgent = userAgent;
+                                    booruDownloadProc.running = true;
+                                    return;
+                                }
                                 const userAgentHeader = userAgent ? ` -H 'User-Agent: ${StringUtils.shellSingleQuoteEscape(userAgent)}'` : ""
-                                Quickshell.execDetached(["bash", "-c", 
+                                Quickshell.execDetached(["bash", "-c",
                                     `mkdir -p '${targetPath}' && curl '${StringUtils.shellSingleQuoteEscape(root.imageData.file_url)}'${userAgentHeader} -o '${targetPath}/${root.fileName}' && notify-send '${Translation.tr("Download complete")}' '${root.downloadPath}/${root.fileName}' -a 'Shell'`
                                 ])
+                            }
+                        }
+
+                        Process {
+                            id: booruDownloadProc
+                            property string targetPath: ""
+                            property string userAgent: ""
+                            command: ["cmd", "/c",
+                                `if not exist "${booruDownloadProc.targetPath}" mkdir "${booruDownloadProc.targetPath}" & curl -sSL "${root.imageData.file_url}"${booruDownloadProc.userAgent ? ` -H "User-Agent: ${booruDownloadProc.userAgent}"` : ""} -o "${booruDownloadProc.targetPath}\\${root.fileName}"`
+                            ]
+                            onExited: (exitCode, exitStatus) => {
+                                Notifications.sendDesktop(
+                                    Translation.tr("Download complete"),
+                                    `${booruDownloadProc.targetPath}\\${root.fileName}`,
+                                    ["-a", "Shell"]
+                                )
                             }
                         }
                     }

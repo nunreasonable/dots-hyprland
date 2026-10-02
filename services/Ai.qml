@@ -357,13 +357,18 @@ Singleton {
 
     Process {
         id: getOllamaModels
-        running: !Platform.isWindows // ls/bash-based lookups; no Windows equivalent yet
-        command: ["bash", "-c", `${Directories.scriptPath}/ai/show-installed-ollama-models.sh`.replace(/file:\/\//, "")]
-        stdout: SplitParser {
-            onRead: data => {
+        // The Linux script is a bash/awk wrapper around `ollama list`; ollama.exe ships the
+        // same command on Windows, so just run it directly and parse the plain-text table
+        // (skip the header line, take the first column) instead of bash + jq-shaped JSON.
+        running: true
+        command: Platform.isWindows ? ["ollama", "list"] : ["bash", "-c", `${Directories.scriptPath}/ai/show-installed-ollama-models.sh`.replace(/file:\/\//, "")]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (this.text.length === 0) return;
                 try {
-                    if (data.length === 0) return;
-                    const dataJson = JSON.parse(data);
+                    const dataJson = Platform.isWindows
+                        ? this.text.split("\n").slice(1).map(line => line.trim().split(/\s+/)[0]).filter(name => name && name.length > 0)
+                        : JSON.parse(this.text);
                     root.modelList = [...root.modelList, ...dataJson];
                     dataJson.forEach(model => {
                         const safeModelName = root.safeModelName(model);
@@ -377,9 +382,7 @@ Singleton {
                             "requires_key": false,
                         })
                     });
-
                     root.modelList = Object.keys(root.models);
-
                 } catch (e) {
                     console.log("Could not fetch Ollama models:", e);
                 }
@@ -389,12 +392,13 @@ Singleton {
 
     Process {
         id: getDefaultPrompts
-        running: !Platform.isWindows // ls/bash-based lookups; no Windows equivalent yet
-        command: ["ls", "-1", Directories.defaultAiPrompts]
+        running: true
+        command: Platform.isWindows ? ["cmd", "/c", `dir /b "${CF.FileUtils.trimFileProtocol(Directories.defaultAiPrompts)}"`] : ["ls", "-1", Directories.defaultAiPrompts]
         stdout: StdioCollector {
             onStreamFinished: {
                 if (text.length === 0) return;
                 root.defaultPrompts = text.split("\n")
+                    .map(line => line.trim())
                     .filter(fileName => fileName.endsWith(".md") || fileName.endsWith(".txt"))
                     .map(fileName => `${Directories.defaultAiPrompts}/${fileName}`)
             }
@@ -403,12 +407,13 @@ Singleton {
 
     Process {
         id: getUserPrompts
-        running: !Platform.isWindows // ls/bash-based lookups; no Windows equivalent yet
-        command: ["ls", "-1", Directories.userAiPrompts]
+        running: true
+        command: Platform.isWindows ? ["cmd", "/c", `dir /b "${CF.FileUtils.trimFileProtocol(Directories.userAiPrompts)}"`] : ["ls", "-1", Directories.userAiPrompts]
         stdout: StdioCollector {
             onStreamFinished: {
                 if (text.length === 0) return;
                 root.userPrompts = text.split("\n")
+                    .map(line => line.trim())
                     .filter(fileName => fileName.endsWith(".md") || fileName.endsWith(".txt"))
                     .map(fileName => `${Directories.userAiPrompts}/${fileName}`)
             }
@@ -417,12 +422,13 @@ Singleton {
 
     Process {
         id: getSavedChats
-        running: !Platform.isWindows // ls/bash-based lookups; no Windows equivalent yet
-        command: ["ls", "-1", Directories.aiChats]
+        running: true
+        command: Platform.isWindows ? ["cmd", "/c", `dir /b "${CF.FileUtils.trimFileProtocol(Directories.aiChats)}"`] : ["ls", "-1", Directories.aiChats]
         stdout: StdioCollector {
             onStreamFinished: {
                 if (text.length === 0) return;
                 root.savedChats = text.split("\n")
+                    .map(line => line.trim())
                     .filter(fileName => fileName.endsWith(".json"))
                     .map(fileName => `${Directories.aiChats}/${fileName}`)
             }

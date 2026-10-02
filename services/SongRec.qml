@@ -17,6 +17,15 @@ Singleton {
     readonly property bool running: recognizeMusicProc.running
 
     function toggleRunning(running) {
+        if (Platform.isWindows) {
+            // No songrec build for Windows.
+            Notifications.sendDesktop(
+                Translation.tr("Couldn't recognize music"),
+                Translation.tr("Music recognition isn't available on Windows yet"),
+                ["-a", "Shell"]
+            );
+            return;
+        }
         if (recognizeMusicProc.running && !running === true) root.manuallyStopped = true;
         if (running != undefined) {
             recognizeMusicProc.running = running
@@ -54,7 +63,7 @@ Singleton {
             }
             musicReconizedProc.running = true
         } catch(e) {
-            Quickshell.execDetached(["notify-send", Translation.tr("Couldn't recognize music"), Translation.tr("Perhaps what you're listening to is too niche"), "-a", "Shell"])
+            Notifications.sendDesktop(Translation.tr("Couldn't recognize music"), Translation.tr("Perhaps what you're listening to is too niche"), ["-a", "Shell"])
         }
     }
 
@@ -73,7 +82,7 @@ Singleton {
         }
         onExited: (exitCode, exitStatus) => {
             if (exitCode === 1) {
-                Quickshell.execDetached(["notify-send", Translation.tr("Couldn't recognize music"), Translation.tr("Make sure you have songrec installed"), "-a", "Shell"])
+                Notifications.sendDesktop(Translation.tr("Couldn't recognize music"), Translation.tr("Make sure you have songrec installed"), ["-a", "Shell"])
             }
         }
     }

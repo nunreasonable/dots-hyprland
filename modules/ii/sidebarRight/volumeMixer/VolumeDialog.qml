@@ -31,7 +31,11 @@ WindowDialog {
         DialogButton {
             buttonText: Translation.tr("Details")
             onClicked: {
-                Quickshell.execDetached(["bash", "-c", `${Config.options.apps.volumeMixer}`]);
+                if (Platform.isWindows) {
+                    Qt.openUrlExternally("ms-settings:apps-volume");
+                } else {
+                    Quickshell.execDetached(["bash", "-c", `${Config.options.apps.volumeMixer}`]);
+                }
                 GlobalStates.sidebarRightOpen = false;
             }
         }

@@ -35,6 +35,9 @@ Scope {
         }
     }
     function unlockKeyring() {
+        // Windows Credentials (CredReadW/CredWriteW) have no "locked until password is typed"
+        // state the way gnome-keyring does, so there's nothing to unlock here.
+        if (Platform.isWindows) return;
         unlockKeyringProc.exec({
             environment: ({
                 "UNLOCK_PASSWORD": lockContext.currentText
@@ -93,7 +96,7 @@ Scope {
     }
 
     function lock() {
-        if (Config.options.lock.useHyprlock) {
+        if (Config.options.lock.useHyprlock && !Platform.isWindows) {
             Quickshell.execDetached(["bash", "-c", "pidof hyprlock || hyprlock"]);
             return;
         }

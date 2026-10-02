@@ -7,13 +7,19 @@ Singleton {
     id: root
 
     function closeAllWindows() {
+        // On Windows, logout()/poweroff()/reboot() below already force-close every app
+        // (ExitWindowsEx/InitiateShutdownW); there's no "kill" binary to shell out to anyway.
+        if (Platform.isWindows) return;
         HyprlandData.windowList.map(w => w.pid).forEach(pid => {
             Quickshell.execDetached(["kill", pid]);
         });
     }
 
     function changePassword() {
-        if (Platform.isWindows) return; // apps.changePassword is a Linux terminal command
+        if (Platform.isWindows) {
+            Qt.openUrlExternally("ms-settings:signinoptions");
+            return;
+        }
         Quickshell.execDetached(["bash", "-c", `${Config.options.apps.changePassword}`]);
     }
 
@@ -43,7 +49,10 @@ Singleton {
     }
 
     function launchTaskManager() {
-        if (Platform.isWindows) return; // apps.taskManager is a Linux terminal command
+        if (Platform.isWindows) {
+            Quickshell.execDetached(["taskmgr"]);
+            return;
+        }
         Quickshell.execDetached(["bash", "-c", `${Config.options.apps.taskManager}`]);
     }
 

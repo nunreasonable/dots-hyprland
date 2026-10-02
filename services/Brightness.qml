@@ -240,7 +240,8 @@ Singleton {
             property string screenName: modelData.name
             property string screenshotPath: `${root.screenshotDir}/screenshot-${screenName}.png`
             Connections {
-                enabled: Config.options.light.antiFlashbang.enable && Appearance.m3colors.darkmode
+                // No grim/magick on Windows to sample screen content with; antiflashbang stays off.
+                enabled: Config.options.light.antiFlashbang.enable && Appearance.m3colors.darkmode && !Platform.isWindows
                 target: Hyprland
                 function onRawEvent(event) {
                     if (["activewindowv2", "windowtitlev2"].includes(event.name)) {

@@ -26,7 +26,34 @@ Rectangle {
         root.mimeType = "";
         root.imageWidth = -1;
         root.imageHeight = -1;
+        if (Platform.isWindows) {
+            // No `file`/`identify` on Windows: guess from the extension, and size the image
+            // (if it is one) with the native ImageTools helper instead of ImageMagick.
+            root.mimeType = root.guessMimeTypeFromExtension(filePath);
+            if (root.mimeType.startsWith("image/")) {
+                const size = WindowsNative.imageTools?.imageSize(filePath);
+                if (size && size.width > 0 && size.height > 0) {
+                    root.imageWidth = size.width;
+                    root.imageHeight = size.height;
+                }
+            }
+            return;
+        }
         fileTypeProc.exec(["file", "-b", "--mime-type", filePath]);
+    }
+
+    function guessMimeTypeFromExtension(path) {
+        const ext = path.split(".").pop().toLowerCase();
+        const imageExts = ({ jpg: "jpeg", jpeg: "jpeg", png: "png", gif: "gif", webp: "webp", bmp: "bmp", svg: "svg+xml", tif: "tiff", tiff: "tiff" });
+        const audioExts = ["mp3", "wav", "flac", "ogg", "oga", "m4a", "aac", "wma"];
+        const videoExts = ["mp4", "webm", "mkv", "avi", "mov", "wmv"];
+        const textExts = ["txt", "md", "json", "xml", "csv", "log", "ini", "yaml", "yml"];
+        if (imageExts[ext]) return `image/${imageExts[ext]}`;
+        if (audioExts.includes(ext)) return `audio/${ext}`;
+        if (videoExts.includes(ext)) return `video/${ext}`;
+        if (ext === "pdf") return "application/pdf";
+        if (textExts.includes(ext)) return "text/plain";
+        return "application/octet-stream";
     }
 
     Process {
