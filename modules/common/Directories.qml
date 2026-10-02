@@ -61,6 +61,24 @@ Singleton {
     // Windows: the m3colors template matugen.exe renders into colors.json. Wallpapers.qml writes
     // the matugen config pointing at it (and at the real StateLocation) at run time.
     property string windowsMatugenTemplatePath: Quickshell.shellPath("defaults/windows/matugen/colors.json")
+    // Windows terminal theming (services/WindowsTerminalTheme.qml): the same two template
+    // files Linux's applycolor.sh fills in by $placeholder substitution (scripts/colors/
+    // terminal/), reused as-is since there's nothing shell-specific in them.
+    property string terminalSchemeBasePath: Quickshell.shellPath("scripts/colors/terminal/scheme-base.json")
+    property string terminalSequencesTemplatePath: Quickshell.shellPath("scripts/colors/terminal/sequences.txt")
+    property string windowsTerminalSequencesPath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/terminal/sequences.txt`)
+    // Second matugen.exe pass for terminalGenerationProps.forceDarkMode while ii itself is
+    // light: generate_colors_material.py forces --mode dark for the terminal independently of
+    // the (still light) colors.json matugen already wrote for ii's own UI; this is that, since
+    // there's no Python/materialyoucolor on Windows to recompute it directly.
+    property string windowsTerminalMaterialDarkConfigPath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/matugen-config-terminal-dark.toml`)
+    property string windowsTerminalMaterialDarkPath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/terminal/material-dark.json`)
+    // Windows Terminal's own JSON fragment (color scheme + profile updates) and the installed
+    // app's settings.json, whose mtime gets nudged so already-open windows notice the fragment
+    // changed (see WindowsTerminalTheme.nudgeWindowsTerminal()).
+    property string windowsTerminalFragmentDir: `${(Quickshell.env("LOCALAPPDATA") || "").replace(/\\/g, "/")}/Microsoft/Windows Terminal/Fragments/illogical-impulse`
+    property string windowsTerminalFragmentPath: `${Directories.windowsTerminalFragmentDir}/illogical-impulse.json`
+    property string windowsTerminalSettingsJsonPath: `${(Quickshell.env("LOCALAPPDATA") || "").replace(/\\/g, "/")}/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json`
     property string defaultAiPrompts: Quickshell.shellPath("defaults/ai/prompts")
     property string userAiPrompts: FileUtils.trimFileProtocol(`${Directories.shellConfig}/ai/prompts`)
     property string userActions: FileUtils.trimFileProtocol(`${Directories.shellConfig}/actions`)
