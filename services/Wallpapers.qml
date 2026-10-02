@@ -169,16 +169,46 @@ Singleton {
         // yield more than one candidate source color: without it matugen prompts
         // interactively, which just hangs/errors ("not a terminal") since nothing reads that
         // prompt here. switchwall.sh always passes this for the same reason.
-        const args = [matugenExe, "--source-color-index", "0", "-c", Directories.windowsMatugenConfigPath, "-m", darkMode ? "dark" : "light", "-t", schemeType];
+        const args = [matugenExe, "--source-color-index", "0", "-c", windowsMatugenConfig.path, "-m", darkMode ? "dark" : "light", "-t", schemeType];
         if (hasAccentColor) {
             args.push("color", "hex", accentColor);
         } else {
             args.push("image", path);
         }
 
-        matugenProc.command = args;
-        matugenProc.running = false;
-        matugenProc.running = true;
+        // matugen writes `output_path` as given and colors.json lives in the profile-dependent
+        // StateLocation, so the config is written with the real paths first; matugen runs
+        // once it is saved.
+        root._pendingMatugen = args;
+        windowsMatugenConfig.setText(root._windowsMatugenConfigText());
+    }
+
+    property var _pendingMatugen: null
+
+    function _windowsMatugenConfigText() {
+        // TOML literal strings take paths as they are; a quote in one needs a basic string.
+        const toml = s => s.indexOf("'") === -1 ? `'${s}'` : JSON.stringify(s);
+        const template = FileUtils.trimFileProtocol(Directories.windowsMatugenTemplatePath);
+        return `[config]\nversion_check = false\n\n[templates.m3colors]\n`
+            + `input_path = ${toml(template)}\n`
+            + `output_path = ${toml(Directories.generatedMaterialThemePath)}\n`;
+    }
+
+    FileView {
+        id: windowsMatugenConfig
+        path: Platform.isWindows ? `${FileUtils.trimFileProtocol(Directories.state)}/user/generated/matugen-config.toml` : ""
+        preload: false
+        onSaved: {
+            if (!root._pendingMatugen) return;
+            matugenProc.command = root._pendingMatugen;
+            root._pendingMatugen = null;
+            matugenProc.running = false;
+            matugenProc.running = true;
+        }
+        onSaveFailed: error => {
+            root._pendingMatugen = null;
+            console.warn("[Wallpapers] Could not write the matugen config:", error);
+        }
     }
 
     Process {
