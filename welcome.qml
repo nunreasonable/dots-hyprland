@@ -49,12 +49,21 @@ ApplicationWindow {
     Process {
         id: konachanWallProc
         property string status: ""
-        command: ["bash", "-c", Quickshell.shellPath("scripts/colors/random/random_konachan_wall.sh")]
+        // Windows: random_wall.ps1 only downloads and prints the path; applying is ii's job there.
+        command: Platform.isWindows
+            ? ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+                FileUtils.trimFileProtocol(Quickshell.shellPath("scripts/colors/random/random_wall.ps1")),
+                "-Source", "konachan", "-UserAgent", Config.options.networking.userAgent ?? "",
+                "-Current", Config.options.background.wallpaperPath ?? ""]
+            : ["bash", "-c", Quickshell.shellPath("scripts/colors/random/random_konachan_wall.sh")]
         stdout: SplitParser {
             onRead: data => {
                 console.log(`Konachan wall proc output: ${data}`);
                 konachanWallProc.status = data.trim();
             }
+        }
+        onExited: (exitCode, exitStatus) => {
+            if (Platform.isWindows && exitCode === 0 && konachanWallProc.status) Wallpapers.apply(konachanWallProc.status);
         }
     }
 

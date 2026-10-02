@@ -15,11 +15,21 @@ ContentPage {
         id: randomWallProc
         property string status: ""
         property string scriptPath: `${Directories.scriptPath}/colors/random/random_konachan_wall.sh`
-        command: ["bash", "-c", FileUtils.trimFileProtocol(randomWallProc.scriptPath)]
+        // Windows: random_wall.ps1 only downloads and prints the path; applying is ii's job there.
+        command: Platform.isWindows
+            ? ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+                FileUtils.trimFileProtocol(`${Directories.scriptPath}/colors/random/random_wall.ps1`),
+                "-Source", randomWallProc.scriptPath.includes("osu") ? "osu" : "konachan",
+                "-UserAgent", Config.options.networking.userAgent ?? "",
+                "-Current", Config.options.background.wallpaperPath ?? ""]
+            : ["bash", "-c", FileUtils.trimFileProtocol(randomWallProc.scriptPath)]
         stdout: SplitParser {
             onRead: data => {
                 randomWallProc.status = data.trim();
             }
+        }
+        onExited: (exitCode, exitStatus) => {
+            if (Platform.isWindows && exitCode === 0 && randomWallProc.status) Wallpapers.apply(randomWallProc.status);
         }
     }
 

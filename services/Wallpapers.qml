@@ -38,6 +38,26 @@ Singleton {
 
     function load () {} // For forcing initialization
 
+    // Windows: ii has no wallpaper of its own until one is picked, so it starts from the one
+    // Windows already shows (in its current light/dark mode), changing nothing in Windows.
+    // Linux gets its first wallpaper from switchwall.sh in FirstRunExperience instead.
+    function adoptSystemWallpaper() {
+        const wn = WindowsNative.wallpaper;
+        if (!wn || !Config.ready || Config.options.background.wallpaperPath) return;
+        const current = wn.currentWallpaper();
+        const fallback = FileUtils.trimFileProtocol(`${Directories.assetsPath}/images/default_wallpaper.png`);
+        root._retheme(current && current.length > 0 ? current : fallback, wn.isDarkMode(), false);
+    }
+
+    Connections {
+        target: Platform.isWindows ? WindowsNative : null
+        function onReadyChanged() { root.adoptSystemWallpaper(); }
+    }
+    Connections {
+        target: Platform.isWindows ? Config : null
+        function onReadyChanged() { root.adoptSystemWallpaper(); }
+    }
+
     function isVideoPath(path) {
         const lower = path.toLowerCase();
         return root.videoExtensions.some(ext => lower.endsWith(`.${ext}`));
@@ -127,7 +147,8 @@ Singleton {
     // palette (colors.json, picked up by MaterialThemeLoader's FileView) while
     // WindowsNative.wallpaper drives the OS-level state matugen has no access to (the desktop
     // wallpaper image and Settings' light/dark toggle).
-    function _retheme(path, darkMode) {
+    // applyToSystem false only themes ii itself (see adoptSystemWallpaper()).
+    function _retheme(path, darkMode, applyToSystem = true) {
         const wn = WindowsNative.wallpaper;
         if (!wn) return; // native backend not ready yet (very early startup)
 
@@ -137,10 +158,10 @@ Singleton {
             return;
         }
 
-        wn.setDarkMode(darkMode);
+        if (applyToSystem) wn.setDarkMode(darkMode);
 
         if (hasPath) {
-            wn.setWallpaper(path);
+            if (applyToSystem) wn.setWallpaper(path);
             Config.options.background.wallpaperPath = path;
         }
 
