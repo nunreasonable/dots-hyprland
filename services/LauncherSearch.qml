@@ -248,7 +248,10 @@ Singleton {
                 iconType: LauncherSearchResult.IconType.System,
                 verb: Translation.tr("Open"),
                 execute: () => {
-                    if (!entry.runInTerminal)
+                    // No freedesktop Terminal=true entries expected on Windows (DesktopEntries
+                    // there reads Start Menu shortcuts, not .desktop files), but fall back to
+                    // running it directly rather than a nonexistent bash+terminal wrap just in case.
+                    if (!entry.runInTerminal || Platform.isWindows)
                         entry.execute();
                     else {
                         // Probably needs more proper escaping, but this will do for now
@@ -265,7 +268,7 @@ Singleton {
                         iconName: action.icon,
                         iconType: LauncherSearchResult.IconType.System,
                         execute: () => {
-                            if (!action.runInTerminal)
+                            if (!action.runInTerminal || Platform.isWindows)
                                 action.execute();
                             else {
                                 Quickshell.execDetached(["bash", '-c', `${Config.options.apps.terminal} -e '${StringUtils.shellSingleQuoteEscape(action.command.join(' '))}'`]);
@@ -287,6 +290,11 @@ Singleton {
                 cleanedCommand = StringUtils.cleanPrefix(cleanedCommand, Config.options.search.prefix.shellCommand);
                 if (cleanedCommand.startsWith(Config.options.search.prefix.shellCommand)) {
                     cleanedCommand = cleanedCommand.slice(Config.options.search.prefix.shellCommand.length);
+                }
+                if (Platform.isWindows) {
+                    // No sudo/terminal-wrap semantics on Windows; just run it through cmd.
+                    Quickshell.execDetached(["cmd", "/c", cleanedCommand]);
+                    return;
                 }
                 Quickshell.execDetached(["bash", "-c", root.query.startsWith('sudo') ? `${Config.options.apps.terminal} fish -C '${cleanedCommand}'` : cleanedCommand]);
             }
