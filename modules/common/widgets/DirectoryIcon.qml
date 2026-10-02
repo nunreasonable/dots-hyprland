@@ -14,6 +14,8 @@ StyledImage {
     fillMode: Image.PreserveAspectFit
 
     source: {
+        if (Platform.isWindows) return root.windowsSource();
+
         if (!fileModelData.fileIsDir)
             return Quickshell.iconPath("application-x-zerosize");
 
@@ -23,13 +25,26 @@ StyledImage {
         return Quickshell.iconPath("inode-directory");
     }
 
+    // Windows: no `file` to sniff types, so images go by extension (as Images does elsewhere),
+    // and the special folders are matched by location: their names are localized or redirected
+    // (OneDrive\Imagens), unlike the XDG folder names the Linux icon lookup relies on.
+    function windowsSource() {
+        if (!fileModelData.fileIsDir) {
+            return Images.isValidImageByName(fileModelData.fileName) ? fileModelData.fileUrl : Quickshell.iconPath("text-x-generic", "image-missing");
+        }
+        const special = [[Directories.documents, "folder-documents"], [Directories.downloads, "folder-download"],
+            [Directories.music, "folder-music"], [Directories.pictures, "folder-pictures"], [Directories.videos, "folder-videos"]]
+            .find(([dir, icon]) => FileUtils.trimFileProtocol(dir).toLowerCase() === fileModelData.filePath.toLowerCase());
+        return Quickshell.iconPath(special ? special[1] : "inode-directory", "inode-directory");
+    }
+
     onStatusChanged: {
         if (status === Image.Error)
-            source = Quickshell.iconPath("error");
+            source = Quickshell.iconPath(Platform.isWindows ? "image-missing" : "error");
     }
 
     Process {
-        running: !fileModelData.fileIsDir
+        running: !fileModelData.fileIsDir && !Platform.isWindows
         command: ["file", "--mime", "-b", fileModelData.filePath]
         stdout: StdioCollector {
             onStreamFinished: {

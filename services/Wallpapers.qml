@@ -411,7 +411,8 @@ Singleton {
             const fileName = folderModel.get(i, "fileName");
             if (!Images.isValidImageByName(fileName)) continue;
             const filePath = folderModel.get(i, "filePath");
-            pending[Images.thumbnailPathFor(filePath, size)] = filePath;
+            // Plain paths: the thumbnailer writes files and reports them back by path.
+            pending[FileUtils.trimFileProtocol(Images.thumbnailPathFor(filePath, size))] = filePath;
         }
 
         root._windowsPendingThumbnails = pending;

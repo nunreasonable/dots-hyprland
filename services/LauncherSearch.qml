@@ -149,10 +149,33 @@ Singleton {
         }
     }
 
+    // Windows: qalc only if Qalculate is installed; otherwise plain arithmetic in JS, limited to
+    // digits and operators so nothing but a number can come out of it.
+    property bool windowsHasQalc: false
+    Process {
+        running: Platform.isWindows
+        command: ["where", "qalc"]
+        onExited: (exitCode, exitStatus) => root.windowsHasQalc = exitCode === 0
+    }
+    function evalArithmetic(expression) {
+        const expr = expression.replace(/\s+/g, "").replace(/,/g, ".").replace(/×/g, "*").replace(/÷/g, "/").replace(/\^/g, "**");
+        if (!/^[0-9.+\-*\/%()]+$/.test(expr) || !/[0-9]/.test(expr)) return "";
+        try {
+            const value = Function(`"use strict"; return (${expr});`)();
+            return Number.isFinite(value) ? String(Number(value.toPrecision(12))) : "";
+        } catch (e) {
+            return "";
+        }
+    }
+
     Process {
         id: mathProc
         property list<string> baseCommand: ["qalc", "-t"]
         function calculateExpression(expression) {
+            if (Platform.isWindows && !root.windowsHasQalc) {
+                root.mathResult = root.evalArithmetic(expression);
+                return;
+            }
             mathProc.running = false;
             mathProc.command = baseCommand.concat(expression);
             mathProc.running = true;
