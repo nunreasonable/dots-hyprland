@@ -53,6 +53,10 @@ Singleton {
     property string generatedWallpaperCategoryPath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/wallpaper/category.txt`)
     property string cliphistDecode: FileUtils.trimFileProtocol(`${Directories.tempRoot}/media/cliphist`)
     property string screenshotTemp: `${Directories.tempRoot}/media/screenshot`
+    // Windows only: PID of the ffmpeg process the region selector's recorder started, so a
+    // second invocation (the "stop" toggle) can find and kill the right one. See
+    // scripts/videos/record.ps1 and ScreenshotAction.qml's recording helpers.
+    property string recordingPidFile: `${Directories.tempRoot}/media/recording.pid`
     property string wallpaperSwitchScriptPath: FileUtils.trimFileProtocol(`${Directories.scriptPath}/colors/switchwall.sh`)
     property string defaultAiPrompts: Quickshell.shellPath("defaults/ai/prompts")
     property string userAiPrompts: FileUtils.trimFileProtocol(`${Directories.shellConfig}/ai/prompts`)

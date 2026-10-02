@@ -57,6 +57,19 @@ Singleton {
     }
 
     /**
+     * Makes a string safe to use as a single path segment (a file/dir name, not a path).
+     * Windows screen names look like "\\.\DISPLAY1"; used e.g. for the region selector's
+     * per-screen temp screenshot name. A no-op for names that are already safe (every Linux
+     * output name: "DP-1", "eDP-1", etc.), so this is also fine to call unconditionally there.
+     * @param {string} str
+     * @returns {string}
+     */
+    function sanitizeFilename(str) {
+        if (typeof str !== "string") return "";
+        return str.replace(/[\\/:*?"<>|]/g, "_");
+    }
+
+    /**
      * Returns the parent directory of a given file path
      * @param {string} str
      * @returns {string}

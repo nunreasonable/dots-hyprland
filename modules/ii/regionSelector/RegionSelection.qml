@@ -68,7 +68,7 @@ PanelWindow {
     readonly property real monitorOffsetX: hyprlandMonitor.x
     readonly property real monitorOffsetY: hyprlandMonitor.y
     property int activeWorkspaceId: hyprlandMonitor.activeWorkspace?.id ?? 0
-    property string screenshotPath: `${root.screenshotDir}/image-${screen.name}`
+    property string screenshotPath: `${root.screenshotDir}/image-${FileUtils.sanitizeFilename(screen.name)}`
     property real dragStartX: 0
     property real dragStartY: 0
     property real draggingX: 0
@@ -118,7 +118,10 @@ PanelWindow {
     property bool isCircleSelection: (root.selectionMode === RegionSelection.SelectionMode.Circle)
     property bool enableWindowRegions: Config.options.regionSelector.targetRegions.windows && !isCircleSelection
     property bool enableLayerRegions: Config.options.regionSelector.targetRegions.layers && !isCircleSelection
-    property bool enableContentRegions: Config.options.regionSelector.targetRegions.content
+    // Content region detection (find-regions-venv.sh, Python/OpenCV) isn't ported to Windows
+    // yet - no dependency-free way to redo its MSER/contour box detection in C++ - so it's
+    // forced off there regardless of the config option.
+    property bool enableContentRegions: !Platform.isWindows && Config.options.regionSelector.targetRegions.content
 
     // Target
     property real targetedRegionX: -1
@@ -198,20 +201,38 @@ PanelWindow {
     }
     property bool isRecording: root.action === RegionSelection.SnipAction.Record || root.action === RegionSelection.SnipAction.RecordWithSound
     property bool recordingShouldStop: false
+    // Windows only: set when not currently recording and ffmpeg isn't on PATH either (see
+    // ScreenshotAction.windowsRecordingStatusCommand()). Always false on Linux/non-Record.
+    property bool ffmpegMissing: false
     Process {
         id: checkRecordingProc
         running: isRecording
-        command: ["pidof", "wf-recorder"]
+        command: Platform.isWindows
+            ? ScreenshotAction.windowsRecordingStatusCommand()
+            : ["pidof", "wf-recorder"]
         onExited: (exitCode, exitStatus) => {
             root.preparationDone = !screenshotProc.running
             root.recordingShouldStop = (exitCode === 0);
+            root.ffmpegMissing = Platform.isWindows && exitCode === 1;
         }
     }
     property bool preparationDone: false
     onPreparationDoneChanged: {
         if (!preparationDone) return;
         if (root.isRecording && root.recordingShouldStop) {
-            Quickshell.execDetached([Directories.recordScriptPath]);
+            if (Platform.isWindows) {
+                ScreenshotAction.stopWindowsRecording();
+            } else {
+                Quickshell.execDetached([Directories.recordScriptPath]);
+            }
+            root.dismiss();
+            return;
+        }
+        if (root.isRecording && root.ffmpegMissing) {
+            Notifications.sendDesktop(
+                Translation.tr("Recording needs ffmpeg"),
+                Translation.tr("Install it first: winget install Gyan.FFmpeg")
+            );
             root.dismiss();
             return;
         }
@@ -279,16 +300,30 @@ PanelWindow {
         const screenshotDir = Config.options.screenSnip.savePath !== "" ? //
             Config.options.screenSnip.savePath : "";
         var screenshotAction = root.getScreenshotAction();
-        const command = ScreenshotAction.getCommand(
-            root.regionX * root.monitorScale, //
-            root.regionY * root.monitorScale, //
-            root.regionWidth * root.monitorScale,// 
-            root.regionHeight * root.monitorScale, //
-            root.screenshotPath, //
-            screenshotAction, //
-            screenshotDir
-        )
-        Quickshell.execDetached(command);
+        if (Platform.isWindows) {
+            ScreenshotAction.runWindows(
+                root.regionX * root.monitorScale,
+                root.regionY * root.monitorScale,
+                root.regionWidth * root.monitorScale,
+                root.regionHeight * root.monitorScale,
+                root.screenshotPath,
+                screenshotAction,
+                screenshotDir,
+                root.monitorOffsetX,
+                root.monitorOffsetY
+            );
+        } else {
+            const command = ScreenshotAction.getCommand(
+                root.regionX * root.monitorScale, //
+                root.regionY * root.monitorScale, //
+                root.regionWidth * root.monitorScale,//
+                root.regionHeight * root.monitorScale, //
+                root.screenshotPath, //
+                screenshotAction, //
+                screenshotDir
+            )
+            Quickshell.execDetached(command);
+        }
         if (root.action == RegionSelection.SnipAction.Record || root.action == RegionSelection.SnipAction.RecordWithSound) {
             root.phase = RegionSelection.Phase.Post
             root.selectionMode = RegionSelection.SelectionMode.RectCorners
