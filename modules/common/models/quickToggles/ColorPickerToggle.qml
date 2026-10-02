@@ -9,10 +9,13 @@ import qs.modules.common.widgets
 QuickToggleModel {
     name: Translation.tr("Color picker")
     hasStatusText: false
+    // No hyprpicker build for Windows.
+    available: !Platform.isWindows
     toggled: false
     icon: "colorize"
 
     mainAction: () => {
+        if (Platform.isWindows) return;
         GlobalStates.sidebarRightOpen = false;
         delayedActionTimer.start();
     }
