@@ -195,6 +195,7 @@ Button {
                                 ...(booruDownloadProc.userAgent ? ["-H", `User-Agent: ${booruDownloadProc.userAgent}`] : []),
                                 "-o", `${booruDownloadProc.targetPath}\\${root.fileName}`]
                             onExited: (exitCode, exitStatus) => {
+                                if (exitCode !== 0) return; // like the Linux `&&` chain
                                 Notifications.sendDesktop(
                                     Translation.tr("Download complete"),
                                     `${booruDownloadProc.targetPath}\\${root.fileName}`,

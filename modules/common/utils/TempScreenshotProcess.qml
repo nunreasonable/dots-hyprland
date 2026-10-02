@@ -23,7 +23,12 @@ Item {
         id: linuxProc
         running: root.running && !Platform.isWindows
         command: ["bash", "-c", `mkdir -p '${StringUtils.shellSingleQuoteEscape(root.screenshotDir)}' && grim -o '${StringUtils.shellSingleQuoteEscape(root.screen.name)}' '${StringUtils.shellSingleQuoteEscape(root.screenshotPath)}'`]
-        onExited: (exitCode, exitStatus) => root.exited(exitCode, exitStatus)
+        onExited: (exitCode, exitStatus) => {
+            // `running` reads like a Process's: false again once the capture is done (callers
+            // check it to know whether the screenshot is still pending).
+            root.running = false;
+            root.exited(exitCode, exitStatus);
+        }
     }
 
     onRunningChanged: {
@@ -35,6 +40,9 @@ Item {
         // Deferred, not emitted inline: callers (RegionSelection.qml etc.) wire up onExited
         // right after setting `running`, same event-loop tick as this change, and a real
         // Process's exited would never fire synchronously from its own running:true binding.
-        Qt.callLater(() => root.exited(ok ? 0 : 1, 0));
+        Qt.callLater(() => {
+            root.running = false;
+            root.exited(ok ? 0 : 1, 0);
+        });
     }
 }

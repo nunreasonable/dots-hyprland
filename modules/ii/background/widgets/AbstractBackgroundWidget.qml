@@ -55,6 +55,11 @@ AbstractWidget {
     onWallpaperPathChanged: refreshPlacementIfNeeded()
     onPlacementStrategyChanged: refreshPlacementIfNeeded()
     Connections {
+        // The native helpers load asynchronously and may come after the config.
+        target: Platform.isWindows ? WindowsNative : null
+        function onReadyChanged() { if (WindowsNative.ready) root.refreshPlacementIfNeeded() }
+    }
+    Connections {
         target: Config
         function onReadyChanged() { refreshPlacementIfNeeded() }
     }

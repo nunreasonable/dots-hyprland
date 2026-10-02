@@ -205,15 +205,19 @@ Singleton {
         const config = root._windowsMatugenConfigText();
         if (config === root._writtenMatugenConfig) {
             root._runMatugen(args);
-        } else {
-            root._pendingMatugen = args;
-            root._writtenMatugenConfig = config;
+            return;
+        }
+        // Until the write lands, only the latest request runs (once, from onSaved).
+        root._pendingMatugen = args;
+        if (config !== root._writingMatugenConfig) {
+            root._writingMatugenConfig = config;
             windowsMatugenConfig.setText(config);
         }
     }
 
     property var _pendingMatugen: null
-    property string _writtenMatugenConfig: ""
+    property string _writtenMatugenConfig: "" // on disk
+    property string _writingMatugenConfig: "" // write in flight
 
     function _runMatugen(args) {
         matugenProc.command = args;
@@ -235,6 +239,8 @@ Singleton {
         path: Platform.isWindows ? `${FileUtils.trimFileProtocol(Directories.state)}/user/generated/matugen-config.toml` : ""
         preload: false
         onSaved: {
+            root._writtenMatugenConfig = root._writingMatugenConfig;
+            root._writingMatugenConfig = "";
             if (!root._pendingMatugen) return;
             const args = root._pendingMatugen;
             root._pendingMatugen = null;
@@ -242,7 +248,7 @@ Singleton {
         }
         onSaveFailed: error => {
             root._pendingMatugen = null;
-            root._writtenMatugenConfig = "";
+            root._writingMatugenConfig = "";
             console.warn("[Wallpapers] Could not write the matugen config:", error);
         }
     }

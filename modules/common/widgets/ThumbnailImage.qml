@@ -27,6 +27,11 @@ StyledImage {
         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
     }
 
+    Connections {
+        // Windows: a thumbnail asked for before the native helpers loaded is made once they are.
+        target: Platform.isWindows ? WindowsNative : null
+        function onReadyChanged() { if (WindowsNative.ready) root.sourceSizeChanged() }
+    }
     onSourceSizeChanged: {
         if (!root.generateThumbnail) return;
         if (Platform.isWindows) {
