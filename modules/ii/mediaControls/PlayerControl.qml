@@ -84,7 +84,7 @@ Item { // Player instance
         property string targetFile: root.artUrl
         property string artFilePath: root.artFilePath
         command: Platform.isWindows
-            ? ["cmd", "/c", `curl -4 -sSL "${targetFile}" -o "${artFilePath}"`]
+            ? ["curl", "-4", "-sSL", targetFile, "-o", artFilePath]
             : ["bash", "-c", `[ -f ${artFilePath} ] || curl -4 -sSL '${targetFile}' -o '${artFilePath}'`]
         onExited: (exitCode, exitStatus) => {
             root.downloaded = true

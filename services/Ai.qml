@@ -326,6 +326,7 @@ Singleton {
     Component.onCompleted: {
         setModel(currentModelId, false, false); // Do necessary setup for model
         root.addUserModels() // Config onReadyChanged above might not fire if config is loaded before this service
+        if (Platform.isWindows && WindowsNative.ready) root.listWindowsFiles();
     }
 
     function guessModelLogo(model) {
@@ -390,10 +391,34 @@ Singleton {
         }
     }
 
+    function refreshSavedChats() {
+        if (Platform.isWindows) root.listWindowsFiles();
+        else getSavedChats.running = true;
+    }
+
+    // Windows: the `ls -1` listings below, read natively (cmd's dir would mangle non-ASCII names).
+    function listWindowsFiles() {
+        const fs = WindowsNative.fsUtils;
+        if (!fs) return;
+        const list = (dir, extensions) => fs.listDir(CF.FileUtils.trimFileProtocol(dir))
+            .filter(fileName => extensions.some(ext => fileName.endsWith(ext)))
+            .map(fileName => `${dir}/${fileName}`);
+        root.defaultPrompts = list(Directories.defaultAiPrompts, [".md", ".txt"]);
+        root.userPrompts = list(Directories.userAiPrompts, [".md", ".txt"]);
+        root.savedChats = list(Directories.aiChats, [".json"]);
+    }
+
+    Connections {
+        target: Platform.isWindows ? WindowsNative : null
+        function onReadyChanged() {
+            if (WindowsNative.ready) root.listWindowsFiles();
+        }
+    }
+
     Process {
         id: getDefaultPrompts
-        running: true
-        command: Platform.isWindows ? ["cmd", "/c", `dir /b "${CF.FileUtils.trimFileProtocol(Directories.defaultAiPrompts)}"`] : ["ls", "-1", Directories.defaultAiPrompts]
+        running: !Platform.isWindows // see listWindowsFiles()
+        command: ["ls", "-1", Directories.defaultAiPrompts]
         stdout: StdioCollector {
             onStreamFinished: {
                 if (text.length === 0) return;
@@ -407,8 +432,8 @@ Singleton {
 
     Process {
         id: getUserPrompts
-        running: true
-        command: Platform.isWindows ? ["cmd", "/c", `dir /b "${CF.FileUtils.trimFileProtocol(Directories.userAiPrompts)}"`] : ["ls", "-1", Directories.userAiPrompts]
+        running: !Platform.isWindows // see listWindowsFiles()
+        command: ["ls", "-1", Directories.userAiPrompts]
         stdout: StdioCollector {
             onStreamFinished: {
                 if (text.length === 0) return;
@@ -422,8 +447,8 @@ Singleton {
 
     Process {
         id: getSavedChats
-        running: true
-        command: Platform.isWindows ? ["cmd", "/c", `dir /b "${CF.FileUtils.trimFileProtocol(Directories.aiChats)}"`] : ["ls", "-1", Directories.aiChats]
+        running: !Platform.isWindows // see listWindowsFiles()
+        command: ["ls", "-1", Directories.aiChats]
         stdout: StdioCollector {
             onStreamFinished: {
                 if (text.length === 0) return;
@@ -875,7 +900,7 @@ Singleton {
         chatSaveFile.chatName = chatName.trim()
         const saveContent = JSON.stringify(root.chatToJson())
         chatSaveFile.setText(saveContent)
-        getSavedChats.running = true;
+        root.refreshSavedChats();
     }
 
     /**
@@ -917,7 +942,7 @@ Singleton {
         } catch (e) {
             console.log("[AI] Could not load chat: ", e);
         } finally {
-            getSavedChats.running = true;
+            root.refreshSavedChats();
         }
     }
 }

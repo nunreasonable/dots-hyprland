@@ -292,8 +292,9 @@ Singleton {
                     cleanedCommand = cleanedCommand.slice(Config.options.search.prefix.shellCommand.length);
                 }
                 if (Platform.isWindows) {
-                    // No sudo/terminal-wrap semantics on Windows; just run it through cmd.
-                    Quickshell.execDetached(["cmd", "/c", cleanedCommand]);
+                    // No sudo/terminal-wrap semantics on Windows. PowerShell, not cmd: QProcess
+                    // escapes quotes as \" for C runtime parsing, which cmd.exe doesn't understand.
+                    Quickshell.execDetached(["powershell", "-NoProfile", "-Command", cleanedCommand]);
                     return;
                 }
                 Quickshell.execDetached(["bash", "-c", root.query.startsWith('sudo') ? `${Config.options.apps.terminal} fish -C '${cleanedCommand}'` : cleanedCommand]);

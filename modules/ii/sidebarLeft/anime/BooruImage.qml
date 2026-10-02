@@ -190,9 +190,10 @@ Button {
                             id: booruDownloadProc
                             property string targetPath: ""
                             property string userAgent: ""
-                            command: ["cmd", "/c",
-                                `if not exist "${booruDownloadProc.targetPath}" mkdir "${booruDownloadProc.targetPath}" & curl -sSL "${root.imageData.file_url}"${booruDownloadProc.userAgent ? ` -H "User-Agent: ${booruDownloadProc.userAgent}"` : ""} -o "${booruDownloadProc.targetPath}\\${root.fileName}"`
-                            ]
+                            // curl directly: QProcess's \" quote escaping doesn't survive cmd.exe.
+                            command: ["curl", "--create-dirs", "-sSL", root.imageData.file_url,
+                                ...(booruDownloadProc.userAgent ? ["-H", `User-Agent: ${booruDownloadProc.userAgent}`] : []),
+                                "-o", `${booruDownloadProc.targetPath}\\${root.fileName}`]
                             onExited: (exitCode, exitStatus) => {
                                 Notifications.sendDesktop(
                                     Translation.tr("Download complete"),

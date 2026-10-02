@@ -27,21 +27,22 @@ Process {
         return ` -H 'User-Agent: ${StringUtils.shellSingleQuoteEscape(downloadUserAgent)}'`;
     }
 
-    // Windows: no bash/mkdir -p/`file`; curl.exe itself still exists, so mkdir the parent with
-    // cmd and read the final image size with the native ImageTools helper instead of `file`.
+    // Windows: no bash/mkdir -p/`file`. curl.exe ships with Windows and makes the parent
+    // directory itself (--create-dirs); it is called directly because QProcess escapes quotes as
+    // \" for C runtime parsing, which cmd.exe doesn't understand. The image size comes from the
+    // native ImageTools helper instead of `file`.
     function rawFilePath() {
         return FileUtils.trimFileProtocol(filePath);
     }
-    function rawParentDir() {
-        return FileUtils.parentDirectory(rawFilePath());
-    }
-    function windowsUserAgentArg() {
-        return downloadUserAgent ? ` -H "User-Agent: ${downloadUserAgent}"` : "";
+    function windowsCommand() {
+        if (WindowsNative.fsUtils?.classify(rawFilePath()) === "file") return ["cmd", "/c", "exit", "0"];
+        const userAgent = downloadUserAgent ? ["-H", `User-Agent: ${downloadUserAgent}`] : [];
+        return ["curl", "--create-dirs", "-sSL", root.sourceUrl, ...userAgent, "-o", rawFilePath()];
     }
 
     running: true
     command: Platform.isWindows
-        ? ["cmd", "/c", `if not exist "${rawParentDir()}" mkdir "${rawParentDir()}" & if not exist "${rawFilePath()}" curl -sSL "${root.sourceUrl}"${windowsUserAgentArg()} -o "${rawFilePath()}"`]
+        ? windowsCommand()
         : ["bash", "-c",
             `mkdir -p $(dirname '${processFilePath()}'); [ -f '${processFilePath()}' ] || curl -sSL '${processSourceUrl()}'${curlUserAgentArg()} -o '${processFilePath()}' && file '${processFilePath()}'`
         ]
