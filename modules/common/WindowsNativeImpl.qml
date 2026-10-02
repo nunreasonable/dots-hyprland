@@ -22,4 +22,8 @@ QtObject {
     readonly property QtObject hotkeys: QSWin.Hotkeys
     readonly property QtObject notificationSettings: QSWin.NotificationSettings
     readonly property QtObject network: QSWin.Network
+    readonly property QtObject wallpaper: QSWin.Wallpaper
+    readonly property QtObject imageTools: QSWin.ImageTools
+    readonly property QtObject thumbnailer: QSWin.Thumbnailer
+    readonly property QtObject fsUtils: QSWin.FsUtils
 }

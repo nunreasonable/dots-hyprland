@@ -15,13 +15,7 @@ StyledImage {
     property bool generateThumbnail: true
     required property string sourcePath
     property string thumbnailSizeName: Images.thumbnailSizeNameForDimensions(sourceSize.width, sourceSize.height)
-    property string thumbnailPath: {
-        if (sourcePath.length == 0) return;
-        const resolvedUrlWithoutFileProtocol = FileUtils.trimFileProtocol(`${Qt.resolvedUrl(sourcePath)}`);
-        const encodedUrlWithoutFileProtocol = resolvedUrlWithoutFileProtocol.split("/").map(part => encodeURIComponent(part)).join("/");
-        const md5Hash = Qt.md5(`file://${encodedUrlWithoutFileProtocol}`);
-        return `${Directories.genericCache}/thumbnails/${thumbnailSizeName}/${md5Hash}.png`;
-    }
+    property string thumbnailPath: Images.thumbnailPathFor(sourcePath, thumbnailSizeName)
     source: thumbnailPath
 
     asynchronous: true
@@ -35,14 +29,34 @@ StyledImage {
 
     onSourceSizeChanged: {
         if (!root.generateThumbnail) return;
+        if (Platform.isWindows) {
+            if (!WindowsNative.thumbnailer) return; // native backend not ready yet
+            const maxSize = Images.thumbnailSizes[root.thumbnailSizeName];
+            WindowsNative.thumbnailer.generate(
+                FileUtils.trimFileProtocol(root.sourcePath),
+                FileUtils.trimFileProtocol(root.thumbnailPath),
+                maxSize
+            );
+            return;
+        }
         thumbnailGeneration.running = false;
         thumbnailGeneration.running = true;
+    }
+    // Windows equivalent of thumbnailGeneration below: QImageReader on a worker thread instead
+    // of shelling out to `magick` (which isn't bundled/installed on Windows).
+    Connections {
+        target: WindowsNative.thumbnailer
+        function onFinished(sourcePath, outputPath, ok) {
+            if (!ok || outputPath !== FileUtils.trimFileProtocol(root.thumbnailPath)) return;
+            root.source = "";
+            root.source = root.thumbnailPath; // Force reload
+        }
     }
     Process {
         id: thumbnailGeneration
         command: {
             const maxSize = Images.thumbnailSizes[root.thumbnailSizeName];
-            return ["bash", "-c", 
+            return ["bash", "-c",
                 `[ -f '${FileUtils.trimFileProtocol(root.thumbnailPath)}' ] && exit 0 || { magick '${root.sourcePath}' -resize ${maxSize}x${maxSize} '${FileUtils.trimFileProtocol(root.thumbnailPath)}' && exit 1; }`
             ]
         }

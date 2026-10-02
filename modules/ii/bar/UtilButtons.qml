@@ -1,4 +1,5 @@
 import qs
+import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 import QtQuick
@@ -106,11 +107,7 @@ Item {
             sourceComponent: CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter
                 onClicked: event => {
-                    if (Appearance.m3colors.darkmode) {
-                        Quickshell.execDetached(["bash", "-c", `${Directories.wallpaperSwitchScriptPath} --mode light --noswitch`])
-                    } else {
-                        Quickshell.execDetached(["bash", "-c", `${Directories.wallpaperSwitchScriptPath} --mode dark --noswitch`])
-                    }
+                    Wallpapers.setMode(!Appearance.m3colors.darkmode);
                 }
                 MaterialSymbol {
                     horizontalAlignment: Qt.AlignHCenter

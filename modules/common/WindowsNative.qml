@@ -37,6 +37,10 @@ Singleton {
     // switch that lets ii read the notification center.
     readonly property QtObject notificationSettings: _impl ? _impl.notificationSettings : null
     readonly property QtObject network: _impl ? _impl.network : null
+    readonly property QtObject wallpaper: _impl ? _impl.wallpaper : null
+    readonly property QtObject imageTools: _impl ? _impl.imageTools : null
+    readonly property QtObject thumbnailer: _impl ? _impl.thumbnailer : null
+    readonly property QtObject fsUtils: _impl ? _impl.fsUtils : null
 
     Component.onCompleted: {
         if (!Platform.isWindows) return;
