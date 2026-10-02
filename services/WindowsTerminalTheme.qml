@@ -417,7 +417,8 @@ Singleton {
                             "leading_diamond": ` ${pillStart}`, "trailing_diamond": pillEnd,
                             "foreground": "p:onPrimary", "background": "p:primary",
                             "template": "\u{F024B} \u2192 {{ .Path }}",
-                            "options": { "style": "agnoster_short", "max_depth": 2, "home_icon": "\uF46D" },
+                            // DOS separators, as Windows paths are shown elsewhere in ii.
+                            "options": { "style": "agnoster_short", "max_depth": 2, "home_icon": "\uF46D", "folder_separator_icon": "\\" },
                         },
                         {
                             "type": "git", "style": "diamond",
