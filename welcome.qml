@@ -23,6 +23,11 @@ ApplicationWindow {
     property string firstRunFileContent: "This file is just here to confirm you've been greeted :>"
     property real contentPadding: 8
     property bool showNextTime: false
+    FileView {
+        id: firstRunMarker // Windows only, see showNextTimeSwitch
+        path: root.firstRunFilePath
+        preload: false
+    }
     visible: true
     onClosing: {
         Notifications.sendDesktop(Translation.tr("Welcome app"), Translation.tr("Enjoy! You can reopen the welcome app any time with <tt>Super+Shift+Alt+/</tt>. To open the settings app, hit <tt>Super+I</tt>"), ["-a", "Shell"]);
@@ -100,6 +105,12 @@ ApplicationWindow {
                     scale: 0.6
                     Layout.alignment: Qt.AlignVCenter
                     onCheckedChanged: {
+                        if (Platform.isWindows) {
+                            // No rm/bash there; the marker file is written through a FileView.
+                            if (checked) Quickshell.execDetached(["cmd", "/c", "del", "/f", "/q", root.firstRunFilePath.replace(/\//g, "\\")]);
+                            else firstRunMarker.setText(root.firstRunFileContent);
+                            return;
+                        }
                         if (checked) {
                             Quickshell.execDetached(["rm", root.firstRunFilePath]);
                         } else {

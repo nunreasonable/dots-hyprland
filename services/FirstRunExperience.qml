@@ -19,9 +19,17 @@ Singleton {
     }
 
     function enableNextTime() {
+        if (Platform.isWindows) {
+            Quickshell.execDetached(["cmd", "/c", "del", "/f", "/q", FileUtils.trimFileProtocol(root.firstRunFilePath).replace(/\//g, "\\")])
+            return
+        }
         Quickshell.execDetached(["rm", "-f", root.firstRunFilePath])
     }
     function disableNextTime() {
+        if (Platform.isWindows) {
+            firstRunFileView.setText(root.firstRunFileContent)
+            return
+        }
         Quickshell.execDetached(["bash", "-c", `echo '${root.firstRunFileContent}' > '${root.firstRunFilePath}'`])
     }
 
