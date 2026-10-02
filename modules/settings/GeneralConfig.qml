@@ -182,6 +182,15 @@ ContentPage {
                     enabled: !translationProc.running || (translationProc.locale !== localeInput.text.trim())
                     mainText: enabled ? Translation.tr("Generate\nTypically takes 2 minutes") : Translation.tr("Generating...\nDon't close this window!")
                     onClicked: {
+                        if (Platform.isWindows) {
+                            // gemini-translate.sh has no Windows port yet.
+                            Notifications.sendDesktop(
+                                Translation.tr("Generate translation with Gemini"),
+                                Translation.tr("Not available on Windows yet"),
+                                ["-a", "Shell"]
+                            );
+                            return;
+                        }
                         translationProc.locale = localeInput.text.trim();
                         translationProc.running = false;
                         translationProc.running = true;
