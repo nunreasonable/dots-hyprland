@@ -32,8 +32,12 @@ Singleton {
         root.distroName = [info.name ?? "Windows", info.version ?? ""].join(" ").trim();
         root.windowsBuild = info.build ?? "";
         root.distroId = "windows";
-        root.distroIcon = "microsoft-symbolic";
-        root.logo = "microsoft-symbolic";
+        // Windows 11's logo is Microsoft's four squares; Windows 10 (builds below 22000) has the
+        // window in perspective. The symbolic icon is recolored (bar, sidebar); the About page
+        // shows the logo as is, so it gets the colored one.
+        const windows10 = parseInt(root.windowsBuild) < 22000;
+        root.distroIcon = windows10 ? "windows10-symbolic" : "microsoft-symbolic";
+        root.logo = windows10 ? "windows10-logo" : "windows11-logo";
         root.username = Quickshell.env("USERNAME") || "user";
         root.desktopEnvironment = "Windows";
         root.windowingSystem = "Win32";
