@@ -200,11 +200,26 @@ Singleton {
         // matugen writes `output_path` as given and colors.json lives in the profile-dependent
         // StateLocation, so the config is written with the real paths first; matugen runs
         // once it is saved.
-        root._pendingMatugen = args;
-        windowsMatugenConfig.setText(root._windowsMatugenConfigText());
+        // FileView skips writes of unchanged text (and then never emits saved), so matugen only
+        // waits for the config when it is new.
+        const config = root._windowsMatugenConfigText();
+        if (config === root._writtenMatugenConfig) {
+            root._runMatugen(args);
+        } else {
+            root._pendingMatugen = args;
+            root._writtenMatugenConfig = config;
+            windowsMatugenConfig.setText(config);
+        }
     }
 
     property var _pendingMatugen: null
+    property string _writtenMatugenConfig: ""
+
+    function _runMatugen(args) {
+        matugenProc.command = args;
+        matugenProc.running = false;
+        matugenProc.running = true;
+    }
 
     function _windowsMatugenConfigText() {
         // TOML literal strings take paths as they are; a quote in one needs a basic string.
@@ -221,13 +236,13 @@ Singleton {
         preload: false
         onSaved: {
             if (!root._pendingMatugen) return;
-            matugenProc.command = root._pendingMatugen;
+            const args = root._pendingMatugen;
             root._pendingMatugen = null;
-            matugenProc.running = false;
-            matugenProc.running = true;
+            root._runMatugen(args);
         }
         onSaveFailed: error => {
             root._pendingMatugen = null;
+            root._writtenMatugenConfig = "";
             console.warn("[Wallpapers] Could not write the matugen config:", error);
         }
     }

@@ -24,6 +24,32 @@ Singleton {
     property string desktopEnvironment: ""
     property string windowingSystem: ""
 
+    // Windows: no /etc/os-release or whoami; the edition and version come from the registry
+    // (WindowsNative.session.osInfo), the links are Microsoft's own.
+    property string windowsBuild: ""
+    function loadWindowsInfo() {
+        const info = WindowsNative.session?.osInfo() ?? ({});
+        root.distroName = [info.name ?? "Windows", info.version ?? ""].join(" ").trim();
+        root.windowsBuild = info.build ?? "";
+        root.distroId = "windows";
+        root.distroIcon = "microsoft-symbolic";
+        root.logo = "microsoft-symbolic";
+        root.username = Quickshell.env("USERNAME") || "user";
+        root.desktopEnvironment = "Windows";
+        root.windowingSystem = "Win32";
+        root.homeUrl = "https://www.microsoft.com/windows";
+        root.documentationUrl = "https://support.microsoft.com/windows";
+        root.supportUrl = "https://support.microsoft.com/contactus";
+        root.bugReportUrl = "feedback-hub:"; // Feedback Hub app
+        root.privacyPolicyUrl = "https://privacy.microsoft.com/privacystatement";
+    }
+    Connections {
+        target: Platform.isWindows ? WindowsNative : null
+        function onReadyChanged() {
+            if (WindowsNative.ready) root.loadWindowsInfo();
+        }
+    }
+
     Timer {
         triggeredOnStart: true
         interval: 1
@@ -31,15 +57,7 @@ Singleton {
         repeat: false
         onTriggered: {
             if (Platform.isWindows) {
-                // No /etc/os-release or whoami(1)-shaped output here; set sane
-                // Windows-native values directly instead of polling commands.
-                root.distroName = "Windows";
-                root.distroId = "windows";
-                root.distroIcon = "linux-symbolic"; // No dedicated Windows glyph bundled yet
-                root.logo = root.distroIcon;
-                root.username = Quickshell.env("USERNAME") || "user";
-                root.desktopEnvironment = "Windows";
-                root.windowingSystem = "Win32";
+                root.loadWindowsInfo();
                 return;
             }
             getUsername.running = true

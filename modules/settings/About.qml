@@ -30,6 +30,12 @@ ContentPage {
                     font.pixelSize: Appearance.font.pixelSize.title
                 }
                 StyledText {
+                    visible: SystemInfo.windowsBuild !== ""
+                    text: Translation.tr("Build %1").arg(SystemInfo.windowsBuild)
+                    font.pixelSize: Appearance.font.pixelSize.small
+                    color: Appearance.colors.colSubtext
+                }
+                StyledText {
                     font.pixelSize: Appearance.font.pixelSize.normal
                     text: SystemInfo.homeUrl
                     textFormat: Text.MarkdownText
@@ -141,6 +147,28 @@ ContentPage {
                 mainText: Translation.tr("Donate")
                 onClicked: {
                     Qt.openUrlExternally("https://github.com/sponsors/end-4")
+                }
+            }
+        }
+
+        // The Windows port: this config's fork and the Quickshell backend it runs on.
+        Flow {
+            visible: Platform.isWindows
+            Layout.fillWidth: true
+            spacing: 5
+
+            RippleButtonWithIcon {
+                materialIcon: "desktop_windows"
+                mainText: Translation.tr("ii for Windows")
+                onClicked: {
+                    Qt.openUrlExternally("https://github.com/nunreasonable/dots-hyprland/tree/ii-windows")
+                }
+            }
+            RippleButtonWithIcon {
+                materialIcon: "deployed_code"
+                mainText: Translation.tr("Quickshell for Windows")
+                onClicked: {
+                    Qt.openUrlExternally("https://github.com/nunreasonable/quickshell/tree/windows")
                 }
             }
 
