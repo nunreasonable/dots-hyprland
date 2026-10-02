@@ -1,0 +1,36 @@
+{
+  "about": [
+    "Blur behind ii's panels on Windows, converted from the blur and ignore_alpha layer rules in dots/.config/hypr/hyprland/rules.lua (same order: later matching rules override earlier ones).",
+    "Copy to %LOCALAPPDATA%\\illogical-impulse\\layerrules.json to customize; that file wins over this one and is reloaded on save.",
+    "namespace: regex matched against the whole WlrLayershell.namespace, like Hyprland. blur: true/false. ignoreAlpha: blur only behind Rectangle items whose fill (opacity included) is more opaque than this (0-1; 1 = nothing); null = behind the whole surface.",
+    "Windows approximates ignore_alpha with Rectangle fills instead of pixels, so text and images don't get blur of their own. Blur is off while Windows' Transparency effects setting is off, or high contrast or energy saver is on.",
+    "enable: false turns blur behind panels off. layered: true adds WS_EX_LAYERED to the blur windows (only if clicks next to a blurred panel get stuck). blur_popups and xray have no Windows counterpart.",
+    "quickshell:background is Windows only: ii's wallpaper covers the Windows desktop, so blur behind it would never show."
+  ],
+  "enable": true,
+  "rules": [
+    {"namespace": "gtk-layer-shell", "blur": true, "ignoreAlpha": 0},
+    {"namespace": "launcher", "blur": true, "ignoreAlpha": 0.5},
+    {"namespace": "notifications", "blur": true, "ignoreAlpha": 0.69},
+    {"namespace": "logout_dialog", "blur": true},
+    {"namespace": "session[0-9]*", "blur": true},
+    {"namespace": "bar[0-9]*", "blur": true, "ignoreAlpha": 0.6},
+    {"namespace": "barcorner.*", "blur": true, "ignoreAlpha": 0.6},
+    {"namespace": "dock[0-9]*", "blur": true, "ignoreAlpha": 0.6},
+    {"namespace": "indicator.*", "blur": true, "ignoreAlpha": 0.6},
+    {"namespace": "overview[0-9]*", "blur": true, "ignoreAlpha": 0.6},
+    {"namespace": "cheatsheet[0-9]*", "blur": true, "ignoreAlpha": 0.6},
+    {"namespace": "sideright[0-9]*", "blur": true, "ignoreAlpha": 0.6},
+    {"namespace": "sideleft[0-9]*", "blur": true, "ignoreAlpha": 0.6},
+    {"namespace": "osk[0-9]*", "blur": true, "ignoreAlpha": 0.6},
+
+    {"namespace": "quickshell:.*", "blur": true, "ignoreAlpha": 0.79},
+    {"namespace": "quickshell:overlay", "ignoreAlpha": 1},
+    {"namespace": "quickshell:popup", "ignoreAlpha": 1},
+    {"namespace": "quickshell:mediaControls", "ignoreAlpha": 1},
+    {"namespace": "quickshell:session", "blur": true, "ignoreAlpha": 0},
+    {"namespace": "quickshell:wTaskView", "ignoreAlpha": 0},
+
+    {"namespace": "quickshell:background", "blur": false}
+  ]
+}
