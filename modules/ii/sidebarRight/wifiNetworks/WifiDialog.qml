@@ -67,7 +67,11 @@ WindowDialog {
         DialogButton {
             buttonText: Translation.tr("Details")
             onClicked: {
-                Quickshell.execDetached(["bash", "-c", `${Network.ethernet ? Config.options.apps.networkEthernet : Config.options.apps.network}`]);
+                if (Platform.isWindows) {
+                    WindowsNative.network?.openWifiSettings();
+                } else {
+                    Quickshell.execDetached(["bash", "-c", `${Network.ethernet ? Config.options.apps.networkEthernet : Config.options.apps.network}`]);
+                }
                 GlobalStates.sidebarRightOpen = false;
             }
         }
