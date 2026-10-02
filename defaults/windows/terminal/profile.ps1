@@ -23,9 +23,14 @@ doesn't leave a broken profile behind.
 # No greeting: unlike fish (which prints one unless `set fish_greeting` is used), neither
 # PowerShell host prints a startup greeting of its own, so there's nothing to suppress here.
 
-# Starship prompt, with transient prompt (collapses the full prompt to just the character once
-# a command finishes, same as config.fish's starship_transient_prompt_func).
-if (Get-Command starship -ErrorAction SilentlyContinue) {
+# Prompt: Oh My Posh with ii's theme (generated in the shell's current colors by
+# services/WindowsTerminalTheme.qml), else Starship with ii's starship.toml like on Linux. Both
+# with a transient prompt (the full prompt collapses to the character once a command finishes,
+# same as config.fish's starship_transient_prompt_func).
+$IiOhMyPoshTheme = Join-Path $env:LOCALAPPDATA 'quickshell\State\user\generated\terminal\ii.omp.json'
+if ((Get-Command oh-my-posh -ErrorAction SilentlyContinue) -and (Test-Path -LiteralPath $IiOhMyPoshTheme)) {
+    oh-my-posh init pwsh --config $IiOhMyPoshTheme | Invoke-Expression
+} elseif (Get-Command starship -ErrorAction SilentlyContinue) {
     $env:STARSHIP_CONFIG = Join-Path $PSScriptRoot 'starship.toml'
 
     function global:Invoke-Starship-TransientFunction {

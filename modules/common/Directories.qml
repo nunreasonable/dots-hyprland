@@ -67,6 +67,8 @@ Singleton {
     property string terminalSchemeBasePath: Quickshell.shellPath("scripts/colors/terminal/scheme-base.json")
     property string terminalSequencesTemplatePath: Quickshell.shellPath("scripts/colors/terminal/sequences.txt")
     property string windowsTerminalSequencesPath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/terminal/sequences.txt`)
+    // Windows: the Oh My Posh prompt theme, in ii's colors (services/WindowsTerminalTheme.qml)
+    property string windowsTerminalOhMyPoshPath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/terminal/ii.omp.json`)
     // Second matugen.exe pass for terminalGenerationProps.forceDarkMode while ii itself is
     // light: generate_colors_material.py forces --mode dark for the terminal independently of
     // the (still light) colors.json matugen already wrote for ii's own UI; this is that, since

@@ -310,6 +310,7 @@ Singleton {
 
         root._writeSequences(colorMap);
         root._writeFragment(colorMap, material);
+        root._writeOhMyPosh(colorMap);
         root._nudgeWindowsTerminal();
     }
 
@@ -380,13 +381,89 @@ Singleton {
         onSaveFailed: error => console.warn("[WindowsTerminalTheme] Could not write the Windows Terminal fragment:", error);
     }
 
+    // Oh My Posh prompt (profile.ps1 prefers it over Starship): the layout of ii's starship.toml
+    // - a duration pill, the path pill and a git pill, then the prompt character on its own
+    // line - in the same Material roles its 256-color slots map to (sequences.txt: 255 primary,
+    // 252 secondaryContainer, 235 onSecondaryContainer, 240 onPrimary, 243 primary, 244 error).
+    function _writeOhMyPosh(c) {
+        const pillStart = "\uE0B6", pillEnd = "\uE0B4";
+        const character = "{{ if gt .Code 0 }}\uF00D \uF04B{{ else }}\uEA71 \uF04B{{ end }}";
+        const characterColor = ["{{ if gt .Code 0 }}p:error{{ end }}"];
+        const theme = {
+            "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+            "version": 3,
+            "final_space": true,
+            "palette": {
+                "primary": c.primary,
+                "onPrimary": c.onPrimary,
+                "secondaryContainer": c.secondaryContainer,
+                "onSecondaryContainer": c.onSecondaryContainer,
+                "error": c.error,
+            },
+            "blocks": [
+                {
+                    "type": "prompt",
+                    "alignment": "left",
+                    "segments": [
+                        {
+                            "type": "executiontime", "style": "diamond",
+                            "leading_diamond": pillStart, "trailing_diamond": pillEnd,
+                            "foreground": "p:onSecondaryContainer", "background": "p:secondaryContainer",
+                            "template": "\u{F0AA2} {{ .FormattedMs }}",
+                            "options": { "threshold": 0, "style": "austin" },
+                        },
+                        {
+                            "type": "path", "style": "diamond",
+                            "leading_diamond": ` ${pillStart}`, "trailing_diamond": pillEnd,
+                            "foreground": "p:onPrimary", "background": "p:primary",
+                            "template": "\u{F024B} \u2192 {{ .Path }}",
+                            "options": { "style": "agnoster_short", "max_depth": 2, "home_icon": "\uF46D" },
+                        },
+                        {
+                            "type": "git", "style": "diamond",
+                            "leading_diamond": ` \u{F0725} ${pillStart}`, "trailing_diamond": pillEnd,
+                            "foreground": "p:onSecondaryContainer", "background": "p:secondaryContainer",
+                            "template": "\u{F062C} {{ .HEAD }}",
+                            "options": { "branch_icon": "" },
+                        },
+                    ],
+                },
+                {
+                    "type": "prompt",
+                    "alignment": "left",
+                    "newline": true,
+                    "segments": [
+                        {
+                            "type": "text", "style": "plain",
+                            "foreground": "p:primary", "foreground_templates": characterColor,
+                            "template": `  ${character}`,
+                        },
+                    ],
+                },
+            ],
+            "transient_prompt": {
+                "foreground": "p:primary",
+                "foreground_templates": characterColor,
+                "template": `${character} `,
+            },
+        };
+        ohMyPoshOutput.setText(JSON.stringify(theme, null, 2));
+    }
+
+    FileView {
+        id: ohMyPoshOutput
+        path: Platform.isWindows ? Directories.windowsTerminalOhMyPoshPath : ""
+        onSaveFailed: error => console.warn("[WindowsTerminalTheme] Could not write the Oh My Posh theme:", error);
+    }
+
     // --- removal (enableTerminal/enableAppsAndShell off) & nudging an open Windows Terminal --
 
     function _removeOutputs() {
         if (!Platform.isWindows) return;
         removeOutputsProc.command = ["powershell", "-NoProfile", "-NonInteractive", "-Command",
             `Remove-Item -LiteralPath '${Directories.windowsTerminalSequencesPath}' -Force -ErrorAction SilentlyContinue; `
-            + `Remove-Item -LiteralPath '${Directories.windowsTerminalFragmentPath}' -Force -ErrorAction SilentlyContinue`];
+            + `Remove-Item -LiteralPath '${Directories.windowsTerminalFragmentPath}' -Force -ErrorAction SilentlyContinue; `
+            + `Remove-Item -LiteralPath '${Directories.windowsTerminalOhMyPoshPath}' -Force -ErrorAction SilentlyContinue`];
         removeOutputsProc.running = false;
         removeOutputsProc.running = true;
         root._nudgeWindowsTerminal();
