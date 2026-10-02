@@ -8,7 +8,7 @@ import qs.modules.common
 /**
  * Safe-to-import-everywhere gateway to the native Quickshell.Windows singletons
  * (Session, SystemStats, Brightness, Keyboard, Clipboard, Credentials, Input, NightLight, Hotkeys,
- * NotificationSettings, Network).
+ * NotificationSettings, Network, Screenshot, Ocr).
  *
  * Services that need one of those read it from here (e.g. `WindowsNative.stats.cpuUsage`)
  * instead of importing Quickshell.Windows directly, since that module only exists on
@@ -41,6 +41,9 @@ Singleton {
     readonly property QtObject imageTools: _impl ? _impl.imageTools : null
     readonly property QtObject thumbnailer: _impl ? _impl.thumbnailer : null
     readonly property QtObject fsUtils: _impl ? _impl.fsUtils : null
+    // Still screen capture + file crop (region selector) and Windows.Media.Ocr text recognition.
+    readonly property QtObject screenshot: _impl ? _impl.screenshot : null
+    readonly property QtObject ocr: _impl ? _impl.ocr : null
 
     Component.onCompleted: {
         if (!Platform.isWindows) return;

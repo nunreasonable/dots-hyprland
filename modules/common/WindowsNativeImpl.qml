@@ -26,4 +26,6 @@ QtObject {
     readonly property QtObject imageTools: QSWin.ImageTools
     readonly property QtObject thumbnailer: QSWin.Thumbnailer
     readonly property QtObject fsUtils: QSWin.FsUtils
+    readonly property QtObject screenshot: QSWin.Screenshot
+    readonly property QtObject ocr: QSWin.Ocr
 }
