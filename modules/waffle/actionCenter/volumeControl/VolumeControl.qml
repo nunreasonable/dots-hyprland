@@ -63,7 +63,11 @@ Item {
 
                 onClicked: {
                     Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "sidebarLeft", "toggle"]);
-                    Quickshell.execDetached(["bash", "-c", Config.options.apps.volumeMixer]);
+                    if (Platform.isWindows) {
+                        Qt.openUrlExternally("ms-settings:apps-volume");
+                    } else {
+                        Quickshell.execDetached(["bash", "-c", Config.options.apps.volumeMixer]);
+                    }
                 }
 
                 contentItem: Item {
