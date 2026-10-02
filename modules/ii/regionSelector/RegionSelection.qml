@@ -211,9 +211,11 @@ PanelWindow {
             ? ScreenshotAction.windowsRecordingStatusCommand()
             : ["pidof", "wf-recorder"]
         onExited: (exitCode, exitStatus) => {
-            root.preparationDone = !screenshotProc.running
+            // Flags first: onPreparationDoneChanged reads them as soon as preparationDone flips,
+            // and this can finish after the screenshot (always, with Windows' instant capture).
             root.recordingShouldStop = (exitCode === 0);
             root.ffmpegMissing = Platform.isWindows && exitCode === 1;
+            root.preparationDone = !screenshotProc.running
         }
     }
     property bool preparationDone: false
