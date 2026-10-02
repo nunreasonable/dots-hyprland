@@ -263,12 +263,13 @@ Singleton {
     /**
      * Fire-and-forget desktop notification for bits of code that just want to tell
      * the user something happened (as opposed to the tracked notifications above).
-     * Centralized here so there's a single place to point at a real Windows
-     * notification server once one exists; for now it just logs there.
+     * Takes notify-send's options in extraArgs. On Linux notify-send reaches the server
+     * above over D-Bus; Windows has no notify-send, so the native server parses the
+     * same options and delivers the notification to onNotification just the same.
      */
     function sendDesktop(summary, body, extraArgs = []) {
         if (Platform.isWindows) {
-            console.info(`[Notifications] ${summary}: ${body}`);
+            notifServer.notifySend(summary, body, extraArgs);
             return;
         }
         Quickshell.execDetached(["notify-send", summary, body, ...extraArgs]);

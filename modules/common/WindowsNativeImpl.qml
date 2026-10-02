@@ -20,4 +20,5 @@ QtObject {
     readonly property QtObject input: QSWin.Input
     readonly property QtObject nightLight: QSWin.NightLight
     readonly property QtObject hotkeys: QSWin.Hotkeys
+    readonly property QtObject notificationSettings: QSWin.NotificationSettings
 }
