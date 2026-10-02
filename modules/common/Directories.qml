@@ -54,6 +54,9 @@ Singleton {
     property string cliphistDecode: FileUtils.trimFileProtocol(`${Directories.tempRoot}/media/cliphist`)
     property string screenshotTemp: `${Directories.tempRoot}/media/screenshot`
     property string wallpaperSwitchScriptPath: FileUtils.trimFileProtocol(`${Directories.scriptPath}/colors/switchwall.sh`)
+    // Windows equivalent of ~/.config/matugen/config.toml: just the m3colors template, passed
+    // to matugen.exe with `-c` by services/Wallpapers.qml. Not used on Linux.
+    property string windowsMatugenConfigPath: Quickshell.shellPath("defaults/windows/matugen/config.toml")
     property string defaultAiPrompts: Quickshell.shellPath("defaults/ai/prompts")
     property string userAiPrompts: FileUtils.trimFileProtocol(`${Directories.shellConfig}/ai/prompts`)
     property string userActions: FileUtils.trimFileProtocol(`${Directories.shellConfig}/actions`)

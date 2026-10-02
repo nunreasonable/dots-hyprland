@@ -40,9 +40,9 @@ MouseArea {
         }
     }
 
-    function selectWallpaperPath(filePath) {
+    function selectWallpaperPath(filePath, isDirectory) {
         if (filePath && filePath.length > 0) {
-            Wallpapers.select(filePath, root.useDarkMode);
+            Wallpapers.select(filePath, isDirectory, root.useDarkMode);
             filterField.text = "";
         }
     }
@@ -310,7 +310,8 @@ MouseArea {
 
                         function activateCurrent() {
                             const filePath = grid.model.get(currentIndex, "filePath");
-                            root.selectWallpaperPath(filePath);
+                            const isDirectory = grid.model.get(currentIndex, "fileIsDir");
+                            root.selectWallpaperPath(filePath, isDirectory);
                         }
 
                         model: Wallpapers.folderModel
@@ -329,7 +330,7 @@ MouseArea {
                             }
 
                             onActivated: {
-                                root.selectWallpaperPath(fileModelData.filePath);
+                                root.selectWallpaperPath(fileModelData.filePath, fileModelData.fileIsDir);
                             }
                         }
 

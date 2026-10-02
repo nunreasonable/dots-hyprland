@@ -23,4 +23,5 @@ QtObject {
     readonly property QtObject wallpaper: QSWin.Wallpaper
     readonly property QtObject imageTools: QSWin.ImageTools
     readonly property QtObject thumbnailer: QSWin.Thumbnailer
+    readonly property QtObject fsUtils: QSWin.FsUtils
 }

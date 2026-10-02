@@ -1,6 +1,7 @@
 pragma Singleton
 
 import Quickshell
+import qs.modules.common.functions
 
 Singleton {
     // Formats
@@ -27,5 +28,17 @@ Singleton {
             if (width <= maxSize && height <= maxSize) return sizeName;
         }
         return "xx-large";
+    }
+
+    // Freedesktop thumbnail cache path for `filePath` at `sizeName`: shared by
+    // modules/common/widgets/ThumbnailImage.qml and services/Wallpapers.qml's Windows bulk
+    // thumbnail generation, so both land on the exact same file the Linux side's
+    // generate-thumbnails-magick.sh (its own md5()/urlencode() reimplementation of this) does.
+    function thumbnailPathFor(filePath: string, sizeName: string): string {
+        if (!filePath || filePath.length === 0) return "";
+        const resolvedUrlWithoutFileProtocol = FileUtils.trimFileProtocol(`${Qt.resolvedUrl(filePath)}`);
+        const encodedUrlWithoutFileProtocol = resolvedUrlWithoutFileProtocol.split("/").map(part => encodeURIComponent(part)).join("/");
+        const md5Hash = Qt.md5(`file://${encodedUrlWithoutFileProtocol}`);
+        return `${Directories.genericCache}/thumbnails/${sizeName}/${md5Hash}.png`;
     }
 }

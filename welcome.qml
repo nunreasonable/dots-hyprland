@@ -301,7 +301,7 @@ ApplicationWindow {
                                 text: Translation.tr("Pick wallpaper image on your system")
                             }
                             onClicked: {
-                                Quickshell.execDetached([`${Directories.wallpaperSwitchScriptPath}`]);
+                                Wallpapers.openPicker();
                             }
                             mainContentComponent: Component {
                                 RowLayout {

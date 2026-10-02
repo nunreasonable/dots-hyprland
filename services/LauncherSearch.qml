@@ -65,13 +65,13 @@ Singleton {
         {
             action: "accentcolor",
             execute: args => {
-                Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--noswitch", "--color", ...(args != '' ? [`${args}`] : [])]);
+                Wallpapers.setAccentColor(args != '' ? args : undefined);
             }
         },
         {
             action: "dark",
             execute: () => {
-                Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--mode", "dark", "--noswitch"]);
+                Wallpapers.setMode(true);
             }
         },
         {
@@ -83,7 +83,7 @@ Singleton {
         {
             action: "light",
             execute: () => {
-                Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--mode", "light", "--noswitch"]);
+                Wallpapers.setMode(false);
             }
         },
         {

@@ -58,28 +58,55 @@ AbstractWidget {
         target: Config
         function onReadyChanged() { refreshPlacementIfNeeded() }
     }
+    // TODO: make these less arbitrary
+    readonly property int leastBusyContentWidth: 300
+    readonly property int leastBusyContentHeight: 300
+    readonly property int leastBusyHorizontalPadding: 200
+    readonly property int leastBusyVerticalPadding: 200
+
     function refreshPlacementIfNeeded() {
         if (!Config.ready) return;
         if (root.placementStrategy === "free" && !root.needsColText) return;
+
+        if (Platform.isWindows) {
+            if (!WindowsNative.imageTools) return; // native backend not ready yet
+            const result = WindowsNative.imageTools.leastBusyRegion(
+                root.wallpaperPath,
+                root.leastBusyContentWidth,
+                root.leastBusyContentHeight,
+                Math.round(root.scaledScreenWidth),
+                Math.round(root.scaledScreenHeight),
+                root.leastBusyHorizontalPadding,
+                root.leastBusyVerticalPadding,
+                root.placementStrategy === "mostBusy"
+            );
+            root.applyPlacement(result);
+            return;
+        }
+
         leastBusyRegionProc.wallpaperPath = root.wallpaperPath;
         leastBusyRegionProc.running = false;
         leastBusyRegionProc.running = true;
     }
+
+    function applyPlacement(parsedContent) {
+        if (!parsedContent || parsedContent.error) return;
+        root.dominantColor = parsedContent.dominant_color || Appearance.colors.colPrimary;
+        if (root.placementStrategy === "free") return;
+        root.targetX = parsedContent.center_x * root.wallpaperScale - root.width / 2;
+        root.targetY  = parsedContent.center_y * root.wallpaperScale - root.height / 2;
+    }
+
     Process {
         id: leastBusyRegionProc
         property string wallpaperPath: root.wallpaperPath
-        // TODO: make these less arbitrary
-        property int contentWidth: 300
-        property int contentHeight: 300
-        property int horizontalPadding: 200
-        property int verticalPadding: 200
         command: [Quickshell.shellPath("scripts/images/least-busy-region-venv.sh") // Comments to force the formatter to break lines
             , "--screen-width", Math.round(root.scaledScreenWidth) //
             , "--screen-height", Math.round(root.scaledScreenHeight) //
-            , "--width", contentWidth //
-            , "--height", contentHeight //
-            , "--horizontal-padding", horizontalPadding //
-            , "--vertical-padding", verticalPadding //
+            , "--width", root.leastBusyContentWidth //
+            , "--height", root.leastBusyContentHeight //
+            , "--horizontal-padding", root.leastBusyHorizontalPadding //
+            , "--vertical-padding", root.leastBusyVerticalPadding //
             , wallpaperPath //
             , ...(root.placementStrategy === "mostBusy" ? ["--busiest"] : [])
             // "--visual-output",
@@ -90,11 +117,7 @@ AbstractWidget {
                 const output = leastBusyRegionOutputCollector.text;
                 // console.log("[Background] Least busy region output:", output)
                 if (output.length === 0) return;
-                const parsedContent = JSON.parse(output);
-                root.dominantColor = parsedContent.dominant_color || Appearance.colors.colPrimary;
-                if (root.placementStrategy === "free") return;
-                root.targetX = parsedContent.center_x * root.wallpaperScale - root.width / 2;
-                root.targetY  = parsedContent.center_y * root.wallpaperScale - root.height / 2;
+                root.applyPlacement(JSON.parse(output));
             }
         }
     }

@@ -26,7 +26,15 @@ Singleton {
     }
 
     function handleFirstRun() {
-        if (Platform.isWindows) return; // No switchwall.sh / qs launcher wrapper on Windows yet
+        if (Platform.isWindows) {
+            // Seed ii's background with whatever the user already had set as their Windows
+            // wallpaper (falling back to the bundled default) instead of starting blank -
+            // see Wallpaper::currentWallpaper().
+            const current = WindowsNative.wallpaper ? WindowsNative.wallpaper.currentWallpaper() : "";
+            Wallpapers.apply(current && current.length > 0 ? current : root.defaultWallpaperPath);
+            Quickshell.execDetached(["qs", "-p", root.welcomeQmlPath]);
+            return;
+        }
         Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, root.defaultWallpaperPath])
         Quickshell.execDetached(["bash", "-c", `qs -p '${root.welcomeQmlPath}'`])
     }
