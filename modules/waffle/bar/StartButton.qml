@@ -37,10 +37,12 @@ AppButton {
             {
                 text: Translation.tr("Terminal"),
                 action: () => {
-                    // apps.terminal is a Linux terminal-emulator command; Windows Terminal ships
-                    // with Windows 11.
+                    // apps.terminal is a Linux terminal-emulator command; on Windows, Windows
+                    // Terminal ships with Windows 11 but not Windows 10, so fall back to
+                    // powershell.exe like keybinds.json's "exec" binds do. Start-Process gives
+                    // it a console window; started straight from here it would have none.
                     if (Platform.isWindows) {
-                        Quickshell.execDetached(["wt"]);
+                        Quickshell.execDetached(["powershell.exe", "-NoProfile", "-Command", "if (Get-Command wt.exe -ErrorAction SilentlyContinue) { Start-Process wt.exe } else { Start-Process powershell.exe }"]);
                         return;
                     }
                     Quickshell.execDetached(["bash", "-c", Config.options.apps.terminal]);

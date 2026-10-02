@@ -3,7 +3,7 @@
     "ii keybinds for Windows, ported from dots/.config/hypr/hyprland/keybinds.lua.",
     "Copy to %LOCALAPPDATA%\\illogical-impulse\\keybinds.json to customize; that file wins over this one and is reloaded on save.",
     "keys: Ctrl+Alt+Shift+Super+<key>, or a lone modifier (\"Super\"): with onRelease it fires when tapped alone, otherwise on press and release.",
-    "action: global (GlobalShortcut name, appid:name), dispatch (Hyprland.dispatch), exec (command; %SHELL% = config dir, %VAR% = environment), ipc (target, function, args), key (inject a key), reload, native (Windows handles it; listed for the cheatsheet only).",
+    "action: global (GlobalShortcut name, appid:name), dispatch (Hyprland.dispatch), exec (command; %SHELL% = config dir, %VAR% = environment; \"cmd1 || cmd2\" tries cmd2 if cmd1 isn't found, e.g. for a program missing on older Windows versions; console programs open in a console window of their own, `conhost.exe --headless <command>` runs one hidden), ipc (target, function, args), key (inject a key), reload, native (Windows handles it; listed for the cheatsheet only).",
     "repeat: fire again on key auto-repeat. description: \"Section: text\" shows in the cheatsheet."
   ],
   "binds": [
@@ -94,9 +94,9 @@
     {"keys": "Ctrl+Super+Down", "action": "dispatch", "dispatch": "workspace r+5"},
     {"keys": "Super+L", "action": "native", "description": "Session: Lock"},
     {"keys": "Shift+Super+L", "action": "exec", "command": "rundll32.exe powrprof.dll,SetSuspendState 0,1,0", "description": "Session: Sleep"},
-    {"keys": "Super+Return", "action": "exec", "command": "wt.exe", "description": "App: Terminal"},
-    {"keys": "Super+T", "action": "exec", "command": "wt.exe"},
-    {"keys": "Ctrl+Alt+T", "action": "exec", "command": "wt.exe"},
+    {"keys": "Super+Return", "action": "exec", "command": "wt.exe || powershell.exe", "description": "App: Terminal"},
+    {"keys": "Super+T", "action": "exec", "command": "wt.exe || powershell.exe"},
+    {"keys": "Ctrl+Alt+T", "action": "exec", "command": "wt.exe || powershell.exe"},
     {"keys": "Super+E", "action": "native", "description": "App: File manager"},
     {"keys": "Super+X", "action": "exec", "command": "notepad.exe", "description": "App: Text editor"},
     {"keys": "Ctrl+Super+V", "action": "exec", "command": "sndvol.exe", "description": "App: Volume mixer"},

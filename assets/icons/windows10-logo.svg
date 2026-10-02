@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Windows 10's logo in its own blue, for the About page (which doesn't recolor icons). -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 21 21" width="20" height="20">
+  <path d="M 0,3 9.5,1.7 V 10 H 0 Z" style="fill:#0078d7" />
+  <path d="M 10.5,1.55 21,0 V 10 H 10.5 Z" style="fill:#0078d7" />
+  <path d="M 0,11 H 9.5 V 19.3 L 0,18 Z" style="fill:#0078d7" />
+  <path d="M 10.5,11 H 21 V 21 L 10.5,19.45 Z" style="fill:#0078d7" />
+</svg>
