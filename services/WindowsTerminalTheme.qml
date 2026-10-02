@@ -270,6 +270,9 @@ Singleton {
             return;
         }
 
+        // Both templates regenerate once loaded (onLoadedChanged below).
+        if (!schemeBaseFileView.loaded || !sequencesTemplateFileView.loaded) return;
+
         let schemeBase;
         try {
             schemeBase = JSON.parse(schemeBaseFileView.text());
@@ -323,6 +326,9 @@ Singleton {
             text = text.split(`$${name} #`).join(hex);
         }
         text = text.split("$alpha").join("100"); // term_alpha in applycolor.sh; always opaque here
+        // The template's OSC 1 (icon name) is ignored by kitty and foot but is the tab title in
+        // Windows Terminal, which would read "0;#RRGGBB".
+        text = text.replace(/\x1b\]1;[^\x1b]*\x1b\\/g, "");
         sequencesOutput.setText(text);
     }
 
