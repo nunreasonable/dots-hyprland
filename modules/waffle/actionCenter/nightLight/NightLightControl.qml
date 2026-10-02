@@ -17,11 +17,12 @@ Item {
     id: root
 
     Component.onCompleted: {
-        if (Bluetooth.defaultAdapter.enabled)
+        if (Bluetooth.defaultAdapter?.enabled)
             Bluetooth.defaultAdapter.discovering = true;
     }
     Component.onDestruction: {
-        Bluetooth.defaultAdapter.discovering = false;
+        if (Bluetooth.defaultAdapter)
+            Bluetooth.defaultAdapter.discovering = false;
     }
 
     WPanelPageColumn {

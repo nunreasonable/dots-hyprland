@@ -17,10 +17,10 @@ Item {
     id: root
 
     Component.onCompleted: {
-        if (Bluetooth.defaultAdapter.enabled) Bluetooth.defaultAdapter.discovering = true;
+        if (Bluetooth.defaultAdapter?.enabled) Bluetooth.defaultAdapter.discovering = true;
     }
     Component.onDestruction: {
-        Bluetooth.defaultAdapter.discovering = false;
+        if (Bluetooth.defaultAdapter) Bluetooth.defaultAdapter.discovering = false;
     }
 
     WPanelPageColumn {
@@ -117,7 +117,7 @@ Item {
                 enabled: !Bluetooth.defaultAdapter?.discovering && Bluetooth.defaultAdapter?.enabled
 
                 onClicked: {
-                    Bluetooth.defaultAdapter.discovering = true;
+                    if (Bluetooth.defaultAdapter) Bluetooth.defaultAdapter.discovering = true;
                 }
 
                 contentItem: FluentIcon {
