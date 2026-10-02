@@ -70,6 +70,7 @@ AbstractWidget {
 
         if (Platform.isWindows) {
             if (!WindowsNative.imageTools) return; // native backend not ready yet
+            if (!root.wallpaperPath) return; // nothing to place against (the script finds nothing either)
             const result = WindowsNative.imageTools.leastBusyRegion(
                 root.wallpaperPath,
                 root.leastBusyContentWidth,
