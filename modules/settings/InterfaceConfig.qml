@@ -144,6 +144,8 @@ ContentPage {
     ContentSection {
         icon: "lock"
         title: Translation.tr("Lock screen")
+        // Windows locks with its own lock screen (LockWorkStation); none of this applies there.
+        visible: !Platform.isWindows
 
         ConfigSwitch {
             buttonIcon: "water_drop"
