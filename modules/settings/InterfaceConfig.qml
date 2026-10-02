@@ -148,7 +148,8 @@ ContentPage {
 
         ConfigSwitch {
             buttonIcon: "web_traffic"
-            text: Translation.tr("Show only when the cursor touches the bottom edge")
+            // Not always the bottom: Windows 10 allows docking the taskbar to any screen edge.
+            text: Translation.tr("Show only when the cursor touches its screen edge")
             checked: Config.options.windowsPort.taskbarHoverOnly
             onCheckedChanged: {
                 Config.options.windowsPort.taskbarHoverOnly = checked;
