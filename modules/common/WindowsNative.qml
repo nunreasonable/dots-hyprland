@@ -31,6 +31,9 @@ Singleton {
     readonly property QtObject input: _impl ? _impl.input : null
     readonly property QtObject nightLight: _impl ? _impl.nightLight : null
     readonly property QtObject hotkeys: _impl ? _impl.hotkeys : null
+    readonly property QtObject wallpaper: _impl ? _impl.wallpaper : null
+    readonly property QtObject imageTools: _impl ? _impl.imageTools : null
+    readonly property QtObject thumbnailer: _impl ? _impl.thumbnailer : null
 
     Component.onCompleted: {
         if (!Platform.isWindows) return;

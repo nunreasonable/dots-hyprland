@@ -20,4 +20,7 @@ QtObject {
     readonly property QtObject input: QSWin.Input
     readonly property QtObject nightLight: QSWin.NightLight
     readonly property QtObject hotkeys: QSWin.Hotkeys
+    readonly property QtObject wallpaper: QSWin.Wallpaper
+    readonly property QtObject imageTools: QSWin.ImageTools
+    readonly property QtObject thumbnailer: QSWin.Thumbnailer
 }
