@@ -1,34 +1,64 @@
-# Windows counterpart to record.sh: starts an ffmpeg capture of a desktop region and writes its
-# PID to -PidFile so a later run of ScreenshotAction.qml's stopWindowsRecording() can find and
-# kill that exact process (replacing record.sh's own `pgrep wf-recorder` toggle, and `pidof
-# wf-recorder` in RegionSelection.qml's checkRecordingProc - see windowsRecordingStatusCommand()
-# in ScreenshotAction.qml). Stopping does NOT go through this script: it only needs the PID
-# file, so it's done inline from QML/PowerShell without starting ffmpeg again.
+# Windows counterpart to record.sh, driven by ScreenshotAction.qml.
 #
-# Only ever invoked by ScreenshotAction.qml's startWindowsRecording(), which has already
-# confirmed ffmpeg is on PATH (see windowsRecordingStatusCommand(); this script assumes it is).
+#   record.ps1 -X -Y -Width -Height [-Sound] [-SaveDir dir] -PidFile file   start a recording
+#   record.ps1 -Stop -PidFile file                                         stop it
 #
-# X/Y/Width/Height are physical-pixel, virtual-desktop-global coordinates (gdigrab's "desktop"
-# source spans every monitor, with (0,0) at the primary monitor's top-left - same convention as
-# HyprlandMonitor.x/y in the native window tracker, which is what the caller adds to the
-# region's monitor-local coordinates before calling this script).
+# Start launches ffmpeg (gdigrab) on a desktop region and writes "<pid>`n<output file>" to the
+# PID file, so stopping targets exactly that process. ffmpeg can't be asked to stop gracefully
+# from another process (no SIGINT on Windows, and its stdin isn't ours), so it records to
+# Matroska, which stays playable when the process is killed, and Stop remuxes that to the .mp4
+# record.sh would have produced (stream copy, no re-encode).
+#
+# X/Y/Width/Height are physical-pixel, virtual-desktop coordinates (gdigrab's "desktop" spans
+# every monitor with (0,0) at the primary's top-left, like HyprlandMonitor.x/y).
+#
+# Output on stdout, for ScreenshotAction.qml: "nosound" when sound was asked for but there is no
+# loopback capture device, and on stop "saved <file>".
 param(
-    [Parameter(Mandatory = $true)][int]$X,
-    [Parameter(Mandatory = $true)][int]$Y,
-    [Parameter(Mandatory = $true)][int]$Width,
-    [Parameter(Mandatory = $true)][int]$Height,
+    [int]$X,
+    [int]$Y,
+    [int]$Width,
+    [int]$Height,
     [switch]$Sound,
     [string]$SaveDir = "",
+    [switch]$Stop,
     [Parameter(Mandatory = $true)][string]$PidFile
 )
+
+$ErrorActionPreference = "Stop"
+
+if ($Stop) {
+    if (-not (Test-Path $PidFile)) { exit 0 }
+    $pidValue, $mkv = Get-Content $PidFile
+    Remove-Item -Force $PidFile
+
+    $proc = Get-Process -Id $pidValue -ErrorAction SilentlyContinue
+    if ($proc -and $proc.ProcessName -eq "ffmpeg") {
+        Stop-Process -Id $pidValue -Force
+        $proc.WaitForExit(5000) | Out-Null
+    }
+
+    if ($mkv -and (Test-Path $mkv)) {
+        $mp4 = [IO.Path]::ChangeExtension($mkv, ".mp4")
+        & ffmpeg -hide_banner -loglevel error -y -i $mkv -c copy -movflags +faststart $mp4
+        if ($LASTEXITCODE -eq 0 -and (Test-Path $mp4)) {
+            Remove-Item -Force $mkv
+            "saved $mp4"
+        } else {
+            "saved $mkv"
+        }
+    }
+    exit 0
+}
 
 $RecordingDir = if ($SaveDir -ne "") { $SaveDir } else { Join-Path $env:USERPROFILE "Videos" }
 New-Item -ItemType Directory -Force -Path $RecordingDir | Out-Null
 
 $stamp = Get-Date -Format "yyyy-MM-dd_HH.mm.ss"
-$outFile = Join-Path $RecordingDir "recording_$stamp.mp4"
+$outFile = Join-Path $RecordingDir "recording_$stamp.mkv"
 
 $ffmpegArgs = @(
+    "-hide_banner", "-nostdin",
     "-f", "gdigrab",
     "-offset_x", $X,
     "-offset_y", $Y,
@@ -38,15 +68,30 @@ $ffmpegArgs = @(
 )
 
 if ($Sound) {
-    # Best-effort WASAPI loopback of the default playback device (needs a build with the wasapi
-    # indev, e.g. the winget Gyan.FFmpeg package the "ffmpeg missing" notice points to). Not
-    # verified on the target yet - BUILD-ONLY MODE, see docs/AGENTS.md - check this first if
-    # "record with sound" comes back silent.
-    $ffmpegArgs += @("-f", "wasapi", "-i", "default")
+    # What the speakers play is only reachable through a loopback capture device: the driver's
+    # "Stereo Mix" (off by default in Sound settings, localized name) or a virtual cable.
+    $list = (& ffmpeg -hide_banner -list_devices true -f dshow -i dummy 2>&1 | Out-String)
+    $loopback = [regex]::Matches($list, '"([^"]+)" \(audio\)') |
+        ForEach-Object { $_.Groups[1].Value } |
+        Where-Object { $_ -match 'Stereo ?Mix|Mixagem est|Mezcla est|Mixage st|What U Hear|Wave Out|Loopback|CABLE Output|virtual-audio-capturer' } |
+        Select-Object -First 1
+
+    if ($loopback) {
+        $ffmpegArgs += @("-f", "dshow", "-i", "audio=$loopback", "-c:a", "aac")
+    } else {
+        "nosound"
+    }
 }
 
-$ffmpegArgs += @("-pix_fmt", "yuv420p", "-y", $outFile)
+$ffmpegArgs += @("-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p", "-y", $outFile)
+
+# Windows PowerShell joins -ArgumentList with spaces and no quoting; device names and profile
+# paths have spaces.
+function Format-Arg([string]$a) {
+    if ($a -match '[\s"]') { '"' + ($a -replace '"', '\"') + '"' } else { $a }
+}
+$argLine = ($ffmpegArgs | ForEach-Object { Format-Arg "$_" }) -join " "
 
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $PidFile) | Out-Null
-$proc = Start-Process -FilePath "ffmpeg" -ArgumentList $ffmpegArgs -WindowStyle Hidden -PassThru
-Set-Content -Path $PidFile -Value $proc.Id -NoNewline
+$proc = Start-Process -FilePath "ffmpeg" -ArgumentList $argLine -WindowStyle Hidden -PassThru
+Set-Content -Path $PidFile -Value "$($proc.Id)`n$outFile" -NoNewline

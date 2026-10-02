@@ -9,6 +9,7 @@ import QtQuick
 import QtQuick.Controls
 import Qt.labs.synchronizer
 import Quickshell
+import Quickshell.Io
 
 Singleton {
     id: root
@@ -35,7 +36,7 @@ Singleton {
         function onRecognized(requestId, text, ok, error) {
             const path = root._pendingOcr[requestId];
             delete root._pendingOcr[requestId];
-            if (path) Quickshell.execDetached(["cmd", "/c", "del", "/f", "/q", path]);
+            if (path) Quickshell.execDetached(["cmd", "/c", "del", "/f", "/q", path.replace(/\//g, "\\")]);
 
             if (ok) {
                 WindowsNative.clipboard.copyText(text);
@@ -69,7 +70,7 @@ Singleton {
         const ry = Math.round(y);
         const rw = Math.round(width);
         const rh = Math.round(height);
-        const cleanupRaw = () => Quickshell.execDetached(["cmd", "/c", "del", "/f", "/q", screenshotPath]);
+        const cleanupRaw = () => Quickshell.execDetached(["cmd", "/c", "del", "/f", "/q", screenshotPath.replace(/\//g, "\\")]);
 
         switch (action) {
             case ScreenshotAction.Action.Copy: {
@@ -78,7 +79,7 @@ Singleton {
                     : `${saveDir}/screenshot-${root.timestampForFilename()}.png`;
                 if (WindowsNative.screenshot.cropToFile(screenshotPath, rx, ry, rw, rh, savePath)) {
                     WindowsNative.clipboard.copyImageFile(savePath);
-                    if (saveDir === "") Quickshell.execDetached(["cmd", "/c", "del", "/f", "/q", savePath]);
+                    if (saveDir === "") Quickshell.execDetached(["cmd", "/c", "del", "/f", "/q", savePath.replace(/\//g, "\\")]);
                 }
                 cleanupRaw();
                 break;
@@ -130,25 +131,41 @@ Singleton {
         const evenW = width - (width % 2);
         const evenH = height - (height % 2);
         const saveDir = Config.options.screenRecord.savePath;
-        const scriptPath = `${Directories.scriptPath}/videos/record.ps1`;
         const args = [
-            "powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", scriptPath,
+            "powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", root.windowsRecordScript,
             "-X", String(Math.round(x)), "-Y", String(Math.round(y)),
             "-Width", String(evenW), "-Height", String(evenH),
             "-PidFile", Directories.recordingPidFile
         ];
         if (saveDir) args.push("-SaveDir", saveDir);
         if (sound) args.push("-Sound");
-        Quickshell.execDetached(args);
+        windowsRecordProc.command = args;
+        windowsRecordProc.running = true;
         Notifications.sendDesktop(Translation.tr("Starting recording"), Translation.tr("Recording region…"));
     }
 
     function stopWindowsRecording() {
-        const pidFile = Directories.recordingPidFile;
-        Quickshell.execDetached(["powershell", "-NoProfile", "-Command",
-            `if (Test-Path '${pidFile}') { $p = Get-Content '${pidFile}'; Stop-Process -Id $p -Force -ErrorAction SilentlyContinue; Remove-Item -Force '${pidFile}' }`
-        ]);
-        Notifications.sendDesktop(Translation.tr("Recording Stopped"), Translation.tr("Stopped"));
+        windowsRecordProc.command = ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
+            root.windowsRecordScript, "-Stop", "-PidFile", Directories.recordingPidFile];
+        windowsRecordProc.running = true;
+    }
+
+    readonly property string windowsRecordScript: FileUtils.trimFileProtocol(`${Directories.scriptPath}/videos/record.ps1`)
+
+    Process {
+        // record.ps1 reports on stdout: "nosound" (no loopback device for -Sound) when starting,
+        // "saved <file>" once a stopped recording is remuxed.
+        id: windowsRecordProc
+        stdout: SplitParser {
+            onRead: line => {
+                if (line === "nosound") {
+                    Notifications.sendDesktop(Translation.tr("Recording without sound"),
+                        Translation.tr("No loopback device found. Enable \"Stereo Mix\" in Windows sound settings (Recording devices) or install a virtual audio cable."));
+                } else if (line.startsWith("saved ")) {
+                    Notifications.sendDesktop(Translation.tr("Recording Stopped"), line.slice(6));
+                }
+            }
+        }
     }
 
     // Command for RegionSelection.qml's checkRecordingProc on Windows: exit 0 if a recording ii
