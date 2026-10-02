@@ -10,10 +10,23 @@ Rectangle {
     required property var directory
     property bool showBreadcrumb: true
     onShowBreadcrumbChanged: {
-        addressInput.text = root.directory;
+        addressInput.text = root.displayPath(root.directory);
     }
 
     signal navigateToDirectory(string path)
+
+    // Windows shows and takes paths the DOS way (C:\Users\...); paths stay C:/... internally,
+    // and a bare drive is its root, not the drive's current directory.
+    function displayPath(path) {
+        return Platform.isWindows ? path.replace(/\//g, "\\") : path;
+    }
+    function navigate(path) {
+        if (Platform.isWindows) {
+            path = path.trim().replace(/\\/g, "/");
+            if (/^[A-Za-z]:$/.test(path)) path += "/";
+        }
+        root.navigateToDirectory(path);
+    }
 
     property real padding: 6
     implicitWidth: mainLayout.implicitWidth + padding * 2
@@ -35,7 +48,7 @@ Rectangle {
 
         RippleButton {
             id: parentDirButton
-            downAction: () => root.navigateToDirectory(FileUtils.parentDirectory(root.directory))
+            downAction: () => root.navigate(FileUtils.parentDirectory(root.directory))
             contentItem: MaterialSymbol {
                 text: "drive_folder_upload"
                 iconSize: Appearance.font.pixelSize.larger
@@ -68,11 +81,11 @@ Rectangle {
                     id: addressInput
                     anchors.fill: parent
                     padding: 10
-                    text: root.directory
+                    text: root.displayPath(root.directory)
 
                     Keys.onPressed: event => {
                         if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
-                            root.navigateToDirectory(text);
+                            root.navigate(text);
                             root.showBreadcrumb = true;
                             event.accepted = true;
                         }
@@ -96,7 +109,7 @@ Rectangle {
                 sourceComponent: AddressBreadcrumb {
                     directory: root.directory
                     onNavigateToDirectory: dir => {
-                        root.navigateToDirectory(dir);
+                        root.navigate(dir);
                     }
                 }
             }

@@ -21,21 +21,24 @@ ListView {
     clip: true
     spacing: 2
 
-    model: breadcrumbDirectory.split("/")
+    // Windows: "C:/" splits into ["C:", ""]; the drive is the first crumb (shown as C:\).
+    readonly property var parts: Platform.isWindows ? breadcrumbDirectory.split("/").filter((part, i) => i === 0 || part !== "") : breadcrumbDirectory.split("/")
+    model: parts
     delegate: SelectionGroupButton {
         id: folderButton
         required property var modelData
         required property int index
-        buttonText: index === 0 ? "/" : modelData
+        buttonText: index === 0 ? (Platform.isWindows ? `${modelData}\\` : "/") : modelData
         toggled: {
+            if (Platform.isWindows) return index === directory.split("/").filter(part => part !== "").length - 1;
             if (directory.trim() === "/") return index === 0;
             return index === directory.split("/").length - 1
         }
         leftmost: index === 0
-        rightmost: index === breadcrumbDirectory.split("/").length - 1
+        rightmost: index === root.parts.length - 1
 
         onClicked: {
-            root.navigateToDirectory(breadcrumbDirectory.split("/").slice(0, index + 1).join("/"))
+            root.navigateToDirectory(root.parts.slice(0, index + 1).join("/"))
         }
     }
 }
