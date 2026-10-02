@@ -16,8 +16,10 @@ Item {
     id: root
 
     Component.onCompleted: {
+        Network.setWifiListVisible(true);
         Network.rescanWifi();
     }
+    Component.onDestruction: Network.setWifiListVisible(false)
 
     WPanelPageColumn {
         anchors.fill: parent
@@ -60,6 +62,28 @@ Item {
                         shown: Network.wifiScanning
                         visible: true
                         sourceComponent: WIndeterminateProgressBar {}
+                    }
+                }
+
+                RowLayout {
+                    visible: Network.wifiNeedsLocationPermission
+                    Layout.fillWidth: true
+                    Layout.topMargin: 4
+                    Layout.bottomMargin: 4
+                    spacing: 8
+
+                    FluentIcon {
+                        icon: "wifi-warning"
+                        Layout.alignment: Qt.AlignTop
+                    }
+                    WText {
+                        Layout.fillWidth: true
+                        wrapMode: Text.WordWrap
+                        text: Translation.tr("Location is off, so Windows is hiding Wi-Fi networks.")
+                    }
+                    WTextButton {
+                        text: Translation.tr("Open Settings")
+                        onClicked: Network.openWifiLocationSettings()
                     }
                 }
 

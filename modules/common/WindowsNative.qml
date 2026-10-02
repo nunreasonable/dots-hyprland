@@ -7,7 +7,8 @@ import qs.modules.common
 
 /**
  * Safe-to-import-everywhere gateway to the native Quickshell.Windows singletons
- * (Session, SystemStats, Brightness, Keyboard, Clipboard, Credentials, Input, NightLight, Hotkeys).
+ * (Session, SystemStats, Brightness, Keyboard, Clipboard, Credentials, Input, NightLight,
+ * Hotkeys, Network).
  *
  * Services that need one of those read it from here (e.g. `WindowsNative.stats.cpuUsage`)
  * instead of importing Quickshell.Windows directly, since that module only exists on
@@ -31,6 +32,7 @@ Singleton {
     readonly property QtObject input: _impl ? _impl.input : null
     readonly property QtObject nightLight: _impl ? _impl.nightLight : null
     readonly property QtObject hotkeys: _impl ? _impl.hotkeys : null
+    readonly property QtObject network: _impl ? _impl.network : null
 
     Component.onCompleted: {
         if (!Platform.isWindows) return;

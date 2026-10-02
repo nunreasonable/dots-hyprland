@@ -10,17 +10,22 @@ import qs.services.network
 import qs.modules.common
 
 /**
- * Network service with nmcli.
+ * Network service: nmcli on Linux, the native WlanAPI/INetworkListManager-backed
+ * `WindowsNative.network` (Quickshell.Windows' Network singleton) on Windows.
  */
 Singleton {
     id: root
 
     property bool wifi: true
-    property bool ethernet: false
+    // On Windows this is a live binding onto WindowsNative.network; the Linux process handlers
+    // below imperatively overwrite it (and everything else in this block), which detaches that
+    // binding there and is a no-op on Windows, since those processes never run there (same
+    // pattern as services/ResourceUsage.qml).
+    property bool ethernet: Platform.isWindows ? (WindowsNative.network ? WindowsNative.network.ethernetConnected : false) : false
 
-    property bool wifiEnabled: false
-    property bool wifiScanning: false
-    property bool wifiConnecting: connectProc.running
+    property bool wifiEnabled: Platform.isWindows ? (WindowsNative.network ? WindowsNative.network.wifiRadioOn : false) : false
+    property bool wifiScanning: Platform.isWindows ? (WindowsNative.network ? WindowsNative.network.wifiScanning : false) : false
+    property bool wifiConnecting: Platform.isWindows ? (WindowsNative.network ? WindowsNative.network.wifiConnecting : false) : connectProc.running
     property WifiAccessPoint wifiConnectTarget
     readonly property list<WifiAccessPoint> wifiNetworks: []
     readonly property WifiAccessPoint active: wifiNetworks.find(n => n.active) ?? null
@@ -31,10 +36,42 @@ Singleton {
             return 1;
         return b.strength - a.strength;
     })
-    property string wifiStatus: "disconnected"
+    property string wifiStatus: Platform.isWindows ? (WindowsNative.network ? WindowsNative.network.wifiStatus : "disabled") : "disconnected"
+    // True on 24H2+ when Wi-Fi scan/connection-state queries are blocked because Settings >
+    // Privacy > Location (or "let desktop apps access your location") is off. Windows-only;
+    // always false on Linux. WifiDialog/WifiControl show a hint + button to fix it.
+    readonly property bool wifiNeedsLocationPermission: Platform.isWindows && WindowsNative.network ? WindowsNative.network.needsLocationPermission : false
 
-    property string networkName: ""
-    property int networkStrength
+    property string networkName: Platform.isWindows ? (WindowsNative.network ? (WindowsNative.network.ethernetConnected ? Translation.tr("Ethernet") : WindowsNative.network.activeSsid) : "") : ""
+    property int networkStrength: Platform.isWindows ? (WindowsNative.network ? WindowsNative.network.activeSignalQuality : 0) : 0
+
+    // Windows: `networks.values` is a live list of native NetworkWifiNetwork objects (reused
+    // across rescans, so their own properties update in place); mirror it into wifiNetworks the
+    // same way getNetworks.onStreamFinished below mirrors nmcli's parsed list.
+    readonly property list<var> winWifiNetworksRaw: (Platform.isWindows && WindowsNative.network) ? WindowsNative.network.networks.values : []
+    onWinWifiNetworksRawChanged: {
+        const rNetworks = root.wifiNetworks;
+        const destroyed = rNetworks.filter(rn => !winWifiNetworksRaw.includes(rn.lastIpcObject));
+        for (const network of destroyed)
+            rNetworks.splice(rNetworks.indexOf(network), 1).forEach(n => n.destroy());
+
+        for (const native of winWifiNetworksRaw) {
+            if (!rNetworks.some(n => n.lastIpcObject === native))
+                rNetworks.push(apComp.createObject(root, {
+                    lastIpcObject: native
+                }));
+        }
+    }
+
+    Connections {
+        target: Platform.isWindows ? WindowsNative.network : null
+        function onWifiConnectResult(ssid, success, reason) {
+            if (root.wifiConnectTarget && root.wifiConnectTarget.ssid === ssid) {
+                root.wifiConnectTarget.askingPassword = !success;
+                root.wifiConnectTarget = null;
+            }
+        }
+    }
     property string materialSymbol: root.ethernet
         ? "lan"
         : (root.wifiEnabled && root.wifiStatus === "connected")
@@ -55,9 +92,11 @@ Singleton {
                         : "signal_wifi_bad"
 
     // Control
-    // nmcli-backed; no-ops on Windows until the WlanAPI/INetworkListManager backend lands (see PORTING.md)
     function enableWifi(enabled = true): void {
-        if (Platform.isWindows) return;
+        if (Platform.isWindows) {
+            if (WindowsNative.network) WindowsNative.network.setWifiRadioEnabled(enabled);
+            return;
+        }
         const cmd = enabled ? "on" : "off";
         enableWifiProc.exec(["nmcli", "radio", "wifi", cmd]);
     }
@@ -67,13 +106,42 @@ Singleton {
     }
 
     function rescanWifi(): void {
-        if (Platform.isWindows) return;
+        if (Platform.isWindows) {
+            if (WindowsNative.network) WindowsNative.network.scanWifiNetworks();
+            return;
+        }
         wifiScanning = true;
         rescanProcess.running = true;
     }
 
+    // Windows: starts/stops the periodic background rescan (see network.hpp); call with true
+    // while ii's Wi-Fi list is on screen (WifiDialog/WifiControl do this on show/hide, mirroring
+    // how BluetoothDialog ties Bluetooth.defaultAdapter.discovering to its own visibility) and
+    // false otherwise. No-op on Linux, where live updates instead come from `nmcli monitor`.
+    function setWifiListVisible(visible: bool): void {
+        if (!Platform.isWindows || !WindowsNative.network) return;
+        WindowsNative.network.setWifiListVisible(visible);
+    }
+
+    function openWifiLocationSettings(): void {
+        if (Platform.isWindows) WindowsNative.network?.openLocationSettings();
+    }
+
     function connectToWifiNetwork(accessPoint: WifiAccessPoint): void {
-        if (Platform.isWindows) return;
+        if (Platform.isWindows) {
+            accessPoint.askingPassword = false;
+            root.wifiConnectTarget = accessPoint;
+            // Same effective UX as nmcli: an open or already-known network connects right away,
+            // a secured network with no saved profile goes straight to the password prompt
+            // instead of a doomed-to-fail attempt with an empty passphrase.
+            if (accessPoint.isSecure && !accessPoint.lastIpcObject?.hasProfile) {
+                accessPoint.askingPassword = true;
+                root.wifiConnectTarget = null;
+                return;
+            }
+            WindowsNative.network?.connectToNetwork(accessPoint.ssid, "");
+            return;
+        }
         accessPoint.askingPassword = false;
         root.wifiConnectTarget = accessPoint;
         // We use this instead of `nmcli connection up SSID` because this also creates a connection profile
@@ -82,7 +150,10 @@ Singleton {
     }
 
     function disconnectWifiNetwork(): void {
-        if (Platform.isWindows) return;
+        if (Platform.isWindows) {
+            WindowsNative.network?.disconnectActive();
+            return;
+        }
         if (active) disconnectProc.exec(["nmcli", "connection", "down", active.ssid]);
     }
 
@@ -97,6 +168,11 @@ Singleton {
     function changePassword(network: WifiAccessPoint, password: string, username = ""): void {
         // TODO: enterprise wifi with username
         network.askingPassword = false;
+        if (Platform.isWindows) {
+            root.wifiConnectTarget = network;
+            WindowsNative.network?.connectToNetwork(network.ssid, password);
+            return;
+        }
         changePasswordProc.exec({
             "environment": {
                 "PASSWORD": password,
