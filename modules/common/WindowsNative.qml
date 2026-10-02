@@ -8,7 +8,7 @@ import qs.modules.common
 /**
  * Safe-to-import-everywhere gateway to the native Quickshell.Windows singletons
  * (Session, SystemStats, Brightness, Keyboard, Clipboard, Credentials, Input, NightLight, Hotkeys,
- * NotificationSettings, Network, Screenshot, Ocr).
+ * NotificationSettings, Network, Screenshot, Ocr, TerminalColors).
  *
  * Services that need one of those read it from here (e.g. `WindowsNative.stats.cpuUsage`)
  * instead of importing Quickshell.Windows directly, since that module only exists on
@@ -44,6 +44,10 @@ Singleton {
     // Still screen capture + file crop (region selector) and Windows.Media.Ocr text recognition.
     readonly property QtObject screenshot: _impl ? _impl.screenshot : null
     readonly property QtObject ocr: _impl ? _impl.ocr : null
+    // Terminal color harmonization (generate_colors_material.py's terminal part, natively) -
+    // see services/WindowsTerminalTheme.qml. Not merged into the Quickshell fork yet; null
+    // until it is, same as every other property here before `ready`.
+    readonly property QtObject terminalColors: _impl ? _impl.terminalColors : null
 
     Component.onCompleted: {
         if (!Platform.isWindows) return;

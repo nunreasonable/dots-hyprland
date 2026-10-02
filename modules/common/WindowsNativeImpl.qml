@@ -28,4 +28,5 @@ QtObject {
     readonly property QtObject fsUtils: QSWin.FsUtils
     readonly property QtObject screenshot: QSWin.Screenshot
     readonly property QtObject ocr: QSWin.Ocr
+    readonly property QtObject terminalColors: QSWin.TerminalColors
 }
