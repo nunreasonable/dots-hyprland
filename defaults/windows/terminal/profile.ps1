@@ -29,15 +29,101 @@ doesn't leave a broken profile behind.
 # starts from a clear screen. The actual clearing happens at the bottom of this file, once the
 # prompt this script ends up installing is known - see the comment there for why.
 
+# Nerd Font glyphs in the prompt: Windows Terminal is always fine (its own font/fallback stack
+# shows them, and this never touches a Windows Terminal session - checked via $env:WT_SESSION).
+# The classic console (conhost: this host opened without Windows Terminal, e.g. ii's terminal
+# bind falling back, or Windows+R > powershell) draws its own text with GDI and only shows what
+# its *current console font* actually contains - that font is a per-user Windows setting
+# (console properties / the registry), almost never a Nerd Font out of the box, so the glyphs
+# ii.omp.json and starship.toml use come out as boxes there.
+#
+# $IiConsoleHasGlyphs resolves that once per session, cheaply (conhost only; Windows Terminal
+# short-circuits to $true without any of the checks below):
+#   1. GetCurrentConsoleFontEx reads the font this console window is already using. If its face
+#      name already looks like a patched Nerd Font (the nerd-fonts patcher's own naming:
+#      "...Nerd Font", "...NF", "...Nerd Font Mono" - case-insensitive), nothing to do.
+#   2. Otherwise, try switching *this console window only* to "JetBrainsMono NF" - the family
+#      name the Nerd Font patcher registers for the font the installer ships (see
+#      build/package-stage/fonts/JetBrainsMonoNerdFont-*.ttf; whether install.ps1 actually
+#      registers it per-user is for the integrator to confirm on the VM, hence the verification
+#      below rather than assuming success). SetCurrentConsoleFontEx only affects the window
+#      that's open right now - like ENABLE_VIRTUAL_TERMINAL_PROCESSING above, Windows throws
+#      this away with the window; nothing persists past the session, no other console is
+#      touched, and Windows Terminal is never involved.
+#   3. SetCurrentConsoleFontEx can return success without the font actually existing (it falls
+#      back silently), so the only reliable check is reading the font back and comparing the
+#      face name GetCurrentConsoleFontEx now reports. If it doesn't match, the font isn't
+#      installed (or this build of Windows refused it) and the glyphs still won't show - fall
+#      back to the plain prompt instead of guessing.
+$IiConsoleHasGlyphs = $true
+if ($Host.Name -eq 'ConsoleHost' -and -not $env:WT_SESSION -and -not $env:TERM_PROGRAM) {
+    $IiConsoleHasGlyphs = $false
+    try {
+        if (-not ('Ii.Windows.ConsoleFont' -as [type])) {
+            Add-Type -Namespace Ii.Windows -Name ConsoleFont -MemberDefinition @'
+                [StructLayout(LayoutKind.Sequential)]
+                public struct COORD { public short X; public short Y; }
+
+                [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+                public struct CONSOLE_FONT_INFOEX {
+                    public uint cbSize;
+                    public uint nFont;
+                    public COORD dwFontSize;
+                    public uint FontFamily;
+                    public uint FontWeight;
+                    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+                    public string FaceName;
+                }
+
+                [DllImport("kernel32.dll", SetLastError = true)]
+                public static extern bool GetCurrentConsoleFontEx(IntPtr hConsoleOutput, bool bMaximumWindow, ref CONSOLE_FONT_INFOEX lpConsoleCurrentFontEx);
+                [DllImport("kernel32.dll", SetLastError = true)]
+                public static extern bool SetCurrentConsoleFontEx(IntPtr hConsoleOutput, bool bMaximumWindow, ref CONSOLE_FONT_INFOEX lpConsoleCurrentFontEx);
+                [DllImport("kernel32.dll", SetLastError = true)]
+                public static extern IntPtr GetStdHandle(int nStdHandle);
+'@ -UsingNamespace 'System.Runtime.InteropServices'
+        }
+
+        $iiStdOut = [Ii.Windows.ConsoleFont]::GetStdHandle(-11) # STD_OUTPUT_HANDLE
+        $iiFont = New-Object Ii.Windows.ConsoleFont+CONSOLE_FONT_INFOEX
+        $iiFont.cbSize = [Runtime.InteropServices.Marshal]::SizeOf($iiFont)
+
+        if ([Ii.Windows.ConsoleFont]::GetCurrentConsoleFontEx($iiStdOut, $false, [ref]$iiFont)) {
+            if ($iiFont.FaceName -match '(?i)Nerd ?Font|\bNF\b') {
+                $IiConsoleHasGlyphs = $true
+            } else {
+                $iiWanted = New-Object Ii.Windows.ConsoleFont+CONSOLE_FONT_INFOEX
+                $iiWanted.cbSize = $iiFont.cbSize
+                $iiWanted.dwFontSize = $iiFont.dwFontSize # keep the size the user already has
+                $iiWanted.FontFamily = $iiFont.FontFamily
+                $iiWanted.FontWeight = $iiFont.FontWeight
+                $iiWanted.FaceName = 'JetBrainsMono NF'
+                [Ii.Windows.ConsoleFont]::SetCurrentConsoleFontEx($iiStdOut, $false, [ref]$iiWanted) | Out-Null
+
+                $iiCheck = New-Object Ii.Windows.ConsoleFont+CONSOLE_FONT_INFOEX
+                $iiCheck.cbSize = $iiFont.cbSize
+                if ([Ii.Windows.ConsoleFont]::GetCurrentConsoleFontEx($iiStdOut, $false, [ref]$iiCheck)) {
+                    $IiConsoleHasGlyphs = $iiCheck.FaceName -match '(?i)JetBrainsMono ?NF|JetBrainsMono Nerd Font'
+                }
+            }
+        }
+    } catch { } # $IiConsoleHasGlyphs stays $false; the plain prompt always works
+}
+
 # Prompt: Oh My Posh with ii's theme (generated in the shell's current colors by
-# services/WindowsTerminalTheme.qml), else Starship with ii's starship.toml like on Linux. Both
-# with a transient prompt (the full prompt collapses to the character once a command finishes,
-# same as config.fish's starship_transient_prompt_func).
-$IiOhMyPoshTheme = Join-Path $env:LOCALAPPDATA 'quickshell\State\user\generated\terminal\ii.omp.json'
+# services/WindowsTerminalTheme.qml), else Starship with ii's starship.toml like on Linux -
+# ii.omp.json/starship.toml when $IiConsoleHasGlyphs, otherwise the plain-glyph variant
+# WindowsTerminalTheme.qml writes next to it (ii.plain.omp.json) or starship-plain.toml next to
+# this file, same colors and layout, ASCII/plain-Unicode symbols instead of Nerd Font icons.
+# Both with a transient prompt (the full prompt collapses to the character once a command
+# finishes, same as config.fish's starship_transient_prompt_func).
+$IiOhMyPoshThemeName = if ($IiConsoleHasGlyphs) { 'ii.omp.json' } else { 'ii.plain.omp.json' }
+$IiOhMyPoshTheme = Join-Path $env:LOCALAPPDATA "quickshell\State\user\generated\terminal\$IiOhMyPoshThemeName"
 if ((Get-Command oh-my-posh -ErrorAction SilentlyContinue) -and (Test-Path -LiteralPath $IiOhMyPoshTheme)) {
     oh-my-posh init pwsh --config $IiOhMyPoshTheme | Invoke-Expression
 } elseif (Get-Command starship -ErrorAction SilentlyContinue) {
-    $env:STARSHIP_CONFIG = Join-Path $PSScriptRoot 'starship.toml'
+    $IiStarshipConfigName = if ($IiConsoleHasGlyphs) { 'starship.toml' } else { 'starship-plain.toml' }
+    $env:STARSHIP_CONFIG = Join-Path $PSScriptRoot $IiStarshipConfigName
 
     function global:Invoke-Starship-TransientFunction {
         &starship module character

@@ -69,6 +69,10 @@ Singleton {
     property string windowsTerminalSequencesPath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/terminal/sequences.txt`)
     // Windows: the Oh My Posh prompt theme, in ii's colors (services/WindowsTerminalTheme.qml)
     property string windowsTerminalOhMyPoshPath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/terminal/ii.omp.json`)
+    // Same theme, plain Unicode/ASCII symbols instead of Nerd Font glyphs: profile.ps1 picks
+    // this one in a classic console (conhost) that can't show the glyph font (see
+    // WindowsTerminalTheme._writeOhMyPoshPlain()). Windows Terminal always gets the glyph one.
+    property string windowsTerminalOhMyPoshPlainPath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/terminal/ii.plain.omp.json`)
     // Second matugen.exe pass for terminalGenerationProps.forceDarkMode while ii itself is
     // light: generate_colors_material.py forces --mode dark for the terminal independently of
     // the (still light) colors.json matugen already wrote for ii's own UI; this is that, since

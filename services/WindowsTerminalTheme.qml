@@ -16,6 +16,11 @@ import Quickshell.Io
  * _retheme()). When either is off, the fragment and sequences.txt are removed instead, so
  * Windows Terminal falls back to whatever the user had configured themselves.
  *
+ * Also writes two Oh My Posh prompt themes (_writeOhMyPosh()/_writeOhMyPoshPlain()): ii.omp.json
+ * with Nerd Font glyphs for Windows Terminal, and ii.plain.omp.json with plain Unicode/ASCII
+ * stand-ins for a classic console (conhost) whose current font can't show them. profile.ps1
+ * picks between the two at shell start; this file just keeps both current.
+ *
  * term0..15 come from the native Quickshell.Windows.TerminalColors.generate() - a C++ port of
  * generate_colors_material.py's terminal-harmonization pass, since there's no bundled Python/
  * materialyoucolor on Windows to run the script itself. It takes scheme-base.json's dark/light
@@ -311,6 +316,7 @@ Singleton {
         root._writeSequences(colorMap);
         root._writeFragment(colorMap, material);
         root._writeOhMyPosh(colorMap);
+        root._writeOhMyPoshPlain(colorMap);
         root._nudgeWindowsTerminal();
     }
 
@@ -459,6 +465,80 @@ Singleton {
         onSaveFailed: error => console.warn("[WindowsTerminalTheme] Could not write the Oh My Posh theme:", error);
     }
 
+    // Same layout and colors as _writeOhMyPosh(), but every segment's glyph is a plain
+    // Unicode/ASCII stand-in instead of a Nerd Font private-use-area codepoint - for a classic
+    // console (conhost) whose current font isn't a Nerd Font (profile.ps1 decides which of the
+    // two files to load; Windows Terminal always gets the glyph one above, untouched). The
+    // powerline pill separators (/) are themselves Nerd/PowerLine PUA glyphs, so
+    // this drops the diamond styling and falls back to "plain" segments with ASCII brackets,
+    // which every console font (raster or TrueType) already has.
+    function _writeOhMyPoshPlain(c) {
+        const character = "{{ if gt .Code 0 }}x{{ else }}>{{ end }}";
+        const characterColor = ["{{ if gt .Code 0 }}p:error{{ end }}"];
+        const theme = {
+            "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+            "version": 3,
+            "final_space": true,
+            "palette": {
+                "primary": c.primary,
+                "onPrimary": c.onPrimary,
+                "secondaryContainer": c.secondaryContainer,
+                "onSecondaryContainer": c.onSecondaryContainer,
+                "error": c.error,
+            },
+            "blocks": [
+                {
+                    "type": "prompt",
+                    "alignment": "left",
+                    "segments": [
+                        {
+                            "type": "executiontime", "style": "plain",
+                            "foreground": "p:onSecondaryContainer", "background": "p:secondaryContainer",
+                            "template": "[{{ .FormattedMs }}]",
+                            "options": { "threshold": 0, "style": "austin" },
+                        },
+                        {
+                            "type": "path", "style": "plain",
+                            "foreground": "p:onPrimary", "background": "p:primary",
+                            "template": " {{ .Path }}",
+                            "options": { "style": "agnoster_short", "max_depth": 2, "home_icon": "~", "folder_separator_icon": "\\" },
+                        },
+                        {
+                            "type": "git", "style": "plain",
+                            "foreground": "p:onSecondaryContainer", "background": "p:secondaryContainer",
+                            "template": " [{{ .HEAD }}]",
+                            "options": { "branch_icon": "" },
+                        },
+                    ],
+                },
+                {
+                    "type": "prompt",
+                    "alignment": "left",
+                    "newline": true,
+                    "segments": [
+                        {
+                            "type": "text", "style": "plain",
+                            "foreground": "p:primary", "foreground_templates": characterColor,
+                            "template": `${character} `,
+                        },
+                    ],
+                },
+            ],
+            "transient_prompt": {
+                "foreground": "p:primary",
+                "foreground_templates": characterColor,
+                "template": `${character} `,
+            },
+        };
+        ohMyPoshPlainOutput.setText(JSON.stringify(theme, null, 2));
+    }
+
+    FileView {
+        id: ohMyPoshPlainOutput
+        path: Platform.isWindows ? Directories.windowsTerminalOhMyPoshPlainPath : ""
+        onSaveFailed: error => console.warn("[WindowsTerminalTheme] Could not write the plain Oh My Posh theme:", error);
+    }
+
     // --- removal (enableTerminal/enableAppsAndShell off) & nudging an open Windows Terminal --
 
     function _removeOutputs() {
@@ -466,7 +546,8 @@ Singleton {
         removeOutputsProc.command = ["powershell", "-NoProfile", "-NonInteractive", "-Command",
             `Remove-Item -LiteralPath '${Directories.windowsTerminalSequencesPath}' -Force -ErrorAction SilentlyContinue; `
             + `Remove-Item -LiteralPath '${Directories.windowsTerminalFragmentPath}' -Force -ErrorAction SilentlyContinue; `
-            + `Remove-Item -LiteralPath '${Directories.windowsTerminalOhMyPoshPath}' -Force -ErrorAction SilentlyContinue`];
+            + `Remove-Item -LiteralPath '${Directories.windowsTerminalOhMyPoshPath}' -Force -ErrorAction SilentlyContinue; `
+            + `Remove-Item -LiteralPath '${Directories.windowsTerminalOhMyPoshPlainPath}' -Force -ErrorAction SilentlyContinue`];
         removeOutputsProc.running = false;
         removeOutputsProc.running = true;
         root._nudgeWindowsTerminal();
