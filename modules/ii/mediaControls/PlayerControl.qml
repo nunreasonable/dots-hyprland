@@ -26,7 +26,8 @@ Item { // Player instance
     property int visualizerSmoothing: 2 // Number of points to average for smoothing
     property real radius
 
-    property string displayedArtFilePath: root.downloaded ? Qt.resolvedUrl(artFilePath) : ""
+    readonly property bool artIsLocal: Platform.isWindows && String(root.artUrl ?? "").startsWith("file:")
+    property string displayedArtFilePath: root.artIsLocal ? root.artUrl : (root.downloaded ? (Platform.isWindows ? `file:///${artFilePath}` : Qt.resolvedUrl(artFilePath)) : "")
 
     component TrackChangeButton: RippleButton {
         implicitWidth: 24
@@ -65,6 +66,8 @@ Item { // Player instance
             return;
         }
 
+        if (root.artIsLocal) return;
+
         // Binding does not work in Process
         coverArtDownloader.targetFile = root.artUrl
         coverArtDownloader.artFilePath = root.artFilePath
@@ -87,7 +90,7 @@ Item { // Player instance
             ? ["curl", "-4", "-sSL", targetFile, "-o", artFilePath]
             : ["bash", "-c", `[ -f ${artFilePath} ] || curl -4 -sSL '${targetFile}' -o '${artFilePath}'`]
         onExited: (exitCode, exitStatus) => {
-            root.downloaded = true
+            root.downloaded = !Platform.isWindows || exitCode === 0
         }
     }
 
