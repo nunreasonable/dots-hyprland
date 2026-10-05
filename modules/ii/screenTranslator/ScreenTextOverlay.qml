@@ -130,6 +130,17 @@ Item {
         }
     }
 
+    // WindowsNative's backend loads asynchronously (Component.onCompleted there is still
+    // waiting on Qt.createComponent when this overlay's own Component.onCompleted fires, e.g.
+    // right after login): startWindows() above would otherwise fail once with "not available"
+    // and never retry. Mirrors the GoogleCloud Connections above for the Windows case.
+    Connections {
+        target: Platform.isWindows ? WindowsNative : null
+        function onReadyChanged() {
+            if (WindowsNative.ready) root.reattemptAsNeeded();
+        }
+    }
+
     Rectangle {
         id: loadingOverlay
         anchors.fill: parent
