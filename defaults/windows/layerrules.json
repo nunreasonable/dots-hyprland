@@ -5,7 +5,7 @@
     "namespace: regex matched against the whole WlrLayershell.namespace, like Hyprland. blur: true/false. ignoreAlpha: blur only behind Rectangle items whose fill (opacity included) is more opaque than this (0-1; 1 = nothing); null = behind the whole surface.",
     "Windows approximates ignore_alpha with Rectangle fills instead of pixels, so text and images don't get blur of their own. Blur is off while Windows' Transparency effects setting is off, or high contrast or energy saver is on.",
     "enable: false turns blur behind panels off. layered: true adds WS_EX_LAYERED to the blur windows (only if clicks next to a blurred panel get stuck). blur_popups and xray have no Windows counterpart.",
-    "quickshell:background is Windows only: ii's wallpaper covers the Windows desktop, so blur behind it would never show."
+    "quickshell:background has no blur, like upstream's rules.lua: ii's wallpaper covers the Windows desktop, so blur behind it would never show."
   ],
   "enable": true,
   "rules": [
