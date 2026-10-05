@@ -4,6 +4,7 @@ import QtQuick
 import QtQuick.Effects
 import Qt5Compat.GraphicalEffects
 import Quickshell
+import Quickshell.Io
 
 import qs
 import qs.modules.common
@@ -39,7 +40,71 @@ Item {
         error = true;
     }
 
+    // Windows path: no GCloudVision/GCloudTranslate (both need a Google Cloud service
+    // account key, set up through the "Key input" toolbar button below). WindowsNative.ocr
+    // (Windows.Media.Ocr) reads the text and GoogleTranslateFree (the key-less endpoint
+    // translate-shell itself uses) translates it. Windows.Media.Ocr only returns flat text,
+    // not per-line bounding boxes like Cloud Vision's DOCUMENT_TEXT_DETECTION, so there's no
+    // per-paragraph overlay here - windowsResultPanel below shows the whole translation in
+    // one card instead. Giving Ocr a bounding-box result (Windows.Media.Ocr's OcrResult.Lines/
+    // Words already carry one) would need a C++ change to src/windows/system/ocr.* and isn't
+    // done here.
+    property int windowsOcrRequestId: -1
+    property string windowsOcrText: ""
+    property string windowsStage: "" // "ocr" | "translate" | ""
+
+    function startWindows() {
+        root.windowsStage = "ocr";
+        if (!WindowsNative.ready || !WindowsNative.ocr) {
+            root.handleError(Translation.tr("Windows text recognition is not available"));
+            return;
+        }
+        root.windowsOcrRequestId = WindowsNative.ocr.recognizeText(root.screenshotPath);
+    }
+
+    Connections {
+        target: (Platform.isWindows && WindowsNative.ready) ? WindowsNative.ocr : null
+        function onRecognized(requestId, text, ok, error) {
+            if (requestId !== root.windowsOcrRequestId) return;
+            if (!ok || text.trim().length === 0) {
+                root.handleError(error || Translation.tr("No text found"));
+                return;
+            }
+            root.windowsOcrText = text;
+            root.windowsStage = "translate";
+            windowsTranslateProc.buffer = "";
+            windowsTranslateProc.command = GoogleTranslateFree.requestArgs("auto", Translation.languageCode, text);
+            windowsTranslateProc.running = true;
+        }
+    }
+
+    Process {
+        id: windowsTranslateProc
+        property string buffer: ""
+        stdout: SplitParser {
+            onRead: data => {
+                windowsTranslateProc.buffer += data + "\n";
+            }
+        }
+        onExited: (exitCode, exitStatus) => {
+            const translated = GoogleTranslateFree.parseResponse(windowsTranslateProc.buffer);
+            if (!translated) {
+                root.handleError(Translation.tr("Translation failed"));
+                return;
+            }
+            root.translation = ({
+                [root.windowsOcrText]: translated
+            });
+            root.windowsStage = "";
+            root.loading = false;
+        }
+    }
+
     Component.onCompleted: {
+        if (Platform.isWindows) {
+            root.startWindows();
+            return;
+        }
         if (GoogleCloud.tokenReady && GoogleCloud.tokenError) {
             root.showError();
         }
@@ -47,6 +112,11 @@ Item {
     }
 
     function reattemptAsNeeded() {
+        if (Platform.isWindows) {
+            root.error = false;
+            root.startWindows();
+            return;
+        }
         if (root.visionParagraphs == [] && GoogleCloud.tokenReady && !GoogleCloud.tokenError) {
             root.error = false;
             cloudVision.annotateImage(root.screenshotPath);
@@ -54,7 +124,7 @@ Item {
     }
 
     Connections {
-        target: GoogleCloud
+        target: Platform.isWindows ? null : GoogleCloud
         function onTokenReadyChanged() {
             root.reattemptAsNeeded();
         }
@@ -81,6 +151,11 @@ Item {
             StyledText {
                 anchors.horizontalCenter: parent.horizontalCenter
                 text: {
+                    if (Platform.isWindows) {
+                        if (root.windowsStage === "ocr") return Translation.tr("Reading image");
+                        if (root.windowsStage === "translate") return Translation.tr("Translating");
+                        return " ";
+                    }
                     if (cloudVision.state == GCloudApi.State.Preparing)
                         return Translation.tr("Uploading image");
                     else if (cloudVision.state == GCloudApi.State.Processing)
@@ -120,7 +195,9 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
                 textFormat: Text.MarkdownText
                 wrapMode: Text.Wrap
-                text: `**${Translation.tr("Screen Translator")}**\n\n${root.errorMessage}\n\n__[${Translation.tr("See setup instructions on the wiki")}](${root.wikiLink})__`
+                text: Platform.isWindows
+                    ? `**${Translation.tr("Screen Translator")}**\n\n${root.errorMessage}`
+                    : `**${Translation.tr("Screen Translator")}**\n\n${root.errorMessage}\n\n__[${Translation.tr("See setup instructions on the wiki")}](${root.wikiLink})__`
                 font.pixelSize: Appearance.font.pixelSize.small * root.scaleFactor
                 color: root.textColor
                 onLinkActivated: (link) => {
@@ -262,6 +339,60 @@ Item {
             model: root.loading ? [] : root.visionParagraphs
             // An entry looks like this:
             delegate: TextItem {}
+        }
+    }
+
+    // Windows has no per-line bounding boxes (see the comment by windowsOcrRequestId above),
+    // so instead of overlaying each line in place this shows the whole translation in one card.
+    Rectangle {
+        id: windowsResultPanel
+        visible: Platform.isWindows && !root.loading && !root.error && root.windowsOcrText.length > 0
+        z: 999
+        anchors {
+            bottom: parent.bottom
+            horizontalCenter: parent.horizontalCenter
+            bottomMargin: 24 * root.scaleFactor
+        }
+        width: Math.min(root.windowWidth * 0.6, 700 * root.scaleFactor)
+        height: Math.min(resultColumn.implicitHeight + 24 * root.scaleFactor, root.windowHeight * 0.5)
+        radius: Appearance.rounding.normal
+        color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.08)
+
+        StyledFlickable {
+            anchors.fill: parent
+            anchors.margins: 12 * root.scaleFactor
+            contentHeight: resultColumn.implicitHeight
+
+            Column {
+                id: resultColumn
+                width: windowsResultPanel.width - 24 * root.scaleFactor
+                spacing: 6 * root.scaleFactor
+
+                StyledText {
+                    width: parent.width
+                    wrapMode: Text.Wrap
+                    text: root.translate(root.windowsOcrText)
+                    color: root.textColor
+                    font.pixelSize: Appearance.font.pixelSize.normal * root.scaleFactor
+                }
+            }
+        }
+
+        GroupButton {
+            anchors {
+                top: parent.top
+                right: parent.right
+                margins: 6 * root.scaleFactor
+            }
+            baseWidth: height
+            buttonRadius: Appearance.rounding.small
+            contentItem: MaterialSymbol {
+                anchors.centerIn: parent
+                iconSize: Appearance.font.pixelSize.larger
+                text: "content_copy"
+                color: Appearance.colors.colOnLayer1
+            }
+            onClicked: Quickshell.clipboardText = root.translate(root.windowsOcrText)
         }
     }
 

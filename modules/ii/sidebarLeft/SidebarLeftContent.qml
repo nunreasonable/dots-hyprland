@@ -13,8 +13,9 @@ Item {
     property int sidebarPadding: 10
     anchors.fill: parent
     property bool aiChatEnabled: Config.options.policies.ai !== 0
-    // No `trans` CLI build for Windows; the tab stays hidden there.
-    property bool translatorEnabled: Config.options.sidebar.translator.enable && !Platform.isWindows
+    // Translator.qml now calls the free Google Translate endpoint through curl.exe on
+    // Windows instead of `trans`, so the tab no longer needs to stay hidden there.
+    property bool translatorEnabled: Config.options.sidebar.translator.enable
     property bool animeEnabled: Config.options.policies.weeb !== 0
     property bool animeCloset: Config.options.policies.weeb === 2
     property var tabButtonList: [

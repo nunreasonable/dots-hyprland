@@ -63,10 +63,15 @@ Item {
 
     Process {
         id: translateProc
-        command: ["bash", "-c", `trans -brief -no-bidi`
-            + ` -source '${StringUtils.shellSingleQuoteEscape(root.sourceLanguage)}'`
-            + ` -target '${StringUtils.shellSingleQuoteEscape(root.targetLanguage)}'`
-            + ` '${StringUtils.shellSingleQuoteEscape(root.inputField.text.trim())}'`]
+        // Windows has no `trans`: GoogleTranslateFree hits the same free endpoint it uses,
+        // through curl.exe (ships since 1803), with each value as its own argument so
+        // cmd's quote-escaping rule (see AGENTS.md) never comes into play.
+        command: Platform.isWindows
+            ? GoogleTranslateFree.requestArgs(root.sourceLanguage, root.targetLanguage, root.inputField.text.trim())
+            : ["bash", "-c", `trans -brief -no-bidi`
+                + ` -source '${StringUtils.shellSingleQuoteEscape(root.sourceLanguage)}'`
+                + ` -target '${StringUtils.shellSingleQuoteEscape(root.targetLanguage)}'`
+                + ` '${StringUtils.shellSingleQuoteEscape(root.inputField.text.trim())}'`]
         property string buffer: ""
         stdout: SplitParser {
             onRead: data => {
@@ -75,15 +80,31 @@ Item {
         }
         onExited: (exitCode, exitStatus) => {
             // With -brief mode, we get output with no metadata
-            root.translatedText = translateProc.buffer.trim();
+            root.translatedText = Platform.isWindows
+                ? GoogleTranslateFree.parseResponse(translateProc.buffer)
+                : translateProc.buffer.trim();
         }
     }
+
+    // `trans -list-languages` isn't available on Windows either, so the list is the fixed
+    // set of language codes the "gtx" endpoint above accepts (same set translate-shell itself
+    // lists for the Google engine). Kept in code order with "auto" first, same contract as
+    // the Linux branch's result.
+    readonly property list<string> windowsLanguageCodes: ["auto", "af", "sq", "am", "ar", "hy", "as", "ay", "az",
+        "bm", "eu", "be", "bn", "bho", "bs", "bg", "ca", "ceb", "ny", "zh-CN", "zh-TW", "co", "hr", "cs", "da",
+        "dv", "doi", "nl", "en", "eo", "et", "ee", "fil", "fi", "fr", "fy", "gl", "ka", "de", "el", "gn", "gu",
+        "ht", "ha", "haw", "he", "hi", "hmn", "hu", "is", "ig", "ilo", "id", "ga", "it", "ja", "jv", "kn", "kk",
+        "km", "rw", "gom", "ko", "kri", "ku", "ckb", "ky", "lo", "la", "lv", "ln", "lt", "lg", "lb", "mk", "mai",
+        "mg", "ms", "ml", "mt", "mi", "mr", "mni-Mtei", "lus", "mn", "my", "ne", "no", "or", "om", "ps", "fa",
+        "pl", "pt", "pa", "qu", "ro", "ru", "sm", "sa", "gd", "nso", "sr", "st", "sn", "sd", "si", "sk", "sl",
+        "so", "es", "su", "sw", "sv", "tl", "tg", "ta", "tt", "te", "th", "ti", "ts", "tr", "tk", "ak", "uk",
+        "ur", "ug", "uz", "vi", "cy", "xh", "yi", "yo", "zu"]
 
     Process {
         id: getLanguagesProc
         command: ["trans", "-list-languages", "-no-bidi"]
         property list<string> bufferList: ["auto"]
-        running: true
+        running: !Platform.isWindows
         stdout: SplitParser {
             onRead: data => {
                 getLanguagesProc.bufferList.push(data.trim());
@@ -98,6 +119,10 @@ Item {
             root.languages = langs;
             getLanguagesProc.bufferList = []; // Clear the buffer
         }
+    }
+
+    Component.onCompleted: {
+        if (Platform.isWindows) root.languages = root.windowsLanguageCodes;
     }
 
     ColumnLayout {
