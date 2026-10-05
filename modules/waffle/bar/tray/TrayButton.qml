@@ -29,7 +29,9 @@ BarIconButton {
     }
 
     altAction: () => {
-        if (item.hasMenu) menu.open()
+        // Windows tray icons have no menu model: the app draws its own context menu.
+        if (Platform.isWindows) item.display(root.QsWindow.window, 0, 0);
+        else if (item.hasMenu) menu.open()
     }
 
     // This is lazy, but it's not like tray menus on Windoes are consistent...
