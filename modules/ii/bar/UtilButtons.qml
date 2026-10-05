@@ -1,6 +1,7 @@
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.common.utils
 import qs.modules.common.widgets
 import QtQuick
 import QtQuick.Layouts
@@ -42,11 +43,22 @@ Item {
             visible: Config.options.bar.utilButtons.showScreenRecord
             sourceComponent: CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter
-                onClicked: Quickshell.execDetached([Directories.recordScriptPath])
+                onClicked: {
+                    if (!Platform.isWindows) {
+                        Quickshell.execDetached([Directories.recordScriptPath]);
+                    } else if (ScreenshotAction.windowsNativeRecording) {
+                        ScreenshotAction.stopWindowsRecording();
+                    } else {
+                        // record.sh picks the region with slurp; on Windows that's the region
+                        // selector (which also stops a running ffmpeg fallback recording).
+                        Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "region", "record"]);
+                    }
+                }
                 MaterialSymbol {
                     horizontalAlignment: Qt.AlignHCenter
                     fill: 1
-                    text: "videocam"
+                    // Windows' native recorder reports its state: the button becomes the stop toggle.
+                    text: ScreenshotAction.windowsNativeRecording ? "stop_circle" : "videocam"
                     iconSize: Appearance.font.pixelSize.large
                     color: Appearance.colors.colOnLayer2
                 }

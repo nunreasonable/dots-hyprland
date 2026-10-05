@@ -269,10 +269,22 @@ Singleton {
      */
     function sendDesktop(summary, body, extraArgs = []) {
         if (Platform.isWindows) {
-            notifServer.notifySend(summary, body, extraArgs);
-            return;
+            // The id lets callers that passed "-A" actions match desktopActionInvoked.
+            return notifServer.notifySend(summary, body, extraArgs);
         }
         Quickshell.execDetached(["notify-send", summary, body, ...extraArgs]);
+        return 0;
+    }
+
+    // Windows only: an action of a sendDesktop() notification was clicked. On Linux
+    // notify-send prints the action instead, so this never fires there.
+    signal desktopActionInvoked(id: int, action: string)
+    Connections {
+        target: Platform.isWindows ? notifServer : null
+        ignoreUnknownSignals: true
+        function onActionInvoked(id, action) {
+            root.desktopActionInvoked(id, action);
+        }
     }
 
     Component.onCompleted: {

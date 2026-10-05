@@ -2,6 +2,7 @@ pragma ComponentBehavior: Bound
 import qs
 import qs.modules.common
 import qs.modules.common.functions
+import qs.modules.common.utils
 import qs.modules.common.widgets
 import qs.services
 import QtQuick
@@ -40,13 +41,23 @@ Scope {
         regionSelectorLoader.item.imageAction = WRegionSelectionPanel.ImageAction.CharRecognition;
     }
 
+    // Windows' native recorder: the record binds stop a running recording (record.sh's toggle
+    // does that on Linux) instead of opening the selector again.
+    function stopNativeRecording() {
+        if (!(Platform.isWindows && ScreenshotAction.windowsNativeRecording)) return false;
+        ScreenshotAction.stopWindowsRecording();
+        return true;
+    }
+
     function record() {
+        if (root.stopNativeRecording()) return;
         GlobalStates.regionSelectorOpen = true;
         regionSelectorLoader.item.mediaType = WRegionSelectionPanel.MediaType.Video;
         regionSelectorLoader.item.videoAction = WRegionSelectionPanel.VideoAction.Record;
     }
 
     function recordWithSound() {
+        if (root.stopNativeRecording()) return;
         GlobalStates.regionSelectorOpen = true;
         regionSelectorLoader.item.mediaType = WRegionSelectionPanel.MediaType.Video;
         regionSelectorLoader.item.videoAction = WRegionSelectionPanel.VideoAction.RecordWithSound;

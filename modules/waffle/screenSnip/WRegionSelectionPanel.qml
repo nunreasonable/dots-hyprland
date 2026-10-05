@@ -161,6 +161,18 @@ PanelWindow {
                 }
                 const screenshotDir = Config.options.screenSnip.savePath !== "" ? Config.options.screenSnip.savePath : "";
                 const screenshotAction = root.getScreenshotAction();
+                if (Platform.isWindows) {
+                    // No bash pipeline on Windows: the native helpers do the work (see
+                    // ScreenshotAction.runWindows()).
+                    ScreenshotAction.runWindows(dragArea.selectionX * root.monitorScale,
+                        dragArea.selectionY * root.monitorScale,
+                        dragArea.selectionWidth * root.monitorScale,
+                        dragArea.selectionHeight * root.monitorScale,
+                        root.screenshotPath, screenshotAction, screenshotDir,
+                        root.hyprlandMonitor.x, root.hyprlandMonitor.y);
+                    root.close();
+                    return;
+                }
                 const command = ScreenshotAction.getCommand(dragArea.selectionX * root.monitorScale //
                 , dragArea.selectionY * root.monitorScale //
                 , dragArea.selectionWidth * root.monitorScale//
