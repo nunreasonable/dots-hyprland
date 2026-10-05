@@ -80,8 +80,39 @@ Singleton {
         root.data = temp;
     }
 
+    property var windowsRequest: null
+
+    function getDataWindows() {
+        const place = (root.gpsActive && root.location.valid) ? `${root.location.lat},${root.location.long}` : root.formatCityName(root.city);
+        root.windowsRequest?.abort();
+        const xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState !== XMLHttpRequest.DONE || xhr.status === 0) return;
+            if (xhr.status !== 200) {
+                console.error(`[WeatherService] wttr.in answered ${xhr.status}`);
+                return;
+            }
+            try {
+                const json = JSON.parse(xhr.responseText);
+                root.refineData({
+                    current: json.current_condition?.[0],
+                    location: json.nearest_area?.[0],
+                    astronomy: json.weather?.[0]?.astronomy?.[0]
+                });
+            } catch (e) {
+                console.error(`[WeatherService] ${e.message}`);
+            }
+        };
+        xhr.open("GET", `https://wttr.in/${encodeURI(place)}?format=j1`);
+        xhr.send();
+        root.windowsRequest = xhr;
+    }
+
     function getData() {
-        if (Platform.isWindows) return;
+        if (Platform.isWindows) {
+            root.getDataWindows();
+            return;
+        }
         let command = "curl -s wttr.in";
 
         if (root.gpsActive && root.location.valid) {
