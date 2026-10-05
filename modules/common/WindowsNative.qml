@@ -55,6 +55,9 @@ Singleton {
     // see services/WindowsTerminalTheme.qml. Not merged into the Quickshell fork yet; null
     // until it is, same as every other property here before `ready`.
     readonly property QtObject terminalColors: _impl ? _impl.terminalColors : null
+    // Optional native tiling (Hyprland style dwindle) on top of the window tracker, on
+    // Windows' own virtual desktops - bound from shell.qml, see Config.options.windowsPort.tiling.
+    readonly property QtObject tiling: _impl ? _impl.tiling : null
 
     Component.onCompleted: {
         if (!Platform.isWindows) return;

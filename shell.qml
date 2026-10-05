@@ -48,6 +48,38 @@ ShellRoot {
         property: "enabled"
         value: Config.options.windowsPort.backgroundBehindIcons
     }
+    // Native tiling: state belongs to this process (like the taskbar setting above), so only
+    // the shell binds it, not settings or other qs windows of this config.
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
+        property: "enabled"
+        value: Config.options.windowsPort.tiling.enable
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
+        property: "gapsIn"
+        value: Config.options.windowsPort.tiling.gapsIn
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
+        property: "gapsOut"
+        value: Config.options.windowsPort.tiling.gapsOut
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
+        property: "preserveSplit"
+        value: Config.options.windowsPort.tiling.preserveSplit
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
+        property: "excluded"
+        value: Config.options.windowsPort.tiling.excluded
+    }
 
     // Panel families
     property list<string> families: ["ii", "waffle"]
