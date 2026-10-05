@@ -289,17 +289,6 @@ Singleton {
         return 0;
     }
 
-    // Windows only: an action of a sendDesktop() notification was clicked. On Linux
-    // notify-send prints the action instead, so this never fires there.
-    signal desktopActionInvoked(id: int, action: string)
-    Connections {
-        target: Platform.isWindows ? notifServer : null
-        ignoreUnknownSignals: true
-        function onActionInvoked(id, action) {
-            root.desktopActionInvoked(id, action);
-        }
-    }
-
     Component.onCompleted: {
         refresh()
     }
