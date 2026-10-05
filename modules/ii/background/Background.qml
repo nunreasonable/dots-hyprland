@@ -22,6 +22,20 @@ Variants {
     id: root
     model: Quickshell.screens
 
+    // Windows: the input (and drawn) area of a widget in the widgets window above the desktop
+    // icons. Padded for the shadows and the press animation, which would be clipped otherwise.
+    component WidgetMaskRegion: Region {
+        required property Loader loader
+        required property Item canvas
+        readonly property Item widget: loader.item
+        readonly property bool shown: widget !== null && loader.visible && widget.visible
+        readonly property int padding: 16
+        x: shown ? Math.floor(canvas.x + loader.x + widget.x) - padding : 0
+        y: shown ? Math.floor(canvas.y + loader.y + widget.y) - padding : 0
+        width: shown ? Math.ceil(widget.width) + padding * 2 : 0
+        height: shown ? Math.ceil(widget.height) + padding * 2 : 0
+    }
+
     PanelWindow {
         id: bgRoot
 
@@ -71,10 +85,20 @@ Variants {
             animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
         }
 
+        // Windows: inside the desktop this window is behind the desktop icons, which take the
+        // mouse everywhere, so the widgets move to a window of their own above the icons (still
+        // part of the desktop; see the aboveIcons binding in shell.qml). It only covers the
+        // widgets: they can be dragged and the icons work around them. Not while locked, when
+        // this window is the lock screen's background.
+        readonly property bool widgetsAboveIcons: Platform.isWindows && (WindowsNative.desktopLayer?.active ?? false) && !GlobalStates.screenLocked
+        readonly property Item widgetsSlot: widgetsWindowLoader.item?.slot ?? null
+
         // Layer props
         screen: modelData
         exclusionMode: ExclusionMode.Ignore
-        WlrLayershell.layer: (GlobalStates.screenLocked && !scaleAnim.running) ? WlrLayer.Overlay : WlrLayer.Bottom
+        // Background on Windows: if the desktop refuses these windows, the wallpaper stays below
+        // the widgets window as a bottom-most window.
+        WlrLayershell.layer: (GlobalStates.screenLocked && !scaleAnim.running) ? WlrLayer.Overlay : (Platform.isWindows ? WlrLayer.Background : WlrLayer.Bottom)
         // WlrLayershell.layer: WlrLayer.Bottom
         WlrLayershell.namespace: "quickshell:background"
         anchors {
@@ -140,7 +164,47 @@ Variants {
             }
         }
 
+        LazyLoader {
+            id: widgetsWindowLoader
+            active: Platform.isWindows
+
+            PanelWindow {
+                id: widgetsWindow
+                readonly property Item slot: widgetsSlotItem
+
+                screen: bgRoot.modelData
+                visible: bgRoot.widgetsAboveIcons
+                exclusionMode: ExclusionMode.Ignore
+                WlrLayershell.layer: WlrLayer.Bottom
+                WlrLayershell.namespace: "quickshell:backgroundWidgets"
+                anchors {
+                    top: true
+                    bottom: true
+                    left: true
+                    right: true
+                }
+                color: "transparent"
+
+                mask: Region {
+                    WidgetMaskRegion {
+                        loader: weatherLoader
+                        canvas: widgetCanvas
+                    }
+                    WidgetMaskRegion {
+                        loader: clockLoader
+                        canvas: widgetCanvas
+                    }
+                }
+
+                Item {
+                    id: widgetsSlotItem
+                    anchors.fill: parent
+                }
+            }
+        }
+
         Item {
+            id: wallpaperLayer
             anchors.fill: parent
 
             // Wallpaper
@@ -242,6 +306,7 @@ Variants {
 
             WidgetCanvas {
                 id: widgetCanvas
+                parent: bgRoot.widgetsAboveIcons && bgRoot.widgetsSlot ? bgRoot.widgetsSlot : wallpaperLayer
                 width: parent.width
                 height: parent.height
                 readonly property real parallaxFactor: {
@@ -271,6 +336,7 @@ Variants {
                 }
 
                 FadeLoader {
+                    id: weatherLoader
                     shown: Config.options.background.widgets.weather.enable
                     sourceComponent: WeatherWidget {
                         screenWidth: bgRoot.screen.width
@@ -282,6 +348,7 @@ Variants {
                 }
 
                 FadeLoader {
+                    id: clockLoader
                     shown: Config.options.background.widgets.clock.enable
                     sourceComponent: ClockWidget {
                         screenWidth: bgRoot.screen.width

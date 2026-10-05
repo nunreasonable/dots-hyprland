@@ -48,6 +48,14 @@ ShellRoot {
         property: "enabled"
         value: Config.options.windowsPort.backgroundBehindIcons
     }
+    // The background's widgets get their own window above the desktop icons, so they still
+    // take the mouse (see modules/ii/background/Background.qml).
+    Binding {
+        when: Platform.isWindows && WindowsNative.ready
+        target: WindowsNative.desktopLayer
+        property: "aboveIcons"
+        value: ["quickshell:backgroundWidgets"]
+    }
 
     // Panel families
     property list<string> families: ["ii", "waffle"]

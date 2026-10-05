@@ -20,7 +20,7 @@ ContentPage {
                 Config.options.windowsPort.backgroundBehindIcons = checked;
             }
             StyledToolTip {
-                text: Translation.tr("The wallpaper and its widgets become part of the Windows desktop: the icons show on top, and Show desktop (Win+D) keeps them.\nThe icons take the mouse there, so widgets can't be dragged; turn this off to move them.\nIf the desktop isn't available, the background stays a window.")
+                text: Translation.tr("The wallpaper and its widgets become part of the Windows desktop, and Show desktop (Win+D) keeps them.\nThe wallpaper goes behind the icons; the widgets stay above them and can still be dragged, and the icons work everywhere around them.\nIf the desktop isn't available, the background stays a window.")
             }
         }
     }
