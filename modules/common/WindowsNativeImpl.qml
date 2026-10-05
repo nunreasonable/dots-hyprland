@@ -27,6 +27,7 @@ QtObject {
     readonly property QtObject thumbnailer: QSWin.Thumbnailer
     readonly property QtObject fsUtils: QSWin.FsUtils
     readonly property QtObject taskbar: QSWin.Taskbar
+    readonly property QtObject desktopLayer: QSWin.DesktopLayer
     readonly property QtObject screenshot: QSWin.Screenshot
     readonly property QtObject ocr: QSWin.Ocr
     readonly property QtObject screenRecorder: QSWin.ScreenRecorder
