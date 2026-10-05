@@ -438,6 +438,7 @@ Item {
         id: screenshotImage
         z: 1
         asynchronous: false
+        cache: !Platform.isWindows
         width: root.windowWidth
         height: root.windowHeight
         source: Platform.isWindows ? `file:///${root.screenshotPath}` : Qt.resolvedUrl(root.screenshotPath)
