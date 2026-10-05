@@ -109,11 +109,13 @@ Singleton {
     // Cleanup on init
     Component.onCompleted: {
         if (Platform.isWindows) {
-            // No Linux cache/cleanup dirs to pre-create: Quickshell's FileView creates
-            // parent directories on write (see fileview.cpp's dir.mkpath), which is all
-            // the boot-critical paths here (config.json, state/user/*) need. The media
-            // cache dirs below are only touched by Linux-only download features that
-            // aren't active yet on Windows.
+            // Most Linux cache/cleanup dirs don't need pre-creating: Quickshell's FileView
+            // creates parent directories on write (see fileview.cpp's dir.mkpath), which is
+            // all the boot-critical paths here (config.json, state/user/*) need. latexOutput
+            // is the exception: MicroTeX's own process writes the .svg directly (no FileView
+            // involved), so the directory has to exist before LatexRenderer spawns it.
+            Quickshell.execDetached(["powershell", "-NoProfile", "-Command",
+                `New-Item -ItemType Directory -Force -Path "${latexOutput}" | Out-Null`]);
             return;
         }
         Quickshell.execDetached(["mkdir", "-p", `${shellConfig}`])

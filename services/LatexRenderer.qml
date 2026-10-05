@@ -5,6 +5,7 @@ import qs.modules.common.functions
 import qs.modules.common
 import QtQuick
 import Quickshell
+import Quickshell.Io
 
 /**
  * Renders LaTeX snippets with MicroTeX.
@@ -47,10 +48,8 @@ Singleton {
             // console.log("Rendering expression: " + expression)
         }
 
-        // No MicroTeX build for Windows; behave the same way Linux does when the binary
-        // isn't installed (signal finished with an image that was never produced).
         if (Platform.isWindows) {
-            root.renderFinished(hash, imagePath)
+            root._requestRenderWindows(hash, expression, imagePath)
             return [hash, true]
         }
 
@@ -86,5 +85,87 @@ Singleton {
         // console.log("MicroTeX: " + processQml)
         Qt.createQmlObject(processQml, root, `MicroTeXProcess_${hash}`)
         return [hash, true]
+    }
+
+    // --- Windows ---------------------------------------------------------------------------
+    //
+    // ii-windows ships a cross-compiled MicroTeX (toolchain/microtex/LaTeX.exe, built against
+    // the Qt backend instead of cairo/gtk - see docs/HANDOFF.md) next to matugen.exe in the
+    // install dir. There's no native "application dir" accessor in QML (matugenPath() is the
+    // only one, on Wallpaper), so the install dir is derived from it rather than adding one:
+    // matugen.exe and LaTeX.exe are deployed as siblings by tools/deploy-ii.sh.
+    //
+    // Unlike the Linux branch, this spawns LaTeX.exe directly (no shell), so expression text
+    // goes straight into the Process.command array with no quoting to get wrong - QProcess
+    // builds the Win32 command line itself from that array.
+
+    property Component _windowsProcessComponent: Component {
+        Process {
+            running: false
+        }
+    }
+
+    function _requestRenderWindows(hash, expression, imagePath) {
+        const matugenExe = WindowsNative.ready && WindowsNative.wallpaper ? WindowsNative.wallpaper.matugenPath() : ""
+        if (!matugenExe) {
+            // Dev build that hasn't run tools/deploy-ii.sh, or (unlike the Linux "MicroTeX
+            // isn't installed" fallback this otherwise mirrors) just WindowsNativeImpl.qml
+            // still loading asynchronously on the very first chat message after boot - a
+            // transient condition, not a permanent one. Un-mark the hash (requestRender()
+            // already pushed it before calling us) so it isn't stuck "processed" with no
+            // image for the rest of the session: renderLatex() in MessageTextBlock.qml reruns
+            // on every segmentContent/done change during a streaming reply, so this retries on
+            // its own a moment later once WindowsNative is ready.
+            const idx = root.processedHashes.indexOf(hash)
+            if (idx !== -1) root.processedHashes.splice(idx, 1)
+            console.warn("[LatexRenderer] can't locate the install dir (matugenPath() empty); will retry")
+            root.renderFinished(hash, imagePath)
+            return
+        }
+        const installDir = matugenExe.substring(0, Math.max(matugenExe.lastIndexOf("/"), matugenExe.lastIndexOf("\\")))
+        const exePath = `${installDir}/LaTeX.exe`
+
+        const proc = root._windowsProcessComponent.createObject(root, {
+            command: [
+                exePath,
+                "-headless",
+                `-input=${expression}`,
+                `-output=${imagePath}`,
+                `-textsize=${Appearance.font.pixelSize.normal}`,
+                `-padding=${renderPadding}`,
+                `-foreground=${Appearance.colors.colOnLayer1}`,
+                "-maxwidth=0.85",
+            ],
+            workingDirectory: installDir,
+        })
+
+        // Process.exited never fires when the OS fails to launch the program at all (missing
+        // exe, e.g. an incomplete deploy that has matugen.exe but not LaTeX.exe yet) - Quickshell's
+        // Process::onErrorOccurred(FailedToStart) tears the process down and only emits
+        // runningChanged, so without this the hash would stay unfinished forever and `proc`
+        // would leak. `_finished` makes the two paths mutually exclusive: onFinished emits
+        // exited() then runningChanged() synchronously in that order (see process.cpp), so the
+        // `exited` handler below always wins the race for a normal exit.
+        let _finished = false
+        const finish = () => {
+            if (_finished) return
+            _finished = true
+            renderedImagePaths[hash] = imagePath
+            root.renderFinished(hash, imagePath)
+            proc.destroy()
+        }
+        proc.exited.connect((exitCode, exitStatus) => {
+            if (exitCode !== 0) {
+                console.warn(`[LatexRenderer] LaTeX.exe exited with code ${exitCode} for hash ${hash}`)
+            }
+            finish()
+        })
+        proc.runningChanged.connect(() => {
+            if (!proc.running && !_finished) {
+                console.warn(`[LatexRenderer] LaTeX.exe failed to start for hash ${hash} (missing/broken deploy?)`)
+                finish()
+            }
+        })
+        proc.running = true
     }
 }
