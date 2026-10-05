@@ -130,15 +130,9 @@ Singleton {
             monitor.ready = false;
             if (Platform.isWindows) {
                 if (!WindowsNative.brightness) {
-                    // WindowsNativeImpl hasn't finished loading yet; try again next tick.
                     Qt.callLater(() => monitor.initialize());
                     return;
                 }
-                // Don't talk DDC/CI to the monitor on startup: a query at boot, together with the
-                // monitor's own OSD and the Linux host also using DDC, froze the ASUS VG259Q5A's
-                // firmware. probe() only asks WMI, which knows laptop panels; anything else is
-                // assumed at full brightness and gets DDC/CI (or software dimming, where DDC/CI
-                // doesn't work) once the user changes it. The answer comes to windowsQuery below.
                 WindowsNative.brightness.probe(monitor.screen.name);
                 return;
             }
@@ -149,9 +143,6 @@ Singleton {
             initProc.running = true;
         }
 
-        // Windows: Brightness.query() is async (DDC/WMI run on a worker thread), so the result
-        // comes back as a signal rather than a process exit. A property, since QtObject has no
-        // default property to hold children.
         readonly property Connections windowsQuery: Connections {
             target: Platform.isWindows ? WindowsNative.brightness : null
             function onQueried(screenName, available, queriedIsDdc, queriedBrightness) {
@@ -238,7 +229,6 @@ Singleton {
             property string screenName: modelData.name
             property string screenshotPath: `${root.screenshotDir}/screenshot-${screenName}.png`
             Connections {
-                // No grim/magick on Windows to sample screen content with; antiflashbang stays off.
                 enabled: Config.options.light.antiFlashbang.enable && Appearance.m3colors.darkmode && !Platform.isWindows
                 target: Hyprland
                 function onRawEvent(event) {

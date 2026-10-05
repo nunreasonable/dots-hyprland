@@ -41,8 +41,6 @@ Scope {
         regionSelectorLoader.item.imageAction = WRegionSelectionPanel.ImageAction.CharRecognition;
     }
 
-    // Windows' native recorder: the record binds stop a running recording (record.sh's toggle
-    // does that on Linux) instead of opening the selector again.
     function stopNativeRecording() {
         if (!(Platform.isWindows && ScreenshotAction.windowsNativeRecording)) return false;
         ScreenshotAction.stopWindowsRecording();

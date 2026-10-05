@@ -10,9 +10,6 @@ Singleton {
     property list<int> altKeys: [56, 100] // Keycodes for Alt keys (left and right)
     property list<int> ctrlKeys: [29, 97] // Keycodes for Ctrl keys (left and right)
 
-    // Windows: keycodes this service pressed and hasn't released yet. releaseAllKeys() only
-    // releases these, since injecting a key-up for every key (what ydotool does on Linux) also
-    // runs at startup and would reach every app and the hotkey hook.
     property var windowsPressed: ({})
 
     function releaseAllKeys() {

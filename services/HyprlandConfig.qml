@@ -20,7 +20,6 @@ Singleton {
     readonly property string shellOverridesPath: FileUtils.trimFileProtocol(`${Directories.config}/hypr/hyprland/shellOverrides/main.lua`)
 
     function set(key: string, value: var) {
-        // No Hyprland config to override on Windows (window visuals are DWM's, not ii's).
         if (Platform.isWindows) return;
         Quickshell.execDetached(["bash", "-c", //
             `${root.configuratorScriptPath} --file ${root.shellOverridesPath} --set "${key}" "${value}"` //

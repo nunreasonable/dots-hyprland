@@ -35,8 +35,6 @@ Singleton {
 
     function handleFirstRun() {
         if (Platform.isWindows) {
-            // The first wallpaper is the one Windows already shows (Wallpapers.adoptSystemWallpaper),
-            // so first run leaves the user's Windows wallpaper and theme alone.
             Wallpapers.adoptSystemWallpaper();
             Quickshell.execDetached(["qs", "-p", root.welcomeQmlPath]);
             return;

@@ -1,15 +1,6 @@
 import Quickshell.Windows as QSWin
 import QtQml
 
-/**
- * The only file in this fork allowed to `import Quickshell.Windows`.
- *
- * That module doesn't exist on Linux, so a bare `import` of it would fail to even
- * parse any file that had it at the top level - breaking Linux builds. WindowsNative.qml
- * (the thing every service actually imports) only ever instantiates this file through
- * Qt.createComponent(), and only when Platform.isWindows, so the import above is never
- * resolved outside Windows.
- */
 QtObject {
     readonly property QtObject session: QSWin.Session
     readonly property QtObject stats: QSWin.SystemStats

@@ -63,17 +63,8 @@ Singleton {
         }
     }
 
-    // --- Windows ---------------------------------------------------------------------------
-    // songrec.exe is SongRec's recognizer built for Windows (GPL-3.0, shipped separately - see
-    // the README). Its `recognize` does what recognize-music.sh does around `songrec listen`:
-    // records the default output device (WASAPI loopback, --loopback) or the default
-    // microphone, asks Shazam every `interval` seconds, prints the first match as Shazam's JSON
-    // and exits, or exits empty-handed after `timeout` seconds.
-
     property string windowsSongrecPath: ""
     property int windowsNotificationId: -1
-    // Snapshot of monitorSource for the run in flight, so a device error names the source
-    // that was actually recorded even if the toggle is flipped again before songrec.exe exits.
     property var windowsRunMonitorSource: SongRec.MonitorSource.Monitor
 
     function toggleRunningWindows(running) {
@@ -81,7 +72,6 @@ Singleton {
         if (!start) {
             if (windowsRecognizeProc.running) {
                 root.manuallyStopped = true;
-                // running = false only posts WM_CLOSE, which a console program never sees.
                 windowsRecognizeProc.signal(9);
             }
             return;
@@ -89,8 +79,6 @@ Singleton {
         if (windowsRecognizeProc.running) return;
 
         const fsUtils = WindowsNative.fsUtils;
-        // Without FsUtils.findExecutable (older qs.exe), let CreateProcess search qs.exe's
-        // folder and PATH for it.
         const path = (fsUtils && typeof fsUtils.findExecutable === "function")
             ? fsUtils.findExecutable("songrec.exe") : "songrec.exe";
         if (!path) {
@@ -108,7 +96,6 @@ Singleton {
     }
 
     function handleWindowsExit(exitCode, text) {
-        // 2-4 are songrec.exe's own exit codes for these (see toolchain/songrec/songrec-win).
         if (exitCode === 2) {
             Notifications.sendDesktop(Translation.tr("Couldn't recognize music"),
                 root.windowsRunMonitorSource === SongRec.MonitorSource.Monitor
@@ -138,7 +125,6 @@ Singleton {
         target: Platform.isWindows ? Notifications : null
         function onDesktopActionInvoked(id, action) {
             if (id !== root.windowsNotificationId) return;
-            // Unnamed -A actions are numbered like notify-send's ("0" = Shazam, "1" = YouTube).
             if (action === "0") {
                 Qt.openUrlExternally(root.recognizedTrack.url);
             } else if (action === "1") {
@@ -165,8 +151,6 @@ Singleton {
             root.handleWindowsExit(exitCode, windowsRecognizeStdout.text);
         }
     }
-
-    // --- Linux -----------------------------------------------------------------------------
 
     Process {
         id: recognizeMusicProc

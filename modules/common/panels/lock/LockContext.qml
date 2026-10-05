@@ -79,7 +79,7 @@ Scope {
 
     Process {
         id: fingerprintCheckProc
-        running: !Platform.isWindows // No fprintd on Windows; fingerprintsConfigured stays false
+        running: !Platform.isWindows
         command: ["bash", "-c", "fprintd-list $(whoami)"]
         stdout: StdioCollector {
             id: fingerprintOutputCollector

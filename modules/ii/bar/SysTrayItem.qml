@@ -18,7 +18,6 @@ MouseArea {
     signal menuClosed()
 
     hoverEnabled: true
-    // Windows: middle click opens the menu below with just Pin/Unpin
     acceptedButtons: Qt.LeftButton | Qt.RightButton | (Platform.isWindows ? Qt.MiddleButton : Qt.NoButton)
     implicitWidth: 20
     implicitHeight: 20
@@ -29,8 +28,6 @@ MouseArea {
             break;
         case Qt.RightButton:
             if (Platform.isWindows) {
-                // Windows tray icons have no menu model to render: the app draws its own
-                // context menu when told about the right click.
                 item.display(root.QsWindow.window, event.x, event.y);
                 break;
             }

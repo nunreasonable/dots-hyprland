@@ -22,8 +22,6 @@ Variants {
     id: root
     model: Quickshell.screens
 
-    // Windows: the input (and drawn) area of a widget in the widgets window above the desktop
-    // icons. Padded for the shadows and the press animation, which would be clipped otherwise.
     component WidgetMaskRegion: Region {
         required property Loader loader
         required property Item canvas
@@ -85,19 +83,12 @@ Variants {
             animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
         }
 
-        // Windows: inside the desktop this window is behind the desktop icons, which take the
-        // mouse everywhere, so the widgets move to a window of their own above the icons (still
-        // part of the desktop; see the aboveIcons binding in shell.qml). It only covers the
-        // widgets: they can be dragged and the icons work around them. Not while locked, when
-        // this window is the lock screen's background.
         readonly property bool widgetsAboveIcons: Platform.isWindows && (WindowsNative.desktopLayer?.active ?? false) && !GlobalStates.screenLocked
         readonly property Item widgetsSlot: widgetsWindowLoader.item?.slot ?? null
 
         // Layer props
         screen: modelData
         exclusionMode: ExclusionMode.Ignore
-        // Background on Windows: if the desktop refuses these windows, the wallpaper stays below
-        // the widgets window as a bottom-most window.
         WlrLayershell.layer: (GlobalStates.screenLocked && !scaleAnim.running) ? WlrLayer.Overlay : (Platform.isWindows ? WlrLayer.Background : WlrLayer.Bottom)
         // WlrLayershell.layer: WlrLayer.Bottom
         WlrLayershell.namespace: "quickshell:background"
@@ -124,7 +115,6 @@ Variants {
         // Wallpaper zoom scale
         function updateZoomScale() {
             if (Platform.isWindows) {
-                // No ImageMagick there; the image header gives the same numbers.
                 const size = WindowsNative.imageTools?.imageSize(bgRoot.wallpaperPath);
                 if (size && size.width > 0 && size.height > 0) bgRoot.applyWallpaperSize(size.width, size.height);
                 return;
@@ -133,7 +123,6 @@ Variants {
             getWallpaperSizeProc.running = true;
         }
         Connections {
-            // The native helpers load asynchronously; the first wallpaper may come before them.
             target: Platform.isWindows ? WindowsNative : null
             function onReadyChanged() {
                 if (WindowsNative.ready) bgRoot.updateZoomScale();

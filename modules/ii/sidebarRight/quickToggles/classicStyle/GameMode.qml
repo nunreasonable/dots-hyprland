@@ -6,7 +6,6 @@ import Quickshell.Io
 
 QuickToggleButton {
     id: root
-    // No Hyprland config keywords to flip on Windows (window visuals are DWM's)
     visible: !Platform.isWindows
     buttonIcon: "gamepad"
     toggled: toggled

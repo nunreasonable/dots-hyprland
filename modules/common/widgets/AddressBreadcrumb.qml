@@ -21,7 +21,6 @@ ListView {
     clip: true
     spacing: 2
 
-    // Windows: "C:/" splits into ["C:", ""]; the drive is the first crumb (shown as C:\).
     readonly property var parts: Platform.isWindows ? breadcrumbDirectory.split("/").filter((part, i) => i === 0 || part !== "") : breadcrumbDirectory.split("/")
     model: parts
     delegate: SelectionGroupButton {

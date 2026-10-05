@@ -162,8 +162,6 @@ PanelWindow {
                 const screenshotDir = Config.options.screenSnip.savePath !== "" ? Config.options.screenSnip.savePath : "";
                 const screenshotAction = root.getScreenshotAction();
                 if (Platform.isWindows) {
-                    // No bash pipeline on Windows: the native helpers do the work (see
-                    // ScreenshotAction.runWindows()).
                     ScreenshotAction.runWindows(dragArea.selectionX * root.monitorScale,
                         dragArea.selectionY * root.monitorScale,
                         dragArea.selectionWidth * root.monitorScale,

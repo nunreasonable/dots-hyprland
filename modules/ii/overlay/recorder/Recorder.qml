@@ -61,7 +61,6 @@ StyledOverlayWidget {
                     onClicked: {
                         GlobalStates.overlayOpen = false;
                         if (Platform.isWindows) {
-                            // Toggles like record.sh: a second click stops the recording.
                             ScreenshotAction.toggleWindowsScreenRecording(Hyprland.focusedMonitor, true);
                         } else {
                             Quickshell.execDetached([Directories.recordScriptPath, "--fullscreen", "--sound"]);
@@ -79,8 +78,6 @@ StyledOverlayWidget {
                 colRipple: Appearance.colors.colLayer3Active
                 onClicked: {
                     GlobalStates.overlayOpen = false;
-                    // A Windows path needs the third slash ("file:///C:/..."), or the drive
-                    // letter is read as a host name.
                     Qt.openUrlExternally(`file://${Platform.isWindows ? "/" : ""}${Config.options.screenRecord.savePath}`);
                 }
                 contentItem: Row {

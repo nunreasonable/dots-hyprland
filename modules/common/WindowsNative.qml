@@ -5,18 +5,6 @@ import QtQuick
 import Quickshell
 import qs.modules.common
 
-/**
- * Safe-to-import-everywhere gateway to the native Quickshell.Windows singletons
- * (Session, SystemStats, Brightness, Keyboard, Clipboard, Credentials, Input, NightLight, Hotkeys,
- * NotificationSettings, Network, Screenshot, Ocr, ScreenRecorder, TerminalColors).
- *
- * Services that need one of those read it from here (e.g. `WindowsNative.stats.cpuUsage`)
- * instead of importing Quickshell.Windows directly, since that module only exists on
- * Windows - see WindowsNativeImpl.qml for why a direct import would break Linux.
- *
- * Every property below is null until `ready` (false on Linux, and briefly during Windows
- * startup while the component loads).
- */
 Singleton {
     id: root
 
@@ -32,9 +20,6 @@ Singleton {
     readonly property QtObject input: _impl ? _impl.input : null
     readonly property QtObject nightLight: _impl ? _impl.nightLight : null
     readonly property QtObject hotkeys: _impl ? _impl.hotkeys : null
-    // openSettings(): Windows' own notification settings, where its toast banners (which
-    // still show next to ii's popups) can be turned off; openAccessSettings(): the privacy
-    // switch that lets ii read the notification center.
     readonly property QtObject notificationSettings: _impl ? _impl.notificationSettings : null
     readonly property QtObject network: _impl ? _impl.network : null
     readonly property QtObject wallpaper: _impl ? _impl.wallpaper : null
@@ -42,21 +27,11 @@ Singleton {
     readonly property QtObject thumbnailer: _impl ? _impl.thumbnailer : null
     readonly property QtObject fsUtils: _impl ? _impl.fsUtils : null
     readonly property QtObject taskbar: _impl ? _impl.taskbar : null
-    // Whether Background/Bottom layer panels live inside the Windows desktop, behind the icons.
     readonly property QtObject desktopLayer: _impl ? _impl.desktopLayer : null
-    // Still screen capture + file crop (region selector) and Windows.Media.Ocr text recognition.
     readonly property QtObject screenshot: _impl ? _impl.screenshot : null
     readonly property QtObject ocr: _impl ? _impl.ocr : null
-    // Region/screen recording to .mp4 without ffmpeg (Windows.Graphics.Capture + Media
-    // Foundation). Check `available` (false e.g. on Windows N without the Media Feature Pack, or
-    // a Quickshell build without it, where this is null) - see ScreenshotAction.qml.
     readonly property QtObject screenRecorder: _impl ? _impl.screenRecorder : null
-    // Terminal color harmonization (generate_colors_material.py's terminal part, natively) -
-    // see services/WindowsTerminalTheme.qml. Not merged into the Quickshell fork yet; null
-    // until it is, same as every other property here before `ready`.
     readonly property QtObject terminalColors: _impl ? _impl.terminalColors : null
-    // Optional native tiling (Hyprland style dwindle) on top of the window tracker, on
-    // Windows' own virtual desktops - bound from shell.qml, see Config.options.windowsPort.tiling.
     readonly property QtObject tiling: _impl ? _impl.tiling : null
 
     Component.onCompleted: {

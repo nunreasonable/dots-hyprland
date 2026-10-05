@@ -10,7 +10,6 @@ QuickToggleModel {
     id: root
     name: Translation.tr("Cloudflare WARP")
 
-    // No warp-cli build for Windows.
     available: !Platform.isWindows
     toggled: false
     icon: "cloud_lock"
@@ -59,7 +58,7 @@ QuickToggleModel {
 
     Process {
         id: fetchActiveState
-        running: !Platform.isWindows // No warp-cli build for Windows; available stays false
+        running: !Platform.isWindows
         command: ["bash", "-c", "warp-cli status"]
         stdout: StdioCollector {
             id: warpStatusCollector

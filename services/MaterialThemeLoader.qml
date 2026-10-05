@@ -44,11 +44,6 @@ Singleton {
 
         Appearance.m3colors.darkmode = (Appearance.m3colors.m3background.hslLightness < 0.5)
 
-        // Best-effort accent color sync: there's no Linux equivalent (GTK/Qt/KDE apps read
-        // Appearance.m3colors directly or through their own matugen templates), but on
-        // Windows the taskbar/title bars/Start only ever see DWM's own accent color, so push
-        // this palette's primary color into it too. See Wallpaper::setAccentColor() for why
-        // only AccentColor/ColorizationColor are set, not the Explorer accent palette.
         if (Platform.isWindows && json.primary && WindowsNative.wallpaper) {
             WindowsNative.wallpaper.setAccentColor(json.primary)
         }
@@ -83,10 +78,6 @@ Singleton {
         id: themeFileView
         path: Qt.resolvedUrl(root.filePath)
         watchChanges: true
-        // On Windows this only exists after the first successful matugen.exe run
-        // (services/Wallpapers.qml); a missing file before that, or matugen.exe missing or
-        // failing, just means "use Appearance's built-in default palette", not an error
-        // worth printing.
         printErrors: !Platform.isWindows
         onFileChanged: {
             this.reload()

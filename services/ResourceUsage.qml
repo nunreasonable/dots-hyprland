@@ -11,9 +11,6 @@ import Quickshell.Io
  */
 Singleton {
     id: root
-	// On Windows these start out bound to WindowsNative.stats (SystemStats); the Linux Timer
-	// below imperatively overwrites them every tick, which detaches that binding there (and is
-	// a no-op on Windows, since that Timer never runs there).
 	property real memoryTotal: Platform.isWindows ? (WindowsNative.stats ? WindowsNative.stats.memoryTotalKb : 1) : 1
 	property real memoryFree: Platform.isWindows ? (WindowsNative.stats ? WindowsNative.stats.memoryAvailableKb : 0) : 0
 	property real memoryUsed: memoryTotal - memoryFree
@@ -62,9 +59,6 @@ Singleton {
         updateCpuUsageHistory()
     }
 
-	// Windows: memoryTotal/cpuUsage/etc above are already live bindings onto WindowsNative.stats
-	// (SystemStats samples on its own timer); this just periodically snapshots them into the
-	// history lists the graphs read.
 	Timer {
 		interval: Config.options?.resources?.updateInterval ?? 3000
 		running: Platform.isWindows
@@ -110,7 +104,7 @@ Singleton {
         }
 	}
 
-	FileView { id: fileMeminfo; path: Platform.isWindows ? "" : "/proc/meminfo" } // stats come from WindowsNative there
+	FileView { id: fileMeminfo; path: Platform.isWindows ? "" : "/proc/meminfo" }
     FileView { id: fileStat; path: Platform.isWindows ? "" : "/proc/stat" }
 
     Process {

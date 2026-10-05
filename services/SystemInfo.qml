@@ -24,17 +24,12 @@ Singleton {
     property string desktopEnvironment: ""
     property string windowingSystem: ""
 
-    // Windows: no /etc/os-release or whoami; the edition and version come from the registry
-    // (WindowsNative.session.osInfo), the links are Microsoft's own.
     property string windowsBuild: ""
     function loadWindowsInfo() {
         const info = WindowsNative.session?.osInfo() ?? ({});
         root.distroName = [info.name ?? "Windows", info.version ?? ""].join(" ").trim();
         root.windowsBuild = info.build ?? "";
         root.distroId = "windows";
-        // Windows 11's logo is Microsoft's four squares; Windows 10 (builds below 22000) has the
-        // window in perspective. The symbolic icon is recolored (bar, sidebar); the About page
-        // shows the logo as is, so it gets the colored one.
         const windows10 = parseInt(root.windowsBuild) < 22000;
         root.distroIcon = windows10 ? "windows10-symbolic" : "microsoft-symbolic";
         root.logo = windows10 ? "windows10-logo" : "windows11-logo";
@@ -44,7 +39,7 @@ Singleton {
         root.homeUrl = "https://www.microsoft.com/windows";
         root.documentationUrl = "https://support.microsoft.com/windows";
         root.supportUrl = "https://support.microsoft.com/contactus";
-        root.bugReportUrl = "feedback-hub:"; // Feedback Hub app
+        root.bugReportUrl = "feedback-hub:";
         root.privacyPolicyUrl = "https://privacy.microsoft.com/privacystatement";
     }
     Connections {
@@ -148,6 +143,6 @@ Singleton {
 
     FileView {
         id: fileOsRelease
-        path: Platform.isWindows ? "" : "/etc/os-release" // see the Windows branch above
+        path: Platform.isWindows ? "" : "/etc/os-release"
     }
 }

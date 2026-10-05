@@ -11,8 +11,7 @@ pragma ComponentBehavior: Bound
 
 /**
  * Provides a list of wallpapers and an "apply" action that calls the existing
- * switchwall.sh script (or, on Windows, the native matugen.exe + IDesktopWallpaper pipeline -
- * see applyWindows() below). Pretty much a limited file browsing service.
+ * switchwall.sh script. Pretty much a limited file browsing service.
  */
 Singleton {
     id: root
@@ -38,9 +37,6 @@ Singleton {
 
     function load () {} // For forcing initialization
 
-    // Windows: ii has no wallpaper of its own until one is picked, so it starts from the one
-    // Windows already shows (in its current light/dark mode), changing nothing in Windows.
-    // Linux gets its first wallpaper from switchwall.sh in FirstRunExperience instead.
     function adoptSystemWallpaper() {
         const wn = WindowsNative.wallpaper;
         if (!wn || !Config.ready || Config.options.background.wallpaperPath) return;
@@ -65,9 +61,6 @@ Singleton {
 
     function openFallbackPicker(darkMode = Appearance.m3colors.darkmode) {
         if (Platform.isWindows) {
-            // No kdialog/native file-dialog integration yet; fall back to ii's own grid
-            // picker instead of doing nothing (this path is only reached when the user has
-            // Config.options.wallpaperSelector.useSystemFileDialog set, which defaults off).
             console.warn("[Wallpapers] Native file dialog not available on Windows yet, opening the in-shell picker instead");
             GlobalStates.wallpaperSelectorOpen = true;
             return;
@@ -75,10 +68,6 @@ Singleton {
         Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--mode", darkMode ? "dark" : "light"]);
     }
 
-    // Opens ii's own wallpaper selector grid - the cross-platform equivalent of the "choose
-    // wallpaper file" buttons' kdialog call on Linux (modules/settings/QuickConfig.qml,
-    // welcome.qml): there's no native Windows file-picker wired up, and the grid is upstream's
-    // own default anyway (Config.options.wallpaperSelector.useSystemFileDialog is off by default).
     function openPicker() {
         if (Platform.isWindows) {
             GlobalStates.wallpaperSelectorOpen = true;
@@ -90,8 +79,6 @@ Singleton {
     function apply(path, darkMode = Appearance.m3colors.darkmode) {
         if (!path || path.length === 0) return;
         if (Platform.isWindows) {
-            // A new explicit image always wins over a previously-picked custom accent color,
-            // same as switchwall.sh's main() clearing it once --image/a positional path is given.
             Config.options.appearance.palette.accentColor = "";
             root._retheme(path, darkMode);
         } else {
@@ -100,9 +87,6 @@ Singleton {
         root.changed()
     }
 
-    // Re-themes without changing the wallpaper image (switchwall.sh's `--noswitch`): dark/light
-    // toggle buttons (DarkModeToggle, LightDarkPreferenceButton, UtilButtons, QuickConfig,
-    // MaterialThemeLoader.toggleLightDark, LauncherSearch's "dark"/"light" actions).
     function setMode(dark) {
         if (Platform.isWindows) {
             root._retheme(Config.options.background.wallpaperPath, dark);
@@ -111,8 +95,6 @@ Singleton {
         }
     }
 
-    // Re-themes the current wallpaper/color with whatever's in Config right now (switchwall.sh's
-    // bare `--noswitch`): used after changing the palette type (QuickConfig's scheme selector).
     function reapplyPalette() {
         if (Platform.isWindows) {
             root._retheme(Config.options.background.wallpaperPath, Appearance.m3colors.darkmode);
@@ -121,10 +103,6 @@ Singleton {
         }
     }
 
-    // Sets (or clears) a custom Material You accent color, overriding the wallpaper-derived one
-    // (switchwall.sh's `--color <hex|clear>` / LauncherSearch's "accentcolor" action). A bare/
-    // invalid `hexOrClear` means "pick interactively" on Linux (hyprpicker); Windows has no
-    // picker wired up yet, so that case just warns instead of silently doing nothing unexplained.
     function setAccentColor(hexOrClear) {
         if (Platform.isWindows) {
             if (!hexOrClear || hexOrClear === "clear") {
@@ -143,14 +121,9 @@ Singleton {
         Quickshell.execDetached(args);
     }
 
-    // Windows equivalent of switchwall.sh's switch(): matugen.exe regenerates the Material You
-    // palette (colors.json, picked up by MaterialThemeLoader's FileView) while
-    // WindowsNative.wallpaper drives the OS-level state matugen has no access to (the desktop
-    // wallpaper image and Settings' light/dark toggle).
-    // applyToSystem false only themes ii itself (see adoptSystemWallpaper()).
     function _retheme(path, darkMode, applyToSystem = true) {
         const wn = WindowsNative.wallpaper;
-        if (!wn) return; // native backend not ready yet (very early startup)
+        if (!wn) return;
 
         const hasPath = !!path && path.length > 0;
         if (hasPath && root.isVideoPath(path)) {
@@ -171,7 +144,7 @@ Singleton {
 
         const accentColor = Config.options.appearance.palette.accentColor;
         const hasAccentColor = /^#[0-9a-fA-F]{6}$/.test(accentColor ?? "");
-        if (!hasAccentColor && !hasPath) return; // nothing to theme from
+        if (!hasAccentColor && !hasPath) return;
 
         const matugenExe = wn.matugenPath();
         if (!matugenExe) {
@@ -186,10 +159,6 @@ Singleton {
                 : "scheme-tonal-spot";
         }
 
-        // --source-color-index 0 (most dominant color) is required whenever an image can
-        // yield more than one candidate source color: without it matugen prompts
-        // interactively, which just hangs/errors ("not a terminal") since nothing reads that
-        // prompt here. switchwall.sh always passes this for the same reason.
         const args = [matugenExe, "--source-color-index", "0", "-c", windowsMatugenConfig.path, "-m", darkMode ? "dark" : "light", "-t", schemeType];
         if (hasAccentColor) {
             args.push("color", "hex", accentColor);
@@ -197,17 +166,11 @@ Singleton {
             args.push("image", path);
         }
 
-        // matugen writes `output_path` as given and colors.json lives in the profile-dependent
-        // StateLocation, so the config is written with the real paths first; matugen runs
-        // once it is saved.
-        // FileView skips writes of unchanged text (and then never emits saved), so matugen only
-        // waits for the config when it is new.
         const config = root._windowsMatugenConfigText();
         if (config === root._writtenMatugenConfig) {
             root._runMatugen(args);
             return;
         }
-        // Until the write lands, only the latest request runs (once, from onSaved).
         root._pendingMatugen = args;
         if (config !== root._writingMatugenConfig) {
             root._writingMatugenConfig = config;
@@ -216,8 +179,8 @@ Singleton {
     }
 
     property var _pendingMatugen: null
-    property string _writtenMatugenConfig: "" // on disk
-    property string _writingMatugenConfig: "" // write in flight
+    property string _writtenMatugenConfig: ""
+    property string _writingMatugenConfig: ""
 
     function _runMatugen(args) {
         matugenProc.command = args;
@@ -226,7 +189,6 @@ Singleton {
     }
 
     function _windowsMatugenConfigText() {
-        // TOML literal strings take paths as they are; a quote in one needs a basic string.
         const toml = s => s.indexOf("'") === -1 ? `'${s}'` : JSON.stringify(s);
         const template = FileUtils.trimFileProtocol(Directories.windowsMatugenTemplatePath);
         return `[config]\nversion_check = false\n\n[templates.m3colors]\n`
@@ -262,10 +224,6 @@ Singleton {
         }
     }
 
-    // select(): applies `filePath` as the wallpaper, or browses into it if it's a directory.
-    // `isDirectory` is the caller's already-known `fileIsDir` role from `folderModel` (every
-    // call site gets `filePath` from that same model) - cheaper and more portable than this
-    // used to be, when it ran `test -d` in a child process just to find out the same thing.
     function select(filePath, isDirectory, darkMode = Appearance.m3colors.darkmode) {
         if (isDirectory) {
             root.setDirectory(filePath);
@@ -316,7 +274,7 @@ Singleton {
                 root.directory = Qt.resolvedUrl(nicePath);
             } else if (kind === "file") {
                 root.directory = Qt.resolvedUrl(FileUtils.parentDirectory(nicePath));
-            } // else: ignore, same as the Linux branch below
+            }
             return;
         }
         validateDirProc.setDirectoryIfValid(path)
@@ -393,12 +351,6 @@ Singleton {
         }
     }
 
-    // Windows thumbnail generation: QImageReader on a worker thread per image
-    // (WindowsNative.thumbnailer), since there's no bundled `magick`/Python venv to shell out
-    // to for the whole directory at once like thumbgen-venv.sh / generate-thumbnails-magick.sh
-    // do on Linux. `_windowsPendingThumbnails` maps each queued output path (computed with the
-    // same Images.thumbnailPathFor() formula the per-item ThumbnailImage.qml uses) back to its
-    // source, for matching Thumbnailer's completion signal and reporting progress.
     property var _windowsPendingThumbnails: ({})
     property int _windowsThumbnailTotal: 0
 
@@ -411,7 +363,6 @@ Singleton {
             const fileName = folderModel.get(i, "fileName");
             if (!Images.isValidImageByName(fileName)) continue;
             const filePath = folderModel.get(i, "filePath");
-            // Plain paths: the thumbnailer writes files and reports them back by path.
             pending[FileUtils.trimFileProtocol(Images.thumbnailPathFor(filePath, size))] = filePath;
         }
 

@@ -183,7 +183,6 @@ ContentPage {
                     mainText: enabled ? Translation.tr("Generate\nTypically takes 2 minutes") : Translation.tr("Generating...\nDon't close this window!")
                     onClicked: {
                         if (Platform.isWindows) {
-                            // gemini-translate.sh has no Windows port yet.
                             Notifications.sendDesktop(
                                 Translation.tr("Generate translation with Gemini"),
                                 Translation.tr("Not available on Windows yet"),
@@ -319,7 +318,6 @@ ContentPage {
                 currentValue: Config.options.time.format
                 onSelected: newValue => {
                     if (Platform.isWindows) {
-                        // No hyprlock.conf to keep in sync; the lock screen is Windows'.
                     } else if (newValue === "hh:mm") {
                         Quickshell.execDetached(["bash", "-c", `sed -i 's/\\TIME12\\b/TIME/' '${FileUtils.trimFileProtocol(Directories.config)}/hypr/hyprlock.conf'`]);
                     } else {

@@ -30,10 +30,6 @@ Singleton {
         return "xx-large";
     }
 
-    // Freedesktop thumbnail cache path for `filePath` at `sizeName`: shared by
-    // modules/common/widgets/ThumbnailImage.qml and services/Wallpapers.qml's Windows bulk
-    // thumbnail generation, so both land on the exact same file the Linux side's
-    // generate-thumbnails-magick.sh (its own md5()/urlencode() reimplementation of this) does.
     function thumbnailPathFor(filePath: string, sizeName: string): string {
         if (!filePath || filePath.length === 0) return "";
         const resolvedUrlWithoutFileProtocol = FileUtils.trimFileProtocol(`${Qt.resolvedUrl(filePath)}`);

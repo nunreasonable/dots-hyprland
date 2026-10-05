@@ -149,8 +149,6 @@ Singleton {
         }
     }
 
-    // Windows: qalc only if Qalculate is installed; otherwise plain arithmetic in JS, limited to
-    // digits and operators so nothing but a number can come out of it.
     property bool windowsHasQalc: false
     Process {
         running: Platform.isWindows
@@ -271,9 +269,6 @@ Singleton {
                 iconType: LauncherSearchResult.IconType.System,
                 verb: Translation.tr("Open"),
                 execute: () => {
-                    // No freedesktop Terminal=true entries expected on Windows (DesktopEntries
-                    // there reads Start Menu shortcuts, not .desktop files), but fall back to
-                    // running it directly rather than a nonexistent bash+terminal wrap just in case.
                     if (!entry.runInTerminal || Platform.isWindows)
                         entry.execute();
                     else {
@@ -315,8 +310,6 @@ Singleton {
                     cleanedCommand = cleanedCommand.slice(Config.options.search.prefix.shellCommand.length);
                 }
                 if (Platform.isWindows) {
-                    // No sudo/terminal-wrap semantics on Windows. PowerShell, not cmd: QProcess
-                    // escapes quotes as \" for C runtime parsing, which cmd.exe doesn't understand.
                     Quickshell.execDetached(["powershell", "-NoProfile", "-Command", cleanedCommand]);
                     return;
                 }

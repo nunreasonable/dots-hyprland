@@ -28,14 +28,13 @@ StyledImage {
     }
 
     Connections {
-        // Windows: a thumbnail asked for before the native helpers loaded is made once they are.
         target: Platform.isWindows ? WindowsNative : null
         function onReadyChanged() { if (WindowsNative.ready) root.sourceSizeChanged() }
     }
     onSourceSizeChanged: {
         if (!root.generateThumbnail) return;
         if (Platform.isWindows) {
-            if (!WindowsNative.thumbnailer) return; // native backend not ready yet
+            if (!WindowsNative.thumbnailer) return;
             const maxSize = Images.thumbnailSizes[root.thumbnailSizeName];
             WindowsNative.thumbnailer.generate(
                 FileUtils.trimFileProtocol(root.sourcePath),
@@ -47,14 +46,12 @@ StyledImage {
         thumbnailGeneration.running = false;
         thumbnailGeneration.running = true;
     }
-    // Windows equivalent of thumbnailGeneration below: QImageReader on a worker thread instead
-    // of shelling out to `magick` (which isn't bundled/installed on Windows).
     Connections {
         target: WindowsNative.thumbnailer
         function onFinished(sourcePath, outputPath, ok) {
             if (!ok || outputPath !== FileUtils.trimFileProtocol(root.thumbnailPath)) return;
             root.source = "";
-            root.source = root.thumbnailPath; // Force reload
+            root.source = root.thumbnailPath;
         }
     }
     Process {

@@ -51,7 +51,6 @@ Item {
         repeat: false
         onTriggered: () => {
             if (root.inputField.text.trim().length > 0 && Platform.isWindows) {
-                // Windows has no `trans`: the same free endpoint it uses, from QML.
                 root.windowsRequest?.abort();
                 root.windowsRequest = GoogleTranslateFree.translate(root.sourceLanguage, root.targetLanguage,
                     root.inputField.text.trim(), translated => root.translatedText = translated);
@@ -86,10 +85,6 @@ Item {
         }
     }
 
-    // `trans -list-languages` isn't available on Windows either, so the list is the fixed
-    // set of language codes the "gtx" endpoint above accepts (same set translate-shell itself
-    // lists for the Google engine). Kept in code order with "auto" first, same contract as
-    // the Linux branch's result.
     readonly property list<string> windowsLanguageCodes: ["auto", "af", "sq", "am", "ar", "hy", "as", "ay", "az",
         "bm", "eu", "be", "bn", "bho", "bs", "bg", "ca", "ceb", "ny", "zh-CN", "zh-TW", "co", "hr", "cs", "da",
         "dv", "doi", "nl", "en", "eo", "et", "ee", "fil", "fi", "fr", "fy", "gl", "ka", "de", "el", "gn", "gu",

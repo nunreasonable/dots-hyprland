@@ -34,8 +34,6 @@ ShellRoot {
     }
 
 
-    // Windows: the taskbar setting belongs to the shell process only (settings and other qs
-    // windows of this config don't touch it).
     Binding {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.taskbar
@@ -48,8 +46,6 @@ ShellRoot {
         property: "enabled"
         value: Config.options.windowsPort.backgroundBehindIcons
     }
-    // Native tiling: state belongs to this process (like the taskbar setting above), so only
-    // the shell binds it, not settings or other qs windows of this config.
     Binding {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.tiling
@@ -80,8 +76,6 @@ ShellRoot {
         property: "excluded"
         value: Config.options.windowsPort.tiling.excluded
     }
-    // The background's widgets get their own window above the desktop icons, so they still
-    // take the mouse (see modules/ii/background/Background.qml).
     Binding {
         when: Platform.isWindows && WindowsNative.ready
         target: WindowsNative.desktopLayer

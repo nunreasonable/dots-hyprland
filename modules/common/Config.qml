@@ -393,25 +393,14 @@ Singleton {
                 property bool filterDuplicatePlayers: true
             }
 
-            // Windows only.
             property JsonObject windowsPort: JsonObject {
-                // Windows' taskbar comes up only when the cursor reaches the bottom edge, never
-                // because an app flashed or nothing else had focus (turns its auto-hide on).
                 property bool taskbarHoverOnly: true
-                // The background goes inside the Windows desktop instead of being a window of its
-                // own: the wallpaper behind the desktop icons, its widgets above them (still
-                // draggable; the icons work around them). Off: a bottom-most window.
                 property bool backgroundBehindIcons: true
-                // Optional native tiling (Hyprland's dwindle, same values as
-                // dots/.config/hypr/hyprland/general.lua) on Windows' own virtual desktops.
-                // Off by default: no window moves until turned on.
                 property JsonObject tiling: JsonObject {
                     property bool enable: false
                     property int gapsIn: 4
                     property int gapsOut: 5
                     property bool preserveSplit: true
-                    // Always-float rules: process name ("vlc.exe"), AppUserModelID, window
-                    // class, or "title:<pattern>" for the window title (*, ? wildcards).
                     property list<string> excluded: [
                         "title:illogical-impulse Settings",
                         "title:*Welcome",
@@ -427,7 +416,6 @@ Singleton {
 
             property JsonObject notifications: JsonObject {
                 property int timeout: 7000
-                // Read by NotificationPopup and the settings page but missing upstream.
                 property JsonObject forceMonitor: JsonObject {
                     property bool enable: false
                     property string name: ""
@@ -581,7 +569,7 @@ Singleton {
             }
 
             property JsonObject screenRecord: JsonObject {
-                property string savePath: Directories.videos.replace(/^file:\/\/(\/(?=[A-Za-z]:))?/, "") // strip "file://" (and the "/" before a Windows drive)
+                property string savePath: Directories.videos.replace(/^file:\/\/(\/(?=[A-Za-z]:))?/, "") // strip "file://"
             }
 
             property JsonObject screenSnip: JsonObject {

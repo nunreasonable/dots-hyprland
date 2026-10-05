@@ -74,8 +74,6 @@ Item { // Player instance
         // Download
         root.downloaded = false
         if (Platform.isWindows && WindowsNative.fsUtils?.classify(root.artFilePath) === "file") {
-            // Already downloaded; curl.exe still exists on Windows but there's no `[ -f ]`
-            // to skip the request, so check with the native helper instead.
             root.downloaded = true
             return
         }

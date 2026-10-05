@@ -12,9 +12,6 @@ import qs.modules.common
 Singleton {
     id: root
     // You can read these
-    // On Windows these are bound directly onto WindowsNative.keyboard (Keyboard); the Hyprland
-    // event handling below never fires there (no Hyprland IPC connection), so there's no
-    // imperative write to conflict with the binding.
     property list<string> layoutCodes: Platform.isWindows ? (WindowsNative.keyboard ? WindowsNative.keyboard.layoutCodes : []) : []
     property var cachedLayoutCodes: ({})
     property string currentLayoutName: Platform.isWindows ? (WindowsNative.keyboard ? WindowsNative.keyboard.currentLayoutName : "") : ""
@@ -26,7 +23,7 @@ Singleton {
     // Update the layout code according to the layout name (Hyprland gives the name not the code)
     onCurrentLayoutNameChanged: root.updateLayoutCode()
     function updateLayoutCode() {
-        if (Platform.isWindows) return; // No xkb base.lst / hyprctl devices on Windows
+        if (Platform.isWindows) return;
         if (cachedLayoutCodes.hasOwnProperty(currentLayoutName)) {
             root.currentLayoutCode = cachedLayoutCodes[currentLayoutName];
         } else {

@@ -358,10 +358,6 @@ Singleton {
 
     Process {
         id: getOllamaModels
-        // The Linux script is a bash/awk wrapper around `ollama list`; ollama.exe ships the
-        // same command on Windows, so just run it directly and parse the plain-text table
-        // (skip the header line, take the first column) instead of bash + jq-shaped JSON.
-        // Through cmd so a machine without ollama gets an empty list, not a failed spawn.
         running: true
         command: Platform.isWindows ? ["cmd", "/c", "ollama", "list"] : ["bash", "-c", `${Directories.scriptPath}/ai/show-installed-ollama-models.sh`.replace(/file:\/\//, "")]
         stdout: StdioCollector {
@@ -397,7 +393,6 @@ Singleton {
         else getSavedChats.running = true;
     }
 
-    // Windows: the `ls -1` listings below, read natively (cmd's dir would mangle non-ASCII names).
     function listWindowsFiles() {
         const fs = WindowsNative.fsUtils;
         if (!fs) return;
@@ -418,7 +413,7 @@ Singleton {
 
     Process {
         id: getDefaultPrompts
-        running: !Platform.isWindows // see listWindowsFiles()
+        running: !Platform.isWindows
         command: ["ls", "-1", Directories.defaultAiPrompts]
         stdout: StdioCollector {
             onStreamFinished: {
@@ -433,7 +428,7 @@ Singleton {
 
     Process {
         id: getUserPrompts
-        running: !Platform.isWindows // see listWindowsFiles()
+        running: !Platform.isWindows
         command: ["ls", "-1", Directories.userAiPrompts]
         stdout: StdioCollector {
             onStreamFinished: {
@@ -448,7 +443,7 @@ Singleton {
 
     Process {
         id: getSavedChats
-        running: !Platform.isWindows // see listWindowsFiles()
+        running: !Platform.isWindows
         command: ["ls", "-1", Directories.aiChats]
         stdout: StdioCollector {
             onStreamFinished: {

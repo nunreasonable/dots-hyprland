@@ -27,8 +27,6 @@ Rectangle {
         root.imageWidth = -1;
         root.imageHeight = -1;
         if (Platform.isWindows) {
-            // No `file`/`identify` on Windows: guess from the extension, and size the image
-            // (if it is one) with the native ImageTools helper instead of ImageMagick.
             root.mimeType = root.guessMimeTypeFromExtension(filePath);
             if (root.mimeType.startsWith("image/")) {
                 const size = WindowsNative.imageTools?.imageSize(filePath);

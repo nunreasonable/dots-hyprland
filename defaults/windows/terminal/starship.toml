@@ -1,6 +1,3 @@
-# ii's Starship config, copied as-is from the dots' ~/.config/starship.toml - nothing in it is
-# Linux-specific, so keep this file in sync with that one rather than diverging.
-
 # Don't print a new line at the start of the prompt
 add_newline = false
 # Pipes ╰─ ╭─

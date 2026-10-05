@@ -26,7 +26,7 @@ QuickToggleButton {
     }
 
     onClicked: {
-        if (Platform.isWindows) return; // No warp-cli build for Windows
+        if (Platform.isWindows) return;
         if (toggled) {
             root.toggled = false
             Quickshell.execDetached(["warp-cli", "disconnect"])
@@ -69,7 +69,7 @@ QuickToggleButton {
 
     Process {
         id: fetchActiveState
-        running: !Platform.isWindows // No warp-cli build for Windows; stays hidden (visible: false above)
+        running: !Platform.isWindows
         command: ["bash", "-c", "warp-cli status"]
         stdout: StdioCollector {
             id: warpStatusCollector
