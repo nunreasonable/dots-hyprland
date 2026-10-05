@@ -440,7 +440,7 @@ Item {
         asynchronous: false
         width: root.windowWidth
         height: root.windowHeight
-        source: Qt.resolvedUrl(root.screenshotPath)
+        source: Platform.isWindows ? `file:///${root.screenshotPath}` : Qt.resolvedUrl(root.screenshotPath)
         visible: false
     }
 
