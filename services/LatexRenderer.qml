@@ -5,6 +5,7 @@ import qs.modules.common.functions
 import qs.modules.common
 import QtQuick
 import Quickshell
+import Quickshell.Io
 
 /**
  * Renders LaTeX snippets with MicroTeX.
@@ -47,10 +48,8 @@ Singleton {
             // console.log("Rendering expression: " + expression)
         }
 
-        // No MicroTeX build for Windows; behave the same way Linux does when the binary
-        // isn't installed (signal finished with an image that was never produced).
         if (Platform.isWindows) {
-            root.renderFinished(hash, imagePath)
+            root._requestRenderWindows(hash, expression, imagePath)
             return [hash, true]
         }
 
@@ -86,5 +85,59 @@ Singleton {
         // console.log("MicroTeX: " + processQml)
         Qt.createQmlObject(processQml, root, `MicroTeXProcess_${hash}`)
         return [hash, true]
+    }
+
+    // --- Windows ---------------------------------------------------------------------------
+    //
+    // ii-windows ships a cross-compiled MicroTeX (toolchain/microtex/LaTeX.exe, built against
+    // the Qt backend instead of cairo/gtk - see docs/HANDOFF.md) next to matugen.exe in the
+    // install dir. There's no native "application dir" accessor in QML (matugenPath() is the
+    // only one, on Wallpaper), so the install dir is derived from it rather than adding one:
+    // matugen.exe and LaTeX.exe are deployed as siblings by tools/deploy-ii.sh.
+    //
+    // Unlike the Linux branch, this spawns LaTeX.exe directly (no shell), so expression text
+    // goes straight into the Process.command array with no quoting to get wrong - QProcess
+    // builds the Win32 command line itself from that array.
+
+    property Component _windowsProcessComponent: Component {
+        Process {
+            running: false
+        }
+    }
+
+    function _requestRenderWindows(hash, expression, imagePath) {
+        const matugenExe = WindowsNative.ready && WindowsNative.wallpaper ? WindowsNative.wallpaper.matugenPath() : ""
+        if (!matugenExe) {
+            // Dev build that hasn't run tools/deploy-ii.sh, or WindowsNative isn't ready yet:
+            // behave like Linux does when MicroTeX isn't installed.
+            console.warn("[LatexRenderer] can't locate the install dir (matugenPath() empty); skipping render")
+            root.renderFinished(hash, imagePath)
+            return
+        }
+        const installDir = matugenExe.substring(0, Math.max(matugenExe.lastIndexOf("/"), matugenExe.lastIndexOf("\\")))
+        const exePath = `${installDir}/LaTeX.exe`
+
+        const proc = root._windowsProcessComponent.createObject(root, {
+            command: [
+                exePath,
+                "-headless",
+                `-input=${expression}`,
+                `-output=${imagePath}`,
+                `-textsize=${Appearance.font.pixelSize.normal}`,
+                `-padding=${renderPadding}`,
+                `-foreground=${Appearance.colors.colOnLayer1}`,
+                "-maxwidth=0.85",
+            ],
+            workingDirectory: installDir,
+        })
+        proc.exited.connect((exitCode, exitStatus) => {
+            if (exitCode !== 0) {
+                console.warn(`[LatexRenderer] LaTeX.exe exited with code ${exitCode} for hash ${hash}`)
+            }
+            renderedImagePaths[hash] = imagePath
+            root.renderFinished(hash, imagePath)
+            proc.destroy()
+        })
+        proc.running = true
     }
 }
