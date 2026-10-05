@@ -72,6 +72,9 @@ Singleton {
 
     property string windowsSongrecPath: ""
     property int windowsNotificationId: -1
+    // Snapshot of monitorSource for the run in flight, so a device error names the source
+    // that was actually recorded even if the toggle is flipped again before songrec.exe exits.
+    property var windowsRunMonitorSource: SongRec.MonitorSource.Monitor
 
     function toggleRunningWindows(running) {
         const start = running !== undefined ? running : !windowsRecognizeProc.running;
@@ -99,6 +102,7 @@ Singleton {
             return;
         }
         root.windowsSongrecPath = path;
+        root.windowsRunMonitorSource = root.monitorSource;
         root.manuallyStopped = false;
         windowsRecognizeProc.running = true;
     }
@@ -107,7 +111,7 @@ Singleton {
         // 2-4 are songrec.exe's own exit codes for these (see toolchain/songrec/songrec-win).
         if (exitCode === 2) {
             Notifications.sendDesktop(Translation.tr("Couldn't recognize music"),
-                root.monitorSource === SongRec.MonitorSource.Monitor
+                root.windowsRunMonitorSource === SongRec.MonitorSource.Monitor
                     ? Translation.tr("Couldn't record the system sound")
                     : Translation.tr("Couldn't record the microphone"),
                 ["-a", "Shell"]);
