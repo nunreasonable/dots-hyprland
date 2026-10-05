@@ -32,4 +32,5 @@ QtObject {
     readonly property QtObject ocr: QSWin.Ocr
     readonly property QtObject screenRecorder: QSWin.ScreenRecorder
     readonly property QtObject terminalColors: QSWin.TerminalColors
+    readonly property QtObject tiling: QSWin.Tiling
 }

@@ -402,6 +402,23 @@ Singleton {
                 // behind the desktop icons, instead of being a window of its own. The icons then
                 // get the mouse, so the widgets can't be dragged. Off: a bottom-most window.
                 property bool backgroundBehindIcons: true
+                // Optional native tiling (Hyprland's dwindle, same values as
+                // dots/.config/hypr/hyprland/general.lua) on Windows' own virtual desktops.
+                // Off by default: no window moves until turned on.
+                property JsonObject tiling: JsonObject {
+                    property bool enable: false
+                    property int gapsIn: 4
+                    property int gapsOut: 5
+                    property bool preserveSplit: true
+                    // Always-float rules: process name ("vlc.exe"), AppUserModelID, window
+                    // class, or "title:<pattern>" for the window title (*, ? wildcards).
+                    property list<string> excluded: [
+                        "title:illogical-impulse Settings",
+                        "title:*Welcome",
+                        "title:Picture-in-Picture*",
+                        "title:Picture in picture*"
+                    ]
+                }
             }
 
             property JsonObject networking: JsonObject {

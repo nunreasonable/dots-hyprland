@@ -161,6 +161,72 @@ ContentPage {
     }
 
     ContentSection {
+        visible: Platform.isWindows
+        icon: "dashboard"
+        title: Translation.tr("Windows tiling")
+
+        ConfigSwitch {
+            buttonIcon: "grid_view"
+            text: Translation.tr("Tile windows")
+            checked: Config.options.windowsPort.tiling.enable
+            onCheckedChanged: {
+                Config.options.windowsPort.tiling.enable = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Arranges windows in a dwindle layout (like Hyprland) inside the space left by the bar and the taskbar.\nOff by default; turning it off puts every window back where it was before tiling.")
+            }
+        }
+
+        ConfigSpinBox {
+            icon: "space_bar"
+            text: Translation.tr("Gap between windows (px)")
+            value: Config.options.windowsPort.tiling.gapsIn
+            from: 0
+            to: 64
+            stepSize: 1
+            onValueChanged: {
+                Config.options.windowsPort.tiling.gapsIn = value;
+            }
+        }
+
+        ConfigSpinBox {
+            icon: "space_dashboard"
+            text: Translation.tr("Gap to screen edges (px)")
+            value: Config.options.windowsPort.tiling.gapsOut
+            from: 0
+            to: 64
+            stepSize: 1
+            onValueChanged: {
+                Config.options.windowsPort.tiling.gapsOut = value;
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "splitscreen"
+            text: Translation.tr("Keep each split's direction")
+            checked: Config.options.windowsPort.tiling.preserveSplit
+            onCheckedChanged: {
+                Config.options.windowsPort.tiling.preserveSplit = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("A split keeps the direction it was made with until Super+\\ flips it.\nOff: a split follows its area's shape instead.")
+            }
+        }
+
+        ConfigRow {
+            MaterialTextArea {
+                Layout.fillWidth: true
+                placeholderText: Translation.tr("Apps that always float, one per line: process name (notepad.exe), app id, window class, or title:<pattern>")
+                text: Config.options.windowsPort.tiling.excluded.join("\n")
+                wrapMode: TextEdit.Wrap
+                onTextChanged: {
+                    Config.options.windowsPort.tiling.excluded = text.split("\n").map(s => s.trim()).filter(s => s.length > 0);
+                }
+            }
+        }
+    }
+
+    ContentSection {
         icon: "lock"
         title: Translation.tr("Lock screen")
         // Windows locks with its own lock screen (LockWorkStation); none of this applies there.
