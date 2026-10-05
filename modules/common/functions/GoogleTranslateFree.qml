@@ -11,17 +11,24 @@ import Quickshell
 Singleton {
     id: root
 
-    /// Builds the curl.exe argv for translating `text` from `sourceLanguage` to
-    /// `targetLanguage` (language codes, "auto" allowed for source). Passed straight to
-    /// Process.command: each value is its own argument, so cmd's quote-escaping rule
-    /// (see AGENTS.md) never comes into play.
-    function requestArgs(sourceLanguage: string, targetLanguage: string, text: string): list<string> {
-        // `--data-urlencode` (not plain `-d`) for `q`: curl's own URL parser rejects a raw
-        // space in the assembled URL, and -G/-d doesn't encode values for you.
-        return ["curl.exe", "-s", "-G", "https://translate.googleapis.com/translate_a/single",
-            "-d", "client=gtx", "-d", "dt=t",
-            "-d", `sl=${sourceLanguage}`, "-d", `tl=${targetLanguage}`,
-            "--data-urlencode", `q=${text}`];
+    /// Translates `text` from `sourceLanguage` to `targetLanguage` (language codes, "auto"
+    /// allowed) and calls `done` with the translation, or "" on failure. Returns the request,
+    /// so a caller can abort() one that a newer request replaces.
+    ///
+    /// Through Qt's own network stack rather than curl.exe: Google answers Windows' curl.exe
+    /// with its "unusual traffic" page, whatever the user agent, while this goes through.
+    function translate(sourceLanguage: string, targetLanguage: string, text: string, done: var): var {
+        const xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState !== XMLHttpRequest.DONE) return;
+            if (xhr.status === 0) return; // aborted, or no network: nothing to report
+            done(xhr.status === 200 ? root.parseResponse(xhr.responseText) : "");
+        };
+        xhr.open("GET", "https://translate.googleapis.com/translate_a/single?client=gtx&dt=t"
+            + `&sl=${encodeURIComponent(sourceLanguage)}&tl=${encodeURIComponent(targetLanguage)}`
+            + `&q=${encodeURIComponent(text)}`);
+        xhr.send();
+        return xhr;
     }
 
     /// Parses the response: a nested JSON array, e.g. [[["Hola","Hello",null,null,1]],null,"en"].

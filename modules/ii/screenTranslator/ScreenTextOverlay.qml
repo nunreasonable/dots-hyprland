@@ -72,31 +72,17 @@ Item {
             }
             root.windowsOcrText = text;
             root.windowsStage = "translate";
-            windowsTranslateProc.buffer = "";
-            windowsTranslateProc.command = GoogleTranslateFree.requestArgs("auto", Translation.languageCode, text);
-            windowsTranslateProc.running = true;
-        }
-    }
-
-    Process {
-        id: windowsTranslateProc
-        property string buffer: ""
-        stdout: SplitParser {
-            onRead: data => {
-                windowsTranslateProc.buffer += data + "\n";
-            }
-        }
-        onExited: (exitCode, exitStatus) => {
-            const translated = GoogleTranslateFree.parseResponse(windowsTranslateProc.buffer);
-            if (!translated) {
-                root.handleError(Translation.tr("Translation failed"));
-                return;
-            }
-            root.translation = ({
-                [root.windowsOcrText]: translated
+            GoogleTranslateFree.translate("auto", Translation.languageCode, text, translated => {
+                if (!translated) {
+                    root.handleError(Translation.tr("Translation failed"));
+                    return;
+                }
+                root.translation = ({
+                    [root.windowsOcrText]: translated
+                });
+                root.windowsStage = "";
+                root.loading = false;
             });
-            root.windowsStage = "";
-            root.loading = false;
         }
     }
 

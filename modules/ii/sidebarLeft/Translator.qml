@@ -50,7 +50,12 @@ Item {
         interval: Config.options.sidebar.translator.delay
         repeat: false
         onTriggered: () => {
-            if (root.inputField.text.trim().length > 0) {
+            if (root.inputField.text.trim().length > 0 && Platform.isWindows) {
+                // Windows has no `trans`: the same free endpoint it uses, from QML.
+                root.windowsRequest?.abort();
+                root.windowsRequest = GoogleTranslateFree.translate(root.sourceLanguage, root.targetLanguage,
+                    root.inputField.text.trim(), translated => root.translatedText = translated);
+            } else if (root.inputField.text.trim().length > 0) {
                 // console.log("Translating with command:", translateProc.command);
                 translateProc.running = false;
                 translateProc.buffer = ""; // Clear the buffer
@@ -61,14 +66,11 @@ Item {
         }
     }
 
+    property var windowsRequest: null
+
     Process {
         id: translateProc
-        // Windows has no `trans`: GoogleTranslateFree hits the same free endpoint it uses,
-        // through curl.exe (ships since 1803), with each value as its own argument so
-        // cmd's quote-escaping rule (see AGENTS.md) never comes into play.
-        command: Platform.isWindows
-            ? GoogleTranslateFree.requestArgs(root.sourceLanguage, root.targetLanguage, root.inputField.text.trim())
-            : ["bash", "-c", `trans -brief -no-bidi`
+        command: ["bash", "-c", `trans -brief -no-bidi`
                 + ` -source '${StringUtils.shellSingleQuoteEscape(root.sourceLanguage)}'`
                 + ` -target '${StringUtils.shellSingleQuoteEscape(root.targetLanguage)}'`
                 + ` '${StringUtils.shellSingleQuoteEscape(root.inputField.text.trim())}'`]
@@ -80,9 +82,7 @@ Item {
         }
         onExited: (exitCode, exitStatus) => {
             // With -brief mode, we get output with no metadata
-            root.translatedText = Platform.isWindows
-                ? GoogleTranslateFree.parseResponse(translateProc.buffer)
-                : translateProc.buffer.trim();
+            root.translatedText = translateProc.buffer.trim();
         }
     }
 
