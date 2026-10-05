@@ -108,9 +108,17 @@ Singleton {
     function _requestRenderWindows(hash, expression, imagePath) {
         const matugenExe = WindowsNative.ready && WindowsNative.wallpaper ? WindowsNative.wallpaper.matugenPath() : ""
         if (!matugenExe) {
-            // Dev build that hasn't run tools/deploy-ii.sh, or WindowsNative isn't ready yet:
-            // behave like Linux does when MicroTeX isn't installed.
-            console.warn("[LatexRenderer] can't locate the install dir (matugenPath() empty); skipping render")
+            // Dev build that hasn't run tools/deploy-ii.sh, or (unlike the Linux "MicroTeX
+            // isn't installed" fallback this otherwise mirrors) just WindowsNativeImpl.qml
+            // still loading asynchronously on the very first chat message after boot - a
+            // transient condition, not a permanent one. Un-mark the hash (requestRender()
+            // already pushed it before calling us) so it isn't stuck "processed" with no
+            // image for the rest of the session: renderLatex() in MessageTextBlock.qml reruns
+            // on every segmentContent/done change during a streaming reply, so this retries on
+            // its own a moment later once WindowsNative is ready.
+            const idx = root.processedHashes.indexOf(hash)
+            if (idx !== -1) root.processedHashes.splice(idx, 1)
+            console.warn("[LatexRenderer] can't locate the install dir (matugenPath() empty); will retry")
             root.renderFinished(hash, imagePath)
             return
         }
@@ -130,13 +138,33 @@ Singleton {
             ],
             workingDirectory: installDir,
         })
+
+        // Process.exited never fires when the OS fails to launch the program at all (missing
+        // exe, e.g. an incomplete deploy that has matugen.exe but not LaTeX.exe yet) - Quickshell's
+        // Process::onErrorOccurred(FailedToStart) tears the process down and only emits
+        // runningChanged, so without this the hash would stay unfinished forever and `proc`
+        // would leak. `_finished` makes the two paths mutually exclusive: onFinished emits
+        // exited() then runningChanged() synchronously in that order (see process.cpp), so the
+        // `exited` handler below always wins the race for a normal exit.
+        let _finished = false
+        const finish = () => {
+            if (_finished) return
+            _finished = true
+            renderedImagePaths[hash] = imagePath
+            root.renderFinished(hash, imagePath)
+            proc.destroy()
+        }
         proc.exited.connect((exitCode, exitStatus) => {
             if (exitCode !== 0) {
                 console.warn(`[LatexRenderer] LaTeX.exe exited with code ${exitCode} for hash ${hash}`)
             }
-            renderedImagePaths[hash] = imagePath
-            root.renderFinished(hash, imagePath)
-            proc.destroy()
+            finish()
+        })
+        proc.runningChanged.connect(() => {
+            if (!proc.running && !_finished) {
+                console.warn(`[LatexRenderer] LaTeX.exe failed to start for hash ${hash} (missing/broken deploy?)`)
+                finish()
+            }
         })
         proc.running = true
     }
