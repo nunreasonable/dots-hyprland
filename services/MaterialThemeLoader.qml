@@ -19,8 +19,20 @@ Singleton {
         themeFileView.reload()
     }
 
+    property int failedReads: 0
+
     function applyColors(fileContent) {
-        const json = JSON.parse(fileContent)
+        let json
+        try {
+            json = JSON.parse(fileContent)
+        } catch (e) {
+            if (root.failedReads++ < 20) {
+                themeFileView.reload()
+                delayedFileRead.restart()
+            }
+            return
+        }
+        root.failedReads = 0
         for (const key in json) {
             if (json.hasOwnProperty(key)) {
                 // Convert snake_case to CamelCase
