@@ -2,9 +2,11 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Hyprland
 import qs
 import qs.services
 import qs.modules.common
+import qs.modules.common.utils
 import qs.modules.common.widgets
 import qs.modules.ii.overlay
 
@@ -58,7 +60,12 @@ StyledOverlayWidget {
                     name: "Record screen"
                     onClicked: {
                         GlobalStates.overlayOpen = false;
-                        Quickshell.execDetached([Directories.recordScriptPath, "--fullscreen", "--sound"]);
+                        if (Platform.isWindows) {
+                            // Toggles like record.sh: a second click stops the recording.
+                            ScreenshotAction.toggleWindowsScreenRecording(Hyprland.focusedMonitor, true);
+                        } else {
+                            Quickshell.execDetached([Directories.recordScriptPath, "--fullscreen", "--sound"]);
+                        }
                     }
                 }
             }
@@ -72,7 +79,9 @@ StyledOverlayWidget {
                 colRipple: Appearance.colors.colLayer3Active
                 onClicked: {
                     GlobalStates.overlayOpen = false;
-                    Qt.openUrlExternally(`file://${Config.options.screenRecord.savePath}`);
+                    // A Windows path needs the third slash ("file:///C:/..."), or the drive
+                    // letter is read as a host name.
+                    Qt.openUrlExternally(`file://${Platform.isWindows ? "/" : ""}${Config.options.screenRecord.savePath}`);
                 }
                 contentItem: Row {
                     anchors.centerIn: parent

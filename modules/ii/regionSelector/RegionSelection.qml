@@ -202,11 +202,17 @@ PanelWindow {
     property bool isRecording: root.action === RegionSelection.SnipAction.Record || root.action === RegionSelection.SnipAction.RecordWithSound
     property bool recordingShouldStop: false
     // Windows only: set when not currently recording and ffmpeg isn't on PATH either (see
-    // ScreenshotAction.windowsRecordingStatusCommand()). Always false on Linux/non-Record.
+    // ScreenshotAction.windowsRecordingStatusCommand()). Always false on Linux/non-Record, and
+    // with the native recorder, which needs neither the check nor ffmpeg.
     property bool ffmpegMissing: false
+    // Windows' native recorder knows its state synchronously; asked once, when the selector opens.
+    readonly property bool nativeRecorder: Platform.isWindows && ScreenshotAction.windowsNativeRecorder
+    Component.onCompleted: {
+        if (root.isRecording && root.nativeRecorder) root.recordingShouldStop = ScreenshotAction.windowsNativeRecording;
+    }
     Process {
         id: checkRecordingProc
-        running: isRecording
+        running: isRecording && !root.nativeRecorder
         command: Platform.isWindows
             ? ScreenshotAction.windowsRecordingStatusCommand()
             : ["pidof", "wf-recorder"]
@@ -231,10 +237,7 @@ PanelWindow {
             return;
         }
         if (root.isRecording && root.ffmpegMissing) {
-            Notifications.sendDesktop(
-                Translation.tr("Recording needs ffmpeg"),
-                Translation.tr("Install it first: winget install Gyan.FFmpeg")
-            );
+            ScreenshotAction.offerFfmpegInstall();
             root.dismiss();
             return;
         }

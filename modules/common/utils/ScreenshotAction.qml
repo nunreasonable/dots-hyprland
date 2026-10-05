@@ -55,11 +55,11 @@ Singleton {
     }
 
     // Windows equivalent of getCommand(): rather than building a shell pipeline, it calls the
-    // native crop/clipboard/OCR helpers (WindowsNative.screenshot/clipboard/ocr) directly and
-    // shells out only for the pieces that still need an external tool (curl.exe for image
-    // search, ffmpeg for recording). monitorOffsetX/Y (physical pixels, HyprlandMonitor.x/y)
+    // native crop/clipboard/OCR/recorder helpers (WindowsNative.*) directly and shells out only
+    // for the pieces that still need an external tool (curl.exe for image search, ffmpeg when
+    // the native recorder is unavailable). monitorOffsetX/Y (physical pixels, HyprlandMonitor.x/y)
     // are only used for Record/RecordWithSound, to turn the region's per-monitor coordinates
-    // into gdigrab's virtual-desktop-global ones.
+    // into virtual-desktop-global ones.
     function runWindows(x, y, width, height, screenshotPath, action, saveDir = "", monitorOffsetX = 0, monitorOffsetY = 0) {
         if (!WindowsNative.ready || !WindowsNative.screenshot || !WindowsNative.clipboard) {
             console.warn("[Region Selector] Windows native helpers not ready, skipping snip.");
@@ -126,11 +126,40 @@ Singleton {
         }
     }
 
+    // Native recorder (Quickshell's ScreenRecorder: Windows.Graphics.Capture + Media Foundation,
+    // no ffmpeg needed). Null/false where it can't work (Windows N without the Media Feature
+    // Pack, older Quickshell builds); record.ps1 + ffmpeg remain the fallback there.
+    readonly property QtObject windowsRecorder: (Platform.isWindows && WindowsNative.ready) ? WindowsNative.screenRecorder : null
+    readonly property bool windowsNativeRecorder: root.windowsRecorder?.available ?? false
+    readonly property bool windowsNativeRecording: root.windowsNativeRecorder && root.windowsRecorder.recording
+
+    Connections {
+        target: root.windowsNativeRecorder ? root.windowsRecorder : null
+        function onStarted(path) {
+            Notifications.sendDesktop(Translation.tr("Starting recording"), FileUtils.fileNameForPath(path));
+        }
+        function onFinished(path) {
+            Notifications.sendDesktop(Translation.tr("Recording Stopped"), path);
+        }
+        function onFailed(reason) {
+            Notifications.sendDesktop(Translation.tr("Recording failed"), reason);
+        }
+        function onSoundUnavailable(reason) {
+            Notifications.sendDesktop(Translation.tr("Recording without sound"), reason);
+        }
+    }
+
     function startWindowsRecording(x, y, width, height, sound) {
+        const saveDir = Config.options.screenRecord.savePath;
+        if (root.windowsNativeRecorder) {
+            // Notifications come from the Connections above (started/failed).
+            root.windowsRecorder.start(Math.round(x), Math.round(y), Math.round(width), Math.round(height), sound, saveDir);
+            return;
+        }
+
         // yuv420p needs even dimensions; shaving at most 1px off is unnoticeable.
         const evenW = width - (width % 2);
         const evenH = height - (height % 2);
-        const saveDir = Config.options.screenRecord.savePath;
         const args = [
             "powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", root.windowsRecordScript,
             "-X", String(Math.round(x)), "-Y", String(Math.round(y)),
@@ -145,9 +174,64 @@ Singleton {
     }
 
     function stopWindowsRecording() {
+        if (root.windowsNativeRecording) {
+            root.windowsRecorder.stop();
+            return;
+        }
         windowsRecordProc.command = ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
             root.windowsRecordScript, "-Stop", "-PidFile", Directories.recordingPidFile];
         windowsRecordProc.running = true;
+    }
+
+    // Record screen (the overlay's recorder widget; record.sh --fullscreen on Linux): stops a
+    // running recording, otherwise records the whole of `monitor` (a HyprlandMonitor, whose
+    // x/y/width/height are physical pixels on Windows).
+    function toggleWindowsScreenRecording(monitor, sound) {
+        if (!monitor) return;
+        if (root.windowsNativeRecorder) {
+            if (root.windowsNativeRecording) root.windowsRecorder.stop();
+            else root.startWindowsRecording(monitor.x, monitor.y, monitor.width, monitor.height, sound);
+            return;
+        }
+        windowsScreenToggleProc.monitor = monitor;
+        windowsScreenToggleProc.sound = sound;
+        windowsScreenToggleProc.running = true;
+    }
+
+    Process {
+        // ffmpeg fallback of toggleWindowsScreenRecording(): same status check as the region
+        // selector's (see windowsRecordingStatusCommand()).
+        id: windowsScreenToggleProc
+        property var monitor: null
+        property bool sound: false
+        command: root.windowsRecordingStatusCommand()
+        onExited: (exitCode, exitStatus) => {
+            const m = windowsScreenToggleProc.monitor;
+            if (exitCode === 0) root.stopWindowsRecording();
+            else if (exitCode === 2) root.startWindowsRecording(m.x, m.y, m.width, m.height, windowsScreenToggleProc.sound);
+            else root.offerFfmpegInstall();
+        }
+    }
+
+    // Shown when recording was asked for, the native recorder is unavailable and ffmpeg isn't
+    // on PATH either: offers installing ffmpeg with winget, in a console the user can watch
+    // (winget may ask to accept its source agreements there).
+    property int _ffmpegNoticeId: -1
+    function offerFfmpegInstall() {
+        const reason = root.windowsRecorder?.unavailableReason ?? "";
+        const body = (reason ? Translation.tr("Built-in recording is unavailable: %1.").arg(reason) + " " : "")
+            + Translation.tr("Recording can use ffmpeg instead (the shell may need a restart to find it after installing).");
+        root._ffmpegNoticeId = Notifications.sendDesktop(Translation.tr("Recording needs ffmpeg"), body,
+            ["-A", `install=${Translation.tr("Install with winget")}`]) ?? -1;
+    }
+    Connections {
+        target: Platform.isWindows ? Notifications : null
+        function onDesktopActionInvoked(id, action) {
+            if (id !== root._ffmpegNoticeId || action !== "install") return;
+            root._ffmpegNoticeId = -1;
+            Quickshell.execDetached(["powershell", "-NoProfile", "-Command",
+                "Start-Process winget -ArgumentList 'install','--exact','--id','Gyan.FFmpeg'"]);
+        }
     }
 
     readonly property string windowsRecordScript: FileUtils.trimFileProtocol(`${Directories.scriptPath}/videos/record.ps1`)

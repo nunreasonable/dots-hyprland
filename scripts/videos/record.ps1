@@ -1,4 +1,5 @@
-# Windows counterpart to record.sh, driven by ScreenshotAction.qml.
+# Windows counterpart to record.sh, driven by ScreenshotAction.qml. Only a fallback: the shell
+# records natively (Quickshell.Windows.ScreenRecorder) unless that is unavailable.
 #
 #   record.ps1 -X -Y -Width -Height [-Sound] [-SaveDir dir] -PidFile file   start a recording
 #   record.ps1 -Stop -PidFile file                                         stop it
