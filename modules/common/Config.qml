@@ -398,6 +398,10 @@ Singleton {
                 // Windows' taskbar comes up only when the cursor reaches the bottom edge, never
                 // because an app flashed or nothing else had focus (turns its auto-hide on).
                 property bool taskbarHoverOnly: true
+                // The background (wallpaper and its widgets) goes inside the Windows desktop,
+                // behind the desktop icons, instead of being a window of its own. The icons then
+                // get the mouse, so the widgets can't be dragged. Off: a bottom-most window.
+                property bool backgroundBehindIcons: true
             }
 
             property JsonObject networking: JsonObject {

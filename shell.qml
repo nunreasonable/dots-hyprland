@@ -42,6 +42,12 @@ ShellRoot {
         property: "hoverOnly"
         value: Config.options.windowsPort.taskbarHoverOnly
     }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.desktopLayer
+        property: "enabled"
+        value: Config.options.windowsPort.backgroundBehindIcons
+    }
 
     // Panel families
     property list<string> families: ["ii", "waffle"]

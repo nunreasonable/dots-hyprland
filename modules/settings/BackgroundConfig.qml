@@ -8,6 +8,24 @@ ContentPage {
     forceWidth: true
 
     ContentSection {
+        visible: Platform.isWindows
+        icon: "desktop_windows"
+        title: Translation.tr("Windows desktop")
+
+        ConfigSwitch {
+            buttonIcon: "wallpaper"
+            text: Translation.tr("Put the background behind the desktop icons")
+            checked: Config.options.windowsPort.backgroundBehindIcons
+            onCheckedChanged: {
+                Config.options.windowsPort.backgroundBehindIcons = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("The wallpaper and its widgets become part of the Windows desktop: the icons show on top, and Show desktop (Win+D) keeps them.\nThe icons take the mouse there, so widgets can't be dragged; turn this off to move them.\nIf the desktop isn't available, the background stays a window.")
+            }
+        }
+    }
+
+    ContentSection {
         icon: "sync_alt"
         title: Translation.tr("Parallax")
 
