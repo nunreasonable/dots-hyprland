@@ -40,21 +40,22 @@ Item {
         error = true;
     }
 
-    // Windows path: no GCloudVision/GCloudTranslate (both need a Google Cloud service
-    // account key, set up through the "Key input" toolbar button below). WindowsNative.ocr
-    // (Windows.Media.Ocr) reads the text and GoogleTranslateFree (the key-less endpoint
-    // translate-shell itself uses) translates it. Windows.Media.Ocr only returns flat text,
-    // not per-line bounding boxes like Cloud Vision's DOCUMENT_TEXT_DETECTION, so there's no
-    // per-paragraph overlay here - windowsResultPanel below shows the whole translation in
-    // one card instead. Giving Ocr a bounding-box result (Windows.Media.Ocr's OcrResult.Lines/
-    // Words already carry one) would need a C++ change to src/windows/system/ocr.* and isn't
-    // done here.
     property int windowsOcrRequestId: -1
     property string windowsOcrText: ""
     property string windowsStage: "" // "ocr" | "translate" | ""
+    property bool windowsCardMode: false
+    property int windowsGeneration: 0
+    property var windowsRequests: []
+    readonly property int windowsMaxUrlLength: 5000
 
     function startWindows() {
+        root.windowsGeneration++;
+        root.windowsAbortRequests();
         root.windowsStage = "ocr";
+        root.windowsCardMode = false;
+        root.visionParagraphs = [];
+        root.translation = ({});
+        root.loading = true;
         if (!WindowsNative.ready || !WindowsNative.ocr) {
             root.handleError(Translation.tr("Windows text recognition is not available"));
             return;
@@ -62,9 +63,192 @@ Item {
         root.windowsOcrRequestId = WindowsNative.ocr.recognizeText(root.screenshotPath);
     }
 
+    function windowsTrack(xhr) {
+        if (xhr) root.windowsRequests.push(xhr);
+    }
+
+    function windowsAbortRequests() {
+        const requests = root.windowsRequests;
+        root.windowsRequests = [];
+        for (const xhr of requests) xhr.abort();
+    }
+
+    Component.onDestruction: {
+        if (Platform.isWindows) root.windowsAbortRequests();
+    }
+
+    function windowsBuildParagraphs(lines) {
+        const sorted = lines.filter(line => (line?.text ?? "").trim().length > 0 && line.width > 0 && line.height > 0)
+            .sort((a, b) => (a.y - b.y) || (a.x - b.x));
+        const groups = [];
+        for (const line of sorted) {
+            let target = null;
+            for (let i = groups.length - 1; i >= 0; i--) {
+                if (root.windowsContinuesParagraph(groups[i][groups[i].length - 1], line)) {
+                    target = groups[i];
+                    break;
+                }
+            }
+            if (target) target.push(line);
+            else groups.push([line]);
+        }
+        return groups.map(group => root.windowsParagraph(group));
+    }
+
+    function windowsContinuesParagraph(previous, line) {
+        const lineHeight = (previous.height + line.height) / 2;
+        const gap = line.y - (previous.y + previous.height);
+        const heightRatio = Math.max(previous.height, line.height) / Math.min(previous.height, line.height);
+        return Math.abs(line.x - previous.x) <= lineHeight
+            && gap < 0.8 * lineHeight
+            && gap > -0.5 * lineHeight
+            && heightRatio <= 1.4;
+    }
+
+    function windowsJoinLines(a, b) {
+        const cjk = /[\u2e80-\u2fdf\u3000-\u30ff\u31c0-\u31ff\u3400-\u4dbf\u4e00-\u9fff\uf900-\ufaff\uff00-\uffef]/;
+        if (cjk.test(a.charAt(a.length - 1)) && cjk.test(b.charAt(0))) return a + b;
+        return a + " " + b;
+    }
+
+    function windowsAverageColor(colors) {
+        const valid = colors.filter(c => typeof c === "string" && /^#[0-9a-fA-F]{6}$/.test(c));
+        if (valid.length === 0) return "";
+        const sums = [0, 0, 0];
+        for (const c of valid) {
+            for (let i = 0; i < 3; i++) sums[i] += parseInt(c.substr(1 + i * 2, 2), 16);
+        }
+        return "#" + sums.map(sum => ("0" + Math.round(sum / valid.length).toString(16)).slice(-2)).join("");
+    }
+
+    function windowsParagraph(group) {
+        const first = group[0];
+        const left = Math.min(...group.map(line => line.x));
+        const top = Math.min(...group.map(line => line.y));
+        const right = Math.max(...group.map(line => line.x + line.width));
+        const bottom = Math.max(...group.map(line => line.y + line.height));
+        const imageWidth = first.imageWidth ?? 0;
+        const imageHeight = first.imageHeight ?? 0;
+        const angle = (first.angle ?? 0) * Math.PI / 180;
+        const cos = Math.cos(angle);
+        const sin = Math.sin(angle);
+        const centerX = imageWidth / 2;
+        const centerY = imageHeight / 2;
+        const scaleX = imageWidth > 0 ? root.windowWidth / imageWidth : 1;
+        const scaleY = imageHeight > 0 ? root.windowHeight / imageHeight : 1;
+        const vertex = (u, v) => ({
+            x: (centerX + (u - centerX) * cos - (v - centerY) * sin) * scaleX,
+            y: (centerY + (u - centerX) * sin + (v - centerY) * cos) * scaleY
+        });
+        return {
+            text: group.map(line => line.text.replace(/\s+/g, " ").trim()).reduce((a, b) => root.windowsJoinLines(a, b)),
+            boundingBox: {
+                vertices: [vertex(left, top), vertex(right, top), vertex(right, bottom), vertex(left, bottom)]
+            },
+            backgroundColor: root.windowsAverageColor(group.map(line => line.backgroundColor)),
+            textColor: root.windowsAverageColor(group.map(line => line.textColor))
+        };
+    }
+
+    function windowsBatches(texts) {
+        const prefix = "https://translate.googleapis.com/translate_a/single?client=gtx&dt=t"
+            + `&sl=auto&tl=${encodeURIComponent(Translation.languageCode)}&q=`;
+        const budget = root.windowsMaxUrlLength - prefix.length;
+        const separatorLength = encodeURIComponent("\n").length;
+        const batches = [];
+        let current = [];
+        let used = 0;
+        for (const text of texts) {
+            const length = encodeURIComponent(text).length;
+            if (current.length > 0 && used + separatorLength + length > budget) {
+                batches.push(current);
+                current = [];
+                used = 0;
+            }
+            used += (current.length > 0 ? separatorLength : 0) + length;
+            current.push(text);
+        }
+        if (current.length > 0) batches.push(current);
+        return batches;
+    }
+
+    function windowsTranslateParagraphs(texts) {
+        const generation = root.windowsGeneration;
+        const translation = {};
+        let pending = 0;
+        let translatedCount = 0;
+
+        const finishOne = () => {
+            pending--;
+            if (pending > 0) return;
+            if (translatedCount === 0) {
+                root.handleError(Translation.tr("Translation failed"));
+                return;
+            }
+            root.translation = translation;
+            root.windowsStage = "";
+            root.loading = false;
+        };
+
+        const translateOne = text => {
+            pending++;
+            root.windowsTrack(GoogleTranslateFree.translate("auto", Translation.languageCode, text, translated => {
+                if (generation !== root.windowsGeneration) return;
+                if (translated) {
+                    translation[text] = translated.trim();
+                    translatedCount++;
+                }
+                finishOne();
+            }));
+        };
+
+        const translateBatch = batch => {
+            if (batch.length === 1) {
+                translateOne(batch[0]);
+                return;
+            }
+            pending++;
+            root.windowsTrack(GoogleTranslateFree.translate("auto", Translation.languageCode, batch.join("\n"), translated => {
+                if (generation !== root.windowsGeneration) return;
+                if (translated) {
+                    let parts = translated.split(/\r?\n/).map(part => part.trim());
+                    if (parts.length !== batch.length) parts = parts.filter(part => part.length > 0);
+                    if (parts.length === batch.length) {
+                        batch.forEach((text, i) => {
+                            translation[text] = parts[i];
+                        });
+                        translatedCount += batch.length;
+                    } else {
+                        batch.forEach(text => translateOne(text));
+                    }
+                }
+                finishOne();
+            }));
+        };
+
+        for (const batch of root.windowsBatches(texts)) translateBatch(batch);
+    }
+
+    function windowsTranslateCard(text) {
+        const generation = root.windowsGeneration;
+        root.windowsCardMode = true;
+        root.windowsTrack(GoogleTranslateFree.translate("auto", Translation.languageCode, text, translated => {
+            if (generation !== root.windowsGeneration) return;
+            if (!translated) {
+                root.handleError(Translation.tr("Translation failed"));
+                return;
+            }
+            root.translation = ({
+                [text]: translated
+            });
+            root.windowsStage = "";
+            root.loading = false;
+        }));
+    }
+
     Connections {
         target: (Platform.isWindows && WindowsNative.ready) ? WindowsNative.ocr : null
-        function onRecognized(requestId, text, ok, error) {
+        function onRecognized(requestId, text, ok, error, lines) {
             if (requestId !== root.windowsOcrRequestId) return;
             if (!ok || text.trim().length === 0) {
                 root.handleError(error || Translation.tr("No text found"));
@@ -72,17 +256,13 @@ Item {
             }
             root.windowsOcrText = text;
             root.windowsStage = "translate";
-            GoogleTranslateFree.translate("auto", Translation.languageCode, text, translated => {
-                if (!translated) {
-                    root.handleError(Translation.tr("Translation failed"));
-                    return;
-                }
-                root.translation = ({
-                    [root.windowsOcrText]: translated
-                });
-                root.windowsStage = "";
-                root.loading = false;
-            });
+            const paragraphs = root.windowsBuildParagraphs(Array.from(lines ?? []));
+            if (paragraphs.length === 0) {
+                root.windowsTranslateCard(text);
+                return;
+            }
+            root.visionParagraphs = paragraphs;
+            root.windowsTranslateParagraphs([...new Set(paragraphs.map(p => p.text))]);
         }
     }
 
@@ -251,16 +431,17 @@ Item {
         }
     }
 
-    property real windowWidth: QsWindow.window.screen.width
-    property real windowHeight: QsWindow.window.screen.height
+    property real windowWidth: QsWindow.window?.screen?.width ?? (root.width / root.scaleFactor)
+    property real windowHeight: QsWindow.window?.screen?.height ?? (root.height / root.scaleFactor)
 
     StyledImage {
         id: screenshotImage
         z: 1
         asynchronous: false
+        cache: !Platform.isWindows
         width: root.windowWidth
         height: root.windowHeight
-        source: Qt.resolvedUrl(root.screenshotPath)
+        source: Platform.isWindows ? `file:///${root.screenshotPath}` : Qt.resolvedUrl(root.screenshotPath)
         visible: false
     }
 
@@ -339,11 +520,9 @@ Item {
         }
     }
 
-    // Windows has no per-line bounding boxes (see the comment by windowsOcrRequestId above),
-    // so instead of overlaying each line in place this shows the whole translation in one card.
     Rectangle {
         id: windowsResultPanel
-        visible: Platform.isWindows && !root.loading && !root.error && root.windowsOcrText.length > 0
+        visible: Platform.isWindows && root.windowsCardMode && !root.loading && !root.error && root.windowsOcrText.length > 0
         z: 999
         anchors {
             bottom: parent.bottom
@@ -424,15 +603,16 @@ Item {
         // {"boundingPoly": {"vertices": [{"x": 536,"y": 236},{"x": 583,"y": 236},{"x": 583,"y": 262},{"x": 536,"y": 262}]},"description": "宮坂"}
         readonly property string text: modelData.text
         readonly property string translatedText: root.translate(text)
+        readonly property bool hasNativeColors: Platform.isWindows && (modelData.backgroundColor ?? "").length > 0 && (modelData.textColor ?? "").length > 0
         visible: translatedText != text
 
-        color: ColorUtils.transparentize(Appearance.colors.colSecondaryContainer, 0.4)
+        color: ti.hasNativeColors ? ColorUtils.transparentize(ti.modelData.backgroundColor, 0.4) : ColorUtils.transparentize(Appearance.colors.colSecondaryContainer, 0.4)
         Behavior on color {
             animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
         }
 
         Loader {
-            active: ti.visible
+            active: ti.visible && !Platform.isWindows
             sourceComponent: MultiTurnProcess {
                 Component.onCompleted: {
                     runSequence([ //
@@ -460,6 +640,13 @@ Item {
             Behavior on color {
                 animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
             }
+        }
+
+        Binding {
+            when: ti.hasNativeColors
+            target: tiText
+            property: "color"
+            value: ti.modelData.textColor
         }
     }
 }

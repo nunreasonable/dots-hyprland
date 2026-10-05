@@ -104,6 +104,7 @@ PanelWindow {
 
         ScreencopyView { // Freeze screen
             id: screencopy
+            visible: !Platform.isWindows
             width: parent.width
             height: parent.height
 
@@ -113,7 +114,23 @@ PanelWindow {
             transformOrigin: Item.TopLeft
 
             live: false
-            captureSource: root.screen
+            captureSource: Platform.isWindows ? null : root.screen
+        }
+
+        Image {
+            visible: Platform.isWindows
+            width: parent.width
+            height: parent.height
+
+            x: root.contentX
+            y: root.contentY
+            scale: root.scale
+            transformOrigin: Item.TopLeft
+
+            cache: false
+            asynchronous: false
+            fillMode: Image.Stretch
+            source: Platform.isWindows && root.screenshotReady ? `file:///${root.screenshotPath}` : ""
         }
 
         Loader {
