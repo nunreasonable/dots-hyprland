@@ -398,9 +398,9 @@ Singleton {
                 // Windows' taskbar comes up only when the cursor reaches the bottom edge, never
                 // because an app flashed or nothing else had focus (turns its auto-hide on).
                 property bool taskbarHoverOnly: true
-                // The background (wallpaper and its widgets) goes inside the Windows desktop,
-                // behind the desktop icons, instead of being a window of its own. The icons then
-                // get the mouse, so the widgets can't be dragged. Off: a bottom-most window.
+                // The background goes inside the Windows desktop instead of being a window of its
+                // own: the wallpaper behind the desktop icons, its widgets above them (still
+                // draggable; the icons work around them). Off: a bottom-most window.
                 property bool backgroundBehindIcons: true
                 // Optional native tiling (Hyprland's dwindle, same values as
                 // dots/.config/hypr/hyprland/general.lua) on Windows' own virtual desktops.
