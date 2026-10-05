@@ -55,8 +55,9 @@ doesn't leave a broken profile behind.
 #      face name GetCurrentConsoleFontEx now reports. If it doesn't match, the font isn't
 #      installed (or this build of Windows refused it) and the glyphs still won't show - fall
 #      back to the plain prompt instead of guessing.
+$IiClassicConsole = $Host.Name -eq 'ConsoleHost' -and -not $env:WT_SESSION -and -not $env:TERM_PROGRAM
 $IiConsoleHasGlyphs = $true
-if ($Host.Name -eq 'ConsoleHost' -and -not $env:WT_SESSION -and -not $env:TERM_PROGRAM) {
+if ($IiClassicConsole) {
     $IiConsoleHasGlyphs = $false
     try {
         if (-not ('Ii.Windows.ConsoleFont' -as [type])) {
@@ -81,7 +82,7 @@ if ($Host.Name -eq 'ConsoleHost' -and -not $env:WT_SESSION -and -not $env:TERM_P
                 public static extern bool SetCurrentConsoleFontEx(IntPtr hConsoleOutput, bool bMaximumWindow, ref CONSOLE_FONT_INFOEX lpConsoleCurrentFontEx);
                 [DllImport("kernel32.dll", SetLastError = true)]
                 public static extern IntPtr GetStdHandle(int nStdHandle);
-'@ -UsingNamespace 'System.Runtime.InteropServices'
+'@
         }
 
         $iiStdOut = [Ii.Windows.ConsoleFont]::GetStdHandle(-11) # STD_OUTPUT_HANDLE
@@ -122,7 +123,7 @@ $IiOhMyPoshTheme = Join-Path $env:LOCALAPPDATA "quickshell\State\user\generated\
 if ((Get-Command oh-my-posh -ErrorAction SilentlyContinue) -and (Test-Path -LiteralPath $IiOhMyPoshTheme)) {
     oh-my-posh init pwsh --config $IiOhMyPoshTheme | Invoke-Expression
 } elseif (Get-Command starship -ErrorAction SilentlyContinue) {
-    $IiStarshipConfigName = if ($IiConsoleHasGlyphs) { 'starship.toml' } else { 'starship-plain.toml' }
+    $IiStarshipConfigName = if ($IiClassicConsole) { 'starship-plain.toml' } else { 'starship.toml' }
     $env:STARSHIP_CONFIG = Join-Path $PSScriptRoot $IiStarshipConfigName
 
     function global:Invoke-Starship-TransientFunction {
@@ -174,6 +175,138 @@ if (Test-Path -LiteralPath $IiSequencesPath) {
     [Console]::Out.Write([IO.File]::ReadAllText($IiSequencesPath))
 }
 
+# The classic console, continued: two things its VT support doesn't cover.
+#   - Colors: conhost takes OSC 4 for SGR colors, but has no default background/foreground
+#     (OSC 10/11) - its text and background are entries of its own 16-color table, and Windows
+#     PowerShell's console settings point the background at entry 5 (DarkMagenta, repainted that
+#     dark blue). So the same term0..15 also go into that table, through
+#     SetConsoleScreenBufferInfoEx, with the screen set to term7 on term0 like a terminal's
+#     default colors. The console table orders colors blue-green-red where ANSI is
+#     red-green-blue, hence the index map.
+#   - Placement: conhost sizes a new window to the rows and columns in its settings (120x50 for
+#     Windows PowerShell) and, when that doesn't fit, clamps it to the work area's size but at
+#     the monitor's corner - under ii's bar. The window goes back inside the work area.
+# Both only last as long as this window, like the console mode above.
+if ($IiClassicConsole) {
+    try {
+        if (-not ('Ii.Windows.ConsoleLook' -as [type])) {
+            Add-Type -Namespace Ii.Windows -Name ConsoleLook -MemberDefinition @'
+                [StructLayout(LayoutKind.Sequential)]
+                public struct COORD { public short X; public short Y; }
+                [StructLayout(LayoutKind.Sequential)]
+                public struct SMALL_RECT { public short Left; public short Top; public short Right; public short Bottom; }
+                [StructLayout(LayoutKind.Sequential)]
+                public struct CONSOLE_SCREEN_BUFFER_INFOEX {
+                    public uint cbSize;
+                    public COORD dwSize;
+                    public COORD dwCursorPosition;
+                    public ushort wAttributes;
+                    public SMALL_RECT srWindow;
+                    public COORD dwMaximumWindowSize;
+                    public ushort wPopupAttributes;
+                    public int bFullscreenSupported;
+                    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+                    public uint[] ColorTable;
+                }
+                [StructLayout(LayoutKind.Sequential)]
+                public struct RECT { public int Left; public int Top; public int Right; public int Bottom; }
+                [StructLayout(LayoutKind.Sequential)]
+                public struct MONITORINFO { public uint cbSize; public RECT rcMonitor; public RECT rcWork; public uint dwFlags; }
+
+                [DllImport("kernel32.dll", SetLastError = true)]
+                public static extern IntPtr GetStdHandle(int nStdHandle);
+                [DllImport("kernel32.dll", SetLastError = true)]
+                public static extern bool GetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFOEX info);
+                [DllImport("kernel32.dll", SetLastError = true)]
+                public static extern bool SetConsoleScreenBufferInfoEx(IntPtr hConsoleOutput, ref CONSOLE_SCREEN_BUFFER_INFOEX info);
+                [DllImport("kernel32.dll")]
+                public static extern IntPtr GetConsoleWindow();
+                [DllImport("user32.dll")]
+                public static extern bool GetWindowRect(IntPtr hWnd, out RECT rect);
+                [DllImport("user32.dll")]
+                public static extern IntPtr MonitorFromWindow(IntPtr hWnd, uint flags);
+                [DllImport("user32.dll")]
+                public static extern bool GetMonitorInfoW(IntPtr hMonitor, ref MONITORINFO info);
+                [DllImport("user32.dll")]
+                public static extern bool SetWindowPos(IntPtr hWnd, IntPtr after, int x, int y, int cx, int cy, uint flags);
+                [DllImport("user32.dll")]
+                public static extern int GetWindowLongW(IntPtr hWnd, int index);
+                [DllImport("user32.dll")]
+                public static extern int SetWindowLongW(IntPtr hWnd, int index, int value);
+                [DllImport("user32.dll")]
+                public static extern bool SetLayeredWindowAttributes(IntPtr hWnd, uint key, byte alpha, uint flags);
+'@
+        }
+
+        $iiStdOut = [Ii.Windows.ConsoleLook]::GetStdHandle(-11)
+
+        $iiTerm = @{}
+        if (Test-Path -LiteralPath $IiSequencesPath) {
+            foreach ($iiMatch in [regex]::Matches([IO.File]::ReadAllText($IiSequencesPath), '\](?:4;(\d+)|(1[01]));(?:\[\d+\])?#([0-9A-Fa-f]{6})')) {
+                $iiIndex = if ($iiMatch.Groups[1].Success) { [int]$iiMatch.Groups[1].Value } else { 100 + [int]$iiMatch.Groups[2].Value }
+                if (($iiIndex -lt 16 -or $iiIndex -ge 110) -and -not $iiTerm.ContainsKey($iiIndex)) {
+                    $iiHex = $iiMatch.Groups[3].Value
+                    $iiTerm[$iiIndex] = [Convert]::ToUInt32($iiHex.Substring(0, 2), 16) -bor
+                        ([Convert]::ToUInt32($iiHex.Substring(2, 2), 16) -shl 8) -bor
+                        ([Convert]::ToUInt32($iiHex.Substring(4, 2), 16) -shl 16)
+                }
+            }
+        }
+
+        $iiInfo = New-Object Ii.Windows.ConsoleLook+CONSOLE_SCREEN_BUFFER_INFOEX
+        $iiInfo.cbSize = [Runtime.InteropServices.Marshal]::SizeOf($iiInfo)
+        $iiDefaultBack = if ($iiTerm.ContainsKey(111)) { $iiTerm[111] } else { $iiTerm[0] }
+        $iiDefaultFore = if ($iiTerm.ContainsKey(110)) { $iiTerm[110] } else { $iiTerm[7] }
+        if ($iiTerm.ContainsKey(0) -and $iiTerm.ContainsKey(15) -and [Ii.Windows.ConsoleLook]::GetConsoleScreenBufferInfoEx($iiStdOut, [ref]$iiInfo)) {
+            $iiAnsiOf = 0, 4, 2, 6, 1, 5, 3, 7
+            for ($iiSlot = 0; $iiSlot -lt 16; $iiSlot++) {
+                $iiInfo.ColorTable[$iiSlot] = $iiTerm[$iiAnsiOf[$iiSlot % 8] + ($iiSlot -band 8)]
+            }
+            $iiFillBack = ($iiInfo.wAttributes -shr 4) -band 0xF
+            $iiFillFore = $iiInfo.wAttributes -band 0xF
+            if ($iiFillBack -ne $iiFillFore) {
+                $iiInfo.ColorTable[$iiFillBack] = $iiDefaultBack
+                $iiInfo.ColorTable[$iiFillFore] = $iiDefaultFore
+            }
+            $iiView = $iiInfo.srWindow
+            $iiView.Right = $iiView.Right + 1
+            $iiView.Bottom = $iiView.Bottom + 1
+            $iiInfo.srWindow = $iiView
+            [Ii.Windows.ConsoleLook]::SetConsoleScreenBufferInfoEx($iiStdOut, [ref]$iiInfo) | Out-Null
+        }
+
+        $iiWindow = [Ii.Windows.ConsoleLook]::GetConsoleWindow()
+        $iiRect = New-Object Ii.Windows.ConsoleLook+RECT
+        $iiMonitorInfo = New-Object Ii.Windows.ConsoleLook+MONITORINFO
+        $iiMonitorInfo.cbSize = [Runtime.InteropServices.Marshal]::SizeOf($iiMonitorInfo)
+        $iiMonitor = [Ii.Windows.ConsoleLook]::MonitorFromWindow($iiWindow, 2) # MONITOR_DEFAULTTONEAREST
+        if ($iiWindow -ne [IntPtr]::Zero -and [Ii.Windows.ConsoleLook]::GetWindowRect($iiWindow, [ref]$iiRect) -and
+            [Ii.Windows.ConsoleLook]::GetMonitorInfoW($iiMonitor, [ref]$iiMonitorInfo)) {
+            $iiWork = $iiMonitorInfo.rcWork
+            $iiWidth = [Math]::Min($iiRect.Right - $iiRect.Left, $iiWork.Right - $iiWork.Left)
+            $iiHeight = [Math]::Min($iiRect.Bottom - $iiRect.Top, $iiWork.Bottom - $iiWork.Top)
+            $iiX = [Math]::Max($iiWork.Left, [Math]::Min($iiRect.Left, $iiWork.Right - $iiWidth))
+            $iiY = [Math]::Max($iiWork.Top, [Math]::Min($iiRect.Top, $iiWork.Bottom - $iiHeight))
+            if ($iiX -ne $iiRect.Left -or $iiY -ne $iiRect.Top -or
+                $iiWidth -ne ($iiRect.Right - $iiRect.Left) -or $iiHeight -ne ($iiRect.Bottom - $iiRect.Top)) {
+                # SWP_NOZORDER | SWP_NOACTIVATE
+                [Ii.Windows.ConsoleLook]::SetWindowPos($iiWindow, [IntPtr]::Zero, $iiX, $iiY, $iiWidth, $iiHeight, 0x14) | Out-Null
+            }
+        }
+
+        $iiConfigPath = Join-Path $env:LOCALAPPDATA 'illogical-impulse\config.json'
+        $iiTransparent = $false
+        if (Test-Path -LiteralPath $iiConfigPath) {
+            $iiTransparent = (Get-Content -LiteralPath $iiConfigPath -Raw -Encoding UTF8 | ConvertFrom-Json).appearance.transparency.enable -eq $true
+        }
+        if ($iiTransparent -and $iiWindow -ne [IntPtr]::Zero) {
+            $iiExStyle = [Ii.Windows.ConsoleLook]::GetWindowLongW($iiWindow, -20)
+            [Ii.Windows.ConsoleLook]::SetWindowLongW($iiWindow, -20, $iiExStyle -bor 0x80000) | Out-Null
+            [Ii.Windows.ConsoleLook]::SetLayeredWindowAttributes($iiWindow, 0, 230, 2) | Out-Null
+        }
+    } catch { } # the console keeps its own colors and place; nothing else depends on this
+}
+
 # Aliases
 
 # kitty doesn't clear scrollback properly on Linux, so config.fish works around it with a raw
@@ -191,7 +324,11 @@ Set-Alias -Name claer -Value Clear-HostAnsi -Option AllScope -Scope Global -Forc
 if (Get-Command eza -ErrorAction SilentlyContinue) {
     # `ls` is normally an alias to Get-ChildItem, which would otherwise shadow the function below.
     Remove-Item Alias:ls -Force -ErrorAction SilentlyContinue
-    function global:ls { eza --icons=auto @args }
+    if ($IiClassicConsole) {
+        function global:ls { eza @args }
+    } else {
+        function global:ls { eza --icons=auto @args }
+    }
 }
 
 # `q` opens ii itself, same as config.fish's `alias q 'qs -c ii'` - qs.exe is the console-mode

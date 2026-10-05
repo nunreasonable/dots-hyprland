@@ -141,6 +141,7 @@ Singleton {
             surfaceContainerLow: json.surface_container_low, onSurface: json.on_surface,
             // See the file-level doc comment: matugen has no paletteKeyColor output.
             primaryKeyColor: json.primary_paletteKeyColor || json.primary,
+            background: json.background,
         };
     }
 
@@ -285,7 +286,8 @@ Singleton {
             console.warn("[WindowsTerminalTheme] Could not read scheme-base.json:", e);
             return;
         }
-        const darkMode = root._needsDarkMaterial || Appearance.m3colors.darkmode;
+        const darkMode = root._needsDarkMaterial
+            || (material.background ? Qt.color(material.background).hslLightness < 0.5 : Appearance.m3colors.darkmode);
         const baseScheme = schemeBase[darkMode ? "dark" : "light"];
         if (!baseScheme) return;
 
@@ -415,23 +417,23 @@ Singleton {
                             "type": "executiontime", "style": "diamond",
                             "leading_diamond": pillStart, "trailing_diamond": pillEnd,
                             "foreground": "p:onSecondaryContainer", "background": "p:secondaryContainer",
-                            "template": "\u{F0AA2} {{ .FormattedMs }}",
+                            "template": "\uF017 {{ .FormattedMs }}",
                             "options": { "threshold": 0, "style": "austin" },
                         },
                         {
                             "type": "path", "style": "diamond",
                             "leading_diamond": ` ${pillStart}`, "trailing_diamond": pillEnd,
                             "foreground": "p:onPrimary", "background": "p:primary",
-                            "template": "\u{F024B} \u2192 {{ .Path }}",
+                            "template": "\uF07B \u2192 {{ .Path }}",
                             // DOS separators, as Windows paths are shown elsewhere in ii.
                             // The Nerd Font house is wider than its cell and would cover the "\".
                             "options": { "style": "agnoster_short", "max_depth": 2, "home_icon": "\uF46D ", "folder_separator_icon": "\\" },
                         },
                         {
                             "type": "git", "style": "diamond",
-                            "leading_diamond": ` \u{F0725} ${pillStart}`, "trailing_diamond": pillEnd,
+                            "leading_diamond": ` \uE702 ${pillStart}`, "trailing_diamond": pillEnd,
                             "foreground": "p:onSecondaryContainer", "background": "p:secondaryContainer",
-                            "template": "\u{F062C} {{ .HEAD }}",
+                            "template": "\uE725 {{ .HEAD }}",
                             "options": { "branch_icon": "" },
                         },
                     ],
