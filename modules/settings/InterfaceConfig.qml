@@ -148,7 +148,6 @@ ContentPage {
 
         ConfigSwitch {
             buttonIcon: "web_traffic"
-            // Not always the bottom: Windows 10 allows docking the taskbar to any screen edge.
             text: Translation.tr("Show only when the cursor touches its screen edge")
             checked: Config.options.windowsPort.taskbarHoverOnly
             onCheckedChanged: {
@@ -220,11 +219,6 @@ ContentPage {
                 text: Config.options.windowsPort.tiling.excluded.join("\n")
                 wrapMode: TextEdit.Wrap
                 onTextChanged: {
-                    // `text` stays bound to excluded.join("\n"); dropping blank lines here would
-                    // erase them again the instant they're typed (e.g. pressing Enter for a new
-                    // line), fighting the binding. The native side already skips blank entries
-                    // (TilingManager::setExcluded trims and ignores empty ones), so just mirror
-                    // the lines back verbatim.
                     Config.options.windowsPort.tiling.excluded = text.split("\n").map(s => s.trim());
                 }
             }
@@ -234,7 +228,6 @@ ContentPage {
     ContentSection {
         icon: "lock"
         title: Translation.tr("Lock screen")
-        // Windows locks with its own lock screen (LockWorkStation); none of this applies there.
         visible: !Platform.isWindows
 
         ConfigSwitch {

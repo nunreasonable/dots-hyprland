@@ -49,15 +49,12 @@ Item {
                     } else if (ScreenshotAction.windowsNativeRecording) {
                         ScreenshotAction.stopWindowsRecording();
                     } else {
-                        // record.sh picks the region with slurp; on Windows that's the region
-                        // selector (which also stops a running ffmpeg fallback recording).
                         Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "region", "record"]);
                     }
                 }
                 MaterialSymbol {
                     horizontalAlignment: Qt.AlignHCenter
                     fill: 1
-                    // Windows' native recorder reports its state: the button becomes the stop toggle.
                     text: ScreenshotAction.windowsNativeRecording ? "stop_circle" : "videocam"
                     iconSize: Appearance.font.pixelSize.large
                     color: Appearance.colors.colOnLayer2
@@ -66,7 +63,6 @@ Item {
         }
 
         Loader {
-            // No hyprpicker build for Windows.
             active: Config.options.bar.utilButtons.showColorPicker && !Platform.isWindows
             visible: Config.options.bar.utilButtons.showColorPicker && !Platform.isWindows
             sourceComponent: CircleUtilButton {

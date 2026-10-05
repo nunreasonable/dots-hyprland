@@ -15,8 +15,6 @@ Rectangle {
 
     signal navigateToDirectory(string path)
 
-    // Windows shows and takes paths the DOS way (C:\Users\...); paths stay C:/... internally,
-    // and a bare drive is its root, not the drive's current directory.
     function displayPath(path) {
         return Platform.isWindows ? path.replace(/\//g, "\\") : path;
     }

@@ -175,8 +175,6 @@ PanelWindow {
 
             IconToolbarButton {
                 id: sleepButton
-                // Windows uses GoogleTranslateFree's key-less endpoint (see ScreenTextOverlay.qml),
-                // so there's no Google Cloud service account key to paste here.
                 visible: !Platform.isWindows
                 onClicked: {
                     toggled = !toggled

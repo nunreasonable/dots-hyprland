@@ -212,7 +212,6 @@ PopupWindow {
         }
 
         Rectangle {
-            // Windows items have no menu entries below (see SysTrayItem)
             visible: !Platform.isWindows || menuEntriesRepeater.count > 0
             Layout.fillWidth: true
             implicitHeight: 1

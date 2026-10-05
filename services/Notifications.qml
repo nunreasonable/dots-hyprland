@@ -146,8 +146,6 @@ Singleton {
     signal discard(id: int);
     signal discardAll();
     signal timeout(id: var);
-    // Windows only: one of the -A actions of a sendDesktop() notification was clicked; `id` is
-    // what sendDesktop() returned. Stands in for notify-send printing the action on Linux.
     signal desktopActionInvoked(id: int, action: string);
 
 	NotificationServer {
@@ -189,7 +187,6 @@ Singleton {
     }
 
     Connections {
-        // Linux's NotificationServer has no actionInvoked (D-Bus tells the sender instead).
         target: Platform.isWindows ? notifServer : null
         ignoreUnknownSignals: true
         function onActionInvoked(id, action) {
@@ -272,17 +269,8 @@ Singleton {
         notifFileView.reload()
     }
 
-    /**
-     * Fire-and-forget desktop notification for bits of code that just want to tell
-     * the user something happened (as opposed to the tracked notifications above).
-     * Takes notify-send's options in extraArgs. On Linux notify-send reaches the server
-     * above over D-Bus; Windows has no notify-send, so the native server parses the
-     * same options and delivers the notification to onNotification just the same, and
-     * returns its id for desktopActionInvoked (undefined on Linux).
-     */
     function sendDesktop(summary, body, extraArgs = []) {
         if (Platform.isWindows) {
-            // The id lets callers that passed "-A" actions match desktopActionInvoked.
             return notifServer.notifySend(summary, body, extraArgs);
         }
         Quickshell.execDetached(["notify-send", summary, body, ...extraArgs]);

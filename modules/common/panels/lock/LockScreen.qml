@@ -35,8 +35,6 @@ Scope {
         }
     }
     function unlockKeyring() {
-        // Windows Credentials (CredReadW/CredWriteW) have no "locked until password is typed"
-        // state the way gnome-keyring does, so there's nothing to unlock here.
         if (Platform.isWindows) return;
         unlockKeyringProc.exec({
             environment: ({

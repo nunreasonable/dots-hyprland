@@ -25,9 +25,6 @@ StyledImage {
         return Quickshell.iconPath("inode-directory");
     }
 
-    // Windows: no `file` to sniff types, so images go by extension (as Images does elsewhere),
-    // and the special folders are matched by location: their names are localized or redirected
-    // (OneDrive\Imagens), unlike the XDG folder names the Linux icon lookup relies on.
     function windowsSource() {
         if (!fileModelData.fileIsDir) {
             return Images.isValidImageByName(fileModelData.fileName) ? fileModelData.fileUrl : Quickshell.iconPath("text-x-generic", "image-missing");

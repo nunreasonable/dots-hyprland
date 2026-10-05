@@ -10,17 +10,12 @@ import qs.services.network
 import qs.modules.common
 
 /**
- * Network service: nmcli on Linux, the native WlanAPI/INetworkListManager-backed
- * `WindowsNative.network` (Quickshell.Windows' Network singleton) on Windows.
+ * Network service with nmcli.
  */
 Singleton {
     id: root
 
     property bool wifi: true
-    // On Windows this is a live binding onto WindowsNative.network; the Linux process handlers
-    // below imperatively overwrite it (and everything else in this block), which detaches that
-    // binding there and is a no-op on Windows, since those processes never run there (same
-    // pattern as services/ResourceUsage.qml).
     property bool ethernet: Platform.isWindows ? (WindowsNative.network ? WindowsNative.network.ethernetConnected : false) : false
 
     property bool wifiEnabled: Platform.isWindows ? (WindowsNative.network ? WindowsNative.network.wifiRadioOn : false) : false
@@ -37,17 +32,11 @@ Singleton {
         return b.strength - a.strength;
     })
     property string wifiStatus: Platform.isWindows ? (WindowsNative.network ? WindowsNative.network.wifiStatus : "disabled") : "disconnected"
-    // True on 24H2+ when Wi-Fi scan/connection-state queries are blocked because Settings >
-    // Privacy > Location (or "let desktop apps access your location") is off. Windows-only;
-    // always false on Linux. WifiDialog/WifiControl show a hint + button to fix it.
     readonly property bool wifiNeedsLocationPermission: Platform.isWindows && WindowsNative.network ? WindowsNative.network.needsLocationPermission : false
 
     property string networkName: Platform.isWindows ? (WindowsNative.network ? (WindowsNative.network.ethernetConnected ? Translation.tr("Ethernet") : WindowsNative.network.activeSsid) : "") : ""
     property int networkStrength: Platform.isWindows ? (WindowsNative.network ? WindowsNative.network.activeSignalQuality : 0) : 0
 
-    // Windows: `networks.values` is a live list of native NetworkWifiNetwork objects (reused
-    // across rescans, so their own properties update in place); mirror it into wifiNetworks the
-    // same way getNetworks.onStreamFinished below mirrors nmcli's parsed list.
     readonly property list<var> winWifiNetworksRaw: (Platform.isWindows && WindowsNative.network) ? WindowsNative.network.networks.values : []
     onWinWifiNetworksRawChanged: {
         const rNetworks = root.wifiNetworks;
@@ -114,10 +103,6 @@ Singleton {
         rescanProcess.running = true;
     }
 
-    // Windows: starts/stops the periodic background rescan (see network.hpp); call with true
-    // while ii's Wi-Fi list is on screen (WifiDialog/WifiControl do this on show/hide, mirroring
-    // how BluetoothDialog ties Bluetooth.defaultAdapter.discovering to its own visibility) and
-    // false otherwise. No-op on Linux, where live updates instead come from `nmcli monitor`.
     function setWifiListVisible(visible: bool): void {
         if (!Platform.isWindows || !WindowsNative.network) return;
         WindowsNative.network.setWifiListVisible(visible);
@@ -131,9 +116,6 @@ Singleton {
         if (Platform.isWindows) {
             accessPoint.askingPassword = false;
             root.wifiConnectTarget = accessPoint;
-            // Same effective UX as nmcli: an open or already-known network connects right away,
-            // a secured network with no saved profile goes straight to the password prompt
-            // instead of a doomed-to-fail attempt with an empty passphrase.
             if (accessPoint.isSecure && !accessPoint.lastIpcObject?.hasProfile) {
                 accessPoint.askingPassword = true;
                 root.wifiConnectTarget = null;

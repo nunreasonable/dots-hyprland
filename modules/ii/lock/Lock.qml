@@ -42,8 +42,6 @@ LockScreen {
         target: GlobalStates
         function onScreenLockedChanged() {
             if (GlobalStates.screenLocked) {
-                // No Hyprland workspaces to push aside on Windows; the native lock surface
-                // (WlSessionLock) covers the whole screen on its own.
                 if (Platform.isWindows) return;
                 // Lock: save workspace per monitor and move all to temp workspace in one batch
                 var next = {}

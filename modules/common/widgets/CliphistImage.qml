@@ -49,8 +49,6 @@ Rectangle {
 
     Component.onCompleted: {
         if (Platform.isWindows) {
-            // The native Clipboard history already keeps a persistent PNG per image entry -
-            // no decode step (and nothing to clean up on destruction below).
             root.source = WindowsNative.clipboard.imagePath(root.entryNumber);
             return;
         }

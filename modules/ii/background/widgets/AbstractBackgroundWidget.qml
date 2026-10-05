@@ -55,7 +55,6 @@ AbstractWidget {
     onWallpaperPathChanged: refreshPlacementIfNeeded()
     onPlacementStrategyChanged: refreshPlacementIfNeeded()
     Connections {
-        // The native helpers load asynchronously and may come after the config.
         target: Platform.isWindows ? WindowsNative : null
         function onReadyChanged() { if (WindowsNative.ready) root.refreshPlacementIfNeeded() }
     }
@@ -74,8 +73,8 @@ AbstractWidget {
         if (root.placementStrategy === "free" && !root.needsColText) return;
 
         if (Platform.isWindows) {
-            if (!WindowsNative.imageTools) return; // native backend not ready yet
-            if (!root.wallpaperPath) return; // nothing to place against (the script finds nothing either)
+            if (!WindowsNative.imageTools) return;
+            if (!root.wallpaperPath) return;
             const result = WindowsNative.imageTools.leastBusyRegion(
                 root.wallpaperPath,
                 root.leastBusyContentWidth,

@@ -27,10 +27,6 @@ Process {
         return ` -H 'User-Agent: ${StringUtils.shellSingleQuoteEscape(downloadUserAgent)}'`;
     }
 
-    // Windows: no bash/mkdir -p/`file`. curl.exe ships with Windows and makes the parent
-    // directory itself (--create-dirs); it is called directly because QProcess escapes quotes as
-    // \" for C runtime parsing, which cmd.exe doesn't understand. The image size comes from the
-    // native ImageTools helper instead of `file`.
     function rawFilePath() {
         return FileUtils.trimFileProtocol(filePath);
     }
@@ -49,7 +45,7 @@ Process {
     stdout: StdioCollector {
         id: imageSizeOutputCollector
         onStreamFinished: {
-            if (Platform.isWindows) return; // handled in onExited below
+            if (Platform.isWindows) return;
             const output = imageSizeOutputCollector.text.trim();
             const match = output.match(/(\d+)\s*x\s*(\d+)/);
 

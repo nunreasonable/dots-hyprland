@@ -11,8 +11,6 @@ import Quickshell.Hyprland
 /**
  * A service that provides access to Hyprland keybinds.
  * Uses the `get_keybinds.py` script to parse comments in config files in a certain format and convert to JSON.
- * On Windows, converts the binds Quickshell's native hotkeys loaded from keybinds.json
- * to the shape of `hyprctl binds -j`.
  */
 Singleton {
     id: root
@@ -58,17 +56,12 @@ Singleton {
         }
     }
 
-    // Windows
-
-    // Hyprland modmask bits, as used by the cheatsheet
     readonly property var windowsModBits: ({
         "shift": 1, "ctrl": 4, "control": 4, "ctl": 4, "alt": 8,
         "super": 64, "win": 64, "windows": 64, "meta": 64, "mod4": 64, "logo": 64,
         "super_l": 64, "super_r": 64, "lwin": 64, "rwin": 64,
     })
-    // Hyprland's key name for a lone modifier ("SUPER + SUPER_L")
     readonly property var windowsLoneKeys: ({ 1: "Shift_L", 4: "Control_L", 8: "Alt_L", 64: "SUPER_L" })
-    // Windows key names that differ from Hyprland's (xkb) ones
     readonly property var windowsKeyNames: ({
         "pageup": "Page_Up", "prior": "Page_Up", "pagedown": "Page_Down", "next": "Page_Down",
         "enter": "Return", "esc": "Escape", "backspace": "BackSpace", "del": "Delete", "ins": "Insert",
@@ -123,8 +116,6 @@ Singleton {
         }
     }
 
-    // The binds Quickshell.Windows' Hotkeys loaded (the user's keybinds.json in
-    // %LOCALAPPDATA%\illogical-impulse, else defaults/windows/keybinds.json), live.
     readonly property var windowsBinds: Platform.isWindows ? (WindowsNative.hotkeys?.binds ?? []) : []
     onWindowsBindsChanged: {
         if (!Platform.isWindows) return

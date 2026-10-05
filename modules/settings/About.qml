@@ -151,7 +151,6 @@ ContentPage {
             }
         }
 
-        // The Windows port: this config's fork and the Quickshell backend it runs on.
         Flow {
             visible: Platform.isWindows
             Layout.fillWidth: true

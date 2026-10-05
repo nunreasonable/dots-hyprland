@@ -42,7 +42,7 @@ Item {
 
     property int windowsOcrRequestId: -1
     property string windowsOcrText: ""
-    property string windowsStage: "" // "ocr" | "translate" | ""
+    property string windowsStage: ""
     property bool windowsCardMode: false
     property int windowsGeneration: 0
     property var windowsRequests: []
@@ -296,10 +296,6 @@ Item {
         }
     }
 
-    // WindowsNative's backend loads asynchronously (Component.onCompleted there is still
-    // waiting on Qt.createComponent when this overlay's own Component.onCompleted fires, e.g.
-    // right after login): startWindows() above would otherwise fail once with "not available"
-    // and never retry. Mirrors the GoogleCloud Connections above for the Windows case.
     Connections {
         target: Platform.isWindows ? WindowsNative : null
         function onReadyChanged() {

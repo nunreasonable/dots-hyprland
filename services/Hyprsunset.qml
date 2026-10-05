@@ -84,7 +84,7 @@ Singleton {
     }
 
     function startHyprsunset() {
-        if (Platform.isWindows) return; // Windows applies the gamma ramp directly, no daemon to start
+        if (Platform.isWindows) return;
         Quickshell.execDetached(["bash", "-c", `pidof hyprsunset || hyprsunset`]);
     }
 
@@ -136,8 +136,6 @@ Singleton {
     }
 
     function fetchState() {
-        // Windows: temperatureActive is already kept correct imperatively by
-        // enable/disableTemperature above, nothing external to poll.
         if (Platform.isWindows) return;
         fetchProc.running = true;
     }

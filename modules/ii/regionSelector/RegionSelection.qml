@@ -118,9 +118,6 @@ PanelWindow {
     property bool isCircleSelection: (root.selectionMode === RegionSelection.SelectionMode.Circle)
     property bool enableWindowRegions: Config.options.regionSelector.targetRegions.windows && !isCircleSelection
     property bool enableLayerRegions: Config.options.regionSelector.targetRegions.layers && !isCircleSelection
-    // Content region detection (find-regions-venv.sh, Python/OpenCV) isn't ported to Windows
-    // yet - no dependency-free way to redo its MSER/contour box detection in C++ - so it's
-    // forced off there regardless of the config option.
     property bool enableContentRegions: !Platform.isWindows && Config.options.regionSelector.targetRegions.content
 
     // Target
@@ -201,11 +198,7 @@ PanelWindow {
     }
     property bool isRecording: root.action === RegionSelection.SnipAction.Record || root.action === RegionSelection.SnipAction.RecordWithSound
     property bool recordingShouldStop: false
-    // Windows only: set when not currently recording and ffmpeg isn't on PATH either (see
-    // ScreenshotAction.windowsRecordingStatusCommand()). Always false on Linux/non-Record, and
-    // with the native recorder, which needs neither the check nor ffmpeg.
     property bool ffmpegMissing: false
-    // Windows' native recorder knows its state synchronously; asked once, when the selector opens.
     readonly property bool nativeRecorder: Platform.isWindows && ScreenshotAction.windowsNativeRecorder
     Component.onCompleted: {
         if (root.isRecording && root.nativeRecorder) root.recordingShouldStop = ScreenshotAction.windowsNativeRecording;
@@ -217,8 +210,6 @@ PanelWindow {
             ? ScreenshotAction.windowsRecordingStatusCommand()
             : ["pidof", "wf-recorder"]
         onExited: (exitCode, exitStatus) => {
-            // Flags first: onPreparationDoneChanged reads them as soon as preparationDone flips,
-            // and this can finish after the screenshot (always, with Windows' instant capture).
             root.recordingShouldStop = (exitCode === 0);
             root.ffmpegMissing = Platform.isWindows && exitCode === 1;
             root.preparationDone = !screenshotProc.running

@@ -65,9 +65,6 @@ Singleton {
     }
 
     function updateAll() {
-        // On Windows the native Hyprland module keeps every object's lastIpcObject live, so the
-        // lists are rebuilt from it instead of asking hyprctl. Events come in bursts; one
-        // rebuild per burst.
         if (Platform.isWindows) {
             nativeRefresh.restart();
             return;

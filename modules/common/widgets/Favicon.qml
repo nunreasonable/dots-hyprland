@@ -24,8 +24,6 @@ IconImage {
     Process {
         id: faviconDownloadProcess
         running: false
-        // curl.exe ships with Windows itself; only the "[ -f ]" existence test needs bash,
-        // and that's checked beforehand via WindowsNative.fsUtils instead (see startDownload).
         command: Platform.isWindows
             ? ["curl", "-s", root.faviconUrl, "-o", root.faviconFilePath, "-L", "-H", `User-Agent: ${downloadUserAgent}`]
             : ["bash", "-c", `[ -f ${faviconFilePath} ] || curl -s '${root.faviconUrl}' -o '${faviconFilePath}' -L -H 'User-Agent: ${downloadUserAgent}'`]

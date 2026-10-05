@@ -15,8 +15,6 @@ Singleton {
     property string pressPasteCommand: "ydotool key -d 1 29:1 47:1 47:0 29:0"
     property bool sloppySearch: Config.options?.search.sloppy ?? false
     property real scoreThreshold: 0.2
-    // Windows: live binding onto the native Clipboard history, which already uses the exact
-    // same "<id>\t<text-or-[[ binary data WxH ]]>" format cliphist's own `list` output does.
     property list<string> entries: Platform.isWindows ? (WindowsNative.clipboard ? WindowsNative.clipboard.entries : []) : []
     readonly property var preparedEntries: entries.map(a => ({
         name: Fuzzy.prepare(`${a.replace(/^\s*\S+\s+/, "")}`),
@@ -54,14 +52,11 @@ Singleton {
     }
 
     function refresh() {
-        // Windows: `entries` above is already a live binding onto the native history, nothing to do.
         if (Platform.isWindows) return;
         readProc.buffer = []
         readProc.running = true
     }
 
-    // Ctrl+V, by evdev keycode (KEY_LEFTCTRL=29, KEY_V=47) - same pair Ydotool.qml's
-    // pressPasteCommand sends via ydotool on Linux.
     function _sendPasteKeystroke() {
         WindowsNative.input.sendKey(29, true);
         WindowsNative.input.sendKey(47, true);
@@ -83,8 +78,6 @@ Singleton {
     }
 
     function paste(entry) {
-        // Matches Linux's actual behaviour: this only copies to the clipboard (see wl-paste
-        // above, which just dumps the clipboard back to stdout rather than sending a keystroke).
         if (Platform.isWindows) {
             WindowsNative.clipboard.copy(root.entryId(entry));
             return;

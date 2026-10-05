@@ -12,13 +12,8 @@ import Quickshell
 Singleton {
     // XDG Dirs, with "file://"
     readonly property string home: StandardPaths.standardLocations(StandardPaths.HomeLocation)[0]
-    // On Windows, plain ConfigLocation is app-qualified (%LOCALAPPDATA%/quickshell),
-    // unlike Linux where it's the bare XDG_CONFIG_HOME ii appends "illogical-impulse" to.
-    // GenericConfigLocation gives the same bare %LOCALAPPDATA% root there.
     readonly property string config: StandardPaths.standardLocations(
         Platform.isWindows ? StandardPaths.GenericConfigLocation : StandardPaths.ConfigLocation)[0]
-    // StateLocation is already app-qualified on both platforms (~/.local/state/quickshell,
-    // %LOCALAPPDATA%/quickshell), so it needs no special-casing here.
     readonly property string state: StandardPaths.standardLocations(StandardPaths.StateLocation)[0]
     readonly property string cache: StandardPaths.standardLocations(StandardPaths.CacheLocation)[0]
     readonly property string genericCache: StandardPaths.standardLocations(StandardPaths.GenericCacheLocation)[0]
@@ -33,7 +28,6 @@ Singleton {
     property string scriptPath: Quickshell.shellPath("scripts")
     property string favicons: FileUtils.trimFileProtocol(`${Directories.cache}/media/favicons`)
     property string coverArt: FileUtils.trimFileProtocol(`${Directories.cache}/media/coverart`)
-    // "/tmp/quickshell" has no equivalent on Windows; TempLocation gives a per-user temp dir there.
     readonly property string tempRoot: Platform.isWindows
         ? `${FileUtils.trimFileProtocol(StandardPaths.standardLocations(StandardPaths.TempLocation)[0])}/quickshell`
         : "/tmp/quickshell"
@@ -53,35 +47,16 @@ Singleton {
     property string generatedWallpaperCategoryPath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/wallpaper/category.txt`)
     property string cliphistDecode: FileUtils.trimFileProtocol(`${Directories.tempRoot}/media/cliphist`)
     property string screenshotTemp: `${Directories.tempRoot}/media/screenshot`
-    // Windows only: PID of the ffmpeg process the region selector's recorder started, so a
-    // second invocation (the "stop" toggle) can find and kill the right one. See
-    // scripts/videos/record.ps1 and ScreenshotAction.qml's recording helpers.
     property string recordingPidFile: `${Directories.tempRoot}/media/recording.pid`
     property string wallpaperSwitchScriptPath: FileUtils.trimFileProtocol(`${Directories.scriptPath}/colors/switchwall.sh`)
-    // Windows: the m3colors template matugen.exe renders into colors.json. Wallpapers.qml writes
-    // the matugen config pointing at it (and at the real StateLocation) at run time.
     property string windowsMatugenTemplatePath: Quickshell.shellPath("defaults/windows/matugen/colors.json")
-    // Windows terminal theming (services/WindowsTerminalTheme.qml): the same two template
-    // files Linux's applycolor.sh fills in by $placeholder substitution (scripts/colors/
-    // terminal/), reused as-is since there's nothing shell-specific in them.
     property string terminalSchemeBasePath: Quickshell.shellPath("scripts/colors/terminal/scheme-base.json")
     property string terminalSequencesTemplatePath: Quickshell.shellPath("scripts/colors/terminal/sequences.txt")
     property string windowsTerminalSequencesPath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/terminal/sequences.txt`)
-    // Windows: the Oh My Posh prompt theme, in ii's colors (services/WindowsTerminalTheme.qml)
     property string windowsTerminalOhMyPoshPath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/terminal/ii.omp.json`)
-    // Same theme, plain Unicode/ASCII symbols instead of Nerd Font glyphs: profile.ps1 picks
-    // this one in a classic console (conhost) that can't show the glyph font (see
-    // WindowsTerminalTheme._writeOhMyPoshPlain()). Windows Terminal always gets the glyph one.
     property string windowsTerminalOhMyPoshPlainPath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/terminal/ii.plain.omp.json`)
-    // Second matugen.exe pass for terminalGenerationProps.forceDarkMode while ii itself is
-    // light: generate_colors_material.py forces --mode dark for the terminal independently of
-    // the (still light) colors.json matugen already wrote for ii's own UI; this is that, since
-    // there's no Python/materialyoucolor on Windows to recompute it directly.
     property string windowsTerminalMaterialDarkConfigPath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/matugen-config-terminal-dark.toml`)
     property string windowsTerminalMaterialDarkPath: FileUtils.trimFileProtocol(`${Directories.state}/user/generated/terminal/material-dark.json`)
-    // Windows Terminal's own JSON fragment (color scheme + profile updates) and the installed
-    // app's settings.json, whose mtime gets nudged so already-open windows notice the fragment
-    // changed (see WindowsTerminalTheme.nudgeWindowsTerminal()).
     property string windowsTerminalFragmentDir: `${(Quickshell.env("LOCALAPPDATA") || "").replace(/\\/g, "/")}/Microsoft/Windows Terminal/Fragments/illogical-impulse`
     property string windowsTerminalFragmentPath: `${Directories.windowsTerminalFragmentDir}/illogical-impulse.json`
     property string windowsTerminalSettingsJsonPath: `${(Quickshell.env("LOCALAPPDATA") || "").replace(/\\/g, "/")}/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json`
@@ -94,7 +69,6 @@ Singleton {
     property string userAvatarPathAccountsService: Platform.isWindows ? "" : FileUtils.trimFileProtocol(`/var/lib/AccountsService/icons/${SystemInfo.username}`)
     property string userAvatarPathRicersAndWeirdSystems: FileUtils.trimFileProtocol(`${Directories.home}.face`)
     property string userAvatarPathRicersAndWeirdSystems2: FileUtils.trimFileProtocol(`${Directories.home}.face.icon`)
-    // Windows account picture: first image under %APPDATA%/Microsoft/Windows/AccountPictures, or empty.
     property string userAvatarPathWindows: (Platform.isWindows && accountPicturesFolder.count > 0)
         ? FileUtils.trimFileProtocol(accountPicturesFolder.get(0, "filePath"))
         : ""
@@ -113,11 +87,6 @@ Singleton {
     // Cleanup on init
     Component.onCompleted: {
         if (Platform.isWindows) {
-            // Most Linux cache/cleanup dirs don't need pre-creating: Quickshell's FileView
-            // creates parent directories on write (see fileview.cpp's dir.mkpath), which is
-            // all the boot-critical paths here (config.json, state/user/*) need. latexOutput
-            // is the exception: MicroTeX's own process writes the .svg directly (no FileView
-            // involved), so the directory has to exist before LatexRenderer spawns it.
             Quickshell.execDetached(["powershell", "-NoProfile", "-Command",
                 `New-Item -ItemType Directory -Force -Path "${latexOutput}" | Out-Null`]);
             return;

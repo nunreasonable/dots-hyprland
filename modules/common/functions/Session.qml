@@ -7,8 +7,6 @@ Singleton {
     id: root
 
     function closeAllWindows() {
-        // On Windows, logout()/poweroff()/reboot() below already force-close every app
-        // (ExitWindowsEx/InitiateShutdownW); there's no "kill" binary to shell out to anyway.
         if (Platform.isWindows) return;
         HyprlandData.windowList.map(w => w.pid).forEach(pid => {
             Quickshell.execDetached(["kill", pid]);

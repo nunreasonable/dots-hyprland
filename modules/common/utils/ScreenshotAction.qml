@@ -26,9 +26,6 @@ Singleton {
     property string imageSearchEngineBaseUrl: Config.options.search.imageSearch.imageSearchEngineBaseUrl
     property string fileUploadApiEndpoint: "https://uguu.se/upload"
 
-    // Windows only: requestId (from WindowsNative.ocr.recognizeText) -> cropped temp file to
-    // delete once the result comes back. See runWindows()'s CharRecognition case and the
-    // Connections below.
     property var _pendingOcr: ({})
 
     Connections {
@@ -54,12 +51,6 @@ Singleton {
         return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}_${pad(d.getHours())}.${pad(d.getMinutes())}.${pad(d.getSeconds())}`;
     }
 
-    // Windows equivalent of getCommand(): rather than building a shell pipeline, it calls the
-    // native crop/clipboard/OCR/recorder helpers (WindowsNative.*) directly and shells out only
-    // for the pieces that still need an external tool (curl.exe for image search, ffmpeg when
-    // the native recorder is unavailable). monitorOffsetX/Y (physical pixels, HyprlandMonitor.x/y)
-    // are only used for Record/RecordWithSound, to turn the region's per-monitor coordinates
-    // into virtual-desktop-global ones.
     function runWindows(x, y, width, height, screenshotPath, action, saveDir = "", monitorOffsetX = 0, monitorOffsetY = 0) {
         if (!WindowsNative.ready || !WindowsNative.screenshot || !WindowsNative.clipboard) {
             console.warn("[Region Selector] Windows native helpers not ready, skipping snip.");
@@ -87,8 +78,6 @@ Singleton {
             case ScreenshotAction.Action.Edit: {
                 const cropPath = `${screenshotPath}-crop.png`;
                 if (WindowsNative.screenshot.cropToFile(screenshotPath, rx, ry, rw, rh, cropPath)) {
-                    // mspaint ships with every Windows 10/11 install and accepts a file to open
-                    // for editing, the closest match to swappy/satty's "crop then annotate" step.
                     Quickshell.execDetached(["mspaint", cropPath]);
                 }
                 cleanupRaw();
@@ -96,7 +85,6 @@ Singleton {
             }
             case ScreenshotAction.Action.Search: {
                 if (WindowsNative.screenshot.cropToFile(screenshotPath, rx, ry, rw, rh, screenshotPath)) {
-                    // No jq on Windows; PowerShell's own JSON parsing replaces it.
                     const psCommand = `$resp = curl.exe -s -F "files[]=@${screenshotPath}" ${root.fileUploadApiEndpoint} | ConvertFrom-Json; `
                         + `Start-Process ("${root.imageSearchEngineBaseUrl}" + $resp.files[0].url); `
                         + `Remove-Item -Force '${screenshotPath}'`;
@@ -126,9 +114,6 @@ Singleton {
         }
     }
 
-    // Native recorder (Quickshell's ScreenRecorder: Windows.Graphics.Capture + Media Foundation,
-    // no ffmpeg needed). Null/false where it can't work (Windows N without the Media Feature
-    // Pack, older Quickshell builds); record.ps1 + ffmpeg remain the fallback there.
     readonly property QtObject windowsRecorder: (Platform.isWindows && WindowsNative.ready) ? WindowsNative.screenRecorder : null
     readonly property bool windowsNativeRecorder: root.windowsRecorder?.available ?? false
     readonly property bool windowsNativeRecording: root.windowsNativeRecorder && root.windowsRecorder.recording
@@ -152,12 +137,10 @@ Singleton {
     function startWindowsRecording(x, y, width, height, sound) {
         const saveDir = Config.options.screenRecord.savePath;
         if (root.windowsNativeRecorder) {
-            // Notifications come from the Connections above (started/failed).
             root.windowsRecorder.start(Math.round(x), Math.round(y), Math.round(width), Math.round(height), sound, saveDir);
             return;
         }
 
-        // yuv420p needs even dimensions; shaving at most 1px off is unnoticeable.
         const evenW = width - (width % 2);
         const evenH = height - (height % 2);
         const args = [
@@ -183,9 +166,6 @@ Singleton {
         windowsRecordProc.running = true;
     }
 
-    // Record screen (the overlay's recorder widget; record.sh --fullscreen on Linux): stops a
-    // running recording, otherwise records the whole of `monitor` (a HyprlandMonitor, whose
-    // x/y/width/height are physical pixels on Windows).
     function toggleWindowsScreenRecording(monitor, sound) {
         if (!monitor) return;
         if (root.windowsNativeRecorder) {
@@ -199,8 +179,6 @@ Singleton {
     }
 
     Process {
-        // ffmpeg fallback of toggleWindowsScreenRecording(): same status check as the region
-        // selector's (see windowsRecordingStatusCommand()).
         id: windowsScreenToggleProc
         property var monitor: null
         property bool sound: false
@@ -213,9 +191,6 @@ Singleton {
         }
     }
 
-    // Shown when recording was asked for, the native recorder is unavailable and ffmpeg isn't
-    // on PATH either: offers installing ffmpeg with winget, in a console the user can watch
-    // (winget may ask to accept its source agreements there).
     property int _ffmpegNoticeId: -1
     function offerFfmpegInstall() {
         const reason = root.windowsRecorder?.unavailableReason ?? "";
@@ -237,8 +212,6 @@ Singleton {
     readonly property string windowsRecordScript: FileUtils.trimFileProtocol(`${Directories.scriptPath}/videos/record.ps1`)
 
     Process {
-        // record.ps1 reports on stdout: "nosound" (no loopback device for -Sound) when starting,
-        // "saved <file>" once a stopped recording is remuxed.
         id: windowsRecordProc
         stdout: SplitParser {
             onRead: line => {
@@ -252,10 +225,6 @@ Singleton {
         }
     }
 
-    // Command for RegionSelection.qml's checkRecordingProc on Windows: exit 0 if a recording ii
-    // started is still running (mirrors `pidof wf-recorder`'s "found" case), exit 1 if not and
-    // ffmpeg isn't on PATH either (caller should notify and bail instead of showing the region
-    // UI), exit 2 if not recording and ffmpeg is available (proceed normally).
     function windowsRecordingStatusCommand() {
         const pidFile = Directories.recordingPidFile;
         const script = `if (Test-Path '${pidFile}') { `

@@ -190,12 +190,11 @@ Button {
                             id: booruDownloadProc
                             property string targetPath: ""
                             property string userAgent: ""
-                            // curl directly: QProcess's \" quote escaping doesn't survive cmd.exe.
                             command: ["curl", "--create-dirs", "-sSL", root.imageData.file_url,
                                 ...(booruDownloadProc.userAgent ? ["-H", `User-Agent: ${booruDownloadProc.userAgent}`] : []),
                                 "-o", `${booruDownloadProc.targetPath}\\${root.fileName}`]
                             onExited: (exitCode, exitStatus) => {
-                                if (exitCode !== 0) return; // like the Linux `&&` chain
+                                if (exitCode !== 0) return;
                                 Notifications.sendDesktop(
                                     Translation.tr("Download complete"),
                                     `${booruDownloadProc.targetPath}\\${root.fileName}`,

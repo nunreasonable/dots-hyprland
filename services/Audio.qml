@@ -115,8 +115,6 @@ Singleton {
     }
 
     function playSystemSound(soundName) {
-        // No ffplay or /usr/share/sounds theme on Windows: the matching Windows sound event,
-        // from the user's sound scheme.
         if (Platform.isWindows) {
             WindowsNative.session?.playSystemSound(soundName);
             return;

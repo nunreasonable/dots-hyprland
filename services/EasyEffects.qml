@@ -24,7 +24,7 @@ Singleton {
     }
 
     function disable() {
-        if (Platform.isWindows) return; // No EasyEffects build for Windows; available stays false
+        if (Platform.isWindows) return;
         root.active = false
         Quickshell.execDetached(["bash", "-c", "pkill easyeffects || flatpak pkill com.github.wwmm.easyeffects"])
     }
@@ -45,7 +45,7 @@ Singleton {
 
     Process {
         id: fetchAvailabilityProc
-        running: !Platform.isWindows // No `command`/flatpak lookup on Windows; available stays false
+        running: !Platform.isWindows
         command: ["bash", "-c", "command -v easyeffects || flatpak info com.github.wwmm.easyeffects > /dev/null 2>&1"]
         onExited: (exitCode, exitStatus) => {
             root.available = exitCode === 0

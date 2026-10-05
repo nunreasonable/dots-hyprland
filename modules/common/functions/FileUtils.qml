@@ -12,7 +12,6 @@ Singleton {
     function trimFileProtocol(str) {
         let s = str;
         if (typeof s !== "string") s = str.toString(); // Convert to string if it's an url or whatever
-        // file:///C:/x on Windows: also drop the slash in front of the drive letter.
         return s.startsWith("file://") ? s.slice(7).replace(/^\/([A-Za-z]:\/)/, "$1") : s;
     }
 
@@ -56,14 +55,6 @@ Singleton {
         return trimmed;
     }
 
-    /**
-     * Makes a string safe to use as a single path segment (a file/dir name, not a path).
-     * Windows screen names look like "\\.\DISPLAY1"; used e.g. for the region selector's
-     * per-screen temp screenshot name. A no-op for names that are already safe (every Linux
-     * output name: "DP-1", "eDP-1", etc.), so this is also fine to call unconditionally there.
-     * @param {string} str
-     * @returns {string}
-     */
     function sanitizeFilename(str) {
         if (typeof str !== "string") return "";
         return str.replace(/[\\/:*?"<>|]/g, "_");

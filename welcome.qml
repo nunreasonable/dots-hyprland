@@ -24,7 +24,7 @@ ApplicationWindow {
     property real contentPadding: 8
     property bool showNextTime: false
     FileView {
-        id: firstRunMarker // Windows only, see showNextTimeSwitch
+        id: firstRunMarker
         path: root.firstRunFilePath
         preload: false
     }
@@ -49,7 +49,6 @@ ApplicationWindow {
     Process {
         id: konachanWallProc
         property string status: ""
-        // Windows: random_wall.ps1 only downloads and prints the path; applying is ii's job there.
         command: Platform.isWindows
             ? ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
                 FileUtils.trimFileProtocol(Quickshell.shellPath("scripts/colors/random/random_wall.ps1")),
@@ -115,7 +114,6 @@ ApplicationWindow {
                     Layout.alignment: Qt.AlignVCenter
                     onCheckedChanged: {
                         if (Platform.isWindows) {
-                            // No rm/bash there; the marker file is written through a FileView.
                             if (checked) Quickshell.execDetached(["cmd", "/c", "del", "/f", "/q", root.firstRunFilePath.replace(/\//g, "\\")]);
                             else firstRunMarker.setText(root.firstRunFileContent);
                             return;

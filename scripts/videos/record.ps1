@@ -1,20 +1,3 @@
-# Windows counterpart to record.sh, driven by ScreenshotAction.qml. Only a fallback: the shell
-# records natively (Quickshell.Windows.ScreenRecorder) unless that is unavailable.
-#
-#   record.ps1 -X -Y -Width -Height [-Sound] [-SaveDir dir] -PidFile file   start a recording
-#   record.ps1 -Stop -PidFile file                                         stop it
-#
-# Start launches ffmpeg (gdigrab) on a desktop region and writes "<pid>`n<output file>" to the
-# PID file, so stopping targets exactly that process. ffmpeg can't be asked to stop gracefully
-# from another process (no SIGINT on Windows, and its stdin isn't ours), so it records to
-# Matroska, which stays playable when the process is killed, and Stop remuxes that to the .mp4
-# record.sh would have produced (stream copy, no re-encode).
-#
-# X/Y/Width/Height are physical-pixel, virtual-desktop coordinates (gdigrab's "desktop" spans
-# every monitor with (0,0) at the primary's top-left, like HyprlandMonitor.x/y).
-#
-# Output on stdout, for ScreenshotAction.qml: "nosound" when sound was asked for but there is no
-# loopback capture device, and on stop "saved <file>".
 param(
     [int]$X,
     [int]$Y,
@@ -69,8 +52,6 @@ $ffmpegArgs = @(
 )
 
 if ($Sound) {
-    # What the speakers play is only reachable through a loopback capture device: the driver's
-    # "Stereo Mix" (off by default in Sound settings, localized name) or a virtual cable.
     $list = (& ffmpeg -hide_banner -list_devices true -f dshow -i dummy 2>&1 | Out-String)
     $loopback = [regex]::Matches($list, '"([^"]+)" \(audio\)') |
         ForEach-Object { $_.Groups[1].Value } |
@@ -86,8 +67,6 @@ if ($Sound) {
 
 $ffmpegArgs += @("-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p", "-y", $outFile)
 
-# Windows PowerShell joins -ArgumentList with spaces and no quoting; device names and profile
-# paths have spaces.
 function Format-Arg([string]$a) {
     if ($a -match '[\s"]') { '"' + ($a -replace '"', '\"') + '"' } else { $a }
 }

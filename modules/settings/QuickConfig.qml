@@ -15,7 +15,6 @@ ContentPage {
         id: randomWallProc
         property string status: ""
         property string scriptPath: `${Directories.scriptPath}/colors/random/random_konachan_wall.sh`
-        // Windows: random_wall.ps1 only downloads and prints the path; applying is ii's job there.
         command: Platform.isWindows
             ? ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
                 FileUtils.trimFileProtocol(`${Directories.scriptPath}/colors/random/random_wall.ps1`),

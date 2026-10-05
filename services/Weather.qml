@@ -81,8 +81,6 @@ Singleton {
     }
 
     function getData() {
-        // The wttr.in pipeline below needs bash + jq, neither of which ship on
-        // Windows; `data` just stays at its zeroed defaults for now (see PORTING.md).
         if (Platform.isWindows) return;
         let command = "curl -s wttr.in";
 

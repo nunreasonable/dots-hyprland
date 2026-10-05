@@ -18,7 +18,6 @@ Singleton {
     Connections {
         target: Config
         function onReadyChanged() {
-            // No kded6/mako/dunst equivalents to check for on Windows
             if (Config.ready && !Platform.isWindows) checkConflictsProc.running = true
         }
     }
