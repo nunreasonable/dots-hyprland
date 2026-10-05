@@ -220,7 +220,12 @@ ContentPage {
                 text: Config.options.windowsPort.tiling.excluded.join("\n")
                 wrapMode: TextEdit.Wrap
                 onTextChanged: {
-                    Config.options.windowsPort.tiling.excluded = text.split("\n").map(s => s.trim()).filter(s => s.length > 0);
+                    // `text` stays bound to excluded.join("\n"); dropping blank lines here would
+                    // erase them again the instant they're typed (e.g. pressing Enter for a new
+                    // line), fighting the binding. The native side already skips blank entries
+                    // (TilingManager::setExcluded trims and ignores empty ones), so just mirror
+                    // the lines back verbatim.
+                    Config.options.windowsPort.tiling.excluded = text.split("\n").map(s => s.trim());
                 }
             }
         }
