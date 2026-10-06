@@ -3,7 +3,7 @@
     "ii keybinds for Windows, ported from dots/.config/hypr/hyprland/keybinds.lua.",
     "Copy to %LOCALAPPDATA%\\illogical-impulse\\keybinds.json to customize; that file wins over this one and is reloaded on save.",
     "keys: Ctrl+Alt+Shift+Super+<key>, or a lone modifier (\"Super\"): with onRelease it fires when tapped alone, otherwise on press and release.",
-    "action: global (GlobalShortcut name, appid:name), dispatch (Hyprland.dispatch), exec (command; %SHELL% = config dir, %VAR% = environment; \"cmd1 || cmd2\" tries cmd2 if cmd1 isn't found, e.g. for a program missing on older Windows versions; console programs open in a console window of their own, `conhost.exe --headless <command>` runs one hidden), ipc (target, function, args), key (inject a key), reload, native (Windows handles it; listed for the cheatsheet only).",
+    "action: global (GlobalShortcut name, appid:name), dispatch (Hyprland.dispatch), exec (command; %SHELL% = config dir, %VAR% = environment; \"cmd1 || cmd2\" tries cmd2 if cmd1 isn't found, e.g. for a program missing on older Windows versions; console programs open in a console window of their own, `conhost.exe --headless <command>` runs one hidden), ipc (target, function, args), key (inject a key), reload, native (Windows or Quickshell handles it; listed for the cheatsheet only; keys may name a mouse button such as mouse:272).",
     "repeat: fire again on key auto-repeat. description: \"Section: text\" shows in the cheatsheet."
   ],
   "binds": [
@@ -51,6 +51,8 @@
     {"keys": "Shift+Super+Right", "action": "dispatch", "dispatch": "movewindow r", "description": "Window: Move Right"},
     {"keys": "Shift+Super+Up", "action": "dispatch", "dispatch": "movewindow u", "description": "Window: Move Up"},
     {"keys": "Shift+Super+Down", "action": "dispatch", "dispatch": "movewindow d", "description": "Window: Move Down"},
+    {"keys": "Super+mouse:272", "action": "native", "description": "Window: Drag to move"},
+    {"keys": "Super+mouse:273", "action": "native", "description": "Window: Drag to resize"},
     {"keys": "Super+Q", "action": "dispatch", "dispatch": "killactive", "description": "Window: Close"},
     {"keys": "Super+D", "action": "dispatch", "dispatch": "fullscreen 1", "description": "Window: Maximize"},
     {"keys": "Super+F", "action": "dispatch", "dispatch": "fullscreen 0", "description": "Window: Fullscreen"},
@@ -116,7 +118,7 @@
     {"keys": "Alt+XF86AudioMute, XF86AudioMicMute, Super+Alt+M", "hyprland": "wpctl set-mute @DEFAULT_SOURCE@", "reason": "no virtual key for mic mute and ii has no IPC target or global shortcut for it"},
     {"keys": "Print, Ctrl+Print", "hyprland": "grim fullscreen screenshot", "reason": "left to Windows (Print Screen / Snipping Tool); Super+Shift+S is ii's region snip"},
     {"keys": "Ctrl+Alt+R, Super+Shift+Alt+R", "hyprland": "record.sh --fullscreen [--sound]", "reason": "script based recording; ii's region recorder is Super+Shift+R"},
-    {"keys": "Super+Shift+Alt+mouse:273/275/276, Super+mouse wheel, Super+mouse drag", "hyprland": "AI summary, playerctl, workspace scroll, window move/resize", "reason": "mouse binds are not supported"},
+    {"keys": "Super+Shift+Alt+mouse:273/275/276, Super+mouse wheel", "hyprland": "AI summary, playerctl, workspace scroll", "reason": "mouse binds are not supported (Super+left/right drag to move/resize windows is built in, see windowsPort.superDrag)"},
     {"keys": "Super+Shift+Alt+Q", "hyprland": "hyprctl kill (click a window to kill it)", "reason": "no kill mode, and the Windows Hyprland module has no forcekillactive dispatcher yet"},
     {"keys": "Super+Alt+F", "hyprland": "fullscreenstate (spoof)", "reason": "no equivalent"},
     {"keys": "Super+S, Ctrl+Super+S, Super+Alt+S", "hyprland": "special workspace (scratchpad)", "reason": "virtual desktops have no scratchpad"},

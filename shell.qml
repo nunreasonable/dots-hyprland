@@ -77,6 +77,12 @@ ShellRoot {
         value: Config.options.windowsPort.tiling.excluded
     }
     Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.superDrag
+        property: "enabled"
+        value: Config.options.windowsPort.superDrag
+    }
+    Binding {
         when: Platform.isWindows && WindowsNative.ready
         target: WindowsNative.desktopLayer
         property: "aboveIcons"

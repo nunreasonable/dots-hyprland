@@ -176,6 +176,18 @@ ContentPage {
             }
         }
 
+        ConfigSwitch {
+            buttonIcon: "open_with"
+            text: Translation.tr("Super + drag moves and resizes windows")
+            checked: Config.options.windowsPort.superDrag
+            onCheckedChanged: {
+                Config.options.windowsPort.superDrag = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Hold the Windows key and drag with the left button to move a window, or with the right button to resize it from the nearest corner.\nWorks with tiling on or off; with tiling on, dropping a window on another one swaps them and resizing moves the split.")
+            }
+        }
+
         ConfigSpinBox {
             icon: "space_bar"
             text: Translation.tr("Gap between windows (px)")
