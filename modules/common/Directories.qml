@@ -17,11 +17,36 @@ Singleton {
     readonly property string state: StandardPaths.standardLocations(StandardPaths.StateLocation)[0]
     readonly property string cache: StandardPaths.standardLocations(StandardPaths.CacheLocation)[0]
     readonly property string genericCache: StandardPaths.standardLocations(StandardPaths.GenericCacheLocation)[0]
-    readonly property string documents: StandardPaths.standardLocations(StandardPaths.DocumentsLocation)[0]
     readonly property string downloads: StandardPaths.standardLocations(StandardPaths.DownloadLocation)[0]
-    readonly property string pictures: StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0]
     readonly property string music: StandardPaths.standardLocations(StandardPaths.MusicLocation)[0]
-    readonly property string videos: StandardPaths.standardLocations(StandardPaths.MoviesLocation)[0]
+
+    readonly property string _rawDocuments: StandardPaths.standardLocations(StandardPaths.DocumentsLocation)[0]
+    readonly property string _rawPictures: StandardPaths.standardLocations(StandardPaths.PicturesLocation)[0]
+    readonly property string _rawVideos: StandardPaths.standardLocations(StandardPaths.MoviesLocation)[0]
+    property var _warnedKnownFolders: ({})
+
+    function resolveKnownFolder(rawLocation, fallbackName) {
+        if (!Platform.isWindows) return rawLocation;
+        if (!WindowsNative.ready || !WindowsNative.fsUtils) return rawLocation;
+
+        const rawPath = FileUtils.trimFileProtocol(rawLocation);
+        if (WindowsNative.fsUtils.isAccessibleDir(rawPath)) return rawLocation;
+
+        if (!Directories._warnedKnownFolders[rawPath]) {
+            Directories._warnedKnownFolders[rawPath] = true;
+            console.warn(`[Directories] ${fallbackName} folder is not accessible, falling back to %USERPROFILE%/${fallbackName}:`, rawPath);
+        }
+
+        const userProfile = (Quickshell.env("USERPROFILE") || "").replace(/\\/g, "/");
+        const fallbackPath = `${userProfile}/${fallbackName}`;
+        Quickshell.execDetached(["powershell", "-NoProfile", "-Command",
+            `New-Item -ItemType Directory -Force -Path "${fallbackPath}" | Out-Null`]);
+        return `file:///${fallbackPath}`;
+    }
+
+    readonly property string documents: Directories.resolveKnownFolder(Directories._rawDocuments, "Documents")
+    readonly property string pictures: Directories.resolveKnownFolder(Directories._rawPictures, "Pictures")
+    readonly property string videos: Directories.resolveKnownFolder(Directories._rawVideos, "Videos")
 
     // Other dirs used by the shell, without "file://"
     property string assetsPath: Quickshell.shellPath("assets")
