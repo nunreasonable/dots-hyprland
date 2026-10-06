@@ -23,6 +23,19 @@ ContentPage {
                 text: Translation.tr("The wallpaper and its widgets become part of the Windows desktop, and Show desktop (Win+D) keeps them.\nThe wallpaper goes behind the icons; the widgets stay above them and can still be dragged, and the icons work everywhere around them.\nIf the desktop isn't available, the background stays a window.")
             }
         }
+
+        ConfigSwitch {
+            buttonIcon: "animation"
+            text: Translation.tr("Draw ii's own wallpaper")
+            enabled: Config.options.windowsPort.backgroundBehindIcons
+            checked: Config.options.windowsPort.ownWallpaper
+            onCheckedChanged: {
+                Config.options.windowsPort.ownWallpaper = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Off: Windows draws the wallpaper, which ii keeps the same as the one you pick, and only ii's widgets go on the desktop. Changing the wallpaper in Windows' settings changes ii's too.\nOn: ii draws its own wallpaper over Windows' one, with parallax between workspaces.")
+            }
+        }
     }
 
     ContentSection {

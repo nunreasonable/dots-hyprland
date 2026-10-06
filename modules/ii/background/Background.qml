@@ -42,7 +42,7 @@ Variants {
         // Hide when fullscreen
         property list<HyprlandWorkspace> workspacesForMonitor: Hyprland.workspaces.values.filter(workspace => workspace.monitor && workspace.monitor.name == monitor.name)
         property var activeWorkspaceWithFullscreen: workspacesForMonitor.filter(workspace => ((workspace.toplevels.values.filter(window => window.wayland?.fullscreen)[0] != undefined) && workspace.active))[0]
-        visible: GlobalStates.screenLocked || (!(activeWorkspaceWithFullscreen != undefined)) || !Config?.options.background.hideWhenFullscreen
+        visible: (GlobalStates.screenLocked || (!(activeWorkspaceWithFullscreen != undefined)) || !Config?.options.background.hideWhenFullscreen) && !(nativeWallpaper && widgetsAboveIcons)
 
         // Workspaces
         property HyprlandMonitor monitor: Hyprland.monitorFor(modelData)
@@ -84,6 +84,7 @@ Variants {
         }
 
         readonly property bool widgetsAboveIcons: Platform.isWindows && (WindowsNative.desktopLayer?.active ?? false) && !GlobalStates.screenLocked
+        readonly property bool nativeWallpaper: Platform.isWindows && Config.options.windowsPort.backgroundBehindIcons && !Config.options.windowsPort.ownWallpaper
         readonly property Item widgetsSlot: widgetsWindowLoader.item?.slot ?? null
 
         // Layer props
@@ -255,7 +256,7 @@ Variants {
                     return - bgRoot.parallaxTotalPixelsY * usedFractionY;
                 }
 
-                source: bgRoot.wallpaperSafetyTriggered ? "" : bgRoot.wallpaperPath
+                source: (bgRoot.wallpaperSafetyTriggered || bgRoot.nativeWallpaper) ? "" : bgRoot.wallpaperPath
                 fillMode: Image.PreserveAspectCrop
                 Behavior on x {
                     NumberAnimation {
@@ -313,8 +314,8 @@ Variants {
                 readonly property real wallpaperTotalOffsetX: wallpaper.x - baseWallpaperOffsetX
                 readonly property real wallpaperTotalOffsetY: wallpaper.y - baseWallpaperOffsetY
                 readonly property bool locked: GlobalStates.screenLocked
-                x: wallpaperTotalOffsetX * parallaxFactor * !locked
-                y: wallpaperTotalOffsetY * parallaxFactor * !locked
+                x: wallpaperTotalOffsetX * parallaxFactor * !locked * !bgRoot.nativeWallpaper
+                y: wallpaperTotalOffsetY * parallaxFactor * !locked * !bgRoot.nativeWallpaper
 
                 transitions: Transition {
                     PropertyAnimation {

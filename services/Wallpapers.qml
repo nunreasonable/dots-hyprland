@@ -47,11 +47,37 @@ Singleton {
 
     Connections {
         target: Platform.isWindows ? WindowsNative : null
-        function onReadyChanged() { root.adoptSystemWallpaper(); }
+        function onReadyChanged() {
+            root.adoptSystemWallpaper();
+            systemWallpaperTimer.restart();
+        }
     }
     Connections {
         target: Platform.isWindows ? Config : null
-        function onReadyChanged() { root.adoptSystemWallpaper(); }
+        function onReadyChanged() {
+            root.adoptSystemWallpaper();
+            systemWallpaperTimer.restart();
+        }
+    }
+
+    function followSystemWallpaper() {
+        const wn = WindowsNative.wallpaper;
+        if (!wn || !Config.ready || Config.options.windowsPort.ownWallpaper) return;
+        const current = wn.currentWallpaper();
+        if (!current || current.length === 0) return;
+        const normalized = path => FileUtils.trimFileProtocol(path).replace(/\\/g, "/").toLowerCase();
+        if (normalized(current) === normalized(Config.options.background.wallpaperPath)) return;
+        root._retheme(current, wn.isDarkMode(), false);
+    }
+
+    Timer {
+        id: systemWallpaperTimer
+        interval: 500
+        onTriggered: root.followSystemWallpaper()
+    }
+    Connections {
+        target: Platform.isWindows ? WindowsNative.desktopLayer : null
+        function onWallpaperChanged() { systemWallpaperTimer.restart(); }
     }
 
     function isVideoPath(path) {

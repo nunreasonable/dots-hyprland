@@ -396,6 +396,7 @@ Singleton {
             property JsonObject windowsPort: JsonObject {
                 property bool taskbarHoverOnly: true
                 property bool backgroundBehindIcons: true
+                property bool ownWallpaper: false
                 property bool superDrag: true
                 property JsonObject tiling: JsonObject {
                     property bool enable: false
