@@ -18,6 +18,7 @@ import qs.modules.waffle.taskView
 
 // Fallbacks
 import qs.modules.ii.cheatsheet
+import qs.modules.ii.colorPicker
 import qs.modules.ii.onScreenKeyboard
 import qs.modules.ii.overlay
 import qs.modules.ii.screenTranslator
@@ -39,6 +40,7 @@ Scope {
     PanelLoader { component: WaffleTaskView {} }
 
     PanelLoader { component: Cheatsheet {} }
+    PanelLoader { extraCondition: Platform.isWindows; component: ColorPicker {} }
     PanelLoader { component: OnScreenKeyboard {} }
     PanelLoader { component: Overlay {} }
     PanelLoader { component: ScreenTranslator {} }

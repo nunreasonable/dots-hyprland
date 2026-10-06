@@ -7,6 +7,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
+import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions
@@ -348,6 +349,11 @@ PanelWindow {
         WToolbarIconButton {
             icon.name: "eyedropper"
             onClicked: {
+                if (Platform.isWindows) {
+                    GlobalStates.colorPickerOpen = true;
+                    root.closed();
+                    return;
+                }
                 Quickshell.execDetached(["bash", "-c", "sleep 0.2; hyprpicker -a"]);
                 root.closed();
             }

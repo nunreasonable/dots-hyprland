@@ -63,11 +63,17 @@ Item {
         }
 
         Loader {
-            active: Config.options.bar.utilButtons.showColorPicker && !Platform.isWindows
-            visible: Config.options.bar.utilButtons.showColorPicker && !Platform.isWindows
+            active: Config.options.bar.utilButtons.showColorPicker
+            visible: Config.options.bar.utilButtons.showColorPicker
             sourceComponent: CircleUtilButton {
                 Layout.alignment: Qt.AlignVCenter
-                onClicked: Quickshell.execDetached(["hyprpicker", "-a"])
+                onClicked: {
+                    if (Platform.isWindows) {
+                        GlobalStates.colorPickerOpen = true;
+                        return;
+                    }
+                    Quickshell.execDetached(["hyprpicker", "-a"]);
+                }
                 MaterialSymbol {
                     horizontalAlignment: Qt.AlignHCenter
                     fill: 1

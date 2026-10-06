@@ -105,12 +105,13 @@ Singleton {
 
     function setAccentColor(hexOrClear) {
         if (Platform.isWindows) {
-            if (!hexOrClear || hexOrClear === "clear") {
+            if (hexOrClear === "clear") {
                 Config.options.appearance.palette.accentColor = "";
-            } else if (/^#?[0-9a-fA-F]{6}$/.test(hexOrClear)) {
+            } else if (/^#?[0-9a-fA-F]{6}$/.test(hexOrClear ?? "")) {
                 Config.options.appearance.palette.accentColor = hexOrClear.startsWith("#") ? hexOrClear : `#${hexOrClear}`;
             } else {
-                console.warn("[Wallpapers] setAccentColor: interactive color picking (hyprpicker) isn't available on Windows");
+                GlobalStates.colorPickerAction = "accent";
+                GlobalStates.colorPickerOpen = true;
                 return;
             }
             root._retheme(Config.options.background.wallpaperPath, Appearance.m3colors.darkmode);
