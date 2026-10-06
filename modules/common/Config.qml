@@ -408,6 +408,12 @@ Singleton {
                         "title:Picture in picture*"
                     ]
                 }
+                property JsonObject gameMode: JsonObject {
+                    property bool enable: false
+                    property bool prevTransparencyEnable: true
+                    property int prevTilingGapsIn: 4
+                    property int prevTilingGapsOut: 5
+                }
             }
 
             property JsonObject networking: JsonObject {

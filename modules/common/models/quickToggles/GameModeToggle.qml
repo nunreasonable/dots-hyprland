@@ -1,15 +1,20 @@
 import QtQuick
 import Quickshell.Io
+import qs.modules.common
 import qs.modules.common.models.hyprland
 import qs.services
 
 QuickToggleModel {
     id: root
     name: Translation.tr("Game mode")
-    toggled: !confOpt.value
+    toggled: Platform.isWindows ? WindowsGameMode.enabled : !confOpt.value
     icon: "gamepad"
 
     mainAction: () => {
+        if (Platform.isWindows) {
+            WindowsGameMode.toggle();
+            return;
+        }
         root.toggled = !root.toggled;
         if (root.toggled) {
             HyprlandConfig.setMany({

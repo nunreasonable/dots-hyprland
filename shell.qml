@@ -82,6 +82,12 @@ ShellRoot {
         property: "aboveIcons"
         value: ["quickshell:backgroundWidgets"]
     }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.blur
+        property: "enabled"
+        value: !Config.options.windowsPort.gameMode.enable
+    }
 
     // Panel families
     property list<string> families: ["ii", "waffle"]

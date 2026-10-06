@@ -10,24 +10,44 @@ QuickToggleModel {
     id: root
     name: Translation.tr("Cloudflare WARP")
 
+    readonly property string windowsDefaultCliPath: "C:/Program Files/Cloudflare/Cloudflare WARP/warp-cli.exe"
+    property string cliPath: Platform.isWindows ? "" : "warp-cli"
+
     available: !Platform.isWindows
     toggled: false
     icon: "cloud_lock"
 
     mainAction: () => {
-        if (Platform.isWindows) return;
+        if (Platform.isWindows && !root.cliPath) return;
         if (toggled) {
             root.toggled = false
-            Quickshell.execDetached(["warp-cli", "disconnect"])
+            Quickshell.execDetached([root.cliPath, "disconnect"])
         } else {
             root.toggled = true
-            Quickshell.execDetached(["warp-cli", "connect"])
+            Quickshell.execDetached([root.cliPath, "connect"])
+        }
+    }
+
+    Process {
+        id: locateCli
+        running: Platform.isWindows
+        command: ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command",
+            `$p = '${root.windowsDefaultCliPath}'; if (Test-Path -LiteralPath $p) { $p } else { $c = Get-Command 'warp-cli.exe' -ErrorAction SilentlyContinue; if ($c) { $c.Source } }`]
+        stdout: StdioCollector {
+            id: locateCliCollector
+            onStreamFinished: {
+                const found = locateCliCollector.text.trim();
+                if (found.length > 0) {
+                    root.cliPath = found;
+                    fetchActiveState.running = true;
+                }
+            }
         }
     }
 
     Process {
         id: connectProc
-        command: ["warp-cli", "connect"]
+        command: [root.cliPath, "connect"]
         onExited: (exitCode, exitStatus) => {
             if (exitCode !== 0) {
                 Notifications.sendDesktop(
@@ -41,7 +61,7 @@ QuickToggleModel {
 
     Process {
         id: registrationProc
-        command: ["warp-cli", "registration", "new"]
+        command: [root.cliPath, "registration", "new"]
         onExited: (exitCode, exitStatus) => {
             console.log("Warp registration exited with code and status:", exitCode, exitStatus)
             if (exitCode === 0) {
@@ -59,7 +79,7 @@ QuickToggleModel {
     Process {
         id: fetchActiveState
         running: !Platform.isWindows
-        command: ["bash", "-c", "warp-cli status"]
+        command: Platform.isWindows ? [root.cliPath, "status"] : ["bash", "-c", "warp-cli status"]
         stdout: StdioCollector {
             id: warpStatusCollector
             onStreamFinished: {
