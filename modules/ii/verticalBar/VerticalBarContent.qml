@@ -17,7 +17,7 @@ Item { // Bar content region
     property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
 
     readonly property real fitNeededHeight: topSectionColumnLayout.implicitHeight + middleSection.implicitHeight + bottomSectionColumnLayout.implicitHeight
-    readonly property real fitScale: (!Platform.isWindows || root.height <= 0 || fitNeededHeight <= root.height) ? 1 : Math.max(0.01, root.height / fitNeededHeight)
+    readonly property real fitScale: (!Platform.isWindows || root.height <= 0 || fitNeededHeight <= root.height) ? 1 : Math.max(0.5, root.height / fitNeededHeight)
 
     component HorizontalBarSeparator: Rectangle {
         Layout.leftMargin: Appearance.sizes.baseBarHeight / 3

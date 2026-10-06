@@ -59,7 +59,7 @@ Item { // Bar content region
                 root.fitForm += 1;
                 return;
             }
-            root.fitScale = Math.max(0.01, Math.min(1, avail / needed));
+            root.fitScale = Math.max(0.5, Math.min(1, avail / needed));
             return;
         }
 
