@@ -24,13 +24,17 @@ Item { // Bar content region
     Behavior on fitShownScale {
         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
     }
+    readonly property real fitMinScale: 0.8
+    readonly property real fitTitleWidth: 120
     property real fitLastAvailableWidth: -1
     property real fitBlockedWidth: -1
     property int fitBlockedForm: -1
-    property bool fitProbingDeescalate: false
+    property bool fitProbing: false
+    readonly property string fitInputs: [width, leftSectionRowLayout.implicitWidth, rightSectionRowLayout.implicitWidth, middleSection.implicitWidth, activeWindow.implicitWidth, activeWindow.visible].join(" ")
 
     function fitNeededWidth() {
-        return middleSection.implicitWidth + 2 * Math.max(leftSectionRowLayout.implicitWidth, rightSectionRowLayout.implicitWidth);
+        const titleExcess = activeWindow.visible ? Math.max(0, activeWindow.implicitWidth - root.fitTitleWidth) : 0;
+        return middleSection.implicitWidth + 2 * Math.max(leftSectionRowLayout.implicitWidth - titleExcess, rightSectionRowLayout.implicitWidth);
     }
 
     function fitEvaluate() {
@@ -42,50 +46,52 @@ Item { // Bar content region
             root.fitLastAvailableWidth = avail;
             root.fitBlockedWidth = -1;
             root.fitBlockedForm = -1;
-            root.fitProbingDeescalate = false;
+            root.fitProbing = false;
             root.fitForm = 0;
             root.fitScale = 1;
+            fitSettleTimer.restart();
             return;
         }
 
-        const needed = fitNeededWidth();
+        const needed = root.fitNeededWidth();
+        const fit = avail / needed;
         const margin = 20;
 
-        if (needed > avail) {
-            if (root.fitProbingDeescalate) {
+        if (root.fitProbing) {
+            root.fitProbing = false;
+            if (fit < root.fitMinScale) {
                 root.fitBlockedForm = root.fitForm;
                 root.fitBlockedWidth = avail;
-                root.fitProbingDeescalate = false;
-                root.fitForm = Math.min(2, root.fitForm + 1);
-                return;
-            }
-            if (root.fitForm < 2) {
                 root.fitForm += 1;
+                fitSettleTimer.restart();
                 return;
             }
-            root.fitScale = Math.max(0.5, Math.min(1, avail / needed));
+        }
+
+        if (fit < root.fitMinScale && root.fitForm < 2) {
+            root.fitForm += 1;
+            fitSettleTimer.restart();
             return;
         }
 
-        root.fitProbingDeescalate = false;
-        if (root.fitScale !== 1 && needed <= avail - margin)
-            root.fitScale = 1;
+        const target = Math.max(root.fitForm < 2 ? root.fitMinScale : 0.5, Math.min(1, fit));
+        if (target < root.fitScale || target > root.fitScale + 0.02 || (target === 1 && needed <= avail - margin))
+            root.fitScale = target;
 
         const reblocked = (root.fitForm - 1 === root.fitBlockedForm) && (avail <= root.fitBlockedWidth + margin);
         if (root.fitForm > 0 && needed <= avail - margin && !reblocked) {
             root.fitForm -= 1;
-            root.fitProbingDeescalate = true;
+            root.fitProbing = true;
+            fitSettleTimer.restart();
         }
     }
 
-    onWidthChanged: if (Platform.isWindows)
-        root.fitEvaluate()
+    onFitInputsChanged: if (Platform.isWindows)
+        fitSettleTimer.restart()
 
     Timer {
-        running: Platform.isWindows
-        interval: 200
-        repeat: true
-        triggeredOnStart: true
+        id: fitSettleTimer
+        interval: 50
         onTriggered: root.fitEvaluate()
     }
 
@@ -122,8 +128,8 @@ Item { // Bar content region
     FocusedScrollMouseArea { // Left side | scroll to change brightness
         id: barLeftSideMouseArea
         transform: Scale {
-            origin.x: root.width / 2 - barLeftSideMouseArea.x
-            origin.y: root.height / 2 - barLeftSideMouseArea.y
+            origin.x: 0
+            origin.y: barLeftSideMouseArea.height / 2
             xScale: root.fitShownScale
             yScale: root.fitShownScale
         }
@@ -168,6 +174,7 @@ Item { // Bar content region
             }
 
             ActiveWindow {
+                id: activeWindow
                 Layout.leftMargin: 10 + (leftSidebarButton.visible ? 0 : Appearance.rounding.screenRounding)
                 Layout.rightMargin: Appearance.rounding.screenRounding
                 Layout.fillWidth: true
@@ -180,8 +187,8 @@ Item { // Bar content region
     Row { // Middle section
         id: middleSection
         transform: Scale {
-            origin.x: root.width / 2 - middleSection.x
-            origin.y: root.height / 2 - middleSection.y
+            origin.x: middleSection.width / 2
+            origin.y: middleSection.height / 2
             xScale: root.fitShownScale
             yScale: root.fitShownScale
         }
@@ -274,8 +281,8 @@ Item { // Bar content region
     FocusedScrollMouseArea { // Right side | scroll to change volume
         id: barRightSideMouseArea
         transform: Scale {
-            origin.x: root.width / 2 - barRightSideMouseArea.x
-            origin.y: root.height / 2 - barRightSideMouseArea.y
+            origin.x: barRightSideMouseArea.width
+            origin.y: barRightSideMouseArea.height / 2
             xScale: root.fitShownScale
             yScale: root.fitShownScale
         }

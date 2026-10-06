@@ -16,7 +16,7 @@ Item { // Bar content region
     property var screen: root.QsWindow.window?.screen
     property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
 
-    readonly property real fitNeededHeight: topSectionColumnLayout.implicitHeight + middleSection.implicitHeight + bottomSectionColumnLayout.implicitHeight
+    readonly property real fitNeededHeight: middleSection.implicitHeight + 2 * Math.max(topSectionColumnLayout.implicitHeight, bottomSectionColumnLayout.implicitHeight)
     readonly property real fitScale: (!Platform.isWindows || root.height <= 0 || fitNeededHeight <= root.height) ? 1 : Math.max(0.5, root.height / fitNeededHeight)
     property real fitShownScale: fitScale
     Behavior on fitShownScale {
@@ -56,8 +56,8 @@ Item { // Bar content region
     FocusedScrollMouseArea { // Top section | scroll to change brightness
         id: barTopSectionMouseArea
         transform: Scale {
-            origin.x: root.width / 2 - barTopSectionMouseArea.x
-            origin.y: root.height / 2 - barTopSectionMouseArea.y
+            origin.x: barTopSectionMouseArea.width / 2
+            origin.y: 0
             xScale: root.fitShownScale
             yScale: root.fitShownScale
         }
@@ -96,8 +96,8 @@ Item { // Bar content region
     Column { // Middle section
         id: middleSection
         transform: Scale {
-            origin.x: root.width / 2 - middleSection.x
-            origin.y: root.height / 2 - middleSection.y
+            origin.x: middleSection.width / 2
+            origin.y: middleSection.height / 2
             xScale: root.fitShownScale
             yScale: root.fitShownScale
         }
@@ -175,8 +175,8 @@ Item { // Bar content region
     FocusedScrollMouseArea { // Bottom section | scroll to change volume
         id: barBottomSectionMouseArea
         transform: Scale {
-            origin.x: root.width / 2 - barBottomSectionMouseArea.x
-            origin.y: root.height / 2 - barBottomSectionMouseArea.y
+            origin.x: barBottomSectionMouseArea.width / 2
+            origin.y: barBottomSectionMouseArea.height
             xScale: root.fitShownScale
             yScale: root.fitShownScale
         }
