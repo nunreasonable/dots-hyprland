@@ -14,7 +14,8 @@ Singleton {
     property QtObject font
     property QtObject sizes
     property string syntaxHighlightingTheme
-    readonly property bool animationsEnabled: !(Platform.isWindows && Config.options.windowsPort.gameMode.enable)
+    readonly property bool animationsEnabled: !(Platform.isWindows
+        && Config.options.windowsPort.gameMode.enable)
     readonly property real animationScale: animationsEnabled ? 1 : 0
 
     // Transparency. The quadratic functions were derived from analysis of hand-picked transparency values.
