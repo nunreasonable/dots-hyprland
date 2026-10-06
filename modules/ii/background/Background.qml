@@ -128,6 +128,12 @@ Variants {
                 if (WindowsNative.ready) bgRoot.updateZoomScale();
             }
         }
+        Connections {
+            target: Platform.isWindows ? bgRoot.modelData : null
+            function onGeometryChanged() {
+                bgRoot.updateZoomScale();
+            }
+        }
         function applyWallpaperSize(width, height) {
             const [screenWidth, screenHeight] = [bgRoot.screen.width, bgRoot.screen.height];
             bgRoot.wallpaperWidth = width;
