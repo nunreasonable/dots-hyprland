@@ -16,6 +16,9 @@ Item { // Bar content region
     property var screen: root.QsWindow.window?.screen
     property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
 
+    readonly property real fitNeededHeight: topSectionColumnLayout.implicitHeight + middleSection.implicitHeight + bottomSectionColumnLayout.implicitHeight
+    readonly property real fitScale: (!Platform.isWindows || root.height <= 0 || fitNeededHeight <= root.height) ? 1 : Math.max(0.01, root.height / fitNeededHeight)
+
     component HorizontalBarSeparator: Rectangle {
         Layout.leftMargin: Appearance.sizes.baseBarHeight / 3
         Layout.rightMargin: Appearance.sizes.baseBarHeight / 3
@@ -46,243 +49,252 @@ Item { // Bar content region
         border.color: Appearance.colors.colLayer0Border
     }
 
-    FocusedScrollMouseArea { // Top section | scroll to change brightness
-        id: barTopSectionMouseArea
-        anchors.top: parent.top
-        implicitHeight: topSectionColumnLayout.implicitHeight
-        implicitWidth: Appearance.sizes.baseVerticalBarWidth
-        height: (root.height - middleSection.height) / 2
-        width: Appearance.sizes.verticalBarWidth
+    Item {
+        id: fitScaler
+        anchors.fill: parent
+        scale: root.fitScale
+        transformOrigin: Item.Center
 
-        onScrollDown: Brightness.decreaseBrightness()
-        onScrollUp: Brightness.increaseBrightness()
-        onMovedAway: GlobalStates.osdBrightnessOpen = false
-        onPressed: event => {
-            if (event.button === Qt.LeftButton)
-                GlobalStates.sidebarLeftOpen = !GlobalStates.sidebarLeftOpen;
+        Behavior on scale {
+            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
         }
 
-        ColumnLayout { // Content
-            id: topSectionColumnLayout
-            anchors.fill: parent
-            spacing: 10
+        FocusedScrollMouseArea { // Top section | scroll to change brightness
+            id: barTopSectionMouseArea
+            anchors.top: parent.top
+            implicitHeight: topSectionColumnLayout.implicitHeight
+            implicitWidth: Appearance.sizes.baseVerticalBarWidth
+            height: (root.height - middleSection.height) / 2
+            width: Appearance.sizes.verticalBarWidth
 
-            Bar.LeftSidebarButton { // Left sidebar button
-                Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: (Appearance.sizes.baseVerticalBarWidth - implicitWidth) / 2 + Appearance.sizes.hyprlandGapsOut
-                colBackground: barTopSectionMouseArea.hovered ? Appearance.colors.colLayer1Hover : ColorUtils.transparentize(Appearance.colors.colLayer1Hover, 1)
+            onScrollDown: Brightness.decreaseBrightness()
+            onScrollUp: Brightness.increaseBrightness()
+            onMovedAway: GlobalStates.osdBrightnessOpen = false
+            onPressed: event => {
+                if (event.button === Qt.LeftButton)
+                    GlobalStates.sidebarLeftOpen = !GlobalStates.sidebarLeftOpen;
             }
 
-            Item {
-                Layout.fillHeight: true
-            }
-            
-        }
-    }
+            ColumnLayout { // Content
+                id: topSectionColumnLayout
+                anchors.fill: parent
+                spacing: 10
 
-    Column { // Middle section
-        id: middleSection
-        anchors.centerIn: parent
-        spacing: 4
+                Bar.LeftSidebarButton { // Left sidebar button
+                    Layout.alignment: Qt.AlignHCenter
+                    Layout.topMargin: (Appearance.sizes.baseVerticalBarWidth - implicitWidth) / 2 + Appearance.sizes.hyprlandGapsOut
+                    colBackground: barTopSectionMouseArea.hovered ? Appearance.colors.colLayer1Hover : ColorUtils.transparentize(Appearance.colors.colLayer1Hover, 1)
+                }
 
-        Bar.BarGroup {
-            vertical: true
-            padding: 8
-            Resources {
-                Layout.fillWidth: true
-                Layout.fillHeight: false
-            }
-            
-            HorizontalBarSeparator {}
-
-            VerticalMedia {
-                Layout.fillWidth: true
-                Layout.fillHeight: false
-            }
-        }
-
-        HorizontalBarSeparator {
-            visible: Config.options?.bar.borderless
-        }
-
-        Bar.BarGroup {
-            id: middleCenterGroup
-            vertical: true
-            padding: 6
-
-            Bar.Workspaces {
-                id: workspacesWidget
-                vertical: true
-                MouseArea {
-                    // Right-click to toggle overview
-                    anchors.fill: parent
-                    acceptedButtons: Qt.RightButton
-
-                    onPressed: event => {
-                        if (event.button === Qt.RightButton) {
-                            GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
-                        }
-                    }
+                Item {
+                    Layout.fillHeight: true
                 }
             }
         }
 
-        HorizontalBarSeparator {
-            visible: Config.options?.bar.borderless
-        }
+        Column { // Middle section
+            id: middleSection
+            anchors.centerIn: parent
+            spacing: 4
 
-        Bar.BarGroup {
-            vertical: true
-            padding: 8
-            
-            VerticalClockWidget {
-                Layout.fillWidth: true
-                Layout.fillHeight: false
+            Bar.BarGroup {
+                vertical: true
+                padding: 8
+                Resources {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: false
+                }
+
+                HorizontalBarSeparator {}
+
+                VerticalMedia {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: false
+                }
             }
 
             HorizontalBarSeparator {
-                visible: Battery.available
+                visible: Config.options?.bar.borderless
             }
 
-            BatteryIndicator {
-                visible: Battery.available
-                Layout.fillWidth: true
-                Layout.fillHeight: false
-            }
-            
-        }
-    }
-
-    FocusedScrollMouseArea { // Bottom section | scroll to change volume
-        id: barBottomSectionMouseArea
-
-        anchors {
-            left: parent.left
-            right: parent.right
-            bottom: parent.bottom
-        }
-        implicitWidth: Appearance.sizes.baseVerticalBarWidth
-        implicitHeight: bottomSectionColumnLayout.implicitHeight
-        
-        onScrollDown: Audio.decrementVolume();
-        onScrollUp: Audio.incrementVolume();
-        onMovedAway: GlobalStates.osdVolumeOpen = false;
-        onPressed: event => {
-            if (event.button === Qt.LeftButton) {
-                GlobalStates.sidebarRightOpen = !GlobalStates.sidebarRightOpen;
-            }
-        }
-
-        ColumnLayout {
-            id: bottomSectionColumnLayout
-            anchors.fill: parent
-            spacing: 4
-
-            Item { 
-                Layout.fillWidth: true
-                Layout.fillHeight: true 
-            }
-
-            Bar.SysTray {
+            Bar.BarGroup {
+                id: middleCenterGroup
                 vertical: true
-                Layout.fillWidth: true
-                Layout.fillHeight: false
-                invertSide: Config?.options.bar.bottom
+                padding: 6
+
+                Bar.Workspaces {
+                    id: workspacesWidget
+                    vertical: true
+                    MouseArea {
+                        // Right-click to toggle overview
+                        anchors.fill: parent
+                        acceptedButtons: Qt.RightButton
+
+                        onPressed: event => {
+                            if (event.button === Qt.RightButton) {
+                                GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
+                            }
+                        }
+                    }
+                }
             }
 
-            RippleButton { // Right sidebar button
-                id: rightSidebarButton
+            HorizontalBarSeparator {
+                visible: Config.options?.bar.borderless
+            }
 
-                Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
-                Layout.bottomMargin: Appearance.rounding.screenRounding
-                Layout.fillHeight: false
+            Bar.BarGroup {
+                vertical: true
+                padding: 8
 
-                implicitHeight: indicatorsColumnLayout.implicitHeight + 4 * 2
-                implicitWidth: indicatorsColumnLayout.implicitWidth + 6 * 2
-
-                buttonRadius: Appearance.rounding.full
-                colBackground: barBottomSectionMouseArea.hovered ? Appearance.colors.colLayer1Hover : ColorUtils.transparentize(Appearance.colors.colLayer1Hover, 1)
-                colBackgroundHover: Appearance.colors.colLayer1Hover
-                colRipple: Appearance.colors.colLayer1Active
-                colBackgroundToggled: Appearance.colors.colSecondaryContainer
-                colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
-                colRippleToggled: Appearance.colors.colSecondaryContainerActive
-                toggled: GlobalStates.sidebarRightOpen
-                property color colText: toggled ? Appearance.m3colors.m3onSecondaryContainer : Appearance.colors.colOnLayer0
-
-                Behavior on colText {
-                    animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+                VerticalClockWidget {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: false
                 }
 
-                onPressed: {
+                HorizontalBarSeparator {
+                    visible: Battery.available
+                }
+
+                BatteryIndicator {
+                    visible: Battery.available
+                    Layout.fillWidth: true
+                    Layout.fillHeight: false
+                }
+            }
+        }
+
+        FocusedScrollMouseArea { // Bottom section | scroll to change volume
+            id: barBottomSectionMouseArea
+
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+            }
+            implicitWidth: Appearance.sizes.baseVerticalBarWidth
+            implicitHeight: bottomSectionColumnLayout.implicitHeight
+
+            onScrollDown: Audio.decrementVolume()
+            onScrollUp: Audio.incrementVolume()
+            onMovedAway: GlobalStates.osdVolumeOpen = false
+            onPressed: event => {
+                if (event.button === Qt.LeftButton) {
                     GlobalStates.sidebarRightOpen = !GlobalStates.sidebarRightOpen;
                 }
+            }
 
-                ColumnLayout {
-                    id: indicatorsColumnLayout
-                    anchors.centerIn: parent
-                    property real realSpacing: 6
-                    spacing: 0
+            ColumnLayout {
+                id: bottomSectionColumnLayout
+                anchors.fill: parent
+                spacing: 4
 
-                    Revealer {
-                        vertical: true
-                        reveal: Audio.sink?.audio?.muted ?? false
-                        Layout.fillWidth: true
-                        Layout.bottomMargin: reveal ? indicatorsColumnLayout.realSpacing : 0
-                        Behavior on Layout.bottomMargin {
-                            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                Item {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                }
+
+                Bar.SysTray {
+                    vertical: true
+                    Layout.fillWidth: true
+                    Layout.fillHeight: false
+                    invertSide: Config?.options.bar.bottom
+                }
+
+                RippleButton { // Right sidebar button
+                    id: rightSidebarButton
+
+                    Layout.alignment: Qt.AlignBottom | Qt.AlignHCenter
+                    Layout.bottomMargin: Appearance.rounding.screenRounding
+                    Layout.fillHeight: false
+
+                    implicitHeight: indicatorsColumnLayout.implicitHeight + 4 * 2
+                    implicitWidth: indicatorsColumnLayout.implicitWidth + 6 * 2
+
+                    buttonRadius: Appearance.rounding.full
+                    colBackground: barBottomSectionMouseArea.hovered ? Appearance.colors.colLayer1Hover : ColorUtils.transparentize(Appearance.colors.colLayer1Hover, 1)
+                    colBackgroundHover: Appearance.colors.colLayer1Hover
+                    colRipple: Appearance.colors.colLayer1Active
+                    colBackgroundToggled: Appearance.colors.colSecondaryContainer
+                    colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
+                    colRippleToggled: Appearance.colors.colSecondaryContainerActive
+                    toggled: GlobalStates.sidebarRightOpen
+                    property color colText: toggled ? Appearance.m3colors.m3onSecondaryContainer : Appearance.colors.colOnLayer0
+
+                    Behavior on colText {
+                        animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+                    }
+
+                    onPressed: {
+                        GlobalStates.sidebarRightOpen = !GlobalStates.sidebarRightOpen;
+                    }
+
+                    ColumnLayout {
+                        id: indicatorsColumnLayout
+                        anchors.centerIn: parent
+                        property real realSpacing: 6
+                        spacing: 0
+
+                        Revealer {
+                            vertical: true
+                            reveal: Audio.sink?.audio?.muted ?? false
+                            Layout.fillWidth: true
+                            Layout.bottomMargin: reveal ? indicatorsColumnLayout.realSpacing : 0
+                            Behavior on Layout.bottomMargin {
+                                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                            }
+                            MaterialSymbol {
+                                text: "volume_off"
+                                iconSize: Appearance.font.pixelSize.larger
+                                color: rightSidebarButton.colText
+                            }
+                        }
+                        Revealer {
+                            vertical: true
+                            reveal: Audio.source?.audio?.muted ?? false
+                            Layout.fillWidth: true
+                            Layout.bottomMargin: reveal ? indicatorsColumnLayout.realSpacing : 0
+                            Behavior on Layout.topMargin {
+                                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                            }
+                            MaterialSymbol {
+                                text: "mic_off"
+                                iconSize: Appearance.font.pixelSize.larger
+                                color: rightSidebarButton.colText
+                            }
+                        }
+                        Bar.HyprlandXkbIndicator {
+                            vertical: true
+                            Layout.alignment: Qt.AlignHCenter
+                            Layout.bottomMargin: indicatorsColumnLayout.realSpacing
+                            color: rightSidebarButton.colText
+                        }
+                        Revealer {
+                            vertical: true
+                            reveal: Notifications.silent || Notifications.unread > 0
+                            Layout.fillWidth: true
+                            Layout.bottomMargin: reveal ? indicatorsColumnLayout.realSpacing : 0
+                            implicitHeight: reveal ? notificationUnreadCount.implicitHeight : 0
+                            implicitWidth: reveal ? notificationUnreadCount.implicitWidth : 0
+                            Behavior on Layout.bottomMargin {
+                                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                            }
+                            Bar.NotificationUnreadCount {
+                                id: notificationUnreadCount
+                            }
                         }
                         MaterialSymbol {
-                            text: "volume_off"
+                            text: Network.materialSymbol
                             iconSize: Appearance.font.pixelSize.larger
                             color: rightSidebarButton.colText
                         }
-                    }
-                    Revealer {
-                        vertical: true
-                        reveal: Audio.source?.audio?.muted ?? false
-                        Layout.fillWidth: true
-                        Layout.bottomMargin: reveal ? indicatorsColumnLayout.realSpacing : 0
-                        Behavior on Layout.topMargin {
-                            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
-                        }
                         MaterialSymbol {
-                            text: "mic_off"
+                            Layout.topMargin: indicatorsColumnLayout.realSpacing
+                            visible: BluetoothStatus.available
+                            text: BluetoothStatus.connected ? "bluetooth_connected" : BluetoothStatus.enabled ? "bluetooth" : "bluetooth_disabled"
                             iconSize: Appearance.font.pixelSize.larger
                             color: rightSidebarButton.colText
                         }
-                    }
-                    Bar.HyprlandXkbIndicator {
-                        vertical: true
-                        Layout.alignment: Qt.AlignHCenter
-                        Layout.bottomMargin: indicatorsColumnLayout.realSpacing
-                        color: rightSidebarButton.colText
-                    }
-                    Revealer {
-                        vertical: true
-                        reveal: Notifications.silent || Notifications.unread > 0
-                        Layout.fillWidth: true
-                        Layout.bottomMargin: reveal ? indicatorsColumnLayout.realSpacing : 0
-                        implicitHeight: reveal ? notificationUnreadCount.implicitHeight : 0
-                        implicitWidth: reveal ? notificationUnreadCount.implicitWidth : 0
-                        Behavior on Layout.bottomMargin {
-                            animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
-                        }
-                        Bar.NotificationUnreadCount {
-                            id: notificationUnreadCount
-                        }
-                    }
-                    MaterialSymbol {
-                        text: Network.materialSymbol
-                        iconSize: Appearance.font.pixelSize.larger
-                        color: rightSidebarButton.colText
-                    }
-                    MaterialSymbol {
-                        Layout.topMargin: indicatorsColumnLayout.realSpacing
-                        visible: BluetoothStatus.available
-                        text: BluetoothStatus.connected ? "bluetooth_connected" : BluetoothStatus.enabled ? "bluetooth" : "bluetooth_disabled"
-                        iconSize: Appearance.font.pixelSize.larger
-                        color: rightSidebarButton.colText
                     }
                 }
             }
