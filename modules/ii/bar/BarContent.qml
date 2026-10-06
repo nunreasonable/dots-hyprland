@@ -14,8 +14,80 @@ Item { // Bar content region
 
     property var screen: root.QsWindow.window?.screen
     property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
-    property real useShortenedForm: (Appearance.sizes.barHellaShortenScreenWidthThreshold >= screen?.width) ? 2 : (Appearance.sizes.barShortenScreenWidthThreshold >= screen?.width) ? 1 : 0
+    readonly property real thresholdShortenedForm: (Appearance.sizes.barHellaShortenScreenWidthThreshold >= screen?.width) ? 2 : (Appearance.sizes.barShortenScreenWidthThreshold >= screen?.width) ? 1 : 0
+    property real useShortenedForm: Platform.isWindows ? fitForm : thresholdShortenedForm
     readonly property int centerSideModuleWidth: (useShortenedForm == 2) ? Appearance.sizes.barCenterSideModuleWidthHellaShortened : (useShortenedForm == 1) ? Appearance.sizes.barCenterSideModuleWidthShortened : Appearance.sizes.barCenterSideModuleWidth
+
+    property int fitForm: 0
+    property real fitScale: 1
+    property real fitShownScale: fitScale
+    Behavior on fitShownScale {
+        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+    }
+    property real fitLastAvailableWidth: -1
+    property real fitBlockedWidth: -1
+    property int fitBlockedForm: -1
+    property bool fitProbingDeescalate: false
+
+    function fitNeededWidth() {
+        return middleSection.implicitWidth + 2 * Math.max(leftSectionRowLayout.implicitWidth, rightSectionRowLayout.implicitWidth);
+    }
+
+    function fitEvaluate() {
+        const avail = root.width;
+        if (avail <= 0)
+            return;
+
+        if (Math.abs(avail - root.fitLastAvailableWidth) > 0.5) {
+            root.fitLastAvailableWidth = avail;
+            root.fitBlockedWidth = -1;
+            root.fitBlockedForm = -1;
+            root.fitProbingDeescalate = false;
+            root.fitForm = 0;
+            root.fitScale = 1;
+            return;
+        }
+
+        const needed = fitNeededWidth();
+        const margin = 20;
+
+        if (needed > avail) {
+            if (root.fitProbingDeescalate) {
+                root.fitBlockedForm = root.fitForm;
+                root.fitBlockedWidth = avail;
+                root.fitProbingDeescalate = false;
+                root.fitForm = Math.min(2, root.fitForm + 1);
+                return;
+            }
+            if (root.fitForm < 2) {
+                root.fitForm += 1;
+                return;
+            }
+            root.fitScale = Math.max(0.5, Math.min(1, avail / needed));
+            return;
+        }
+
+        root.fitProbingDeescalate = false;
+        if (root.fitScale !== 1 && needed <= avail - margin)
+            root.fitScale = 1;
+
+        const reblocked = (root.fitForm - 1 === root.fitBlockedForm) && (avail <= root.fitBlockedWidth + margin);
+        if (root.fitForm > 0 && needed <= avail - margin && !reblocked) {
+            root.fitForm -= 1;
+            root.fitProbingDeescalate = true;
+        }
+    }
+
+    onWidthChanged: if (Platform.isWindows)
+        root.fitEvaluate()
+
+    Timer {
+        running: Platform.isWindows
+        interval: 200
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: root.fitEvaluate()
+    }
 
     component VerticalBarSeparator: Rectangle {
         Layout.topMargin: Appearance.sizes.baseBarHeight / 3
@@ -49,6 +121,12 @@ Item { // Bar content region
 
     FocusedScrollMouseArea { // Left side | scroll to change brightness
         id: barLeftSideMouseArea
+        transform: Scale {
+            origin.x: root.width / 2 - barLeftSideMouseArea.x
+            origin.y: root.height / 2 - barLeftSideMouseArea.y
+            xScale: root.fitShownScale
+            yScale: root.fitShownScale
+        }
 
         anchors {
             top: parent.top
@@ -101,6 +179,12 @@ Item { // Bar content region
 
     Row { // Middle section
         id: middleSection
+        transform: Scale {
+            origin.x: root.width / 2 - middleSection.x
+            origin.y: root.height / 2 - middleSection.y
+            xScale: root.fitShownScale
+            yScale: root.fitShownScale
+        }
         anchors {
             top: parent.top
             bottom: parent.bottom
@@ -189,6 +273,12 @@ Item { // Bar content region
 
     FocusedScrollMouseArea { // Right side | scroll to change volume
         id: barRightSideMouseArea
+        transform: Scale {
+            origin.x: root.width / 2 - barRightSideMouseArea.x
+            origin.y: root.height / 2 - barRightSideMouseArea.y
+            xScale: root.fitShownScale
+            yScale: root.fitShownScale
+        }
 
         anchors {
             top: parent.top

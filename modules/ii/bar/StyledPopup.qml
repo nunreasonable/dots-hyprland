@@ -35,18 +35,19 @@ LazyLoader {
         exclusiveZone: 0
         margins {
             left: {
-                if (!Config.options.bar.vertical) return root.QsWindow?.mapFromItem(
-                    root.hoverTarget, 
-                    (root.hoverTarget.width - popupBackground.implicitWidth) / 2, 0
-                ).x;
-                return Appearance.sizes.verticalBarWidth
+                if (!Config.options.bar.vertical) {
+                    const origin = root.QsWindow?.mapFromItem(root.hoverTarget, 0, 0);
+                    const far = root.QsWindow?.mapFromItem(root.hoverTarget, root.hoverTarget.width, 0);
+                    if (!origin || !far)
+                        return 0;
+                    return origin.x + (far.x - origin.x - popupBackground.implicitWidth) / 2;
+                }
+                return Appearance.sizes.verticalBarWidth;
             }
             top: {
-                if (!Config.options.bar.vertical) return Appearance.sizes.barHeight;
-                return root.QsWindow?.mapFromItem(
-                    root.hoverTarget, 
-                    (root.hoverTarget.height - popupBackground.implicitHeight) / 2, 0
-                ).y;
+                if (!Config.options.bar.vertical)
+                    return Appearance.sizes.barHeight;
+                return root.QsWindow?.mapFromItem(root.hoverTarget, (root.hoverTarget.height - popupBackground.implicitHeight) / 2, 0).y;
             }
             right: Appearance.sizes.verticalBarWidth
             bottom: Appearance.sizes.barHeight

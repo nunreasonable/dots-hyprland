@@ -16,6 +16,13 @@ Item { // Bar content region
     property var screen: root.QsWindow.window?.screen
     property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
 
+    readonly property real fitNeededHeight: topSectionColumnLayout.implicitHeight + middleSection.implicitHeight + bottomSectionColumnLayout.implicitHeight
+    readonly property real fitScale: (!Platform.isWindows || root.height <= 0 || fitNeededHeight <= root.height) ? 1 : Math.max(0.5, root.height / fitNeededHeight)
+    property real fitShownScale: fitScale
+    Behavior on fitShownScale {
+        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+    }
+
     component HorizontalBarSeparator: Rectangle {
         Layout.leftMargin: Appearance.sizes.baseBarHeight / 3
         Layout.rightMargin: Appearance.sizes.baseBarHeight / 3
@@ -48,6 +55,12 @@ Item { // Bar content region
 
     FocusedScrollMouseArea { // Top section | scroll to change brightness
         id: barTopSectionMouseArea
+        transform: Scale {
+            origin.x: root.width / 2 - barTopSectionMouseArea.x
+            origin.y: root.height / 2 - barTopSectionMouseArea.y
+            xScale: root.fitShownScale
+            yScale: root.fitShownScale
+        }
         anchors.top: parent.top
         implicitHeight: topSectionColumnLayout.implicitHeight
         implicitWidth: Appearance.sizes.baseVerticalBarWidth
@@ -82,6 +95,12 @@ Item { // Bar content region
 
     Column { // Middle section
         id: middleSection
+        transform: Scale {
+            origin.x: root.width / 2 - middleSection.x
+            origin.y: root.height / 2 - middleSection.y
+            xScale: root.fitShownScale
+            yScale: root.fitShownScale
+        }
         anchors.centerIn: parent
         spacing: 4
 
@@ -155,6 +174,12 @@ Item { // Bar content region
 
     FocusedScrollMouseArea { // Bottom section | scroll to change volume
         id: barBottomSectionMouseArea
+        transform: Scale {
+            origin.x: root.width / 2 - barBottomSectionMouseArea.x
+            origin.y: root.height / 2 - barBottomSectionMouseArea.y
+            xScale: root.fitShownScale
+            yScale: root.fitShownScale
+        }
 
         anchors {
             left: parent.left
