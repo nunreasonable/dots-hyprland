@@ -64,7 +64,7 @@ Item { // Bar content region
         }
 
         root.fitProbingDeescalate = false;
-        if (root.fitScale !== 1)
+        if (root.fitScale !== 1 && needed <= avail - margin)
             root.fitScale = 1;
 
         const reblocked = (root.fitForm - 1 === root.fitBlockedForm) && (avail <= root.fitBlockedWidth + margin);
