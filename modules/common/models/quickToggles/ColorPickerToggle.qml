@@ -9,13 +9,17 @@ import qs.modules.common.widgets
 QuickToggleModel {
     name: Translation.tr("Color picker")
     hasStatusText: false
-    available: !Platform.isWindows
     toggled: false
     icon: "colorize"
 
     mainAction: () => {
-        if (Platform.isWindows) return;
         GlobalStates.sidebarRightOpen = false;
+        if (Platform.isWindows) {
+            if (Config.options.panelFamily === "waffle")
+                GlobalStates.sidebarLeftOpen = false;
+            GlobalStates.colorPickerOpen = true;
+            return;
+        }
         delayedActionTimer.start();
     }
     Timer {
