@@ -71,6 +71,20 @@ Scope {
         }
     }
 
+    Binding {
+        when: Platform.isWindows && WindowsNative.ready
+        target: WindowsNative.audioVisualizer
+        property: "running"
+        value: mediaControlsLoader.active
+    }
+
+    Connections {
+        target: Platform.isWindows ? WindowsNative.audioVisualizer : null
+        function onValuesChanged() {
+            root.visualizerPoints = WindowsNative.audioVisualizer.values;
+        }
+    }
+
     Loader {
         id: mediaControlsLoader
         active: GlobalStates.mediaControlsOpen
