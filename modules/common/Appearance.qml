@@ -17,6 +17,7 @@ Singleton {
     readonly property bool animationsEnabled: !(Platform.isWindows
         && Config.options.windowsPort.gameMode.enable)
     readonly property real animationScale: animationsEnabled ? 1 : 0
+    readonly property real animationVelocityScale: animationsEnabled ? 1 : 1000
 
     // Transparency. The quadratic functions were derived from analysis of hand-picked transparency values.
     ColorQuantizer {
@@ -275,7 +276,7 @@ Singleton {
             property int duration: animationCurves.expressiveDefaultSpatialDuration * root.animationScale
             property int type: Easing.BezierSpline
             property list<real> bezierCurve: animationCurves.expressiveDefaultSpatial
-            property int velocity: 650
+            property int velocity: 650 * root.animationVelocityScale
             property Component numberAnimation: Component {
                 NumberAnimation {
                     duration: root.animation.elementMove.duration
@@ -289,7 +290,7 @@ Singleton {
             property int duration: animationCurves.expressiveFastSpatialDuration * root.animationScale
             property int type: Easing.BezierSpline
             property list<real> bezierCurve: animationCurves.expressiveFastSpatial
-            property int velocity: 650
+            property int velocity: 650 * root.animationVelocityScale
             property Component numberAnimation: Component {
                 NumberAnimation {
                     duration: root.animation.elementMoveSmall.duration
@@ -303,7 +304,7 @@ Singleton {
             property int duration: 400 * root.animationScale
             property int type: Easing.BezierSpline
             property list<real> bezierCurve: animationCurves.emphasizedDecel
-            property int velocity: 650
+            property int velocity: 650 * root.animationVelocityScale
             property Component numberAnimation: Component {
                 NumberAnimation {
                     alwaysRunToEnd: true
@@ -318,7 +319,7 @@ Singleton {
             property int duration: 200 * root.animationScale
             property int type: Easing.BezierSpline
             property list<real> bezierCurve: animationCurves.emphasizedAccel
-            property int velocity: 650
+            property int velocity: 650 * root.animationVelocityScale
             property Component numberAnimation: Component {
                 NumberAnimation {
                     alwaysRunToEnd: true
@@ -333,7 +334,7 @@ Singleton {
             property int duration: animationCurves.expressiveEffectsDuration * root.animationScale
             property int type: Easing.BezierSpline
             property list<real> bezierCurve: animationCurves.expressiveEffects
-            property int velocity: 850
+            property int velocity: 850 * root.animationVelocityScale
             property Component colorAnimation: Component { ColorAnimation {
                 duration: root.animation.elementMoveFast.duration
                 easing.type: root.animation.elementMoveFast.type
@@ -351,7 +352,7 @@ Singleton {
             property int duration: 300 * root.animationScale
             property int type: Easing.BezierSpline
             property list<real> bezierCurve: animationCurves.emphasized
-            property int velocity: 650
+            property int velocity: 650 * root.animationVelocityScale
             property Component numberAnimation: Component {
                 NumberAnimation {
                     alwaysRunToEnd: true
@@ -366,7 +367,7 @@ Singleton {
             property int duration: 400 * root.animationScale
             property int type: Easing.BezierSpline
             property list<real> bezierCurve: animationCurves.expressiveDefaultSpatial
-            property int velocity: 850
+            property int velocity: 850 * root.animationVelocityScale
             property Component numberAnimation: Component { NumberAnimation {
                 alwaysRunToEnd: true
                 duration: root.animation.clickBounce.duration

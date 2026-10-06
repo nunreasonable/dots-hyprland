@@ -410,7 +410,7 @@ Singleton {
                 }
                 property JsonObject gameMode: JsonObject {
                     property bool enable: false
-                    property bool prevTransparencyEnable: true
+                    property bool prevTransparencyEnable: false
                     property int prevTilingGapsIn: 4
                     property int prevTilingGapsOut: 5
                 }
