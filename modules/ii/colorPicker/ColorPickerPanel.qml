@@ -78,7 +78,6 @@ PanelWindow {
 
     TempScreenshotProcess {
         id: screenshotProc
-        running: true
         screen: root.screen
         screenshotDir: root.screenshotDir
         screenshotPath: root.screenshotPath
@@ -93,6 +92,7 @@ PanelWindow {
         }
     }
 
+    Component.onCompleted: screenshotProc.running = true
     Component.onDestruction: WindowsNative.screenshot?.releasePixels()
 
     Image {
