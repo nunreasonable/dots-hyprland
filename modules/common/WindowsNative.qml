@@ -34,6 +34,7 @@ Singleton {
     readonly property QtObject terminalColors: _impl ? _impl.terminalColors : null
     readonly property QtObject tiling: _impl ? _impl.tiling : null
     readonly property QtObject audioVisualizer: _impl ? _impl.audioVisualizer : null
+    readonly property QtObject blur: _impl ? _impl.blur : null
 
     Component.onCompleted: {
         if (!Platform.isWindows) return;

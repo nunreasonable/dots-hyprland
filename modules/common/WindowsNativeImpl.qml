@@ -25,4 +25,5 @@ QtObject {
     readonly property QtObject terminalColors: QSWin.TerminalColors
     readonly property QtObject tiling: QSWin.Tiling
     readonly property QtObject audioVisualizer: QSWin.AudioVisualizer
+    readonly property QtObject blur: QSWin.BackdropBlur
 }
