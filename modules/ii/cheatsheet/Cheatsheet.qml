@@ -192,15 +192,15 @@ Scope { // Scope
                         CheatsheetPeriodicTable {}
                     }
                 }
-
-                Binding {
-                    when: Platform.isWindows && WindowsNative.ready && WindowsNative.systemMonitor !== null
-                    target: WindowsNative.systemMonitor
-                    property: "active"
-                    value: cheatsheetLoader.active && tabBar.currentIndex === root.systemTabIndex
-                }
             }
         }
+    }
+
+    Binding {
+        when: Platform.isWindows && WindowsNative.ready && WindowsNative.systemMonitor !== null
+        target: WindowsNative.systemMonitor
+        property: "active"
+        value: cheatsheetLoader.active && Persistent.states.cheatsheet.tabIndex === root.systemTabIndex
     }
 
     IpcHandler {
