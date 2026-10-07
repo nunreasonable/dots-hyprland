@@ -13,7 +13,20 @@ import Quickshell.Hyprland
 
 Scope { // Scope
     id: root
-    property var tabButtonList: [
+    property var tabButtonList: Platform.isWindows ? [
+        {
+            "icon": "keyboard",
+            "name": Translation.tr("Keybinds")
+        },
+        {
+            "icon": "monitor_heart",
+            "name": Translation.tr("System")
+        },
+        {
+            "icon": "experiment",
+            "name": Translation.tr("Elements")
+        },
+    ] : [
         {
             "icon": "keyboard",
             "name": Translation.tr("Keybinds")
@@ -23,6 +36,7 @@ Scope { // Scope
             "name": Translation.tr("Elements")
         },
     ]
+    readonly property int systemTabIndex: Platform.isWindows ? 1 : -1
 
     Loader {
         id: cheatsheetLoader
@@ -171,8 +185,19 @@ Scope { // Scope
                         }
 
                         CheatsheetKeybinds {}
+                        Repeater {
+                            model: Platform.isWindows ? 1 : 0
+                            delegate: CheatsheetSystem {}
+                        }
                         CheatsheetPeriodicTable {}
                     }
+                }
+
+                Binding {
+                    when: Platform.isWindows && WindowsNative.ready && WindowsNative.systemMonitor !== null
+                    target: WindowsNative.systemMonitor
+                    property: "active"
+                    value: cheatsheetLoader.active && tabBar.currentIndex === root.systemTabIndex
                 }
             }
         }

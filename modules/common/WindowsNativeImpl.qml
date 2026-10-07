@@ -27,4 +27,5 @@ QtObject {
     readonly property QtObject superDrag: QSWin.SuperDrag
     readonly property QtObject audioVisualizer: QSWin.AudioVisualizer
     readonly property QtObject blur: QSWin.BackdropBlur
+    readonly property QtObject systemMonitor: QSWin.SystemMonitor
 }

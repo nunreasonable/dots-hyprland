@@ -36,6 +36,7 @@ Singleton {
     readonly property QtObject superDrag: _impl ? _impl.superDrag : null
     readonly property QtObject audioVisualizer: _impl ? _impl.audioVisualizer : null
     readonly property QtObject blur: _impl ? _impl.blur : null
+    readonly property QtObject systemMonitor: _impl ? _impl.systemMonitor : null
 
     Component.onCompleted: {
         if (!Platform.isWindows) return;
