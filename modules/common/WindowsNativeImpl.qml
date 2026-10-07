@@ -28,4 +28,5 @@ QtObject {
     readonly property QtObject audioVisualizer: QSWin.AudioVisualizer
     readonly property QtObject blur: QSWin.BackdropBlur
     readonly property QtObject systemMonitor: QSWin.SystemMonitor
+    readonly property QtObject fileIndex: QSWin.FileIndex
 }
