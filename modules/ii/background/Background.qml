@@ -86,7 +86,7 @@ Variants {
 
         readonly property bool widgetsAboveIcons: Platform.isWindows && (WindowsNative.desktopLayer?.active ?? false) && !GlobalStates.screenLocked
         readonly property bool nativeWallpaper: Platform.isWindows && Config.options.windowsPort.backgroundBehindIcons && !Config.options.windowsPort.ownWallpaper
-        readonly property Item widgetsSlot: widgetsWindowLoader.item?.slot ?? null
+        readonly property Item widgetsSlot: widgetsWindowLoader.active ? (widgetsWindowLoader.item?.slot ?? null) : null
 
         // Layer props
         screen: modelData
