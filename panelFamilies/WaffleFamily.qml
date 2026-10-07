@@ -28,7 +28,7 @@ Scope {
     PanelLoader { deferPriority: 1; panelSource: "../modules/waffle/actionCenter/WaffleActionCenter.qml" }
     PanelLoader { deferred: false; panelSource: "../modules/waffle/bar/WaffleBar.qml" }
     PanelLoader { deferPriority: 2; panelSource: "../modules/waffle/background/WaffleBackground.qml" }
-    PanelLoader { panelSource: "../modules/waffle/lock/WaffleLock.qml" }
+    PanelLoader { deferred: Platform.isWindows && !Config.options.lock.launchOnStartup; panelSource: "../modules/waffle/lock/WaffleLock.qml" }
     PanelLoader { panelSource: "../modules/waffle/notificationCenter/WaffleNotificationCenter.qml" }
     PanelLoader { panelSource: "../modules/waffle/notificationPopup/WaffleNotificationPopup.qml" }
     PanelLoader { panelSource: "../modules/waffle/onScreenDisplay/WaffleOSD.qml" }
