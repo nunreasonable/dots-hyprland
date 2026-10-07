@@ -93,6 +93,20 @@ Singleton {
         }
     }
 
+    property bool _windowsOutputDirReady: false
+
+    function _ensureWindowsOutputDir() {
+        if (root._windowsOutputDirReady) return
+        root._windowsOutputDirReady = true
+        const fs = WindowsNative.fsUtils
+        if (fs && typeof fs.makePath === "function") {
+            fs.makePath(root.latexOutputPath)
+            return
+        }
+        Quickshell.execDetached(["powershell", "-NoProfile", "-Command",
+            `New-Item -ItemType Directory -Force -Path "${root.latexOutputPath}" | Out-Null`])
+    }
+
     function _requestRenderWindows(hash, expression, imagePath) {
         const matugenExe = WindowsNative.ready && WindowsNative.wallpaper ? WindowsNative.wallpaper.matugenPath() : ""
         if (!matugenExe) {
@@ -104,6 +118,7 @@ Singleton {
         }
         const installDir = matugenExe.substring(0, Math.max(matugenExe.lastIndexOf("/"), matugenExe.lastIndexOf("\\")))
         const exePath = `${installDir}/LaTeX.exe`
+        root._ensureWindowsOutputDir()
 
         const proc = root._windowsProcessComponent.createObject(root, {
             command: [

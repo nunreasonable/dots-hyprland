@@ -111,11 +111,7 @@ Singleton {
 
     // Cleanup on init
     Component.onCompleted: {
-        if (Platform.isWindows) {
-            Quickshell.execDetached(["powershell", "-NoProfile", "-Command",
-                `New-Item -ItemType Directory -Force -Path "${latexOutput}" | Out-Null`]);
-            return;
-        }
+        if (Platform.isWindows) return;
         Quickshell.execDetached(["mkdir", "-p", `${shellConfig}`])
         Quickshell.execDetached(["mkdir", "-p", `${favicons}`])
         Quickshell.execDetached(["bash", "-c", `rm -rf '${coverArt}'; mkdir -p '${coverArt}'`])
