@@ -105,13 +105,17 @@ Item {
 
                 CheatsheetSystemCard {
                     icon: "memory"
+                    Layout.preferredWidth: 1
+                    Layout.fillHeight: true
+                    Layout.alignment: Qt.AlignTop
                     label: Translation.tr("CPU")
-                    title: Fmt.dash(root.monitor?.cpuName)
-                    subtitle: Translation.tr("%1 cores · %2 threads · up to %3 · L3 %4")
-                        .arg(root.monitor?.cpuCores ?? "—")
-                        .arg(root.monitor?.cpuThreads ?? "—")
-                        .arg(Fmt.ghzString(root.monitor?.cpuMaxMhz))
-                        .arg(Fmt.mibString(root.monitor?.cpuL3Bytes))
+                    title: Fmt.dash(Fmt.cpuName(root.monitor?.cpuName))
+                    subtitle: [
+                        Translation.tr("%1 cores").arg(root.monitor?.cpuCores || "—"),
+                        Translation.tr("%1 threads").arg(root.monitor?.cpuThreads || "—"),
+                        Fmt.isNum(root.monitor?.cpuMaxMhz) ? Translation.tr("up to %1").arg(Fmt.ghzString(root.monitor.cpuMaxMhz)) : "",
+                        (root.monitor?.cpuL3Bytes ?? 0) > 0 ? Translation.tr("L3 %1").arg(Fmt.mibString(root.monitor.cpuL3Bytes)) : ""
+                    ].filter(part => part.length > 0).join(" · ")
 
                     RowLayout {
                         Layout.fillWidth: true
@@ -159,6 +163,9 @@ Item {
 
                 CheatsheetSystemCard {
                     icon: "monitor"
+                    Layout.preferredWidth: 1
+                    Layout.fillHeight: true
+                    Layout.alignment: Qt.AlignTop
                     label: Translation.tr("GPU")
                     title: Fmt.dash(root.currentGpu?.name)
                     subtitle: Translation.tr("%1 VRAM · %2")
@@ -265,6 +272,9 @@ Item {
 
                 CheatsheetSystemCard {
                     icon: "memory_alt"
+                    Layout.preferredWidth: 1
+                    Layout.fillHeight: true
+                    Layout.alignment: Qt.AlignTop
                     label: Translation.tr("Memory")
                     title: Translation.tr("%1 RAM").arg(Fmt.sizeString(root.monitor?.memoryTotal))
                     subtitle: Translation.tr("%1 swap").arg(Fmt.sizeString(root.monitor?.swapTotal))

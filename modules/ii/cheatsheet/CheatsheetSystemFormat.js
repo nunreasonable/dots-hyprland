@@ -21,6 +21,15 @@ function percentString(v) {
     return isNum(v) ? (Math.round(v * 100) + "%") : "—";
 }
 
+function cpuName(name) {
+    if (!name) return name;
+    return name.replace(/\((R|TM|tm|r)\)/g, "")
+        .replace(/^\s*\d+(st|nd|rd|th) Gen\s+/i, "")
+        .replace(/\s+CPU\s+@.*$/i, "")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
 function ghzString(mhz, digits) {
     if (!isNum(mhz)) return "—";
     const d = (digits === undefined) ? 2 : digits;

@@ -82,5 +82,9 @@ Rectangle {
             Layout.fillWidth: true
             spacing: 10
         }
+
+        Item {
+            Layout.fillHeight: true
+        }
     }
 }
