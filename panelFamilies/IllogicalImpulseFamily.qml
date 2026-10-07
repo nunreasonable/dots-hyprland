@@ -25,25 +25,25 @@ import qs.modules.ii.verticalBar
 import qs.modules.ii.wallpaperSelector
 
 Scope {
-    PanelLoader { extraCondition: !Config.options.bar.vertical; component: Bar {} }
-    PanelLoader { component: Background {} }
-    PanelLoader { component: Cheatsheet {} }
-    PanelLoader { extraCondition: Platform.isWindows; component: ColorPicker {} }
-    PanelLoader { extraCondition: Config.options.dock.enable; component: Dock {} }
-    PanelLoader { component: Lock {} }
-    PanelLoader { component: MediaControls {} }
-    PanelLoader { component: NotificationPopup {} }
-    PanelLoader { component: OnScreenDisplay {} }
-    PanelLoader { component: OnScreenKeyboard {} }
-    PanelLoader { component: Overlay {} }
-    PanelLoader { component: Overview {} }
-    PanelLoader { component: Polkit {} }
-    PanelLoader { component: RegionSelector {} }
-    PanelLoader { component: ScreenCorners {} }
-    PanelLoader { component: ScreenTranslator {} }
-    PanelLoader { component: SessionScreen {} }
-    PanelLoader { component: SidebarLeft {} }
-    PanelLoader { component: SidebarRight {} }
-    PanelLoader { extraCondition: Config.options.bar.vertical; component: VerticalBar {} }
-    PanelLoader { component: WallpaperSelector {} }
+    PanelLoader { deferred: false; extraCondition: !Config.options.bar.vertical; panelSource: "../modules/ii/bar/Bar.qml" }
+    PanelLoader { deferPriority: 2; panelSource: "../modules/ii/background/Background.qml" }
+    PanelLoader { panelSource: "../modules/ii/cheatsheet/Cheatsheet.qml" }
+    PanelLoader { extraCondition: Platform.isWindows; panelSource: "../modules/ii/colorPicker/ColorPicker.qml" }
+    PanelLoader { deferPriority: 1; extraCondition: Config.options.dock.enable; panelSource: "../modules/ii/dock/Dock.qml" }
+    PanelLoader { deferred: Platform.isWindows && !Config.options.lock.launchOnStartup; panelSource: "../modules/ii/lock/Lock.qml" }
+    PanelLoader { panelSource: "../modules/ii/mediaControls/MediaControls.qml" }
+    PanelLoader { panelSource: "../modules/ii/notificationPopup/NotificationPopup.qml" }
+    PanelLoader { panelSource: "../modules/ii/onScreenDisplay/OnScreenDisplay.qml" }
+    PanelLoader { panelSource: "../modules/ii/onScreenKeyboard/OnScreenKeyboard.qml" }
+    PanelLoader { panelSource: "../modules/ii/overlay/Overlay.qml" }
+    PanelLoader { deferPriority: 1; panelSource: "../modules/ii/overview/Overview.qml" }
+    PanelLoader { panelSource: "../modules/ii/polkit/Polkit.qml" }
+    PanelLoader { panelSource: "../modules/ii/regionSelector/RegionSelector.qml" }
+    PanelLoader { deferPriority: 1; panelSource: "../modules/ii/screenCorners/ScreenCorners.qml" }
+    PanelLoader { panelSource: "../modules/ii/screenTranslator/ScreenTranslator.qml" }
+    PanelLoader { panelSource: "../modules/ii/sessionScreen/SessionScreen.qml" }
+    PanelLoader { deferPriority: 1; panelSource: "../modules/ii/sidebarLeft/SidebarLeft.qml" }
+    PanelLoader { deferPriority: 1; panelSource: "../modules/ii/sidebarRight/SidebarRight.qml" }
+    PanelLoader { deferred: false; extraCondition: Config.options.bar.vertical; panelSource: "../modules/ii/verticalBar/VerticalBar.qml" }
+    PanelLoader { panelSource: "../modules/ii/wallpaperSelector/WallpaperSelector.qml" }
 }

@@ -18,6 +18,7 @@ import Quickshell.Hyprland
 
 ShellRoot {
     id: root
+    settings.watchFiles: !Platform.isWindows || Quickshell.env("IIW_WATCH_FILES") === "1"
 
     // Stuff for every panel family
     ReloadPopup {}
