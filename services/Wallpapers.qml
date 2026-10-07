@@ -328,11 +328,12 @@ Singleton {
         sortField: FolderListModel.Time
         sortReversed: false
         onCountChanged: {
-            root.wallpapers = []
+            const paths = []
             for (let i = 0; i < folderModel.count; i++) {
                 const path = folderModel.get(i, "filePath") || FileUtils.trimFileProtocol(folderModel.get(i, "fileURL"))
-                if (path && path.length) root.wallpapers.push(path)
+                if (path && path.length) paths.push(path)
             }
+            root.wallpapers = paths
         }
     }
 

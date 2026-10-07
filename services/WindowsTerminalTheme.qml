@@ -260,7 +260,6 @@ Singleton {
         root._writeFragment(colorMap, material);
         root._writeOhMyPosh(colorMap);
         root._writeOhMyPoshPlain(colorMap);
-        root._nudgeWindowsTerminal();
     }
 
     function _writeSequences(colorMap) {
@@ -319,6 +318,7 @@ Singleton {
     FileView {
         id: fragmentOutput
         path: Platform.isWindows ? Directories.windowsTerminalFragmentPath : ""
+        onSaved: root._nudgeWindowsTerminal()
         onSaveFailed: error => console.warn("[WindowsTerminalTheme] Could not write the Windows Terminal fragment:", error);
     }
 
@@ -462,6 +462,10 @@ Singleton {
 
     function _removeOutputs() {
         if (!Platform.isWindows) return;
+        const fs = WindowsNative.fsUtils;
+        const outputs = [Directories.windowsTerminalSequencesPath, Directories.windowsTerminalFragmentPath,
+            Directories.windowsTerminalOhMyPoshPath, Directories.windowsTerminalOhMyPoshPlainPath];
+        if (fs && !outputs.some(path => fs.classify(path) !== "invalid")) return;
         removeOutputsProc.command = ["powershell", "-NoProfile", "-NonInteractive", "-Command",
             `Remove-Item -LiteralPath '${Directories.windowsTerminalSequencesPath}' -Force -ErrorAction SilentlyContinue; `
             + `Remove-Item -LiteralPath '${Directories.windowsTerminalFragmentPath}' -Force -ErrorAction SilentlyContinue; `

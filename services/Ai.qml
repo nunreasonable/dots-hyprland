@@ -326,7 +326,10 @@ Singleton {
     Component.onCompleted: {
         setModel(currentModelId, false, false); // Do necessary setup for model
         root.addUserModels() // Config onReadyChanged above might not fire if config is loaded before this service
-        if (Platform.isWindows && WindowsNative.ready) root.listWindowsFiles();
+        if (Platform.isWindows && WindowsNative.ready) {
+            root.listWindowsFiles();
+            root.fetchOllamaModelsWindows();
+        }
     }
 
     function guessModelLogo(model) {
@@ -356,10 +359,19 @@ Singleton {
         });
     }
 
+    property string ollamaExe: ""
+
+    function fetchOllamaModelsWindows() {
+        const fs = WindowsNative.fsUtils;
+        if (!fs || root.ollamaExe) return;
+        root.ollamaExe = fs.findExecutable("ollama.exe");
+        if (root.ollamaExe) getOllamaModels.running = true;
+    }
+
     Process {
         id: getOllamaModels
-        running: true
-        command: Platform.isWindows ? ["cmd", "/c", "ollama", "list"] : ["bash", "-c", `${Directories.scriptPath}/ai/show-installed-ollama-models.sh`.replace(/file:\/\//, "")]
+        running: !Platform.isWindows
+        command: Platform.isWindows ? [root.ollamaExe, "list"] : ["bash", "-c", `${Directories.scriptPath}/ai/show-installed-ollama-models.sh`.replace(/file:\/\//, "")]
         stdout: StdioCollector {
             onStreamFinished: {
                 if (this.text.length === 0) return;
@@ -407,7 +419,9 @@ Singleton {
     Connections {
         target: Platform.isWindows ? WindowsNative : null
         function onReadyChanged() {
-            if (WindowsNative.ready) root.listWindowsFiles();
+            if (!WindowsNative.ready) return;
+            root.listWindowsFiles();
+            root.fetchOllamaModelsWindows();
         }
     }
 
