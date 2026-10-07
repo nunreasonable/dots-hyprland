@@ -166,13 +166,17 @@ Scope { // Scope
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         spacing: 10
-                        currentIndex: Persistent.states.cheatsheet.tabIndex
+                        currentIndex: Platform.isWindows ? 0 : Persistent.states.cheatsheet.tabIndex
                         onCurrentIndexChanged: {
                             Persistent.states.cheatsheet.tabIndex = currentIndex;
                         }
+                        Component.onCompleted: {
+                            if (Platform.isWindows)
+                                currentIndex = Persistent.states.cheatsheet.tabIndex;
+                        }
 
-                        implicitWidth: Math.max.apply(null, contentChildren.map(child => child.implicitWidth || 0))
-                        implicitHeight: Math.max.apply(null, contentChildren.map(child => child.implicitHeight || 0))
+                        implicitWidth: Math.min(Math.max.apply(null, contentChildren.map(child => child.implicitWidth || 0)), (cheatsheetRoot.screen?.width ?? 100000) - (Appearance.sizes.elevationMargin + cheatsheetBackground.padding) * 2 - 32)
+                        implicitHeight: Math.min(Math.max.apply(null, contentChildren.map(child => child.implicitHeight || 0)), (cheatsheetRoot.screen?.height ?? 100000) - (Appearance.sizes.elevationMargin + cheatsheetBackground.padding) * 2 - 140)
 
                         clip: true
                         layer.enabled: true

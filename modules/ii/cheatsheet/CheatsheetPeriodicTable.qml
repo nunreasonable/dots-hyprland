@@ -12,6 +12,7 @@ Item {
     Column {
         id: mainLayout
         anchors.centerIn: parent
+        scale: Math.min(1, root.width / Math.max(1, mainLayout.implicitWidth), root.height / Math.max(1, mainLayout.implicitHeight))
         spacing: root.spacing
 
         Repeater { // Main table rows
