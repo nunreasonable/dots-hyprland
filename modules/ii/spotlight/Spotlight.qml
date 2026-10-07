@@ -266,6 +266,8 @@ Scope {
                 return [];
             const out = [];
             for (let i = 0; i < folderModel.count; i++) {
+                if (folderModel.get(i, "fileName").startsWith("."))
+                    continue;
                 out.push({
                     name: folderModel.get(i, "fileName"),
                     path: folderModel.get(i, "filePath"),
@@ -703,7 +705,7 @@ q="$1"; h="$2"
                                     caption: root.mode === "emoji" ? "" : (tileCell.modelData.name ?? "")
                                     bigText: root.mode === "emoji" ? (tileCell.modelData.match(/^\s*(\S+)/)?.[1] ?? "") : ""
                                     symbol: root.mode === "system" ? tileCell.modelData.icon : ""
-                                    iconSource: root.mode === "apps" ? Quickshell.iconPath(AppSearch.guessIcon(tileCell.modelData.icon), "image-missing") : ""
+                                    iconSource: root.mode === "apps" ? Quickshell.iconPath(tileCell.modelData.icon, "image-missing") : ""
                                     onClicked: root.activate(tileCell.index)
                                     onHoveredChanged: if (hovered && root.mode === "emoji") root.currentIndex = tileCell.index
                                 }
@@ -742,7 +744,7 @@ q="$1"; h="$2"
                                     if (root.mode === "files") return root.fileSymbol(row.modelData);
                                     return "travel_explore";
                                 }
-                                iconSource: root.mode === "apps" ? Quickshell.iconPath(AppSearch.guessIcon(row.modelData.icon), "image-missing") : ""
+                                iconSource: root.mode === "apps" ? Quickshell.iconPath(row.modelData.icon, "image-missing") : ""
                                 imageSource: root.mode === "files" && root.isImage(row.modelData) ? root.fileUrl(row.modelData.path) : ""
                                 trailingSymbol: root.mode === "files" && row.modelData.isDir ? "open_in_new" : ""
                                 onTrailingClicked: {
