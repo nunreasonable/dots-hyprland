@@ -139,6 +139,130 @@ ContentPage {
                 }
             }
         }
+
+        ContentSubsection {
+            title: Translation.tr("Auto-hide behavior")
+
+            ConfigRow {
+                uniform: true
+                ConfigSwitch {
+                    enabled: Config.options.bar.autoHide.enable
+                    buttonIcon: "fit_screen"
+                    text: Translation.tr("Push windows out of the way")
+                    checked: Config.options.bar.autoHide.pushWindows
+                    onCheckedChanged: {
+                        Config.options.bar.autoHide.pushWindows = checked;
+                    }
+                    StyledToolTip {
+                        text: Translation.tr("When the bar is shown, reserve its space so windows get pushed out of the way instead of going underneath it.")
+                    }
+                }
+                ConfigSwitch {
+                    enabled: Config.options.bar.autoHide.enable
+                    buttonIcon: "keyboard_command_key"
+                    text: Translation.tr("Show when holding Super")
+                    checked: Config.options.bar.autoHide.showWhenPressingSuper.enable
+                    onCheckedChanged: {
+                        Config.options.bar.autoHide.showWhenPressingSuper.enable = checked;
+                    }
+                }
+            }
+
+            ConfigSpinBox {
+                enabled: Config.options.bar.autoHide.enable
+                icon: "swipe"
+                text: Translation.tr("Hover trigger region width (px)")
+                value: Config.options.bar.autoHide.hoverRegionWidth
+                from: 0
+                to: 50
+                stepSize: 1
+                onValueChanged: {
+                    Config.options.bar.autoHide.hoverRegionWidth = value;
+                }
+            }
+
+            ConfigSpinBox {
+                enabled: Config.options.bar.autoHide.enable && Config.options.bar.autoHide.showWhenPressingSuper.enable
+                icon: "timer"
+                text: Translation.tr("Show delay when holding Super (ms)")
+                value: Config.options.bar.autoHide.showWhenPressingSuper.delay
+                from: 0
+                to: 1000
+                stepSize: 10
+                onValueChanged: {
+                    Config.options.bar.autoHide.showWhenPressingSuper.delay = value;
+                }
+            }
+        }
+
+        ContentSubsection {
+            title: Translation.tr("Shown on monitors")
+
+            MaterialTextArea {
+                Layout.fillWidth: true
+                placeholderText: Translation.tr("All monitors")
+                text: Config.options.bar.screenList.join(", ")
+                wrapMode: TextEdit.Wrap
+                onTextChanged: {
+                    Config.options.bar.screenList = text.split(",").map(s => s.trim()).filter(s => s.length > 0);
+                }
+                StyledToolTip {
+                    text: Translation.tr("Comma-separated monitor names to show the bar on, like \"eDP-1, DP-1\". Leave empty to show it on every monitor.")
+                }
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "palette"
+        title: Translation.tr("Bar appearance")
+
+        ConfigSwitch {
+            buttonIcon: "format_paint"
+            text: Translation.tr("Show background")
+            checked: Config.options.bar.showBackground
+            onCheckedChanged: {
+                Config.options.bar.showBackground = checked;
+            }
+        }
+
+        ConfigSwitch {
+            enabled: Config.options.bar.cornerStyle === 1
+            buttonIcon: "shadow"
+            text: Translation.tr("Shadow behind bar")
+            checked: Config.options.bar.floatStyleShadow
+            onCheckedChanged: {
+                Config.options.bar.floatStyleShadow = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Only visible when Corner style above is set to Float.")
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "subject"
+            text: Translation.tr("Verbose")
+            checked: Config.options.bar.verbose
+            onCheckedChanged: {
+                Config.options.bar.verbose = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Shows fuller text, like the date next to the clock, in the bar's center modules instead of compact icons.")
+            }
+        }
+
+        MaterialTextArea {
+            Layout.fillWidth: true
+            placeholderText: Translation.tr("Top-left icon")
+            text: Config.options.bar.topLeftIcon
+            wrapMode: TextEdit.Wrap
+            onTextChanged: {
+                Config.options.bar.topLeftIcon = text;
+            }
+            StyledToolTip {
+                text: Translation.tr("Icon shown at the bar's top left, which opens the left sidebar. Use \"distro\" for your OS logo, or the name of an icon file in ~/.config/quickshell/ii/assets/icons.")
+            }
+        }
     }
 
     ContentSection {
@@ -160,6 +284,91 @@ ContentPage {
             checked: Config.options.tray.monochromeIcons
             onCheckedChanged: {
                 Config.options.tray.monochromeIcons = checked;
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "visibility_off"
+            text: Translation.tr('Hide passive icons')
+            checked: Config.options.tray.filterPassive
+            onCheckedChanged: {
+                Config.options.tray.filterPassive = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Hides tray icons that report themselves as passive (inactive).")
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "label"
+            text: Translation.tr('Show item ID in tooltip')
+            checked: Config.options.tray.showItemId
+            onCheckedChanged: {
+                Config.options.tray.showItemId = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Appends the tray icon's internal ID to its tooltip; useful for finding the ID to pin or filter it.")
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "monitor_heart"
+        title: Translation.tr("Resources")
+
+        ConfigRow {
+            uniform: true
+            ConfigSwitch {
+                buttonIcon: "planner_review"
+                text: Translation.tr("Always show CPU")
+                checked: Config.options.bar.resources.alwaysShowCpu
+                onCheckedChanged: {
+                    Config.options.bar.resources.alwaysShowCpu = checked;
+                }
+            }
+            ConfigSwitch {
+                buttonIcon: "swap_horiz"
+                text: Translation.tr("Always show swap")
+                checked: Config.options.bar.resources.alwaysShowSwap
+                onCheckedChanged: {
+                    Config.options.bar.resources.alwaysShowSwap = checked;
+                }
+            }
+        }
+
+        ConfigSpinBox {
+            icon: "memory"
+            text: Translation.tr("Memory warning threshold (%)")
+            value: Config.options.bar.resources.memoryWarningThreshold
+            from: 0
+            to: 100
+            stepSize: 5
+            onValueChanged: {
+                Config.options.bar.resources.memoryWarningThreshold = value;
+            }
+        }
+
+        ConfigSpinBox {
+            icon: "swap_horiz"
+            text: Translation.tr("Swap warning threshold (%)")
+            value: Config.options.bar.resources.swapWarningThreshold
+            from: 0
+            to: 100
+            stepSize: 5
+            onValueChanged: {
+                Config.options.bar.resources.swapWarningThreshold = value;
+            }
+        }
+
+        ConfigSpinBox {
+            icon: "planner_review"
+            text: Translation.tr("CPU warning threshold (%)")
+            value: Config.options.bar.resources.cpuWarningThreshold
+            from: 0
+            to: 100
+            stepSize: 5
+            onValueChanged: {
+                Config.options.bar.resources.cpuWarningThreshold = value;
             }
         }
     }
@@ -303,6 +512,18 @@ ContentPage {
             stepSize: 50
             onValueChanged: {
                 Config.options.bar.workspaces.showNumberDelay = value;
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "font_download"
+            text: Translation.tr('Use Nerd Font for numbers')
+            checked: Config.options.bar.workspaces.useNerdFont
+            onCheckedChanged: {
+                Config.options.bar.workspaces.useNerdFont = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Renders workspace numbers with a Nerd Font glyph set instead of the regular font. The font must be installed.")
             }
         }
 
