@@ -156,32 +156,29 @@ ContentPage {
             }
         }
 
-        ConfigRow {
-            uniform: true
-            ConfigSpinBox {
-                icon: "height"
-                text: Translation.tr("Height (px)")
-                value: Config.options.dock.height
-                from: 20
-                to: 200
-                stepSize: 1
-                onValueChanged: {
-                    Config.options.dock.height = value;
-                }
+        ConfigSpinBox {
+            icon: "height"
+            text: Translation.tr("Height (px)")
+            value: Config.options.dock.height
+            from: 20
+            to: 200
+            stepSize: 1
+            onValueChanged: {
+                Config.options.dock.height = value;
             }
-            ConfigSpinBox {
-                icon: "swipe_up"
-                text: Translation.tr("Hover region height (px)")
-                value: Config.options.dock.hoverRegionHeight
-                from: 1
-                to: 50
-                stepSize: 1
-                onValueChanged: {
-                    Config.options.dock.hoverRegionHeight = value;
-                }
-                StyledToolTip {
-                    text: Translation.tr("How tall the strip at the screen edge has to be hovered to reveal the dock")
-                }
+        }
+        ConfigSpinBox {
+            icon: "swipe_up"
+            text: Translation.tr("Hover region height (px)")
+            value: Config.options.dock.hoverRegionHeight
+            from: 1
+            to: 50
+            stepSize: 1
+            onValueChanged: {
+                Config.options.dock.hoverRegionHeight = value;
+            }
+            StyledToolTip {
+                text: Translation.tr("How tall the strip at the screen edge has to be hovered to reveal the dock")
             }
         }
 
@@ -328,34 +325,31 @@ ContentPage {
             }
         }
 
-        ConfigRow {
-            uniform: true
-            ConfigSpinBox {
-                enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
-                icon: "mouse"
-                text: Translation.tr("Mouse scroll factor")
-                value: Config.options.interactions.scrolling.mouseScrollFactor
-                from: 10
-                to: 2000
-                stepSize: 10
-                onValueChanged: {
-                    Config.options.interactions.scrolling.mouseScrollFactor = value;
-                }
+        ConfigSpinBox {
+            enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
+            icon: "mouse"
+            text: Translation.tr("Mouse scroll factor")
+            value: Config.options.interactions.scrolling.mouseScrollFactor
+            from: 10
+            to: 2000
+            stepSize: 10
+            onValueChanged: {
+                Config.options.interactions.scrolling.mouseScrollFactor = value;
             }
-            ConfigSpinBox {
-                enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
-                icon: "swipe"
-                text: Translation.tr("Touchpad scroll factor")
-                value: Config.options.interactions.scrolling.touchpadScrollFactor
-                from: 10
-                to: 2000
-                stepSize: 10
-                onValueChanged: {
-                    Config.options.interactions.scrolling.touchpadScrollFactor = value;
-                }
-                StyledToolTip {
-                    text: Translation.tr("Higher moves more per scroll notch/swipe")
-                }
+        }
+        ConfigSpinBox {
+            enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
+            icon: "swipe"
+            text: Translation.tr("Touchpad scroll factor")
+            value: Config.options.interactions.scrolling.touchpadScrollFactor
+            from: 10
+            to: 2000
+            stepSize: 10
+            onValueChanged: {
+                Config.options.interactions.scrolling.touchpadScrollFactor = value;
+            }
+            StyledToolTip {
+                text: Translation.tr("Higher moves more per scroll notch/swipe")
             }
         }
 
