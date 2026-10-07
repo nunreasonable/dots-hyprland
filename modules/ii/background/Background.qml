@@ -163,7 +163,7 @@ Variants {
 
         LazyLoader {
             id: widgetsWindowLoader
-            active: Platform.isWindows
+            activeAsync: Platform.isWindows
 
             PanelWindow {
                 id: widgetsWindow
