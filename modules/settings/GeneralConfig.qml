@@ -63,7 +63,7 @@ ContentPage {
                 }
                 ConfigSlider {
                     buttonIcon: "widgets"
-                    text: Translation.tr("Content")
+                    text: Translation.tr("Panel content")
                     value: Config.options.appearance.transparency.contentTransparency
                     from: 0
                     to: 1

@@ -5,6 +5,11 @@ import QtQuick.Layouts
 
 RowLayout {
     id: root
+    readonly property alias hovered: hoverHandler.hovered
+
+    HoverHandler {
+        id: hoverHandler
+    }
     property string text: ""
     property string icon
     property alias value: spinBoxWidget.value

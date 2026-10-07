@@ -6,6 +6,11 @@ import qs.services
 
 RowLayout {
     id: root
+    readonly property alias hovered: hoverHandler.hovered
+
+    HoverHandler {
+        id: hoverHandler
+    }
     spacing: 10
     Layout.leftMargin: 8
     Layout.rightMargin: 8

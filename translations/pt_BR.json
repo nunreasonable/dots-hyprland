@@ -197,7 +197,7 @@
   "Cheat sheet": "Atalhos",
   "General": "Geral",
   "Password": "Senha",
-  "Config file": "Config file",
+  "Config file": "Arquivo de config",
   "Temperature\nChange with /temp VALUE": "Temperatura\nAltere com /temp VALOR",
   "Swap": "Swap",
   "Up %1": "Ligado há %1",
@@ -982,5 +982,6 @@
   "e.g. anime, booru, hentai": "ex.: anime, booru, hentai",
   "Unsafe link keywords": "Palavras de links inseguros",
   "Comma-separated keywords used to flag unsafe links in search results.": "Palavras separadas por vírgula usadas para marcar links inseguros nos resultados de pesquisa.",
-  "e.g. hentai, porn, rule34": "ex.: hentai, porn, rule34"
+  "e.g. hentai, porn, rule34": "ex.: hentai, porn, rule34",
+  "Panel content": "Conteúdo dos painéis"
 }
