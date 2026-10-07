@@ -303,8 +303,10 @@ ContentPage {
                 placeholderText: Translation.tr("e.g. quora.com, facebook.com")
                 text: Config.options.search.excludedSites.join(", ")
                 wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.search.excludedSites = text.split(",").map(s => s.trim()).filter(s => s.length > 0);
+                onEditingFinished: {
+                    const items = text.split(",").map(s => s.trim()).filter(s => s.length > 0);
+                    if (items.join(", ") !== Config.options.search.excludedSites.join(", "))
+                        Config.options.search.excludedSites = items;
                 }
             }
         }
@@ -405,7 +407,7 @@ ContentPage {
 
         ContentSubsection {
             title: Translation.tr("Languages")
-            tooltip: Translation.tr("Language codes or names accepted by the `trans` command-line tool. Run `trans -list-all` to see them. \"auto\" detects the source language automatically.")
+            tooltip: Translation.tr("Language codes like \"en\", \"pt\" or \"ja\". \"auto\" detects the source language.")
             ConfigRow {
                 uniform: true
                 MaterialTextArea {
@@ -500,6 +502,7 @@ ContentPage {
         }
 
         ConfigSwitch {
+            visible: !Platform.isWindows
             text: Translation.tr("Anti-flashbang (experimental)")
             checked: Config.options.light.antiFlashbang.enable
             onCheckedChanged: {
@@ -626,8 +629,10 @@ ContentPage {
                 placeholderText: Translation.tr("e.g. airport, cafe, guest")
                 text: Config.options.workSafety.triggerCondition.networkNameKeywords.join(", ")
                 wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.workSafety.triggerCondition.networkNameKeywords = text.split(",").map(s => s.trim()).filter(s => s.length > 0);
+                onEditingFinished: {
+                    const items = text.split(",").map(s => s.trim()).filter(s => s.length > 0);
+                    if (items.join(", ") !== Config.options.workSafety.triggerCondition.networkNameKeywords.join(", "))
+                        Config.options.workSafety.triggerCondition.networkNameKeywords = items;
                 }
             }
         }
@@ -640,8 +645,10 @@ ContentPage {
                 placeholderText: Translation.tr("e.g. anime, booru, hentai")
                 text: Config.options.workSafety.triggerCondition.fileKeywords.join(", ")
                 wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.workSafety.triggerCondition.fileKeywords = text.split(",").map(s => s.trim()).filter(s => s.length > 0);
+                onEditingFinished: {
+                    const items = text.split(",").map(s => s.trim()).filter(s => s.length > 0);
+                    if (items.join(", ") !== Config.options.workSafety.triggerCondition.fileKeywords.join(", "))
+                        Config.options.workSafety.triggerCondition.fileKeywords = items;
                 }
             }
         }
@@ -654,8 +661,10 @@ ContentPage {
                 placeholderText: Translation.tr("e.g. hentai, porn, rule34")
                 text: Config.options.workSafety.triggerCondition.linkKeywords.join(", ")
                 wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.workSafety.triggerCondition.linkKeywords = text.split(",").map(s => s.trim()).filter(s => s.length > 0);
+                onEditingFinished: {
+                    const items = text.split(",").map(s => s.trim()).filter(s => s.length > 0);
+                    if (items.join(", ") !== Config.options.workSafety.triggerCondition.linkKeywords.join(", "))
+                        Config.options.workSafety.triggerCondition.linkKeywords = items;
                 }
             }
         }

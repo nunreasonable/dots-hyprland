@@ -24,6 +24,7 @@ ContentPage {
         }
 
         ConfigSlider {
+            visible: !Platform.isWindows
             text: Translation.tr("Lock screen blur radius")
             buttonIcon: "blur_on"
             usePercentTooltip: false

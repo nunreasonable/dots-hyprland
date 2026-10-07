@@ -203,8 +203,10 @@ ContentPage {
                 placeholderText: Translation.tr("All monitors")
                 text: Config.options.bar.screenList.join(", ")
                 wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.bar.screenList = text.split(",").map(s => s.trim()).filter(s => s.length > 0);
+                onEditingFinished: {
+                    const items = text.split(",").map(s => s.trim()).filter(s => s.length > 0);
+                    if (items.join(", ") !== Config.options.bar.screenList.join(", "))
+                        Config.options.bar.screenList = items;
                 }
                 StyledToolTip {
                     text: Translation.tr("Comma-separated monitor names to show the bar on, like \"eDP-1, DP-1\". Leave empty to show it on every monitor.")

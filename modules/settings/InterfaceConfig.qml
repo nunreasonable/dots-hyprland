@@ -191,8 +191,10 @@ ContentPage {
                 placeholderText: Translation.tr("App IDs to hide from the dock, as regexes, comma-separated (e.g. explorer.exe, ^Shell_)")
                 text: Config.options.dock.ignoredAppRegexes.join(", ")
                 wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.dock.ignoredAppRegexes = text.split(",").map(s => s.trim()).filter(s => s.length > 0);
+                onEditingFinished: {
+                    const items = text.split(",").map(s => s.trim()).filter(s => s.length > 0);
+                    if (items.join(", ") !== Config.options.dock.ignoredAppRegexes.join(", "))
+                        Config.options.dock.ignoredAppRegexes = items;
                 }
             }
         }
