@@ -28,21 +28,22 @@ QuickToggleModel {
         }
     }
 
-    Process {
-        id: locateCli
-        running: Platform.isWindows
-        command: ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command",
-            `$p = '${root.windowsDefaultCliPath}'; if (Test-Path -LiteralPath $p) { $p } else { $c = Get-Command 'warp-cli.exe' -ErrorAction SilentlyContinue; if ($c) { $c.Source } }`]
-        stdout: StdioCollector {
-            id: locateCliCollector
-            onStreamFinished: {
-                const found = locateCliCollector.text.trim();
-                if (found.length > 0) {
-                    root.cliPath = found;
-                    fetchActiveState.running = true;
-                }
-            }
-        }
+    function locateWindowsCli() {
+        const fs = WindowsNative.fsUtils;
+        if (!fs || root.cliPath) return;
+        const found = fs.classify(root.windowsDefaultCliPath) === "file"
+            ? root.windowsDefaultCliPath
+            : fs.findExecutable("warp-cli.exe");
+        if (!found) return;
+        root.cliPath = found;
+        fetchActiveState.running = true;
+    }
+
+    Component.onCompleted: if (Platform.isWindows) root.locateWindowsCli()
+
+    Connections {
+        target: Platform.isWindows ? WindowsNative : null
+        function onReadyChanged() { root.locateWindowsCli() }
     }
 
     Process {
