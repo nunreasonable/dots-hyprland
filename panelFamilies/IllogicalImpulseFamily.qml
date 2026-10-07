@@ -36,14 +36,14 @@ Scope {
     PanelLoader { panelSource: "../modules/ii/onScreenDisplay/OnScreenDisplay.qml" }
     PanelLoader { panelSource: "../modules/ii/onScreenKeyboard/OnScreenKeyboard.qml" }
     PanelLoader { panelSource: "../modules/ii/overlay/Overlay.qml" }
-    PanelLoader { panelSource: "../modules/ii/overview/Overview.qml" }
+    PanelLoader { deferPriority: 1; panelSource: "../modules/ii/overview/Overview.qml" }
     PanelLoader { panelSource: "../modules/ii/polkit/Polkit.qml" }
     PanelLoader { panelSource: "../modules/ii/regionSelector/RegionSelector.qml" }
     PanelLoader { deferPriority: 1; panelSource: "../modules/ii/screenCorners/ScreenCorners.qml" }
     PanelLoader { panelSource: "../modules/ii/screenTranslator/ScreenTranslator.qml" }
     PanelLoader { panelSource: "../modules/ii/sessionScreen/SessionScreen.qml" }
-    PanelLoader { panelSource: "../modules/ii/sidebarLeft/SidebarLeft.qml" }
-    PanelLoader { panelSource: "../modules/ii/sidebarRight/SidebarRight.qml" }
+    PanelLoader { deferPriority: 1; panelSource: "../modules/ii/sidebarLeft/SidebarLeft.qml" }
+    PanelLoader { deferPriority: 1; panelSource: "../modules/ii/sidebarRight/SidebarRight.qml" }
     PanelLoader { deferred: false; extraCondition: Config.options.bar.vertical; panelSource: "../modules/ii/verticalBar/VerticalBar.qml" }
     PanelLoader { panelSource: "../modules/ii/wallpaperSelector/WallpaperSelector.qml" }
 }

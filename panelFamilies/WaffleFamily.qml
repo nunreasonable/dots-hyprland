@@ -25,7 +25,7 @@ import qs.modules.ii.screenTranslator
 import qs.modules.ii.wallpaperSelector
 
 Scope {
-    PanelLoader { panelSource: "../modules/waffle/actionCenter/WaffleActionCenter.qml" }
+    PanelLoader { deferPriority: 1; panelSource: "../modules/waffle/actionCenter/WaffleActionCenter.qml" }
     PanelLoader { deferred: false; panelSource: "../modules/waffle/bar/WaffleBar.qml" }
     PanelLoader { deferPriority: 2; panelSource: "../modules/waffle/background/WaffleBackground.qml" }
     PanelLoader { panelSource: "../modules/waffle/lock/WaffleLock.qml" }
@@ -35,7 +35,7 @@ Scope {
     // PanelLoader { component: WaffleOverlay {} }
     PanelLoader { panelSource: "../modules/waffle/polkit/WafflePolkit.qml" }
     PanelLoader { panelSource: "../modules/waffle/screenSnip/WScreenSnip.qml" }
-    PanelLoader { panelSource: "../modules/waffle/startMenu/WaffleStartMenu.qml" }
+    PanelLoader { deferPriority: 1; panelSource: "../modules/waffle/startMenu/WaffleStartMenu.qml" }
     PanelLoader { panelSource: "../modules/waffle/sessionScreen/WaffleSessionScreen.qml" }
     PanelLoader { panelSource: "../modules/waffle/taskView/WaffleTaskView.qml" }
 
