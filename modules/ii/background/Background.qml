@@ -86,7 +86,7 @@ Variants {
 
         readonly property bool widgetsAboveIcons: Platform.isWindows && (WindowsNative.desktopLayer?.active ?? false) && !GlobalStates.screenLocked
         readonly property bool nativeWallpaper: Platform.isWindows && Config.options.windowsPort.backgroundBehindIcons && !Config.options.windowsPort.ownWallpaper
-        readonly property Item widgetsSlot: widgetsWindowLoader.item?.slot ?? null
+        readonly property Item widgetsSlot: widgetsWindowLoader.active ? (widgetsWindowLoader.item?.slot ?? null) : null
 
         // Layer props
         screen: modelData
@@ -163,7 +163,7 @@ Variants {
 
         LazyLoader {
             id: widgetsWindowLoader
-            active: Platform.isWindows
+            activeAsync: Platform.isWindows
 
             PanelWindow {
                 id: widgetsWindow
@@ -338,6 +338,7 @@ Variants {
 
                 FadeLoader {
                     id: weatherLoader
+                    asynchronous: Platform.isWindows
                     shown: Config.options.background.widgets.weather.enable
                     sourceComponent: WeatherWidget {
                         screenWidth: bgRoot.screen.width
@@ -350,6 +351,7 @@ Variants {
 
                 FadeLoader {
                     id: clockLoader
+                    asynchronous: Platform.isWindows
                     shown: Config.options.background.widgets.clock.enable
                     sourceComponent: ClockWidget {
                         screenWidth: bgRoot.screen.width
@@ -363,6 +365,7 @@ Variants {
 
                 FadeLoader {
                     id: resourcesLoader
+                    asynchronous: Platform.isWindows
                     shown: Config.options.background.widgets.resources.enable
                     sourceComponent: ResourcesWidget {
                         screenWidth: bgRoot.screen.width

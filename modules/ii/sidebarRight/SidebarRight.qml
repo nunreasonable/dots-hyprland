@@ -48,6 +48,7 @@ Scope {
         Loader {
             id: sidebarContentLoader
             active: GlobalStates.sidebarRightOpen || Config?.options.sidebar.keepRightSidebarLoaded
+            asynchronous: Platform.isWindows
             anchors {
                 fill: parent
                 margins: Appearance.sizes.hyprlandGapsOut
