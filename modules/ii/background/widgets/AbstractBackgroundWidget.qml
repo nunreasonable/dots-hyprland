@@ -68,6 +68,8 @@ AbstractWidget {
     readonly property int leastBusyHorizontalPadding: 200
     readonly property int leastBusyVerticalPadding: 200
 
+    property int _windowsRequestId: -1
+
     function refreshPlacementIfNeeded() {
         if (!Config.ready) return;
         if (root.placementStrategy === "free" && !root.needsColText) return;
@@ -75,23 +77,46 @@ AbstractWidget {
         if (Platform.isWindows) {
             if (!WindowsNative.imageTools) return;
             if (!root.wallpaperPath) return;
-            const result = WindowsNative.imageTools.leastBusyRegion(
-                root.wallpaperPath,
-                root.leastBusyContentWidth,
-                root.leastBusyContentHeight,
-                Math.round(root.scaledScreenWidth),
-                Math.round(root.scaledScreenHeight),
-                root.leastBusyHorizontalPadding,
-                root.leastBusyVerticalPadding,
-                root.placementStrategy === "mostBusy"
-            );
-            root.applyPlacement(result);
+            windowsRefreshDebounce.restart();
             return;
         }
 
         leastBusyRegionProc.wallpaperPath = root.wallpaperPath;
         leastBusyRegionProc.running = false;
         leastBusyRegionProc.running = true;
+    }
+
+    function windowsRequestPlacement() {
+        if (!Config.ready) return;
+        if (root.placementStrategy === "free" && !root.needsColText) return;
+        if (!WindowsNative.imageTools) return;
+        if (!root.wallpaperPath) return;
+
+        root._windowsRequestId = WindowsNative.imageTools.requestLeastBusyRegion(
+            root.wallpaperPath,
+            root.leastBusyContentWidth,
+            root.leastBusyContentHeight,
+            Math.round(root.scaledScreenWidth),
+            Math.round(root.scaledScreenHeight),
+            root.leastBusyHorizontalPadding,
+            root.leastBusyVerticalPadding,
+            root.placementStrategy === "mostBusy"
+        );
+    }
+
+    Timer {
+        id: windowsRefreshDebounce
+        interval: 0
+        repeat: false
+        onTriggered: root.windowsRequestPlacement()
+    }
+
+    Connections {
+        target: Platform.isWindows ? WindowsNative.imageTools : null
+        function onLeastBusyRegionReady(requestId, result) {
+            if (requestId !== root._windowsRequestId) return;
+            root.applyPlacement(result);
+        }
     }
 
     function applyPlacement(parsedContent) {
