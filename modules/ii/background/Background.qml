@@ -17,6 +17,7 @@ import Quickshell.Hyprland
 import qs.modules.ii.background.widgets
 import qs.modules.ii.background.widgets.clock
 import qs.modules.ii.background.widgets.weather
+import qs.modules.ii.background.widgets.resources
 
 Variants {
     id: root
@@ -190,6 +191,10 @@ Variants {
                         loader: clockLoader
                         canvas: widgetCanvas
                     }
+                    WidgetMaskRegion {
+                        loader: resourcesLoader
+                        canvas: widgetCanvas
+                    }
                 }
 
                 Item {
@@ -353,6 +358,18 @@ Variants {
                         scaledScreenHeight: bgRoot.screen.height
                         wallpaperScale: 1
                         wallpaperSafetyTriggered: bgRoot.wallpaperSafetyTriggered
+                    }
+                }
+
+                FadeLoader {
+                    id: resourcesLoader
+                    shown: Config.options.background.widgets.resources.enable
+                    sourceComponent: ResourcesWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
                     }
                 }
             }
