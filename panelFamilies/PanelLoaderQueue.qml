@@ -6,7 +6,7 @@ import Quickshell
 Singleton {
     id: root
 
-    property int gateHops: 3
+    property int gateHops: 2
     property int hops: 0
     property var pending: []
 
