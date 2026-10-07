@@ -8,6 +8,22 @@ ContentPage {
     forceWidth: true
 
     ContentSection {
+        icon: "view_quilt"
+        title: Translation.tr("Panel style")
+
+        ConfigSelectionArray {
+            currentValue: Config.options.panelFamily
+            onSelected: newValue => {
+                Config.options.panelFamily = newValue;
+            }
+            options: [
+                { displayName: Translation.tr("illogical-impulse"), icon: "view_quilt", value: "ii" },
+                { displayName: Translation.tr("Waffle"), icon: "widgets", value: "waffle" }
+            ]
+        }
+    }
+
+    ContentSection {
         icon: "keyboard"
         title: Translation.tr("Cheat sheet")
 
@@ -139,6 +155,47 @@ ContentPage {
                 Config.options.dock.monochromeIcons = checked;
             }
         }
+
+        ConfigRow {
+            uniform: true
+            ConfigSpinBox {
+                icon: "height"
+                text: Translation.tr("Height (px)")
+                value: Config.options.dock.height
+                from: 20
+                to: 200
+                stepSize: 1
+                onValueChanged: {
+                    Config.options.dock.height = value;
+                }
+            }
+            ConfigSpinBox {
+                icon: "swipe_up"
+                text: Translation.tr("Hover region height (px)")
+                value: Config.options.dock.hoverRegionHeight
+                from: 1
+                to: 50
+                stepSize: 1
+                onValueChanged: {
+                    Config.options.dock.hoverRegionHeight = value;
+                }
+                StyledToolTip {
+                    text: Translation.tr("How tall the strip at the screen edge has to be hovered to reveal the dock")
+                }
+            }
+        }
+
+        ConfigRow {
+            MaterialTextArea {
+                Layout.fillWidth: true
+                placeholderText: Translation.tr("App IDs to hide from the dock, as regexes, comma-separated (e.g. explorer.exe, ^Shell_)")
+                text: Config.options.dock.ignoredAppRegexes.join(", ")
+                wrapMode: TextEdit.Wrap
+                onTextChanged: {
+                    Config.options.dock.ignoredAppRegexes = text.split(",").map(s => s.trim()).filter(s => s.length > 0);
+                }
+            }
+        }
     }
 
     ContentSection {
@@ -233,6 +290,82 @@ ContentPage {
                 onTextChanged: {
                     Config.options.windowsPort.tiling.excluded = text.split("\n").map(s => s.trim());
                 }
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "swipe"
+        title: Translation.tr("Interactions")
+
+        ConfigSwitch {
+            buttonIcon: "swipe"
+            text: Translation.tr("Faster touchpad/mouse scrolling")
+            checked: Config.options.interactions.scrolling.fasterTouchpadScroll
+            onCheckedChanged: {
+                Config.options.interactions.scrolling.fasterTouchpadScroll = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Replaces the default scroll handling with an animated one, using the factors below")
+            }
+        }
+
+        ConfigSpinBox {
+            enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
+            icon: "mouse"
+            text: Translation.tr("Mouse wheel detection threshold")
+            value: Config.options.interactions.scrolling.mouseScrollDeltaThreshold
+            from: 1
+            to: 1000
+            stepSize: 10
+            onValueChanged: {
+                Config.options.interactions.scrolling.mouseScrollDeltaThreshold = value;
+            }
+            StyledToolTip {
+                text: Translation.tr("A scroll delta at or above this is treated as a mouse wheel notch instead of a touchpad swipe")
+            }
+        }
+
+        ConfigRow {
+            uniform: true
+            ConfigSpinBox {
+                enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
+                icon: "mouse"
+                text: Translation.tr("Mouse scroll factor")
+                value: Config.options.interactions.scrolling.mouseScrollFactor
+                from: 10
+                to: 2000
+                stepSize: 10
+                onValueChanged: {
+                    Config.options.interactions.scrolling.mouseScrollFactor = value;
+                }
+            }
+            ConfigSpinBox {
+                enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
+                icon: "swipe"
+                text: Translation.tr("Touchpad scroll factor")
+                value: Config.options.interactions.scrolling.touchpadScrollFactor
+                from: 10
+                to: 2000
+                stepSize: 10
+                onValueChanged: {
+                    Config.options.interactions.scrolling.touchpadScrollFactor = value;
+                }
+                StyledToolTip {
+                    text: Translation.tr("Higher moves more per scroll notch/swipe")
+                }
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "border_right"
+            text: Translation.tr("Dead pixel workaround")
+            checked: Config.options.interactions.deadPixelWorkaround.enable
+            onCheckedChanged: {
+                Config.options.interactions.deadPixelWorkaround.enable = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Shifts the bar and screen corners 1px so a display that leaves out its edge pixel still gets full hover/click coverage")
             }
         }
     }
@@ -390,6 +523,23 @@ ContentPage {
     }
 
     ContentSection {
+        icon: "music_note"
+        title: Translation.tr("Media")
+
+        ConfigSwitch {
+            buttonIcon: "music_note"
+            text: Translation.tr("Filter duplicate players")
+            checked: Config.options.media.filterDuplicatePlayers
+            onCheckedChanged: {
+                Config.options.media.filterDuplicatePlayers = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Hides a player that looks like a duplicate of another one (e.g. a browser's native player showing up alongside its tab-aggregated one)")
+            }
+        }
+    }
+
+    ContentSection {
         icon: "select_window"
         title: Translation.tr("Overlay: General")
 
@@ -407,6 +557,20 @@ ContentPage {
             checked: Config.options.overlay.darkenScreen
             onCheckedChanged: {
                 Config.options.overlay.darkenScreen = checked;
+            }
+        }
+        ConfigSpinBox {
+            icon: "opacity"
+            text: Translation.tr("Clickthrough widget opacity (%)")
+            value: Config.options.overlay.clickthroughOpacity * 100
+            from: 0
+            to: 100
+            stepSize: 5
+            onValueChanged: {
+                Config.options.overlay.clickthroughOpacity = value / 100;
+            }
+            StyledToolTip {
+                text: Translation.tr("How visible pinned, clickthrough overlay widgets (like the floating image) stay while the overlay menu is closed")
             }
         }
     }
@@ -463,6 +627,21 @@ ContentPage {
                 Config.options.overlay.floatingImage.imageSource = text;
             }
         }
+
+        ConfigSpinBox {
+            icon: "loupe"
+            text: Translation.tr("Scale (%)")
+            value: Config.options.overlay.floatingImage.scale * 100
+            from: 10
+            to: 500
+            stepSize: 10
+            onValueChanged: {
+                Config.options.overlay.floatingImage.scale = value / 100;
+            }
+            StyledToolTip {
+                text: Translation.tr("Can also be changed by scrolling on the image itself")
+            }
+        }
     }
 
     ContentSection {
@@ -500,8 +679,79 @@ ContentPage {
                     }
                 }
             }
+
+            ConfigSwitch {
+                buttonIcon: "label"
+                text: Translation.tr("Show label")
+                checked: Config.options.regionSelector.targetRegions.showLabel
+                onCheckedChanged: {
+                    Config.options.regionSelector.targetRegions.showLabel = checked;
+                }
+                StyledToolTip {
+                    text: Translation.tr("Shows the app/window name on top of a hinted region")
+                }
+            }
+
+            ConfigRow {
+                uniform: true
+                ConfigSpinBox {
+                    icon: "opacity"
+                    text: Translation.tr("Window/layer opacity (%)")
+                    value: Config.options.regionSelector.targetRegions.opacity * 100
+                    from: 0
+                    to: 100
+                    stepSize: 5
+                    onValueChanged: {
+                        Config.options.regionSelector.targetRegions.opacity = value / 100;
+                    }
+                }
+                ConfigSpinBox {
+                    visible: !Platform.isWindows
+                    icon: "opacity"
+                    text: Translation.tr("Content region opacity (%)")
+                    value: Config.options.regionSelector.targetRegions.contentRegionOpacity * 100
+                    from: 0
+                    to: 100
+                    stepSize: 5
+                    onValueChanged: {
+                        Config.options.regionSelector.targetRegions.contentRegionOpacity = value / 100;
+                    }
+                }
+            }
+
+            ConfigSpinBox {
+                icon: "screenshot_frame_2"
+                text: Translation.tr("Selection padding (px)")
+                value: Config.options.regionSelector.targetRegions.selectionPadding
+                from: 0
+                to: 50
+                stepSize: 1
+                onValueChanged: {
+                    Config.options.regionSelector.targetRegions.selectionPadding = value;
+                }
+                StyledToolTip {
+                    text: Translation.tr("Extra padding added around a hinted region when it's picked as the selection")
+                }
+            }
         }
-        
+
+        ContentSubsection {
+            visible: !Platform.isWindows
+            title: Translation.tr("Annotation")
+
+            ConfigSwitch {
+                buttonIcon: "draw"
+                text: Translation.tr("Use Satty")
+                checked: Config.options.regionSelector.annotation.useSatty
+                onCheckedChanged: {
+                    Config.options.regionSelector.annotation.useSatty = checked;
+                }
+                StyledToolTip {
+                    text: Translation.tr("Needs satty installed. When off, uses swappy instead")
+                }
+            }
+        }
+
         ContentSubsection {
             title: Translation.tr("Google Lens")
             
@@ -555,6 +805,35 @@ ContentPage {
                 onValueChanged: {
                     Config.options.regionSelector.circle.padding = value;
                 }
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "keyboard"
+        title: Translation.tr("On-screen keyboard")
+
+        ContentSubsection {
+            title: Translation.tr("Layout")
+            ConfigSelectionArray {
+                currentValue: Config.options.osk.layout
+                onSelected: newValue => {
+                    Config.options.osk.layout = newValue;
+                }
+                options: [
+                    { displayName: Translation.tr("English (US)"), value: "English (US)" },
+                    { displayName: Translation.tr("German"), value: "German" },
+                    { displayName: Translation.tr("Russian"), value: "Russian" }
+                ]
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "keep"
+            text: Translation.tr("Pinned on startup")
+            checked: Config.options.osk.pinnedOnStartup
+            onCheckedChanged: {
+                Config.options.osk.pinnedOnStartup = checked;
             }
         }
     }
@@ -898,6 +1177,88 @@ ContentPage {
                         value: 1
                     }
                 ]
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "widgets"
+        title: Translation.tr("Waffle panel")
+
+        ContentSubsection {
+            title: Translation.tr("Tweaks")
+            tooltip: Translation.tr("Some spots are a bit janky; turning these off makes them match for accuracy instead")
+
+            ConfigSwitch {
+                buttonIcon: "toggle_on"
+                text: Translation.tr("Fix switch handle position")
+                checked: Config.options.waffles.tweaks.switchHandlePositionFix
+                onCheckedChanged: {
+                    Config.options.waffles.tweaks.switchHandlePositionFix = checked;
+                }
+            }
+            ConfigSwitch {
+                buttonIcon: "menu_open"
+                text: Translation.tr("Smoother menu animations")
+                checked: Config.options.waffles.tweaks.smootherMenuAnimations
+                onCheckedChanged: {
+                    Config.options.waffles.tweaks.smootherMenuAnimations = checked;
+                }
+            }
+            ConfigSwitch {
+                buttonIcon: "search"
+                text: Translation.tr("Smoother search bar")
+                checked: Config.options.waffles.tweaks.smootherSearchBar
+                onCheckedChanged: {
+                    Config.options.waffles.tweaks.smootherSearchBar = checked;
+                }
+            }
+        }
+
+        ContentSubsection {
+            title: Translation.tr("Bar")
+            ConfigRow {
+                uniform: true
+                ConfigSwitch {
+                    buttonIcon: "vertical_align_bottom"
+                    text: Translation.tr("Bar at bottom")
+                    checked: Config.options.waffles.bar.bottom
+                    onCheckedChanged: {
+                        Config.options.waffles.bar.bottom = checked;
+                    }
+                }
+                ConfigSwitch {
+                    buttonIcon: "format_align_left"
+                    text: Translation.tr("Left-align apps")
+                    checked: Config.options.waffles.bar.leftAlignApps
+                    onCheckedChanged: {
+                        Config.options.waffles.bar.leftAlignApps = checked;
+                    }
+                }
+            }
+        }
+
+        ContentSubsection {
+            title: Translation.tr("Calendar")
+            MaterialTextArea {
+                Layout.fillWidth: true
+                placeholderText: Translation.tr("Locale for the calendar, e.g. en-GB")
+                text: Config.options.calendar.locale
+                wrapMode: TextEdit.NoWrap
+                onTextChanged: {
+                    Config.options.calendar.locale = text;
+                }
+            }
+            ConfigSwitch {
+                buttonIcon: "calendar_view_week"
+                text: Translation.tr("Short day-of-week labels")
+                checked: Config.options.waffles.calendar.force2CharDayOfWeek
+                onCheckedChanged: {
+                    Config.options.waffles.calendar.force2CharDayOfWeek = checked;
+                }
+                StyledToolTip {
+                    text: Translation.tr("Shortens the day of week to 2 characters (e.g. \"Mo\" instead of \"Monday\")")
+                }
             }
         }
     }
