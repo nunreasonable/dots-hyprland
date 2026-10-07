@@ -338,6 +338,7 @@ Variants {
 
                 FadeLoader {
                     id: weatherLoader
+                    asynchronous: Platform.isWindows
                     shown: Config.options.background.widgets.weather.enable
                     sourceComponent: WeatherWidget {
                         screenWidth: bgRoot.screen.width
@@ -350,6 +351,7 @@ Variants {
 
                 FadeLoader {
                     id: clockLoader
+                    asynchronous: Platform.isWindows
                     shown: Config.options.background.widgets.clock.enable
                     sourceComponent: ClockWidget {
                         screenWidth: bgRoot.screen.width
@@ -363,6 +365,7 @@ Variants {
 
                 FadeLoader {
                     id: resourcesLoader
+                    asynchronous: Platform.isWindows
                     shown: Config.options.background.widgets.resources.enable
                     sourceComponent: ResourcesWidget {
                         screenWidth: bgRoot.screen.width

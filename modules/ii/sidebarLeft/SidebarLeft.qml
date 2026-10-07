@@ -58,14 +58,22 @@ Scope { // Scope
         else root.pin = !root.pin;
     }
 
-    Component.onCompleted: {
+    function ensureSidebarContent() {
+        if (root.sidebarContent) return;
         root.sidebarContent = contentComponent.createObject(null, {
             "scopeRoot": root,
         });
-        sidebarLoader.item.contentParent.children = [root.sidebarContent];
+    }
+
+    Component.onCompleted: {
+        if (!Platform.isWindows) {
+            root.ensureSidebarContent();
+            sidebarLoader.item.contentParent.children = [root.sidebarContent];
+        }
     }
 
     onDetachChanged: {
+        root.ensureSidebarContent();
         if (root.detach) {
             GlobalFocusGrab.removeDismissable(sidebarLoader.item) // Remove sidebar from the focus grab system
             sidebarContent.parent = null; // Detach content from sidebar
@@ -116,6 +124,10 @@ Scope { // Scope
 
             onVisibleChanged: {
                 if (visible) {
+                    if (!root.sidebarContent) {
+                        root.ensureSidebarContent();
+                        contentParent.children = [root.sidebarContent];
+                    }
                     GlobalFocusGrab.addDismissable(panelWindow);
                 } else {
                     GlobalFocusGrab.removeDismissable(panelWindow);
