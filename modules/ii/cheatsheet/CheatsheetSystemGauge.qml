@@ -2,7 +2,7 @@ import qs.modules.common
 import qs.modules.common.widgets
 import QtQuick
 
-Column {
+Item {
     id: root
 
     property real value: 0
@@ -13,49 +13,57 @@ Column {
     property int lineWidth: 6
     property color ringColor: Appearance.colors.colPrimary
 
-    spacing: 8
+    implicitWidth: root.ringSize + 12
+    implicitHeight: gaugeColumn.implicitHeight
 
-    Item {
-        anchors.horizontalCenter: parent.horizontalCenter
-        implicitWidth: root.ringSize
-        implicitHeight: root.ringSize
+    Column {
+        id: gaugeColumn
+        width: root.width
+        spacing: 8
 
-        CircularProgress {
+        Item {
+            anchors.horizontalCenter: parent.horizontalCenter
+            implicitWidth: root.ringSize
+            implicitHeight: root.ringSize
 
-            animationDuration: 200
-            anchors.fill: parent
-            implicitSize: root.ringSize
-            lineWidth: root.lineWidth
-            value: root.value
-            colPrimary: root.ringColor
-            colSecondary: Appearance.colors.colLayer2
+            CircularProgress {
+                animationDuration: 200
+                anchors.fill: parent
+                implicitSize: root.ringSize
+                lineWidth: root.lineWidth
+                value: root.value
+                colPrimary: root.ringColor
+                colSecondary: Appearance.colors.colLayer2
+            }
+
+            Column {
+                anchors.centerIn: parent
+                spacing: 0
+
+                StyledText {
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: root.bigText
+                    font.pixelSize: root.ringSize >= 84 ? Appearance.font.pixelSize.huge : Appearance.font.pixelSize.larger
+                    font.weight: Font.Medium
+                    color: Appearance.colors.colOnLayer1
+                }
+                StyledText {
+                    visible: root.smallText.length > 0
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    text: root.smallText
+                    font.pixelSize: Appearance.font.pixelSize.smaller
+                    color: Appearance.colors.colSubtext
+                }
+            }
         }
 
-        Column {
-            anchors.centerIn: parent
-            spacing: 0
-
-            StyledText {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: root.bigText
-                font.pixelSize: Appearance.font.pixelSize.huge
-                font.weight: Font.Medium
-                color: Appearance.colors.colOnLayer1
-            }
-            StyledText {
-                visible: root.smallText.length > 0
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: root.smallText
-                font.pixelSize: Appearance.font.pixelSize.smaller
-                color: Appearance.colors.colSubtext
-            }
+        StyledText {
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
+            elide: Text.ElideRight
+            text: root.caption
+            font.pixelSize: Appearance.font.pixelSize.small
+            color: Appearance.colors.colSubtext
         }
-    }
-
-    StyledText {
-        anchors.horizontalCenter: parent.horizontalCenter
-        text: root.caption
-        font.pixelSize: Appearance.font.pixelSize.small
-        color: Appearance.colors.colSubtext
     }
 }

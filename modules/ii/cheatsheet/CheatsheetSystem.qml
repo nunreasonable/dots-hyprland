@@ -54,6 +54,15 @@ Item {
         }
     }
 
+    readonly property int cardSpacing: 16
+    readonly property int minCardWidth: 320
+    readonly property real layoutWidth: flickable.width
+    readonly property int cardColumns: Math.max(1, Math.min(3, Math.floor((root.layoutWidth + root.cardSpacing) / (root.minCardWidth + root.cardSpacing))))
+    readonly property real cardWidth: (root.layoutWidth - (root.cardColumns - 1) * root.cardSpacing) / root.cardColumns
+    readonly property int gaugeSpacing: root.cardWidth >= 420 ? 24 : 12
+    readonly property int gaugeSlot: Math.floor((root.cardWidth - 32 - 2 * root.gaugeSpacing) / 3)
+    readonly property int gaugeSize: Math.max(56, Math.min(104, root.gaugeSlot - 12))
+
     implicitWidth: (QsWindow?.window?.screen.width ?? 1280) * 0.7
     implicitHeight: (QsWindow?.window?.screen.height ?? 800) * 0.7
 
@@ -99,9 +108,11 @@ Item {
                 }
             }
 
-            RowLayout {
+            GridLayout {
                 Layout.fillWidth: true
-                spacing: 16
+                columns: root.cardColumns
+                columnSpacing: root.cardSpacing
+                rowSpacing: root.cardSpacing
 
                 CheatsheetSystemCard {
                     icon: "memory"
@@ -120,20 +131,23 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignHCenter
-                        spacing: 24
+                        spacing: root.gaugeSpacing
 
                         CheatsheetSystemGauge {
+                            ringSize: root.gaugeSize
                             value: Fmt.clamp01(root.monitor?.cpuUsage)
                             bigText: Fmt.percentString(root.monitor?.cpuUsage)
                             caption: Translation.tr("Usage")
                         }
                         CheatsheetSystemGauge {
+                            ringSize: root.gaugeSize
                             value: Fmt.isNum(root.monitor?.cpuTemperature) ? Fmt.clamp01(root.monitor.cpuTemperature / 100) : 0
                             bigText: Fmt.celsiusString(root.monitor?.cpuTemperature)
                             caption: Translation.tr("Temperature")
                             ringColor: Appearance.colors.colTertiary
                         }
                         CheatsheetSystemGauge {
+                            ringSize: root.gaugeSize
                             value: (Fmt.isNum(root.monitor?.cpuMhz) && Fmt.isNum(root.monitor?.cpuMaxMhz) && root.monitor.cpuMaxMhz > 0) ? Fmt.clamp01(root.monitor.cpuMhz / root.monitor.cpuMaxMhz) : 0
                             bigText: Fmt.ghzNumber(root.monitor?.cpuMhz)
                             smallText: Fmt.isNum(root.monitor?.cpuMhz) ? "GHz" : ""
@@ -205,20 +219,23 @@ Item {
                     RowLayout {
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignHCenter
-                        spacing: 24
+                        spacing: root.gaugeSpacing
 
                         CheatsheetSystemGauge {
+                            ringSize: root.gaugeSize
                             value: Fmt.clamp01(root.currentGpu?.usage)
                             bigText: Fmt.percentString(root.currentGpu?.usage)
                             caption: Translation.tr("Usage")
                         }
                         CheatsheetSystemGauge {
+                            ringSize: root.gaugeSize
                             value: Fmt.isNum(root.currentGpu?.temperature) ? Fmt.clamp01(root.currentGpu.temperature / 100) : 0
                             bigText: Fmt.celsiusString(root.currentGpu?.temperature)
                             caption: Translation.tr("Temperature")
                             ringColor: Appearance.colors.colTertiary
                         }
                         CheatsheetSystemGauge {
+                            ringSize: root.gaugeSize
                             value: Fmt.ratio(root.currentGpu?.vramUsed, root.currentGpu?.vramTotal)
                             bigText: Fmt.isNum(root.currentGpu?.vramUsed) ? Fmt.bytesToGiB(root.currentGpu.vramUsed).toFixed(1) : "—"
                             smallText: Fmt.isNum(root.currentGpu?.vramTotal) ? ("/ " + Fmt.sizeString(root.currentGpu.vramTotal, 0)) : ""
@@ -227,7 +244,7 @@ Item {
                         }
                     }
 
-                    RowLayout {
+                    Flow {
                         Layout.fillWidth: true
                         Layout.topMargin: 2
                         spacing: 16
@@ -248,7 +265,6 @@ Item {
                             icon: "mode_fan"
                             text: Fmt.isNum(root.currentGpu?.fanRpm) ? (root.currentGpu.fanRpm === 0 ? Translation.tr("Fan stopped") : (Math.round(root.currentGpu.fanRpm) + " RPM")) : "—"
                         }
-                        Item { Layout.fillWidth: true }
                     }
 
                     ColumnLayout {
@@ -273,6 +289,7 @@ Item {
                 CheatsheetSystemCard {
                     icon: "memory_alt"
                     Layout.preferredWidth: 1
+                    Layout.columnSpan: root.cardColumns === 2 ? 2 : 1
                     Layout.fillHeight: true
                     Layout.alignment: Qt.AlignTop
                     label: Translation.tr("Memory")
