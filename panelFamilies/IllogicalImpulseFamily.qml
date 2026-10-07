@@ -20,6 +20,7 @@ import qs.modules.ii.screenTranslator
 import qs.modules.ii.sessionScreen
 import qs.modules.ii.sidebarLeft
 import qs.modules.ii.sidebarRight
+import qs.modules.ii.spotlight
 import qs.modules.ii.overlay
 import qs.modules.ii.verticalBar
 import qs.modules.ii.wallpaperSelector
@@ -37,6 +38,7 @@ Scope {
     PanelLoader { panelSource: "../modules/ii/onScreenKeyboard/OnScreenKeyboard.qml" }
     PanelLoader { panelSource: "../modules/ii/overlay/Overlay.qml" }
     PanelLoader { deferPriority: 1; panelSource: "../modules/ii/overview/Overview.qml" }
+    PanelLoader { deferPriority: 1; extraCondition: Config.options.search.spotlight; panelSource: "../modules/ii/spotlight/Spotlight.qml" }
     PanelLoader { panelSource: "../modules/ii/polkit/Polkit.qml" }
     PanelLoader { panelSource: "../modules/ii/regionSelector/RegionSelector.qml" }
     PanelLoader { deferPriority: 1; panelSource: "../modules/ii/screenCorners/ScreenCorners.qml" }

@@ -115,6 +115,14 @@ ContentPage {
         title: Translation.tr("Search")
 
         ConfigSwitch {
+            text: Translation.tr("Spotlight search: Super opens search only, Super+Tab opens workspaces")
+            checked: Config.options.search.spotlight
+            onCheckedChanged: {
+                Config.options.search.spotlight = checked;
+            }
+        }
+
+        ConfigSwitch {
             text: Translation.tr("Use Levenshtein distance-based algorithm instead of fuzzy")
             checked: Config.options.search.sloppy
             onCheckedChanged: {

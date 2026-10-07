@@ -30,6 +30,8 @@ Singleton {
     property bool sessionOpen: false
     property bool superDown: false
     property bool superReleaseMightTrigger: true
+    property bool spotlightOpen: false
+    property string spotlightMode: ""
     property bool wallpaperSelectorOpen: false
     property bool workspaceShowNumbers: false
 

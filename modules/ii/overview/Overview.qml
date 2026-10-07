@@ -14,6 +14,23 @@ import Quickshell.Hyprland
 Scope {
     id: overviewScope
     property bool dontAutoCancelSearch: false
+    readonly property bool spotlight: Config.options.search.spotlight ?? false
+
+    function spotlightToggle(mode) {
+        const wanted = mode ?? "";
+        if (GlobalStates.spotlightOpen && (wanted === "" || GlobalStates.spotlightMode === wanted)) {
+            GlobalStates.spotlightOpen = false;
+            return;
+        }
+        GlobalStates.overviewOpen = false;
+        GlobalStates.spotlightMode = wanted;
+        GlobalStates.spotlightOpen = true;
+    }
+
+    function workspacesToggle() {
+        GlobalStates.spotlightOpen = false;
+        GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
+    }
 
     PanelWindow {
         id: panelWindow
@@ -76,6 +93,7 @@ Scope {
                 top: parent.top
             }
             spacing: -8
+            focus: overviewScope.spotlight && GlobalStates.overviewOpen
 
             Keys.onPressed: event => {
                 if (event.key === Qt.Key_Escape) {
@@ -85,6 +103,7 @@ Scope {
 
             SearchWidget {
                 id: searchWidget
+                visible: !overviewScope.spotlight
                 anchors.horizontalCenter: parent.horizontalCenter
                 Synchronizer on searchingText {
                     property alias source: panelWindow.searchingText
@@ -104,6 +123,10 @@ Scope {
     }
 
     function toggleClipboard() {
+        if (overviewScope.spotlight) {
+            overviewScope.spotlightToggle("clipboard");
+            return;
+        }
         if (GlobalStates.overviewOpen && overviewScope.dontAutoCancelSearch) {
             GlobalStates.overviewOpen = false;
             return;
@@ -114,6 +137,10 @@ Scope {
     }
 
     function toggleEmojis() {
+        if (overviewScope.spotlight) {
+            overviewScope.spotlightToggle("emoji");
+            return;
+        }
         if (GlobalStates.overviewOpen && overviewScope.dontAutoCancelSearch) {
             GlobalStates.overviewOpen = false;
             return;
@@ -127,16 +154,25 @@ Scope {
         target: "search"
 
         function toggle() {
-            GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
+            if (overviewScope.spotlight)
+                overviewScope.spotlightToggle("");
+            else
+                GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
         }
         function workspacesToggle() {
-            GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
+            overviewScope.workspacesToggle();
         }
         function close() {
             GlobalStates.overviewOpen = false;
+            GlobalStates.spotlightOpen = false;
         }
         function open() {
-            GlobalStates.overviewOpen = true;
+            if (overviewScope.spotlight) {
+                GlobalStates.spotlightMode = "";
+                GlobalStates.spotlightOpen = true;
+            } else {
+                GlobalStates.overviewOpen = true;
+            }
         }
         function toggleReleaseInterrupt() {
             GlobalStates.superReleaseMightTrigger = false;
@@ -151,7 +187,10 @@ Scope {
         description: "Toggles search on press"
 
         onPressed: {
-            GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
+            if (overviewScope.spotlight)
+                overviewScope.spotlightToggle("");
+            else
+                GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
         }
     }
     GlobalShortcut {
@@ -167,7 +206,7 @@ Scope {
         description: "Toggles overview on press"
 
         onPressed: {
-            GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
+            overviewScope.workspacesToggle();
         }
     }
     GlobalShortcut {
@@ -183,7 +222,10 @@ Scope {
                 GlobalStates.superReleaseMightTrigger = true;
                 return;
             }
-            GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
+            if (overviewScope.spotlight)
+                overviewScope.spotlightToggle("");
+            else
+                GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
         }
     }
     GlobalShortcut {
