@@ -38,6 +38,7 @@ Singleton {
         window: PanelWindow {
             // Inhibitor requires a "visible" surface
             // Actually not lol
+            visible: !Platform.isWindows
             implicitWidth: 0
             implicitHeight: 0
             color: "transparent"
