@@ -150,10 +150,12 @@ Singleton {
     }
 
     property bool windowsHasQalc: false
-    Process {
-        running: Platform.isWindows
-        command: ["where", "qalc"]
-        onExited: (exitCode, exitStatus) => root.windowsHasQalc = exitCode === 0
+    property bool windowsQalcChecked: false
+    function checkWindowsQalc() {
+        const fs = WindowsNative.fsUtils;
+        if (root.windowsQalcChecked || !fs) return;
+        root.windowsQalcChecked = true;
+        root.windowsHasQalc = !!fs.findExecutable("qalc.exe");
     }
     function evalArithmetic(expression) {
         const expr = expression.replace(/\s+/g, "").replace(/,/g, ".").replace(/×/g, "*").replace(/÷/g, "/").replace(/\^/g, "**");
@@ -170,6 +172,7 @@ Singleton {
         id: mathProc
         property list<string> baseCommand: ["qalc", "-t"]
         function calculateExpression(expression) {
+            if (Platform.isWindows) root.checkWindowsQalc();
             if (Platform.isWindows && !root.windowsHasQalc) {
                 root.mathResult = root.evalArithmetic(expression);
                 return;
