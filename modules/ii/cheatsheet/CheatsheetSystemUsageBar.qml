@@ -45,12 +45,32 @@ ColumnLayout {
         }
     }
 
-    StyledProgressBar {
+    Item {
+        id: track
         Layout.fillWidth: true
-        valueBarHeight: 6
-        from: 0
-        to: 1
-        value: root.ratio
-        highlightColor: root.barColor
+        implicitHeight: 6
+
+        Rectangle {
+            anchors.fill: parent
+            radius: height / 2
+            color: Appearance.m3colors.m3secondaryContainer
+        }
+
+        Rectangle {
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            height: parent.height
+            width: Math.max(height, track.width * Math.max(0, Math.min(1, root.ratio)))
+            visible: root.ratio > 0
+            radius: height / 2
+            color: root.barColor
+
+            Behavior on width {
+                NumberAnimation {
+                    duration: 200
+                    easing.type: Easing.OutCubic
+                }
+            }
+        }
     }
 }

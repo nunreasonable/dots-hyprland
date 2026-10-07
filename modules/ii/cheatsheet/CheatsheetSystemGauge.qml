@@ -21,6 +21,8 @@ Column {
         implicitHeight: root.ringSize
 
         CircularProgress {
+
+            animationDuration: 200
             anchors.fill: parent
             implicitSize: root.ringSize
             lineWidth: root.lineWidth
