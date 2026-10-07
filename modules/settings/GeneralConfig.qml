@@ -85,8 +85,14 @@ ContentPage {
                 placeholderText: Translation.tr("Accent color (hex)")
                 text: Config.options.appearance.palette.accentColor
                 wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.appearance.palette.accentColor = text;
+                onEditingFinished: {
+                    const value = text.trim();
+                    if (value === Config.options.appearance.palette.accentColor)
+                        return;
+                    if (value === "")
+                        Wallpapers.setAccentColor("clear");
+                    else if (/^#?[0-9a-fA-F]{6}$/.test(value))
+                        Wallpapers.setAccentColor(value);
                 }
             }
         }
