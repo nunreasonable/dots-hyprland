@@ -13,7 +13,7 @@ Rectangle {
     implicitWidth: 92
     implicitHeight: 92
     radius: Appearance.rounding.large
-    color: ColorUtils.transparentize(Appearance.colors.colLayer1, 0.15)
+    color: Appearance.colors.colLayer0Base
     border.width: 1
     border.color: Appearance.colors.colLayer0Border
 
@@ -26,13 +26,13 @@ Rectangle {
             implicitWidth: 26
             implicitHeight: 26
             radius: Appearance.rounding.full
-            color: Appearance.colors.colLayer2
+            color: Appearance.colors.colLayer1Base
 
             MaterialSymbol {
                 anchors.centerIn: parent
                 text: root.icon
                 iconSize: Appearance.font.pixelSize.normal
-                color: Appearance.colors.colOnLayer2
+                color: Appearance.colors.colOnLayer1
             }
         }
 
@@ -41,7 +41,7 @@ Rectangle {
             text: Math.round(root.percentValue * 100) + "%"
             font.pixelSize: Appearance.font.pixelSize.huge
             font.weight: Font.Medium
-            color: Appearance.colors.colOnLayer1
+            color: Appearance.colors.colOnLayer0
         }
 
         StyledText {
