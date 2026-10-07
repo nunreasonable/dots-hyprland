@@ -335,7 +335,7 @@ ContentPage {
 
     NoticeBox {
         Layout.fillWidth: true
-        text: Translation.tr('Not all options are available in this app. You should also check the config file by hitting the "Config file" button on the topleft corner or opening %1 manually.').arg(Directories.shellConfigPath)
+        text: Translation.tr('Almost every option is in this app. The few left in the config file are lists that ii edits for you (pinned apps, quick toggles) and extra AI models: open it with the "Config file" button on the top-left corner or at %1.').arg(Directories.shellConfigPath)
 
         Item {
             Layout.fillWidth: true
