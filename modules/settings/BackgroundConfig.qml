@@ -8,6 +8,36 @@ ContentPage {
     forceWidth: true
 
     ContentSection {
+        icon: "tune"
+        title: Translation.tr("General")
+
+        ConfigSwitch {
+            buttonIcon: "fullscreen"
+            text: Translation.tr("Hide when fullscreen")
+            checked: Config.options.background.hideWhenFullscreen
+            onCheckedChanged: {
+                Config.options.background.hideWhenFullscreen = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Hides the wallpaper and its widgets while a window on that monitor is fullscreen.")
+            }
+        }
+
+        ConfigSlider {
+            text: Translation.tr("Lock screen blur radius")
+            buttonIcon: "blur_on"
+            usePercentTooltip: false
+            value: Config.options.lock.blur.radius
+            from: 0
+            to: 250
+            stopIndicatorValues: [100]
+            onValueChanged: {
+                Config.options.lock.blur.radius = value;
+            }
+        }
+    }
+
+    ContentSection {
         visible: Platform.isWindows
         icon: "desktop_windows"
         title: Translation.tr("Windows desktop")
@@ -51,6 +81,18 @@ ContentPage {
             }
         }
 
+        ConfigSwitch {
+            buttonIcon: "screen_rotation"
+            text: Translation.tr("Automatic vertical")
+            checked: Config.options.background.parallax.autoVertical
+            onCheckedChanged: {
+                Config.options.background.parallax.autoVertical = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Uses vertical parallax automatically when the wallpaper is taller than it is wide. Ignored when Vertical above is on.")
+            }
+        }
+
         ConfigRow {
             uniform: true
             ConfigSwitch {
@@ -79,6 +121,17 @@ ContentPage {
             stepSize: 1
             onValueChanged: {
                 Config.options.background.parallax.workspaceZoom = value / 100;
+            }
+        }
+        ConfigSpinBox {
+            icon: "open_with"
+            text: Translation.tr("Widgets parallax strength (%)")
+            value: Config.options.background.parallax.widgetsFactor * 100
+            from: 0
+            to: 300
+            stepSize: 5
+            onValueChanged: {
+                Config.options.background.parallax.widgetsFactor = value / 100;
             }
         }
     }
