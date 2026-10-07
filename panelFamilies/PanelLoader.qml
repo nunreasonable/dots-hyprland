@@ -6,11 +6,23 @@ import qs.modules.common
 LazyLoader {
     id: root
     property bool extraCondition: true
+    property string panelSource
     property bool deferred: Platform.isWindows
     property int deferPriority: 0
     property bool released: !deferred
-    active: Config.ready && extraCondition && released
+    readonly property bool wanted: Config.ready && extraCondition && released
+    active: wanted && (panelSource === "" || source !== "")
 
-    Component.onCompleted: if (!released) PanelLoaderQueue.add(root)
+    function loadSource() {
+        if (wanted && panelSource !== "" && source === "")
+            source = panelSource;
+    }
+
+    onWantedChanged: loadSource()
+    Component.onCompleted: {
+        loadSource();
+        if (!released)
+            PanelLoaderQueue.add(root);
+    }
     Component.onDestruction: if (!released) PanelLoaderQueue.remove(root)
 }
