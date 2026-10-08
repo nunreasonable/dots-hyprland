@@ -7,6 +7,7 @@ StyledText {
     property real fill: 0
     property real truncatedFill: fill.toFixed(1) // Reduce memory consumption spikes from constant font remapping
     renderType: Text.NativeRendering
+    shouldUseNumberFont: false
     font {
         hintingPreference: Font.PreferNoHinting
         family: Appearance?.font.family.iconMaterial ?? "Material Symbols Rounded"
@@ -21,6 +22,7 @@ StyledText {
     }
 
     Behavior on fill { // Leaky leaky, no good
+        enabled: !Platform.isWindows
         NumberAnimation {
             duration: Appearance?.animation.elementMoveFast.duration ?? 200
             easing.type: Appearance?.animation.elementMoveFast.type ?? Easing.BezierSpline
