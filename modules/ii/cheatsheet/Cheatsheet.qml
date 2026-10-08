@@ -37,24 +37,34 @@ Scope { // Scope
         },
     ]
     readonly property int systemTabIndex: Platform.isWindows ? 1 : -1
+    property bool open: false
+
+    Timer {
+        interval: 20000
+        running: Platform.isWindows
+        onTriggered: cheatsheetLoader.kept = true
+    }
 
     Loader {
         id: cheatsheetLoader
-        active: false
+        property bool kept: false
+        active: root.open || (Platform.isWindows && cheatsheetLoader.kept)
+        asynchronous: Platform.isWindows && !root.open
+        onLoaded: cheatsheetLoader.kept = true
 
         sourceComponent: PanelWindow { // Window
             id: cheatsheetRoot
-            visible: cheatsheetLoader.active
+            visible: root.open
 
             anchors {
-                top: true
-                bottom: true
-                left: true
-                right: true
+                top: !Platform.isWindows
+                bottom: !Platform.isWindows
+                left: !Platform.isWindows
+                right: !Platform.isWindows
             }
 
             function hide() {
-                cheatsheetLoader.active = false;
+                root.open = false;
             }
             exclusiveZone: 0
             implicitWidth: cheatsheetBackground.width + Appearance.sizes.elevationMargin * 2
@@ -69,10 +79,17 @@ Scope { // Scope
             }
 
             Component.onCompleted: {
-                GlobalFocusGrab.addDismissable(cheatsheetRoot);
+                if (cheatsheetRoot.visible)
+                    GlobalFocusGrab.addDismissable(cheatsheetRoot);
             }
             Component.onDestruction: {
                 GlobalFocusGrab.removeDismissable(cheatsheetRoot);
+            }
+            onVisibleChanged: {
+                if (cheatsheetRoot.visible)
+                    GlobalFocusGrab.addDismissable(cheatsheetRoot);
+                else
+                    GlobalFocusGrab.removeDismissable(cheatsheetRoot);
             }
             Connections {
                 target: GlobalFocusGrab
@@ -179,7 +196,7 @@ Scope { // Scope
                         implicitHeight: Math.min(Math.max.apply(null, contentChildren.map(child => child.implicitHeight || 0)), (cheatsheetRoot.screen?.height ?? 100000) - (Appearance.sizes.elevationMargin + cheatsheetBackground.padding) * 2 - 140)
 
                         clip: true
-                        layer.enabled: true
+                        layer.enabled: !Platform.isWindows
                         layer.effect: OpacityMask {
                             maskSource: Rectangle {
                                 width: swipeView.width
@@ -188,12 +205,18 @@ Scope { // Scope
                             }
                         }
 
-                        CheatsheetKeybinds {}
+                        CheatsheetKeybinds {
+                            loadAsync: Platform.isWindows && !root.open
+                        }
                         Repeater {
                             model: Platform.isWindows ? 1 : 0
-                            delegate: CheatsheetSystem {}
+                            delegate: CheatsheetSystem {
+                                loadAsync: Platform.isWindows && !root.open
+                            }
                         }
-                        CheatsheetPeriodicTable {}
+                        CheatsheetPeriodicTable {
+                            loadAsync: Platform.isWindows && !root.open
+                        }
                     }
                 }
             }
@@ -204,22 +227,22 @@ Scope { // Scope
         when: Platform.isWindows && WindowsNative.ready && WindowsNative.systemMonitor !== null
         target: WindowsNative.systemMonitor
         property: "active"
-        value: cheatsheetLoader.active && Persistent.states.cheatsheet.tabIndex === root.systemTabIndex
+        value: root.open && Persistent.states.cheatsheet.tabIndex === root.systemTabIndex
     }
 
     IpcHandler {
         target: "cheatsheet"
 
         function toggle(): void {
-            cheatsheetLoader.active = !cheatsheetLoader.active;
+            root.open = !root.open;
         }
 
         function close(): void {
-            cheatsheetLoader.active = false;
+            root.open = false;
         }
 
         function open(): void {
-            cheatsheetLoader.active = true;
+            root.open = true;
         }
     }
 
@@ -228,7 +251,7 @@ Scope { // Scope
         description: "Toggles cheatsheet on press"
 
         onPressed: {
-            cheatsheetLoader.active = !cheatsheetLoader.active;
+            root.open = !root.open;
         }
     }
 
@@ -237,7 +260,7 @@ Scope { // Scope
         description: "Opens cheatsheet on press"
 
         onPressed: {
-            cheatsheetLoader.active = true;
+            root.open = true;
         }
     }
 
@@ -246,7 +269,7 @@ Scope { // Scope
         description: "Closes cheatsheet on press"
 
         onPressed: {
-            cheatsheetLoader.active = false;
+            root.open = false;
         }
     }
 }
