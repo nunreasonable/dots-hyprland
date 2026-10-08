@@ -208,7 +208,7 @@ Item {
                                         live: true
                                         paintCursor: true
                                         constraintSize: Qt.size(root.maxWindowPreviewWidth, root.maxWindowPreviewHeight)
-                                        layer.enabled: true
+                                        layer.enabled: !Platform.isWindows
                                         layer.effect: OpacityMask {
                                             maskSource: Rectangle {
                                                 width: screencopyView.width
