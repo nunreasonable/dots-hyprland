@@ -2,6 +2,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.settings
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -281,7 +282,10 @@ Item {
                 buttonIcon: "settings"
                 onClicked: {
                     GlobalStates.sidebarRightOpen = false;
-                    Quickshell.execDetached(["qs", "-p", root.settingsQmlPath]);
+                    if (Platform.isWindows)
+                        SettingsApp.open();
+                    else
+                        Quickshell.execDetached(["qs", "-p", root.settingsQmlPath]);
                 }
                 StyledToolTip {
                     text: Translation.tr("Settings")

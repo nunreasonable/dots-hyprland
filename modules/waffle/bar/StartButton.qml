@@ -6,6 +6,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions
+import qs.modules.settings
 import qs.modules.waffle.looks
 
 // TODO: Replace the icon with QMLized svg (with /usr/lib/qt6/bin/svgtoqml) for proper micro-animation
@@ -53,6 +54,10 @@ AppButton {
             {
                 text: Translation.tr("Settings"),
                 action: () => {
+                    if (Platform.isWindows) {
+                        SettingsApp.open();
+                        return;
+                    }
                     Quickshell.execDetached(["qs", "-p", Quickshell.shellPath("settings.qml")]);
                 }
             },

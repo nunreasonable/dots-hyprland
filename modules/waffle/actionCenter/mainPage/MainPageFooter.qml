@@ -5,6 +5,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions
+import qs.modules.settings
 import qs.modules.waffle.looks
 import qs.modules.waffle.actionCenter
 
@@ -43,7 +44,10 @@ FooterRectangle {
 
         onClicked: {
             GlobalStates.sidebarLeftOpen = false;
-            Quickshell.execDetached(["qs", "-p", Quickshell.shellPath("settings.qml")]);
+            if (Platform.isWindows)
+                SettingsApp.open();
+            else
+                Quickshell.execDetached(["qs", "-p", Quickshell.shellPath("settings.qml")]);
         }
 
         contentItem: FluentIcon {
