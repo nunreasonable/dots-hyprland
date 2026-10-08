@@ -29,8 +29,10 @@ RippleButton {
         GlobalStates.sidebarLeftOpen = !GlobalStates.sidebarLeftOpen;
     }
 
+    property bool sidebarContentMayExist: !Platform.isWindows || GlobalStates.sidebarLeftOpen
+
     Connections {
-        target: Ai
+        target: root.sidebarContentMayExist ? Ai : null
         function onResponseFinished() {
             if (GlobalStates.sidebarLeftOpen) return;
             root.showPing = true;
@@ -38,7 +40,7 @@ RippleButton {
     }
 
     Connections {
-        target: Booru
+        target: root.sidebarContentMayExist ? Booru : null
         function onResponseFinished() {
             if (GlobalStates.sidebarLeftOpen) return;
             root.showPing = true;
@@ -49,6 +51,8 @@ RippleButton {
         target: GlobalStates
         function onSidebarLeftOpenChanged() {
             root.showPing = false;
+            if (GlobalStates.sidebarLeftOpen)
+                root.sidebarContentMayExist = true;
         }
     }
 
