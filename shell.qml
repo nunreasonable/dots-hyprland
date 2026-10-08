@@ -27,11 +27,20 @@ ShellRoot {
         MaterialThemeLoader.reapplyTheme()
         Hyprsunset.load()
         FirstRunExperience.load()
-        ConflictKiller.load()
-        Cliphist.refresh()
+        if (!Platform.isWindows) {
+            ConflictKiller.load()
+            Cliphist.refresh()
+            Updates.load()
+        }
         Wallpapers.load()
-        WindowsTerminalTheme.load()
-        Updates.load()
+        if (Platform.isWindows)
+            WindowsTerminalTheme.load()
+    }
+
+    Timer {
+        running: FirstRunExperience.welcomePending
+        interval: PanelLoaderQueue.drained ? 0 : 10000
+        onTriggered: FirstRunExperience.launchWelcome()
     }
 
 

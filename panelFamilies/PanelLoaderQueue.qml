@@ -9,11 +9,13 @@ Singleton {
     property int gateHops: 2
     property int hops: 0
     property var pending: []
+    property bool drained: false
 
     function add(loader) {
         root.pending.push(loader);
         root.pending.sort((a, b) => b.deferPriority - a.deferPriority);
         root.hops = 0;
+        root.drained = false;
         if (!releaseTimer.running)
             releaseTimer.start();
     }
@@ -40,6 +42,8 @@ Singleton {
             }
             if (root.pending.length > 0)
                 releaseTimer.restart();
+            else
+                root.drained = true;
         }
     }
 }
