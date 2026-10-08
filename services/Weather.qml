@@ -4,7 +4,6 @@ pragma ComponentBehavior: Bound
 import Quickshell
 import Quickshell.Io
 import QtQuick
-import QtPositioning
 
 import qs.modules.common
 
@@ -134,12 +133,6 @@ Singleton {
         return cityName.trim().split(/\s+/).join('+');
     }
 
-    Component.onCompleted: {
-        if (!root.gpsActive) return;
-        console.info("[WeatherService] Starting the GPS service.");
-        positionSource.start();
-    }
-
     Process {
         id: fetcher
         command: ["bash", "-c", ""]
@@ -158,35 +151,9 @@ Singleton {
         }
     }
 
-    PositionSource {
-        id: positionSource
-        updateInterval: root.fetchInterval
-
-        onPositionChanged: {
-            // update the location if the given location is valid
-            // if it fails getting the location, use the last valid location
-            if (position.latitudeValid && position.longitudeValid) {
-                root.location.lat = position.coordinate.latitude;
-                root.location.long = position.coordinate.longitude;
-                root.location.valid = true;
-                // console.info(`📍 Location: ${position.coordinate.latitude}, ${position.coordinate.longitude}`);
-                root.getData();
-                // if can't get initialized with valid location deactivate the GPS
-            } else {
-                root.gpsActive = root.location.valid ? true : false;
-                console.error("[WeatherService] Failed to get the GPS location.");
-            }
-        }
-
-        onValidityChanged: {
-            if (!positionSource.valid) {
-                positionSource.stop();
-                root.location.valid = false;
-                root.gpsActive = false;
-                Notifications.sendDesktop(Translation.tr("Weather Service"), Translation.tr("Cannot find a GPS service. Using the fallback method instead."), ["-a", "Shell"]);
-                console.error("[WeatherService] Could not aquire a valid backend plugin.");
-            }
-        }
+    LazyLoader {
+        source: Config.options.bar.weather.enableGPS && !Platform.isWindows ? "WeatherPosition.qml" : ""
+        active: source !== ""
     }
 
     Timer {
