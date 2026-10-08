@@ -13,7 +13,7 @@ Scope { // Scope
     property bool detach: false
     property bool pin: false
     property Component contentComponent: SidebarLeftContent {}
-    property Item sidebarContent
+    property var sidebarContent: null
     property var contentIncubator: null
 
     function toggleDetach() {
@@ -75,7 +75,7 @@ Scope { // Scope
 
     function preloadSidebarContent() {
         if (root.sidebarContent || root.contentIncubator) return;
-        const incubator = contentComponent.incubateObject(root, {
+        const incubator = contentComponent.incubateObject(null, {
             "scopeRoot": root,
         }, Qt.Asynchronous);
         if (!incubator) return;
