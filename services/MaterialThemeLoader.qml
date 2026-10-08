@@ -14,6 +14,7 @@ import Quickshell.Hyprland
 Singleton {
     id: root
     property string filePath: Directories.generatedMaterialThemePath
+    property bool ready: false
 
     function reapplyTheme() {
         themeFileView.reload()
@@ -29,6 +30,8 @@ Singleton {
             if (root.failedReads++ < 20) {
                 themeFileView.reload()
                 delayedFileRead.restart()
+            } else {
+                root.ready = true
             }
             return
         }
@@ -47,6 +50,7 @@ Singleton {
         if (Platform.isWindows && json.primary && WindowsNative.wallpaper) {
             WindowsNative.wallpaper.setAccentColor(json.primary)
         }
+        root.ready = true
     }
 
     function resetFilePathNextTime() {
@@ -87,7 +91,10 @@ Singleton {
             const fileContent = themeFileView.text()
             root.applyColors(fileContent)
         }
-        onLoadFailed: root.resetFilePathNextTime();
+        onLoadFailed: {
+            root.ready = true;
+            root.resetFilePathNextTime();
+        }
     }
 
     function toggleLightDark() {

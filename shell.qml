@@ -104,10 +104,18 @@ ShellRoot {
         Config.options.panelFamily = families[nextIndex]
     }
 
+    property bool lookReady: MaterialThemeLoader.ready && Translation.ready
+    Timer {
+        id: lookTimeout
+        interval: 1500
+        running: Config.ready && !root.lookReady
+        onTriggered: root.lookReady = true
+    }
+
     component PanelFamilyLoader: LazyLoader {
         required property string identifier
         property bool extraCondition: true
-        active: Config.ready && Config.options.panelFamily === identifier && extraCondition
+        active: Config.ready && root.lookReady && Config.options.panelFamily === identifier && extraCondition
     }
     
     PanelFamilyLoader {

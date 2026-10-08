@@ -16,6 +16,9 @@ Singleton {
         const combined = new Set([...root.availableLanguages, ...root.availableGeneratedLanguages]);
         return Array.from(combined).sort();
     }
+    property string loadedLanguage: ""
+    property string loadedGeneratedLanguage: ""
+    readonly property bool ready: loadedLanguage === languageCode && loadedGeneratedLanguage === languageCode
     property bool isScanning: scanLanguagesProcess.running
     property bool isLoading: false
     property string translationKeepSuffix: "/*keep*/"
@@ -47,6 +50,12 @@ Singleton {
         }
     }
 
+    Component.onCompleted: {
+        if (translationFileView.path !== "") return;
+        translationFileView.reread();
+        generatedTranslationFileView.reread();
+    }
+
     onLanguageCodeChanged: {
         print("[Translation] Language changed to", root.languageCode);
         translationFileView.languageCode = root.languageCode;
@@ -62,6 +71,7 @@ Singleton {
         onContentLoaded: (data) => {
             root.translations = data;
             root.isLoading = false;
+            root.loadedLanguage = translationFileView.languageCode;
         }
     }
 
@@ -70,8 +80,10 @@ Singleton {
         translationsDir: root.generatedTranslationsDir
         languageCode: root.languageCode
         onContentLoaded: (data) => {
-            root.generatedTranslations = data;
+            if (Object.keys(data).length > 0 || Object.keys(root.generatedTranslations).length > 0)
+                root.generatedTranslations = data;
             root.isLoading = false;
+            root.loadedGeneratedLanguage = generatedTranslationFileView.languageCode;
         }
     }
 
