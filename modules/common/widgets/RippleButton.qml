@@ -47,7 +47,7 @@ Button {
         const stateEndY = stateY + buttonBackground.height
         rippleAnim.radius = Math.sqrt(Math.max(dist(0, stateY), dist(0, stateEndY), dist(width, stateY), dist(width, stateEndY)))
 
-        rippleFadeAnim.complete();
+        rippleFadeAnim.stop();
         rippleAnim.restart();
     }
 
@@ -131,6 +131,15 @@ Button {
         }
     }
 
+    QtObject {
+        id: ripple
+        property real x
+        property real y
+        property real opacity: 0
+        property real implicitWidth: 0
+        property real implicitHeight: 0
+    }
+
     background: Rectangle {
         id: buttonBackground
         radius: root.buttonEffectiveRadius
@@ -141,41 +150,41 @@ Button {
             animation: Appearance?.animation.elementMoveFast.colorAnimation.createObject(this)
         }
 
-        layer.enabled: true
-        layer.effect: OpacityMask {
-            maskSource: Rectangle {
-                width: buttonBackground.width
-                height: buttonBackground.height
-                radius: root.buttonEffectiveRadius
-            }
-        }
-
-        Item {
-            id: ripple
-            width: ripple.implicitWidth
-            height: ripple.implicitHeight
-            opacity: 0
-            visible: width > 0 && height > 0
-
-            property real implicitWidth: 0
-            property real implicitHeight: 0
-
-            Behavior on opacity {
-                animation: Appearance?.animation.elementMoveFast.colorAnimation.createObject(this)
-            }
-
-            RadialGradient {
-                anchors.fill: parent
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: root.rippleColor }
-                    GradientStop { position: 0.3; color: root.rippleColor }
-                    GradientStop { position: 0.5; color: Qt.rgba(root.rippleColor.r, root.rippleColor.g, root.rippleColor.b, 0) }
+        Loader {
+            anchors.fill: parent
+            active: ripple.opacity > 0
+            sourceComponent: Item {
+                layer.enabled: true
+                layer.effect: OpacityMask {
+                    maskSource: Rectangle {
+                        width: buttonBackground.width
+                        height: buttonBackground.height
+                        radius: root.buttonEffectiveRadius
+                    }
                 }
-            }
 
-            transform: Translate {
-                x: -ripple.width / 2
-                y: -ripple.height / 2
+                Item {
+                    x: ripple.x
+                    y: ripple.y
+                    width: ripple.implicitWidth
+                    height: ripple.implicitHeight
+                    opacity: ripple.opacity
+                    visible: width > 0 && height > 0
+
+                    RadialGradient {
+                        anchors.fill: parent
+                        gradient: Gradient {
+                            GradientStop { position: 0.0; color: root.rippleColor }
+                            GradientStop { position: 0.3; color: root.rippleColor }
+                            GradientStop { position: 0.5; color: Qt.rgba(root.rippleColor.r, root.rippleColor.g, root.rippleColor.b, 0) }
+                        }
+                    }
+
+                    transform: Translate {
+                        x: -ripple.implicitWidth / 2
+                        y: -ripple.implicitHeight / 2
+                    }
+                }
             }
         }
     }
