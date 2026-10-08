@@ -9,6 +9,7 @@ import qs.modules.ii.overview
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import QtQml.Models
 import Qt.labs.folderlistmodel
 import Quickshell
 import Quickshell.Io
@@ -59,10 +60,10 @@ Scope {
             return LauncherSearch.results;
         case "apps":
             if (q === "")
-                return [...AppSearch.list].sort((a, b) => a.name.localeCompare(b.name));
+                return root.sortedApps();
             return AppSearch.fuzzyQuery(q);
         case "emoji":
-            return (q === "" ? Emojis.list : Emojis.fuzzyQuery(q)).slice(0, 400);
+            return [...new Set((q === "" ? Emojis.list : Emojis.fuzzyQuery(q)).slice(0, 400))];
         case "system":
             return root.systemActions.filter(a => q === "" || `${a.name} ${a.description}`.toLowerCase().includes(q.toLowerCase()));
         case "files":
@@ -77,6 +78,62 @@ Scope {
         if (root.mode === "system" && root.gridLayout) return 4;
         if (root.mode === "emoji") return 10;
         return 1;
+    }
+
+    readonly property var keyedItems: {
+        const keys = [];
+        const byKey = {};
+        const seen = {};
+        const list = root.items;
+        for (let i = 0; i < list.length; i++) {
+            const item = list[i];
+            const base = root.itemKey(item);
+            const count = (seen[base] ?? 0) + 1;
+            seen[base] = count;
+            const key = count > 1 ? `${base}\u001f${count}` : base;
+            keys.push(key);
+            byKey[key] = item;
+        }
+        return {
+            keys: keys,
+            byKey: byKey
+        };
+    }
+
+    function itemKey(item) {
+        switch (root.mode) {
+        case "":
+        case "clipboard":
+            return item.rawValue ? `r${item.rawValue}` : item.id ? `i${item.id}` : `t${item.type}`;
+        case "apps":
+            return `${item.id}`;
+        case "system":
+            return `${item.name}`;
+        case "files":
+            return `${item.path}`;
+        }
+        return `${item}`;
+    }
+
+    property int appListRevision: 0
+    readonly property var appSortCache: ({
+            revision: -1,
+            sorted: []
+        })
+
+    function sortedApps() {
+        if (root.appSortCache.revision !== root.appListRevision) {
+            root.appSortCache.sorted = [...AppSearch.list].sort((a, b) => a.name.localeCompare(b.name));
+            root.appSortCache.revision = root.appListRevision;
+        }
+        return root.appSortCache.sorted;
+    }
+
+    Connections {
+        target: AppSearch
+        function onListChanged() {
+            root.appListRevision++;
+        }
     }
 
     onItemsChanged: root.currentIndex = 0
@@ -262,7 +319,8 @@ Scope {
     QtObject {
         id: fileBrowser
         readonly property var entries: {
-            if (folderModel.status !== FolderListModel.Ready || folderModel.folder.toString() === "")
+            const folderModel = folderModelInstantiator.object;
+            if (!folderModel || folderModel.status !== FolderListModel.Ready || folderModel.folder.toString() === "")
                 return [];
             const out = [];
             for (let i = 0; i < folderModel.count; i++) {
@@ -280,13 +338,16 @@ Scope {
         }
     }
 
-    FolderListModel {
-        id: folderModel
-        folder: root.fileUrl(root.filesFolder)
-        showDirsFirst: true
-        showHidden: false
-        showDotAndDotDot: false
-        sortField: FolderListModel.Name
+    Instantiator {
+        id: folderModelInstantiator
+        active: GlobalStates.spotlightOpen && root.mode === "files"
+        delegate: FolderListModel {
+            folder: root.fileUrl(root.filesFolder)
+            showDirsFirst: true
+            showHidden: false
+            showDotAndDotDot: false
+            sortField: FolderListModel.Name
+        }
     }
 
     QtObject {
@@ -664,14 +725,19 @@ q="$1"; h="$2"
                             Layout.fillHeight: true
                             clip: true
                             spacing: 2
-                            model: visible ? root.items : []
+                            reuseItems: true
+                            model: ScriptModel {
+                                comparisonMode: ObjectComparison.Identity
+                                values: resultsList.visible ? root.keyedItems.keys : []
+                            }
                             currentIndex: root.currentIndex
                             onCurrentIndexChanged: positionViewAtIndex(currentIndex, ListView.Contain)
                             delegate: SearchItem {
-                                required property var modelData
+                                id: resultItem
+                                required property string modelData
                                 required property int index
                                 width: ListView.view.width
-                                entry: modelData
+                                entry: root.keyedItems.byKey[resultItem.modelData] ?? null
                                 query: root.mode === "clipboard" ? "" : root.query
                                 focus: index === root.currentIndex
                                 horizontalMargin: 0
@@ -687,14 +753,19 @@ q="$1"; h="$2"
                             clip: true
                             cellWidth: Math.floor(width / root.columns)
                             cellHeight: root.mode === "emoji" ? cellWidth : root.mode === "system" ? 96 : 104
-                            model: visible ? root.items : []
+                            reuseItems: true
+                            model: ScriptModel {
+                                comparisonMode: ObjectComparison.Identity
+                                values: tileGrid.visible ? root.keyedItems.keys : []
+                            }
                             currentIndex: root.currentIndex
                             onCurrentIndexChanged: positionViewAtIndex(currentIndex, GridView.Contain)
                             boundsBehavior: Flickable.StopAtBounds
                             delegate: Item {
                                 id: tileCell
-                                required property var modelData
+                                required property string modelData
                                 required property int index
+                                readonly property var entry: root.keyedItems.byKey[tileCell.modelData]
                                 width: GridView.view.cellWidth
                                 height: GridView.view.cellHeight
 
@@ -702,10 +773,10 @@ q="$1"; h="$2"
                                     anchors.fill: parent
                                     anchors.margins: 3
                                     selected: tileCell.index === root.currentIndex
-                                    caption: root.mode === "emoji" ? "" : (tileCell.modelData.name ?? "")
-                                    bigText: root.mode === "emoji" ? (tileCell.modelData.match(/^\s*(\S+)/)?.[1] ?? "") : ""
-                                    symbol: root.mode === "system" ? tileCell.modelData.icon : ""
-                                    iconSource: root.mode === "apps" ? Quickshell.iconPath(tileCell.modelData.icon, "image-missing") : ""
+                                    caption: root.mode === "emoji" ? "" : (tileCell.entry?.name ?? "")
+                                    bigText: root.mode === "emoji" ? (`${tileCell.entry ?? ""}`.match(/^\s*(\S+)/)?.[1] ?? "") : ""
+                                    symbol: root.mode === "system" ? (tileCell.entry?.icon ?? "") : ""
+                                    iconSource: root.mode === "apps" && tileCell.entry ? Quickshell.iconPath(tileCell.entry.icon, "image-missing") : ""
                                     onClicked: root.activate(tileCell.index)
                                     onHoveredChanged: if (hovered && root.mode === "emoji") root.currentIndex = tileCell.index
                                 }
@@ -719,37 +790,45 @@ q="$1"; h="$2"
                             Layout.fillHeight: true
                             clip: true
                             spacing: 2
-                            model: visible ? root.items : []
+                            reuseItems: true
+                            model: ScriptModel {
+                                comparisonMode: ObjectComparison.Identity
+                                values: rowList.visible ? root.keyedItems.keys : []
+                            }
                             currentIndex: root.currentIndex
                             onCurrentIndexChanged: positionViewAtIndex(currentIndex, ListView.Contain)
                             boundsBehavior: Flickable.StopAtBounds
                             delegate: SpotlightRow {
                                 id: row
-                                required property var modelData
+                                required property string modelData
                                 required property int index
+                                readonly property var entry: root.keyedItems.byKey[row.modelData]
                                 width: ListView.view.width
                                 selected: row.index === root.currentIndex
                                 title: {
-                                    if (root.mode === "web") return Translation.tr("Search the web for \"%1\"").arg(row.modelData);
-                                    return row.modelData.name ?? "";
+                                    if (row.entry === undefined) return "";
+                                    if (root.mode === "web") return Translation.tr("Search the web for \"%1\"").arg(row.entry);
+                                    return row.entry.name ?? "";
                                 }
                                 subtitle: {
-                                    if (root.mode === "apps") return row.modelData.comment || row.modelData.genericName || "";
-                                    if (root.mode === "system") return row.modelData.description;
-                                    if (root.mode === "files") return root.fileSubtitle(row.modelData);
+                                    if (row.entry === undefined) return "";
+                                    if (root.mode === "apps") return row.entry.comment || row.entry.genericName || "";
+                                    if (root.mode === "system") return row.entry.description ?? "";
+                                    if (root.mode === "files") return row.entry.path !== undefined ? root.fileSubtitle(row.entry) : "";
                                     return Config.options.search.engineBaseUrl.replace(/^https?:\/\//, "").split("/")[0];
                                 }
                                 symbol: {
-                                    if (root.mode === "system") return row.modelData.icon;
-                                    if (root.mode === "files") return root.fileSymbol(row.modelData);
+                                    if (row.entry === undefined) return "";
+                                    if (root.mode === "system") return row.entry.icon ?? "";
+                                    if (root.mode === "files") return row.entry.name !== undefined ? root.fileSymbol(row.entry) : "";
                                     return "travel_explore";
                                 }
-                                iconSource: root.mode === "apps" ? Quickshell.iconPath(row.modelData.icon, "image-missing") : ""
-                                imageSource: root.mode === "files" && root.isImage(row.modelData) ? root.fileUrl(row.modelData.path) : ""
-                                trailingSymbol: root.mode === "files" && row.modelData.isDir ? "open_in_new" : ""
+                                iconSource: root.mode === "apps" && row.entry !== undefined ? Quickshell.iconPath(row.entry.icon, "image-missing") : ""
+                                imageSource: root.mode === "files" && row.entry?.name !== undefined && root.isImage(row.entry) ? root.fileUrl(row.entry.path) : ""
+                                trailingSymbol: root.mode === "files" && row.entry?.isDir ? "open_in_new" : ""
                                 onTrailingClicked: {
                                     root.close();
-                                    Qt.openUrlExternally(root.fileUrl(row.modelData.path));
+                                    Qt.openUrlExternally(root.fileUrl(row.entry.path));
                                 }
                                 onClicked: root.activate(row.index)
                             }
