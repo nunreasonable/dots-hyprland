@@ -21,10 +21,13 @@ Item {
     readonly property int workspacesShown: Config.options.overview.rows * Config.options.overview.columns
     readonly property int workspaceGroup: Math.floor((effectiveActiveWorkspaceId - 1) / workspacesShown)
     property bool monitorIsFocused: (Hyprland.focusedMonitor?.name == monitor.name)
+    property bool live: true
+    property bool animate: true
     property var windows: HyprlandData.windowList
     property var windowByAddress: HyprlandData.windowByAddress
     property var windowAddresses: HyprlandData.addresses
-    property var monitorData: HyprlandData.monitors.find(m => m.id === root.monitor?.id)
+    property var monitors: HyprlandData.monitors
+    property var monitorData: root.monitors.find(m => m.id === root.monitor?.id)
     property real scale: Config.options.overview.scale
     property color activeBorderColor: Appearance.colors.colSecondary
 
@@ -52,6 +55,46 @@ Item {
 
     property Component windowComponent: OverviewWindow {}
     property list<OverviewWindow> windowWidgets: []
+
+    function windowsInWorkspaceGroup() {
+        return ToplevelManager.toplevels.values.filter(toplevel => {
+            const address = `0x${toplevel.HyprlandToplevel?.address}`;
+            var win = root.windowByAddress[address];
+            const inWorkspaceGroup = (root.workspaceGroup * root.workspacesShown < win?.workspace?.id && win?.workspace?.id <= (root.workspaceGroup + 1) * root.workspacesShown);
+            return inWorkspaceGroup;
+        });
+    }
+
+    onLiveChanged: {
+        if (root.live) {
+            animateTimer.restart();
+        } else {
+            animateTimer.stop();
+            root.animate = false;
+        }
+    }
+
+    Timer {
+        id: animateTimer
+        interval: 0
+        onTriggered: root.animate = true
+    }
+
+    Binding {
+        target: root
+        property: "windowByAddress"
+        when: root.live
+        value: HyprlandData.windowByAddress
+        restoreMode: Binding.RestoreNone
+    }
+
+    Binding {
+        target: root
+        property: "monitors"
+        when: root.live
+        value: HyprlandData.monitors
+        restoreMode: Binding.RestoreNone
+    }
     
     function getWsRow(ws) {
         // 1-indexed workspace, 0-indexed row
@@ -174,26 +217,19 @@ Item {
 
             Repeater { // Window repeater
                 model: ScriptModel {
-                    values: {
-                        // console.log(JSON.stringify(ToplevelManager.toplevels.values.map(t => t), null, 2))
-                        return ToplevelManager.toplevels.values.filter((toplevel) => {
-                            const address = `0x${toplevel.HyprlandToplevel?.address}`
-                            var win = windowByAddress[address]
-                            const inWorkspaceGroup = (root.workspaceGroup * root.workspacesShown < win?.workspace?.id && win?.workspace?.id <= (root.workspaceGroup + 1) * root.workspacesShown)
-                            return inWorkspaceGroup;
-                        })
-                    }
+                    id: windowModel
                 }
                 delegate: OverviewWindow {
                     id: window
                     required property var modelData
                     property int monitorId: windowData?.monitor
-                    property var monitor: HyprlandData.monitors.find(m => m.id == monitorId)
+                    property var monitor: root.monitors.find(m => m.id == monitorId)
                     property var address: `0x${modelData.HyprlandToplevel.address}`
                     toplevel: modelData
                     monitorData: this.monitor
                     scale: root.scale
-                    widgetMonitor: HyprlandData.monitors.find(m => m.id == root.monitor.id)
+                    animate: root.animate
+                    widgetMonitor: root.monitors.find(m => m.id == root.monitor.id)
                     windowData: windowByAddress[address]
 
                     property bool atInitPosition: (initX == x && initY == y)
@@ -301,6 +337,14 @@ Item {
                 }
             }
 
+            Binding {
+                target: windowModel
+                property: "values"
+                when: root.live
+                value: root.windowsInWorkspaceGroup()
+                restoreMode: Binding.RestoreNone
+            }
+
             Rectangle { // Focused workspace indicator
                 id: focusedWorkspaceIndicator
                 property int rowIndex: getWsRow(root.effectiveActiveWorkspaceId)
@@ -322,21 +366,27 @@ Item {
                 border.width: 2
                 border.color: root.activeBorderColor
                 Behavior on x {
+                    enabled: root.animate
                     animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                 }
                 Behavior on y {
+                    enabled: root.animate
                     animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                 }
                 Behavior on topLeftRadius {
+                    enabled: root.animate
                     animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
                 }
                 Behavior on topRightRadius {
+                    enabled: root.animate
                     animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
                 }
                 Behavior on bottomLeftRadius {
+                    enabled: root.animate
                     animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
                 }
                 Behavior on bottomRightRadius {
+                    enabled: root.animate
                     animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
                 }
             }

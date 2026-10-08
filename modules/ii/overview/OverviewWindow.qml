@@ -43,6 +43,7 @@ Item { // Window
     property var targetWindowHeight: windowData?.size[1] * scale * heightRatio
     property bool hovered: false
     property bool pressed: false
+    property bool animate: true
 
     property bool centerIcons: Config.options.overview.centerIcons
     property real iconGapRatio: 0.06
@@ -65,7 +66,7 @@ Item { // Window
     property real bottomLeftRadius
     property real bottomRightRadius
 
-    layer.enabled: true
+    layer.enabled: !Platform.isWindows
     layer.effect: OpacityMask {
         maskSource: Rectangle {
             width: root.width
@@ -78,15 +79,19 @@ Item { // Window
     }
 
     Behavior on x {
+        enabled: root.animate
         animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
     }
     Behavior on y {
+        enabled: root.animate
         animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
     }
     Behavior on width {
+        enabled: root.animate
         animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
     }
     Behavior on height {
+        enabled: root.animate
         animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
     }
 
@@ -132,11 +137,18 @@ Item { // Window
             source: root.iconPath
             width: iconSize
             height: iconSize
+            sourceSize: {
+                const dpr = windowIcon.QsWindow.window?.devicePixelRatio ?? 1;
+                const size = Math.max(16, Math.ceil((windowIcon.iconSize || 0) * dpr / 16) * 16);
+                return Qt.size(size, size);
+            }
 
             Behavior on width {
+                enabled: root.animate
                 animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
             }
             Behavior on height {
+                enabled: root.animate
                 animation: Appearance.animation.elementMoveEnter.numberAnimation.createObject(this)
             }
         }

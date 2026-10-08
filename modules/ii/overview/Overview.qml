@@ -2,7 +2,6 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
-import Qt.labs.synchronizer
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -34,7 +33,7 @@ Scope {
 
     PanelWindow {
         id: panelWindow
-        property string searchingText: ""
+        readonly property string searchingText: searchWidgetLoader.item?.searchingText ?? ""
         readonly property HyprlandMonitor monitor: Hyprland.monitorFor(panelWindow.screen)
         property bool monitorIsFocused: (Hyprland.focusedMonitor?.id == monitor?.id)
         visible: GlobalStates.overviewOpen
@@ -59,12 +58,12 @@ Scope {
             target: GlobalStates
             function onOverviewOpenChanged() {
                 if (!GlobalStates.overviewOpen) {
-                    searchWidget.disableExpandAnimation();
+                    searchWidgetLoader.item?.disableExpandAnimation();
                     overviewScope.dontAutoCancelSearch = false;
                     GlobalFocusGrab.dismiss();
                 } else {
                     if (!overviewScope.dontAutoCancelSearch) {
-                        searchWidget.cancelSearch();
+                        searchWidgetLoader.item?.cancelSearch();
                     }
                     GlobalFocusGrab.addDismissable(panelWindow);
                 }
@@ -81,8 +80,8 @@ Scope {
         implicitHeight: columnLayout.implicitHeight
 
         function setSearchingText(text) {
-            searchWidget.setSearchingText(text);
-            searchWidget.focusFirstItem();
+            searchWidgetLoader.item?.setSearchingText(text);
+            searchWidgetLoader.item?.focusFirstItem();
         }
 
         Column {
@@ -101,22 +100,25 @@ Scope {
                 }
             }
 
-            SearchWidget {
-                id: searchWidget
-                visible: !overviewScope.spotlight
+            Loader {
+                id: searchWidgetLoader
+                active: !overviewScope.spotlight
+                visible: active
+                focus: !overviewScope.spotlight
                 anchors.horizontalCenter: parent.horizontalCenter
-                Synchronizer on searchingText {
-                    property alias source: panelWindow.searchingText
-                }
+                sourceComponent: SearchWidget {}
             }
 
             Loader {
                 id: overviewLoader
+                property bool kept: false
                 anchors.horizontalCenter: parent.horizontalCenter
-                active: GlobalStates.overviewOpen && (Config?.options.overview.enable ?? true)
+                active: (GlobalStates.overviewOpen || (Platform.isWindows && overviewLoader.kept)) && (Config?.options.overview.enable ?? true)
+                onLoaded: overviewLoader.kept = true
                 sourceComponent: OverviewWidget {
                     screen: panelWindow.screen
                     visible: (panelWindow.searchingText == "")
+                    live: !Platform.isWindows || GlobalStates.overviewOpen
                 }
             }
         }
