@@ -19,12 +19,35 @@ Singleton {
         && Config.options.appearance.wallpaperTheming.terminalGenerationProps.forceDarkMode
     readonly property bool _needsDarkMaterial: root._forceDark && !Appearance.m3colors.darkmode
 
+    property bool _armed: false
+    readonly property bool _reading: root._armed && root._enabled
+    readonly property bool _inputsSettled: colorsFileView.settled && schemeBaseFileView.settled
+        && sequencesTemplateFileView.settled && sequencesOutput.settled && fragmentOutput.settled
+        && ohMyPoshOutput.settled && ohMyPoshPlainOutput.settled
+
+    on_ArmedChanged: root.regenerate()
+    on_InputsSettledChanged: root.regenerate()
+
+    Timer {
+        interval: 10000
+        running: Platform.isWindows && Config.ready && !root._armed
+        onTriggered: root._armed = true
+    }
+
+    component SettledFileView: FileView {
+        property bool settled: false
+        onPathChanged: settled = false
+        onLoaded: settled = true
+        onLoadFailed: settled = true
+    }
+
     function regenerate() {
-        if (!Platform.isWindows || !Config.ready) return;
+        if (!root._armed) return;
         if (!root._enabled) {
             root._removeOutputs();
             return;
         }
+        if (!root._inputsSettled) return;
         if (root._needsDarkMaterial) {
             root._ensureDarkMaterial();
         } else {
@@ -57,9 +80,9 @@ Singleton {
         function onEnableChanged() { root.regenerate(); }
     }
 
-    FileView {
+    SettledFileView {
         id: colorsFileView
-        path: Platform.isWindows ? Qt.resolvedUrl(Directories.generatedMaterialThemePath) : ""
+        path: root._reading ? Qt.resolvedUrl(Directories.generatedMaterialThemePath) : ""
         watchChanges: true
         printErrors: false
         onFileChanged: { reload(); colorsReloadDelay.restart(); }
@@ -159,7 +182,7 @@ Singleton {
 
     FileView {
         id: darkMatugenConfig
-        path: Platform.isWindows ? Directories.windowsTerminalMaterialDarkConfigPath : ""
+        path: root._reading ? Directories.windowsTerminalMaterialDarkConfigPath : ""
         preload: false
         onSaved: {
             root._writtenDarkConfig = root._writingDarkConfig;
@@ -187,7 +210,7 @@ Singleton {
 
     FileView {
         id: darkMaterialFileView
-        path: Platform.isWindows ? Qt.resolvedUrl(Directories.windowsTerminalMaterialDarkPath) : ""
+        path: root._reading ? Qt.resolvedUrl(Directories.windowsTerminalMaterialDarkPath) : ""
         watchChanges: true
         printErrors: false
         onFileChanged: { reload(); darkMaterialReloadDelay.restart(); }
@@ -204,17 +227,13 @@ Singleton {
         root._applyFromJsonText(darkMaterialFileView.text());
     }
 
-    FileView {
+    SettledFileView {
         id: schemeBaseFileView
-        path: Platform.isWindows ? Qt.resolvedUrl(Directories.terminalSchemeBasePath) : ""
-        preload: Platform.isWindows
-        onLoadedChanged: root.regenerate()
+        path: root._reading ? Qt.resolvedUrl(Directories.terminalSchemeBasePath) : ""
     }
-    FileView {
+    SettledFileView {
         id: sequencesTemplateFileView
-        path: Platform.isWindows ? Qt.resolvedUrl(Directories.terminalSequencesTemplatePath) : ""
-        preload: Platform.isWindows
-        onLoadedChanged: root.regenerate()
+        path: root._reading ? Qt.resolvedUrl(Directories.terminalSequencesTemplatePath) : ""
     }
 
     function _writeOutputs(material) {
@@ -275,9 +294,9 @@ Singleton {
         sequencesOutput.setText(text);
     }
 
-    FileView {
+    SettledFileView {
         id: sequencesOutput
-        path: Platform.isWindows ? Directories.windowsTerminalSequencesPath : ""
+        path: root._reading ? Directories.windowsTerminalSequencesPath : ""
         onSaveFailed: error => console.warn("[WindowsTerminalTheme] Could not write sequences.txt:", error);
     }
 
@@ -315,9 +334,9 @@ Singleton {
         fragmentOutput.setText(JSON.stringify(fragment, null, 2));
     }
 
-    FileView {
+    SettledFileView {
         id: fragmentOutput
-        path: Platform.isWindows ? Directories.windowsTerminalFragmentPath : ""
+        path: root._reading ? Directories.windowsTerminalFragmentPath : ""
         onSaved: root._nudgeWindowsTerminal()
         onSaveFailed: error => console.warn("[WindowsTerminalTheme] Could not write the Windows Terminal fragment:", error);
     }
@@ -387,9 +406,9 @@ Singleton {
         ohMyPoshOutput.setText(JSON.stringify(theme, null, 2));
     }
 
-    FileView {
+    SettledFileView {
         id: ohMyPoshOutput
-        path: Platform.isWindows ? Directories.windowsTerminalOhMyPoshPath : ""
+        path: root._reading ? Directories.windowsTerminalOhMyPoshPath : ""
         onSaveFailed: error => console.warn("[WindowsTerminalTheme] Could not write the Oh My Posh theme:", error);
     }
 
@@ -454,9 +473,9 @@ Singleton {
         ohMyPoshPlainOutput.setText(JSON.stringify(theme, null, 2));
     }
 
-    FileView {
+    SettledFileView {
         id: ohMyPoshPlainOutput
-        path: Platform.isWindows ? Directories.windowsTerminalOhMyPoshPlainPath : ""
+        path: root._reading ? Directories.windowsTerminalOhMyPoshPlainPath : ""
         onSaveFailed: error => console.warn("[WindowsTerminalTheme] Could not write the plain Oh My Posh theme:", error);
     }
 
