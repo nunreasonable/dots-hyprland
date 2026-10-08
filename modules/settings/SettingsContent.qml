@@ -203,7 +203,7 @@ Item {
                         currentIndex: root.currentPage
                         expanded: navRail.expanded
                         Repeater {
-                            model: root.pages
+                            model: root.ready ? root.pages : []
                             NavigationRailButton {
                                 required property var index
                                 required property var modelData
