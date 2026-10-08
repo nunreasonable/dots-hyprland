@@ -26,6 +26,11 @@ Image {
 
     sourceSize: {
         const dpr = (QsWindow.window as QsWindow)?.devicePixelRatio ?? 1;
-        return Qt.size(width * dpr, height * dpr);
+        if (!Platform.isWindows)
+            return Qt.size(width * dpr, height * dpr);
+        const fromProvider = String(source).startsWith("image://");
+        if (width <= 0 && height <= 0)
+            return fromProvider ? Qt.size(0, 0) : Qt.size(128, 128);
+        return fromProvider ? Qt.size(width, height) : Qt.size(width * dpr, height * dpr);
     }
 }
