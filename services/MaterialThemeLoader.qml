@@ -47,10 +47,34 @@ Singleton {
 
         Appearance.m3colors.darkmode = (Appearance.m3colors.m3background.hslLightness < 0.5)
 
-        if (Platform.isWindows && json.primary && WindowsNative.wallpaper) {
-            WindowsNative.wallpaper.setAccentColor(json.primary)
-        }
+        if (Platform.isWindows && json.primary)
+            root.syncAccentColor(json.primary)
         root.ready = true
+    }
+
+    property string pendingAccentColor: ""
+
+    function syncAccentColor(primary) {
+        if (accentStartupDelay.waiting) {
+            root.pendingAccentColor = primary
+            return
+        }
+        if (WindowsNative.wallpaper)
+            WindowsNative.wallpaper.setAccentColor(primary)
+    }
+
+    Timer {
+        id: accentStartupDelay
+        property bool waiting: Platform.isWindows
+        running: Platform.isWindows
+        interval: 10000
+        onTriggered: {
+            waiting = false
+            const primary = root.pendingAccentColor
+            root.pendingAccentColor = ""
+            if (primary && WindowsNative.wallpaper)
+                WindowsNative.wallpaper.setAccentColor(primary)
+        }
     }
 
     function resetFilePathNextTime() {
