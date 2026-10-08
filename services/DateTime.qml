@@ -43,8 +43,8 @@ Singleton {
     }
 
     Timer {
-        interval: Config.options?.resources?.updateInterval ?? 3000
-        running: Platform.isWindows
+        interval: 60000
+        running: Platform.isWindows && !!WindowsNative.stats
         repeat: true
         triggeredOnStart: true
         onTriggered: {

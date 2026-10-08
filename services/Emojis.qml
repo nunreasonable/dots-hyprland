@@ -15,10 +15,11 @@ Singleton {
     property string emojiScriptPath: Platform.isWindows ? Quickshell.shellPath("defaults/windows/fuzzel-emoji.sh") : `${Directories.config}/hypr/hyprland/scripts/fuzzel-emoji.sh`
 	property string lineBeforeData: "### DATA ###"
     property list<var> list
-    readonly property var preparedEntries: list.map(a => ({
+    property bool searched: false
+    readonly property var preparedEntries: root.searched ? list.map(a => ({
         name: Fuzzy.prepare(`${a}`),
         entry: a
-    }))
+    })) : []
     function fuzzyQuery(search: string): var {
         if (root.sloppySearch) {
             const results = entries.slice(0, 100).map(str => ({
@@ -30,7 +31,8 @@ Singleton {
                 .map(item => item.entry)
         }
 
-        return Fuzzy.go(search, preparedEntries, {
+        root.searched = true;
+        return Fuzzy.go(search, root.preparedEntries, {
             all: true,
             key: "name"
         }).map(r => {

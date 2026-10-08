@@ -16,10 +16,25 @@ Singleton {
     property bool sloppySearch: Config.options?.search.sloppy ?? false
     property real scoreThreshold: 0.2
     property list<string> entries: Platform.isWindows ? (WindowsNative.clipboard ? WindowsNative.clipboard.entries : []) : []
-    readonly property var preparedEntries: entries.map(a => ({
-        name: Fuzzy.prepare(`${a.replace(/^\s*\S+\s+/, "")}`),
-        entry: a
-    }))
+    property bool searched: false
+    readonly property var preparedNames: new Map()
+    readonly property var preparedEntries: {
+        if (!root.searched)
+            return [];
+        const previous = root.preparedNames;
+        const current = new Map();
+        const prepared = root.entries.map(a => {
+            const name = previous.get(a) ?? Fuzzy.prepare(`${a.replace(/^\s*\S+\s+/, "")}`);
+            current.set(a, name);
+            return {
+                name: name,
+                entry: a
+            };
+        });
+        previous.clear();
+        current.forEach((name, entry) => previous.set(entry, name));
+        return prepared;
+    }
 
     function entryId(entry) {
         const match = entry.match(/^(\d+)\t/);
@@ -39,7 +54,8 @@ Singleton {
                 .map(item => item.entry)
         }
 
-        return Fuzzy.go(search, preparedEntries, {
+        root.searched = true;
+        return Fuzzy.go(search, root.preparedEntries, {
             all: true,
             key: "name"
         }).map(r => {

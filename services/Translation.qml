@@ -79,6 +79,7 @@ Singleton {
         id: generatedTranslationFileView
         translationsDir: root.generatedTranslationsDir
         languageCode: root.languageCode
+        printErrors: !Platform.isWindows
         onContentLoaded: (data) => {
             if (Object.keys(data).length > 0 || Object.keys(root.generatedTranslations).length > 0)
                 root.generatedTranslations = data;
