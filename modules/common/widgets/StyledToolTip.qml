@@ -22,13 +22,22 @@ ToolTip {
 
     delay: 0
     visible: internalVisibleCondition
-    
-    contentItem: StyledToolTipContent {
-        id: contentItem
+
+    contentItem: null
+    property Item styledContentItem: null
+    property Component styledContentComponent: StyledToolTipContent {
         font: root.font
         text: root.text
-        shown: root.internalVisibleCondition
+        shown: false
         horizontalPadding: root.horizontalPadding
         verticalPadding: root.verticalPadding
+        Component.onCompleted: shown = Qt.binding(() => root.internalVisibleCondition)
+    }
+
+    onAboutToShow: {
+        if (root.styledContentItem)
+            return;
+        root.styledContentItem = root.styledContentComponent.createObject(root.parent);
+        root.contentItem = root.styledContentItem;
     }
 }

@@ -24,20 +24,26 @@ Item {
     property var anchorEdges: Edges.Top
     property var anchorGravity: anchorEdges
 
-    property Item contentItem: StyledToolTipContent {
-        id: contentItem
+    property Item contentItem: null
+    property Component defaultContentComponent: StyledToolTipContent {
         anchors.centerIn: parent
         text: root.text
-        shown: false
-        Component.onCompleted: shown = true
+        shown: true
         horizontalPadding: root.horizontalPadding
         verticalPadding: root.verticalPadding
+    }
+
+    onInternalVisibleConditionChanged: {
+        if (root.internalVisibleCondition && !root.contentItem)
+            root.contentItem = root.defaultContentComponent.createObject(root, {
+                "parent": null
+            });
     }
 
     Loader {
         id: tooltipLoader
         anchors.fill: parent
-        active: root.internalVisibleCondition
+        active: root.internalVisibleCondition && root.contentItem !== null
         sourceComponent: PopupWindow {
             visible: true
             anchor {
