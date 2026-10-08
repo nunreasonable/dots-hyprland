@@ -45,6 +45,12 @@ Singleton {
     readonly property list<DesktopEntry> list: root._list
     property list<DesktopEntry> _list: []
 
+    property var _cache: ({
+            names: null,
+            icons: null,
+            guesses: new Map()
+        })
+
     function _refreshList() {
         const seen = new Set();
         root._list = Array.from(DesktopEntries.applications.values).filter(app => {
@@ -52,6 +58,11 @@ Singleton {
             seen.add(app.id);
             return true;
         });
+        root._cache = {
+            names: null,
+            icons: null,
+            guesses: new Map()
+        };
     }
 
     Connections {
@@ -61,15 +72,25 @@ Singleton {
 
     Component.onCompleted: root._refreshList()
     
-    readonly property var preppedNames: list.map(a => ({
-        name: Fuzzy.prepare(`${a.name} `),
-        entry: a
-    }))
+    function _preppedNames() {
+        const cache = root._cache;
+        if (!cache.names)
+            cache.names = root._list.map(a => ({
+                name: Fuzzy.prepare(`${a.name} `),
+                entry: a
+            }));
+        return cache.names;
+    }
 
-    readonly property var preppedIcons: list.map(a => ({
-        name: Fuzzy.prepare(`${a.icon} `),
-        entry: a
-    }))
+    function _preppedIcons() {
+        const cache = root._cache;
+        if (!cache.icons)
+            cache.icons = root._list.map(a => ({
+                name: Fuzzy.prepare(`${a.icon} `),
+                entry: a
+            }));
+        return cache.icons;
+    }
 
     function fuzzyQuery(search: string): var { // Idk why list<DesktopEntry> doesn't work
         if (root.sloppySearch) {
@@ -82,7 +103,7 @@ Singleton {
                 .map(item => item.entry)
         }
 
-        return Fuzzy.go(search, preppedNames, {
+        return Fuzzy.go(search, root._preppedNames(), {
             all: true,
             key: "name"
         }).map(r => {
@@ -109,6 +130,17 @@ Singleton {
     }
 
     function guessIcon(str) {
+        const guesses = root._cache.guesses;
+        const key = str ?? "";
+        const cached = guesses.get(key);
+        if (cached !== undefined)
+            return cached;
+        const icon = root._guessIcon(str);
+        guesses.set(key, icon);
+        return icon;
+    }
+
+    function _guessIcon(str) {
         if (!str || str.length == 0) return "image-missing";
 
         // Quickshell's desktop entry lookup
@@ -150,7 +182,7 @@ Singleton {
         if (iconExists(undescoreToKebabGuess)) return undescoreToKebabGuess;
 
         // Search in desktop entries
-        const iconSearchResults = Fuzzy.go(str, preppedIcons, {
+        const iconSearchResults = Fuzzy.go(str, root._preppedIcons(), {
             all: true,
             key: "name"
         }).map(r => {
