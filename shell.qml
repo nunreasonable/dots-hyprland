@@ -2,6 +2,7 @@
 //@ pragma Env QS_NO_RELOAD_POPUP=1
 //@ pragma Env QT_QUICK_CONTROLS_STYLE=Basic
 //@ pragma Env QT_QUICK_FLICKABLE_WHEEL_DECELERATION=10000
+//@ pragma Env IIW_PROCESS=shell
 
 // Remove two slashes below and adjust the value to change the UI scale
 ////@ pragma Env QT_SCALE_FACTOR=1
@@ -9,6 +10,7 @@
 import "modules/common"
 import "services"
 import "panelFamilies"
+import "modules/settings"
 
 import QtQuick
 import QtQuick.Window
@@ -33,8 +35,10 @@ ShellRoot {
             Updates.load()
         }
         Wallpapers.load()
-        if (Platform.isWindows)
+        if (Platform.isWindows) {
             WindowsTerminalTheme.load()
+            SettingsApp.load()
+        }
     }
 
     Timer {

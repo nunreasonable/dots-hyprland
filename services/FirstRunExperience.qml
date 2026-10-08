@@ -38,7 +38,7 @@ Singleton {
         if (!root.welcomePending)
             return;
         root.welcomePending = false;
-        Quickshell.execDetached(["qs", "-p", root.welcomeQmlPath]);
+        Quickshell.execDetached([Platform.isWindows ? "qsw" : "qs", "-p", root.welcomeQmlPath]);
     }
 
     function handleFirstRun() {
