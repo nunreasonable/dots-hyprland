@@ -75,6 +75,7 @@ Singleton {
 
     property bool silent: false
     property int unread: 0
+    readonly property int storedLimit: Platform.isWindows ? 200 : 0
     property var filePath: Directories.notificationsPath
     property list<Notif> list: []
     property var popupList: list.filter((notif) => notif.popup);
@@ -91,6 +92,19 @@ Singleton {
 
     function stringifyList(list) {
         return JSON.stringify(list.map((notif) => notifToJSON(notif)), null, 2);
+    }
+
+    function trimmedList(list) {
+        if (root.storedLimit <= 0 || list.length <= root.storedLimit)
+            return list;
+        let excess = list.length - root.storedLimit;
+        return list.filter((notif) => {
+            if (excess <= 0 || notif.popup)
+                return true;
+            excess--;
+            notif.destroy();
+            return false;
+        });
     }
     
     onListChanged: {
@@ -167,7 +181,7 @@ Singleton {
                 "notification": notification,
                 "time": Date.now(),
             });
-			root.list = [...root.list, newNotifObject];
+			root.list = root.trimmedList([...root.list, newNotifObject]);
 
             // Popup
             if (!root.popupInhibited) {
@@ -286,7 +300,9 @@ Singleton {
         path: Qt.resolvedUrl(filePath)
         onLoaded: {
             const fileContents = notifFileView.text()
-            root.list = JSON.parse(fileContents).map((notif) => {
+            const stored = JSON.parse(fileContents)
+            const kept = root.storedLimit > 0 ? stored.slice(-root.storedLimit) : stored
+            root.list = kept.map((notif) => {
                 return notifComponent.createObject(root, {
                     "notificationId": notif.notificationId,
                     "actions": [], // Notification actions are meaningless if they're not tracked by the server or the sender is dead
@@ -301,7 +317,7 @@ Singleton {
             });
             // Find largest notificationId
             let maxId = 0
-            root.list.forEach((notif) => {
+            stored.forEach((notif) => {
                 maxId = Math.max(maxId, notif.notificationId)
             })
 
