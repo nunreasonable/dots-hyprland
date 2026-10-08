@@ -82,12 +82,12 @@ ContentPage {
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
                     source: Config.options.background.wallpaperPath
-                    cache: false
+                    sourceSize: Qt.size(Math.ceil(340 * Screen.devicePixelRatio), Math.ceil(200 * Screen.devicePixelRatio))
                     layer.enabled: true
                     layer.effect: OpacityMask {
                         maskSource: Rectangle {
-                            width: 360
-                            height: 200
+                            width: wallpaperPreview.width
+                            height: wallpaperPreview.height
                             radius: Appearance.rounding.normal
                         }
                     }

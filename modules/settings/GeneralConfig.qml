@@ -211,102 +211,106 @@ ContentPage {
         }
     }
 
-    ContentSection {
-        icon: "apps"
-        title: Translation.tr("External apps")
-        visible: !Platform.isWindows
+    Loader {
+        Layout.fillWidth: true
+        active: !Platform.isWindows
+        visible: active
+        sourceComponent: ContentSection {
+            icon: "apps"
+            title: Translation.tr("External apps")
 
-        ConfigRow {
-            uniform: true
-            MaterialTextArea {
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("Bluetooth settings")
-                text: Config.options.apps.bluetooth
-                wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.apps.bluetooth = text;
+            ConfigRow {
+                uniform: true
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Bluetooth settings")
+                    text: Config.options.apps.bluetooth
+                    wrapMode: TextEdit.Wrap
+                    onTextChanged: {
+                        Config.options.apps.bluetooth = text;
+                    }
+                }
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Wi-Fi settings")
+                    text: Config.options.apps.network
+                    wrapMode: TextEdit.Wrap
+                    onTextChanged: {
+                        Config.options.apps.network = text;
+                    }
+                }
+            }
+            ConfigRow {
+                uniform: true
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Ethernet settings")
+                    text: Config.options.apps.networkEthernet
+                    wrapMode: TextEdit.Wrap
+                    onTextChanged: {
+                        Config.options.apps.networkEthernet = text;
+                    }
+                }
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Manage user accounts")
+                    text: Config.options.apps.manageUser
+                    wrapMode: TextEdit.Wrap
+                    onTextChanged: {
+                        Config.options.apps.manageUser = text;
+                    }
+                }
+            }
+            ConfigRow {
+                uniform: true
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Task manager")
+                    text: Config.options.apps.taskManager
+                    wrapMode: TextEdit.Wrap
+                    onTextChanged: {
+                        Config.options.apps.taskManager = text;
+                    }
+                }
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Terminal (for shell actions)")
+                    text: Config.options.apps.terminal
+                    wrapMode: TextEdit.Wrap
+                    onTextChanged: {
+                        Config.options.apps.terminal = text;
+                    }
+                }
+            }
+            ConfigRow {
+                uniform: true
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("System update")
+                    text: Config.options.apps.update
+                    wrapMode: TextEdit.Wrap
+                    onTextChanged: {
+                        Config.options.apps.update = text;
+                    }
+                }
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Volume mixer")
+                    text: Config.options.apps.volumeMixer
+                    wrapMode: TextEdit.Wrap
+                    onTextChanged: {
+                        Config.options.apps.volumeMixer = text;
+                    }
                 }
             }
             MaterialTextArea {
                 Layout.fillWidth: true
-                placeholderText: Translation.tr("Wi-Fi settings")
-                text: Config.options.apps.network
+                placeholderText: Translation.tr("Change password")
+                text: Config.options.apps.changePassword
                 wrapMode: TextEdit.Wrap
                 onTextChanged: {
-                    Config.options.apps.network = text;
+                    Config.options.apps.changePassword = text;
                 }
-            }
-        }
-        ConfigRow {
-            uniform: true
-            MaterialTextArea {
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("Ethernet settings")
-                text: Config.options.apps.networkEthernet
-                wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.apps.networkEthernet = text;
-                }
-            }
-            MaterialTextArea {
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("Manage user accounts")
-                text: Config.options.apps.manageUser
-                wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.apps.manageUser = text;
-                }
-            }
-        }
-        ConfigRow {
-            uniform: true
-            MaterialTextArea {
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("Task manager")
-                text: Config.options.apps.taskManager
-                wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.apps.taskManager = text;
-                }
-            }
-            MaterialTextArea {
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("Terminal (for shell actions)")
-                text: Config.options.apps.terminal
-                wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.apps.terminal = text;
-                }
-            }
-        }
-        ConfigRow {
-            uniform: true
-            MaterialTextArea {
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("System update")
-                text: Config.options.apps.update
-                wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.apps.update = text;
-                }
-            }
-            MaterialTextArea {
-                Layout.fillWidth: true
-                placeholderText: Translation.tr("Volume mixer")
-                text: Config.options.apps.volumeMixer
-                wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.apps.volumeMixer = text;
-                }
-            }
-        }
-        MaterialTextArea {
-            Layout.fillWidth: true
-            placeholderText: Translation.tr("Change password")
-            text: Config.options.apps.changePassword
-            wrapMode: TextEdit.Wrap
-            onTextChanged: {
-                Config.options.apps.changePassword = text;
             }
         }
     }

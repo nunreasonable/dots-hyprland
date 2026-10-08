@@ -501,15 +501,19 @@ ContentPage {
             }
         }
 
-        ConfigSwitch {
-            visible: !Platform.isWindows
-            text: Translation.tr("Anti-flashbang (experimental)")
-            checked: Config.options.light.antiFlashbang.enable
-            onCheckedChanged: {
-                Config.options.light.antiFlashbang.enable = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Balances brightness based on screen content to avoid sudden brightness spikes.")
+        Loader {
+            Layout.fillWidth: true
+            active: !Platform.isWindows
+            visible: active
+            sourceComponent: ConfigSwitch {
+                text: Translation.tr("Anti-flashbang (experimental)")
+                checked: Config.options.light.antiFlashbang.enable
+                onCheckedChanged: {
+                    Config.options.light.antiFlashbang.enable = checked;
+                }
+                StyledToolTip {
+                    text: Translation.tr("Balances brightness based on screen content to avoid sudden brightness spikes.")
+                }
             }
         }
     }
@@ -545,74 +549,86 @@ ContentPage {
         }
     }
 
-    ContentSection {
-        visible: !Platform.isWindows
-        icon: "volume_up"
-        title: Translation.tr("Sounds")
+    Loader {
+        Layout.fillWidth: true
+        active: !Platform.isWindows
+        visible: active
+        sourceComponent: ContentSection {
+            icon: "volume_up"
+            title: Translation.tr("Sounds")
 
-        MaterialTextArea {
-            Layout.fillWidth: true
-            placeholderText: Translation.tr("Sound theme name (in /usr/share/sounds)")
-            text: Config.options.sounds.theme
-            wrapMode: TextEdit.Wrap
-            onTextChanged: {
-                Config.options.sounds.theme = text;
+            MaterialTextArea {
+                Layout.fillWidth: true
+                placeholderText: Translation.tr("Sound theme name (in /usr/share/sounds)")
+                text: Config.options.sounds.theme
+                wrapMode: TextEdit.Wrap
+                onTextChanged: {
+                    Config.options.sounds.theme = text;
+                }
             }
         }
     }
 
-    ContentSection {
-        visible: !Platform.isWindows
-        icon: "deployed_code_update"
-        title: Translation.tr("Update thresholds")
+    Loader {
+        Layout.fillWidth: true
+        active: !Platform.isWindows
+        visible: active
+        sourceComponent: ContentSection {
+            icon: "deployed_code_update"
+            title: Translation.tr("Update thresholds")
 
-        ConfigSpinBox {
-            icon: "update"
-            text: Translation.tr("Advise update threshold (packages)")
-            value: Config.options.updates.adviseUpdateThreshold
-            from: 0
-            to: 1000
-            stepSize: 5
-            onValueChanged: {
-                Config.options.updates.adviseUpdateThreshold = value;
+            ConfigSpinBox {
+                icon: "update"
+                text: Translation.tr("Advise update threshold (packages)")
+                value: Config.options.updates.adviseUpdateThreshold
+                from: 0
+                to: 1000
+                stepSize: 5
+                onValueChanged: {
+                    Config.options.updates.adviseUpdateThreshold = value;
+                }
             }
-        }
-        ConfigSpinBox {
-            icon: "update"
-            text: Translation.tr("Strongly advise threshold (packages)")
-            value: Config.options.updates.stronglyAdviseUpdateThreshold
-            from: 0
-            to: 2000
-            stepSize: 10
-            onValueChanged: {
-                Config.options.updates.stronglyAdviseUpdateThreshold = value;
+            ConfigSpinBox {
+                icon: "update"
+                text: Translation.tr("Strongly advise threshold (packages)")
+                value: Config.options.updates.stronglyAdviseUpdateThreshold
+                from: 0
+                to: 2000
+                stepSize: 10
+                onValueChanged: {
+                    Config.options.updates.stronglyAdviseUpdateThreshold = value;
+                }
             }
         }
     }
 
-    ContentSection {
-        visible: !Platform.isWindows
-        icon: "block"
-        title: Translation.tr("Conflict killer")
+    Loader {
+        Layout.fillWidth: true
+        active: !Platform.isWindows
+        visible: active
+        sourceComponent: ContentSection {
+            icon: "block"
+            title: Translation.tr("Conflict killer")
 
-        ConfigSwitch {
-            text: Translation.tr("Automatically kill conflicting tray daemons")
-            checked: Config.options.conflictKiller.autoKillTrays
-            onCheckedChanged: {
-                Config.options.conflictKiller.autoKillTrays = checked;
+            ConfigSwitch {
+                text: Translation.tr("Automatically kill conflicting tray daemons")
+                checked: Config.options.conflictKiller.autoKillTrays
+                onCheckedChanged: {
+                    Config.options.conflictKiller.autoKillTrays = checked;
+                }
+                StyledToolTip {
+                    text: Translation.tr("Silently kills kded6 when it conflicts with the shell's own system tray, instead of asking every time.")
+                }
             }
-            StyledToolTip {
-                text: Translation.tr("Silently kills kded6 when it conflicts with the shell's own system tray, instead of asking every time.")
-            }
-        }
-        ConfigSwitch {
-            text: Translation.tr("Automatically kill conflicting notification daemons")
-            checked: Config.options.conflictKiller.autoKillNotificationDaemons
-            onCheckedChanged: {
-                Config.options.conflictKiller.autoKillNotificationDaemons = checked;
-            }
-            StyledToolTip {
-                text: Translation.tr("Silently kills mako/dunst when they conflict with the shell's own notifications, instead of asking every time.")
+            ConfigSwitch {
+                text: Translation.tr("Automatically kill conflicting notification daemons")
+                checked: Config.options.conflictKiller.autoKillNotificationDaemons
+                onCheckedChanged: {
+                    Config.options.conflictKiller.autoKillNotificationDaemons = checked;
+                }
+                StyledToolTip {
+                    text: Translation.tr("Silently kills mako/dunst when they conflict with the shell's own notifications, instead of asking every time.")
+                }
             }
         }
     }
