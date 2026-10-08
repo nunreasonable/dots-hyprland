@@ -64,19 +64,39 @@ Button {
 
     Behavior on implicitWidth {
         enabled: root.enableImplicitWidthAnimation
-        animation: Appearance.animation.clickBounce.numberAnimation.createObject(this)
+        NumberAnimation {
+            alwaysRunToEnd: true
+            duration: Appearance.animation.clickBounce.duration
+            easing.type: Appearance.animation.clickBounce.type
+            easing.bezierCurve: Appearance.animation.clickBounce.bezierCurve
+        }
     }
 
     Behavior on implicitHeight {
         enabled: root.enableImplicitHeightAnimation
-        animation: Appearance.animation.clickBounce.numberAnimation.createObject(this)
+        NumberAnimation {
+            alwaysRunToEnd: true
+            duration: Appearance.animation.clickBounce.duration
+            easing.type: Appearance.animation.clickBounce.type
+            easing.bezierCurve: Appearance.animation.clickBounce.bezierCurve
+        }
     }
 
     Behavior on leftRadius {
-        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+        NumberAnimation {
+            alwaysRunToEnd: true
+            duration: Appearance.animation.elementMoveFast.duration
+            easing.type: Appearance.animation.elementMoveFast.type
+            easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+        }
     }
     Behavior on rightRadius {
-        animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+        NumberAnimation {
+            alwaysRunToEnd: true
+            duration: Appearance.animation.elementMoveFast.duration
+            easing.type: Appearance.animation.elementMoveFast.type
+            easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+        }
     }
 
     property alias mouseArea: buttonMouseArea
@@ -128,7 +148,11 @@ Button {
 
         color: root.color
         Behavior on color {
-            animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+            ColorAnimation {
+                duration: Appearance.animation.elementMoveFast.duration
+                easing.type: Appearance.animation.elementMoveFast.type
+                easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+            }
         }
 
         border.width: root.tabbedTo ? 2 : 0

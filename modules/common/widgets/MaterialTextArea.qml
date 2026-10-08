@@ -38,7 +38,11 @@ TextArea {
                 root.hovered ? Appearance.m3colors.m3outline : Appearance.m3colors.m3outlineVariant
 
             Behavior on color {
-                animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+                ColorAnimation {
+                    duration: Appearance.animation.elementMoveFast.duration
+                    easing.type: Appearance.animation.elementMoveFast.type
+                    easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
+                }
             }
         }
     }
