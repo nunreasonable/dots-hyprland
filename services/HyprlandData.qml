@@ -75,13 +75,18 @@ Singleton {
         updateWorkspaces();
     }
 
-    function updateFromNative() {
+    function updateWindowsFromNative() {
         const windows = Hyprland.toplevels.values.map(t => t.lastIpcObject).filter(w => w.address);
         let tempWinByAddress = {};
         for (const win of windows) tempWinByAddress[win.address] = win;
         root.windowList = windows;
         root.windowByAddress = tempWinByAddress;
         root.addresses = windows.map(win => win.address);
+    }
+
+    function updateFromNative() {
+        titleRefresh.stop();
+        root.updateWindowsFromNative();
 
         root.monitors = Hyprland.monitors.values.map(m => m.lastIpcObject);
         root.layers = ({});
@@ -100,6 +105,13 @@ Singleton {
         interval: 0
         repeat: false
         onTriggered: root.updateFromNative()
+    }
+
+    Timer {
+        id: titleRefresh
+        interval: 1000
+        repeat: false
+        onTriggered: root.updateWindowsFromNative()
     }
 
     function biggestWindowForWorkspace(workspaceId) {
@@ -121,6 +133,11 @@ Singleton {
         function onRawEvent(event) {
             // console.log("Hyprland raw event:", event.name);
             if (["openlayer", "closelayer", "screencast"].includes(event.name)) return;
+            if (Platform.isWindows && (event.name === "windowtitlev2" || event.name === "windowtitle")) {
+                if (!nativeRefresh.running && !titleRefresh.running)
+                    titleRefresh.start();
+                return;
+            }
             updateAll()
         }
     }
