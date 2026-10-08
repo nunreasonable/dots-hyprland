@@ -18,16 +18,18 @@ Singleton {
 
     property string thumbgenScriptPath: `${FileUtils.trimFileProtocol(Directories.scriptPath)}/thumbnails/thumbgen-venv.sh`
     property string generateThumbnailsMagickScriptPath: `${FileUtils.trimFileProtocol(Directories.scriptPath)}/thumbnails/generate-thumbnails-magick.sh`
-    property alias directory: folderModel.folder
-    readonly property string effectiveDirectory: FileUtils.trimFileProtocol(folderModel.folder.toString())
+    property url _requestedDirectory: Qt.resolvedUrl(root.defaultFolder)
+    readonly property url directory: root._folderModel ? root._folderModel.folder : root._requestedDirectory
+    readonly property string effectiveDirectory: FileUtils.trimFileProtocol(root.directory.toString())
     property url defaultFolder: Qt.resolvedUrl(`${Directories.pictures}/Wallpapers`)
-    property alias folderModel: folderModel // Expose for direct binding when needed
+    property var _folderModel: null
+    property bool _folderModelFresh: false
+    readonly property var folderModel: root._folderModel ?? emptyFolderModel
     property string searchQuery: ""
     readonly property list<string> extensions: [ // TODO: add videos
         "jpg", "jpeg", "png", "webp", "avif", "bmp", "svg"
     ]
     readonly property list<string> videoExtensions: ["mp4", "webm", "mkv", "avi", "mov"]
-    property list<string> wallpapers: [] // List of absolute file paths (without file://)
     readonly property bool thumbnailGenerationRunning: thumbgenProc.running || _windowsThumbnailTotal > 0
     property real thumbnailGenerationProgress: 0
 
@@ -72,12 +74,19 @@ Singleton {
 
     Timer {
         id: systemWallpaperTimer
-        interval: 500
-        onTriggered: root.followSystemWallpaper()
+        property bool startup: true
+        interval: startup ? 4000 : 500
+        onTriggered: {
+            startup = false;
+            root.followSystemWallpaper();
+        }
     }
     Connections {
         target: Platform.isWindows ? WindowsNative.desktopLayer : null
-        function onWallpaperChanged() { systemWallpaperTimer.restart(); }
+        function onWallpaperChanged() {
+            systemWallpaperTimer.startup = false;
+            systemWallpaperTimer.restart();
+        }
     }
 
     function isVideoPath(path) {
@@ -260,10 +269,18 @@ Singleton {
     }
 
     function randomFromCurrentFolder(darkMode = Appearance.m3colors.darkmode) {
-        if (folderModel.count === 0) return;
-        const randomIndex = Math.floor(Math.random() * folderModel.count);
-        const filePath = folderModel.get(randomIndex, "filePath");
-        const isDirectory = folderModel.get(randomIndex, "fileIsDir");
+        const model = root.ensureFolderModel();
+        if (model.status !== FolderListModel.Ready) {
+            if (model.status === FolderListModel.Loading || root._folderModelFresh) {
+                root._pendingRandom = true;
+                root._pendingRandomDarkMode = darkMode;
+            }
+            return;
+        }
+        if (model.count === 0) return;
+        const randomIndex = Math.floor(Math.random() * model.count);
+        const filePath = model.get(randomIndex, "filePath");
+        const isDirectory = model.get(randomIndex, "fileIsDir");
         print("Randomly selected wallpaper:", filePath);
         root.select(filePath, isDirectory, darkMode);
     }
@@ -281,11 +298,11 @@ Singleton {
         }
         stdout: StdioCollector {
             onStreamFinished: {
-                    root.directory = Qt.resolvedUrl(validateDirProc.nicePath)
+                    root._setFolder(Qt.resolvedUrl(validateDirProc.nicePath))
                 const result = text.trim()
                 if (result === "dir") {
                 } else if (result === "file") {
-                    root.directory = Qt.resolvedUrl(FileUtils.parentDirectory(validateDirProc.nicePath))
+                    root._setFolder(Qt.resolvedUrl(FileUtils.parentDirectory(validateDirProc.nicePath)))
                 } else {
                     // Ignore
                 }
@@ -298,42 +315,79 @@ Singleton {
             if (/^\/*$/.test(nicePath)) nicePath = "/";
             const kind = WindowsNative.fsUtils ? WindowsNative.fsUtils.classify(nicePath) : "invalid";
             if (kind === "dir") {
-                root.directory = Qt.resolvedUrl(nicePath);
+                root._setFolder(Qt.resolvedUrl(nicePath));
             } else if (kind === "file") {
-                root.directory = Qt.resolvedUrl(FileUtils.parentDirectory(nicePath));
+                root._setFolder(Qt.resolvedUrl(FileUtils.parentDirectory(nicePath)));
             }
             return;
         }
         validateDirProc.setDirectoryIfValid(path)
     }
     function navigateUp() {
-        folderModel.navigateUp()
+        root.ensureFolderModel().navigateUp()
     }
     function navigateBack() {
-        folderModel.navigateBack()
+        root.ensureFolderModel().navigateBack()
     }
     function navigateForward() {
-        folderModel.navigateForward()
+        root.ensureFolderModel().navigateForward()
+    }
+
+    function _setFolder(url) {
+        if (root._folderModel)
+            root._folderModel.folder = url;
+        else
+            root._requestedDirectory = url;
+    }
+
+    function ensureFolderModel() {
+        if (!root._folderModel) {
+            root._folderModelFresh = true;
+            root._folderModel = folderModelComponent.createObject(root);
+        }
+        return root._folderModel;
+    }
+
+    property string _pendingThumbnailSize: ""
+    property bool _pendingRandom: false
+    property bool _pendingRandomDarkMode: false
+
+    function _onFolderModelStatus(status) {
+        root._folderModelFresh = false;
+        if (status === FolderListModel.Loading) return;
+        const thumbnailSize = root._pendingThumbnailSize;
+        const random = root._pendingRandom;
+        root._pendingThumbnailSize = "";
+        root._pendingRandom = false;
+        if (status !== FolderListModel.Ready) return;
+        if (thumbnailSize !== "") root._generateThumbnailsWindows(thumbnailSize, root.directory);
+        if (random) root.randomFromCurrentFolder(root._pendingRandomDarkMode);
+    }
+
+    Connections {
+        target: GlobalStates
+        function onWallpaperSelectorOpenChanged() {
+            if (GlobalStates.wallpaperSelectorOpen) root.ensureFolderModel();
+        }
+    }
+
+    ListModel {
+        id: emptyFolderModel
     }
 
     // Folder model
-    FolderListModelWithHistory {
-        id: folderModel
-        folder: Qt.resolvedUrl(root.defaultFolder)
-        caseSensitive: false
-        nameFilters: root.extensions.map(ext => `*${searchQuery.split(" ").filter(s => s.length > 0).map(s => `*${s}*`)}*.${ext}`)
-        showDirs: true
-        showDotAndDotDot: false
-        showOnlyReadable: true
-        sortField: FolderListModel.Time
-        sortReversed: false
-        onCountChanged: {
-            const paths = []
-            for (let i = 0; i < folderModel.count; i++) {
-                const path = folderModel.get(i, "filePath") || FileUtils.trimFileProtocol(folderModel.get(i, "fileURL"))
-                if (path && path.length) paths.push(path)
-            }
-            root.wallpapers = paths
+    Component {
+        id: folderModelComponent
+        FolderListModelWithHistory {
+            folder: root._requestedDirectory
+            caseSensitive: false
+            nameFilters: root.extensions.map(ext => `*${root.searchQuery.split(" ").filter(s => s.length > 0).map(s => `*${s}*`)}*.${ext}`)
+            showDirs: true
+            showDotAndDotDot: false
+            showOnlyReadable: true
+            sortField: FolderListModel.Time
+            sortReversed: false
+            onStatusChanged: root._onFolderModelStatus(status)
         }
     }
 
@@ -384,13 +438,19 @@ Singleton {
 
     function _generateThumbnailsWindows(size, directory) {
         if (!WindowsNative.thumbnailer) return;
+        const model = root.ensureFolderModel();
+        if (model.status !== FolderListModel.Ready) {
+            if (model.status === FolderListModel.Loading || root._folderModelFresh)
+                root._pendingThumbnailSize = size;
+            return;
+        }
         const maxSize = Images.thumbnailSizes[size];
         const pending = {};
-        for (let i = 0; i < folderModel.count; i++) {
-            if (folderModel.get(i, "fileIsDir")) continue;
-            const fileName = folderModel.get(i, "fileName");
+        for (let i = 0; i < model.count; i++) {
+            if (model.get(i, "fileIsDir")) continue;
+            const fileName = model.get(i, "fileName");
             if (!Images.isValidImageByName(fileName)) continue;
-            const filePath = folderModel.get(i, "filePath");
+            const filePath = model.get(i, "filePath");
             pending[FileUtils.trimFileProtocol(Images.thumbnailPathFor(filePath, size))] = filePath;
         }
 
