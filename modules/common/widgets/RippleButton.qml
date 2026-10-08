@@ -40,6 +40,9 @@ Button {
 
     function startRipple(x, y) {
         const stateY = buttonBackground.y;
+        if (!ripple.animations)
+            ripple.animations = rippleAnimations.createObject(ripple);
+        const rippleAnim = ripple.animations;
         rippleAnim.x = x;
         rippleAnim.y = y - stateY;
 
@@ -47,8 +50,8 @@ Button {
         const stateEndY = stateY + buttonBackground.height
         rippleAnim.radius = Math.sqrt(Math.max(dist(0, stateY), dist(0, stateEndY), dist(width, stateY), dist(width, stateEndY)))
 
-        rippleFadeAnim.stop();
-        rippleAnim.restart();
+        rippleAnim.fade.stop();
+        rippleAnim.grow.restart();
     }
 
     component RippleAnim: NumberAnimation {
@@ -82,52 +85,12 @@ Button {
             if (root.releaseAction) root.releaseAction();
             root.click() // Because the MouseArea already consumed the event
             if (!root.rippleEnabled) return;
-            rippleFadeAnim.restart();
+            ripple.animations?.fade.restart();
         }
         onCanceled: (event) => {
             root.down = false
             if (!root.rippleEnabled) return;
-            rippleFadeAnim.restart();
-        }
-    }
-
-    RippleAnim {
-        id: rippleFadeAnim
-        duration: rippleDuration * 2
-        target: ripple
-        property: "opacity"
-        to: 0
-    }
-
-    SequentialAnimation {
-        id: rippleAnim
-
-        property real x
-        property real y
-        property real radius
-
-        PropertyAction {
-            target: ripple
-            property: "x"
-            value: rippleAnim.x
-        }
-        PropertyAction {
-            target: ripple
-            property: "y"
-            value: rippleAnim.y
-        }
-        PropertyAction {
-            target: ripple
-            property: "opacity"
-            value: 1
-        }
-        ParallelAnimation {
-            RippleAnim {
-                target: ripple
-                properties: "implicitWidth,implicitHeight"
-                from: 0
-                to: rippleAnim.radius * 2
-            }
+            ripple.animations?.fade.restart();
         }
     }
 
@@ -138,6 +101,52 @@ Button {
         property real opacity: 0
         property real implicitWidth: 0
         property real implicitHeight: 0
+        property QtObject animations: null
+    }
+
+    Component {
+        id: rippleAnimations
+
+        QtObject {
+            id: rippleAnim
+
+            property real x
+            property real y
+            property real radius
+
+            readonly property NumberAnimation fade: RippleAnim {
+                duration: rippleDuration * 2
+                target: ripple
+                property: "opacity"
+                to: 0
+            }
+
+            readonly property SequentialAnimation grow: SequentialAnimation {
+                PropertyAction {
+                    target: ripple
+                    property: "x"
+                    value: rippleAnim.x
+                }
+                PropertyAction {
+                    target: ripple
+                    property: "y"
+                    value: rippleAnim.y
+                }
+                PropertyAction {
+                    target: ripple
+                    property: "opacity"
+                    value: 1
+                }
+                ParallelAnimation {
+                    RippleAnim {
+                        target: ripple
+                        properties: "implicitWidth,implicitHeight"
+                        from: 0
+                        to: rippleAnim.radius * 2
+                    }
+                }
+            }
+        }
     }
 
     background: Rectangle {
