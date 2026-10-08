@@ -35,10 +35,11 @@ Singleton {
     }
 
     component SettledFileView: FileView {
+        id: settledFileView
         property bool settled: false
-        onPathChanged: settled = false
-        onLoaded: settled = true
-        onLoadFailed: settled = true
+        onPathChanged: settledFileView.settled = false
+        onLoaded: settledFileView.settled = true
+        onLoadFailed: settledFileView.settled = true
     }
 
     function regenerate() {
