@@ -22,20 +22,22 @@ Singleton {
         }
     }
 
-    // https://specifications.freedesktop.org/menu/latest/category-registry.html
-    property list<string> mainRegisteredCategories: ["AudioVideo", "Development", "Education", "Game", "Graphics", "Network", "Office", "Science", "Settings", "System", "Utility"]
-    property list<string> appCategories: DesktopEntries.applications.values.reduce((acc, entry) => {
-        for (const category of entry.categories) {
-            if (!acc.includes(category) && mainRegisteredCategories.includes(category)) {
-                acc.push(category);
-            }
-        }
-        return acc;
-    }, []).sort()
-
     // Load user action scripts from ~/.config/illogical-impulse/actions/
     // Uses FolderListModel to auto-reload when scripts are added/removed
+    property var userActionsFolder: null
+    onQueryChanged: {
+        if (root.query !== "" && !root.userActionsFolder)
+            root.loadUserActionsFolder();
+    }
+    function loadUserActionsFolder() {
+        if (Platform.isWindows && WindowsNative.fsUtils?.classify(Directories.userActions) !== "dir")
+            return;
+        root.userActionsFolder = userActionsFolderComponent.createObject(root);
+    }
     property var userActionScripts: {
+        const userActionsFolder = root.userActionsFolder;
+        if (!userActionsFolder)
+            return [];
         const actions = [];
         for (let i = 0; i < userActionsFolder.count; i++) {
             const fileName = userActionsFolder.get(i, "fileName");
@@ -53,12 +55,14 @@ Singleton {
         return actions;
     }
 
-    FolderListModel {
-        id: userActionsFolder
-        folder: Qt.resolvedUrl(Directories.userActions)
-        showDirs: false
-        showHidden: false
-        sortField: FolderListModel.Name
+    Component {
+        id: userActionsFolderComponent
+        FolderListModel {
+            folder: Qt.resolvedUrl(Directories.userActions)
+            showDirs: false
+            showHidden: false
+            sortField: FolderListModel.Name
+        }
     }
 
     property var searchActions: [
