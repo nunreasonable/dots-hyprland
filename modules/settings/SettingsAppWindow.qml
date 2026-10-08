@@ -6,6 +6,7 @@ import qs.modules.common
 FloatingWindow {
     id: root
     property bool forceShown: false
+    property bool shownOnce: false
 
     signal closeRequested
 
@@ -34,8 +35,10 @@ FloatingWindow {
 
     onClosed: root.closeRequested()
     onVisibleChanged: {
-        if (root.visible)
-            root.activate();
+        if (!root.visible || root.shownOnce)
+            return;
+        root.shownOnce = true;
+        root.activate();
     }
 
     Timer {
