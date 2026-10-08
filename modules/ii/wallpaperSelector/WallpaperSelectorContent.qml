@@ -15,6 +15,7 @@ MouseArea {
     property int columns: 4
     property real previewCellAspectRatio: 4 / 3
     property bool useDarkMode: Appearance.m3colors.darkmode
+    property bool shown: true
 
     function updateThumbnails() {
         const totalImageMargin = (Appearance.sizes.wallpaperSelectorItemMargins + Appearance.sizes.wallpaperSelectorItemPadding) * 2;
@@ -25,8 +26,14 @@ MouseArea {
     Connections {
         target: Wallpapers
         function onDirectoryChanged() {
-            root.updateThumbnails();
+            if (root.shown)
+                root.updateThumbnails();
         }
+    }
+
+    onShownChanged: {
+        if (root.shown)
+            root.updateThumbnails();
     }
 
     function handleFilePasting(event) {
@@ -334,7 +341,7 @@ MouseArea {
                             }
                         }
 
-                        layer.enabled: true
+                        layer.enabled: !Platform.isWindows
                         layer.effect: OpacityMask {
                             maskSource: Rectangle {
                                 width: gridDisplayRegion.width

@@ -94,7 +94,9 @@ Scope {
 
     Loader {
         id: osdLoader
-        active: GlobalStates.osdVolumeOpen
+        property bool kept: false
+        active: GlobalStates.osdVolumeOpen || (Platform.isWindows && osdLoader.kept)
+        onLoaded: osdLoader.kept = true
 
         sourceComponent: PanelWindow {
             id: osdRoot
@@ -126,7 +128,7 @@ Scope {
 
             implicitWidth: columnLayout.implicitWidth
             implicitHeight: columnLayout.implicitHeight
-            visible: osdLoader.active
+            visible: GlobalStates.osdVolumeOpen
 
             ColumnLayout {
                 id: columnLayout
@@ -154,9 +156,18 @@ Scope {
                         }
                         spacing: 0
 
-                        Loader {
-                            id: osdIndicatorLoader
-                            source: root.indicators.find(i => i.id === root.currentIndicator)?.sourceUrl
+                        Repeater {
+                            model: root.indicators
+                            delegate: Loader {
+                                id: osdIndicatorLoader
+                                required property var modelData
+                                readonly property bool current: modelData.id === root.currentIndicator
+                                property bool wasLoaded: false
+                                active: osdIndicatorLoader.current || (Platform.isWindows && osdIndicatorLoader.wasLoaded)
+                                visible: osdIndicatorLoader.current
+                                source: modelData.sourceUrl
+                                onLoaded: osdIndicatorLoader.wasLoaded = true
+                            }
                         }
 
                         Item {

@@ -15,10 +15,13 @@ Scope {
 
     Loader {
         id: wallpaperSelectorLoader
-        active: GlobalStates.wallpaperSelectorOpen
+        property bool kept: false
+        active: GlobalStates.wallpaperSelectorOpen || (Platform.isWindows && wallpaperSelectorLoader.kept)
+        onLoaded: wallpaperSelectorLoader.kept = true
 
         sourceComponent: PanelWindow {
             id: panelWindow
+            visible: GlobalStates.wallpaperSelectorOpen
             readonly property HyprlandMonitor monitor: Hyprland.monitorFor(panelWindow.screen)
             property bool monitorIsFocused: (Hyprland.focusedMonitor?.id == monitor?.id)
 
@@ -41,10 +44,17 @@ Scope {
             implicitWidth: Appearance.sizes.wallpaperSelectorWidth
 
             Component.onCompleted: {
-                GlobalFocusGrab.addDismissable(panelWindow);
+                if (panelWindow.visible)
+                    GlobalFocusGrab.addDismissable(panelWindow);
             }
             Component.onDestruction: {
                 GlobalFocusGrab.removeDismissable(panelWindow);
+            }
+            onVisibleChanged: {
+                if (panelWindow.visible)
+                    GlobalFocusGrab.addDismissable(panelWindow);
+                else
+                    GlobalFocusGrab.removeDismissable(panelWindow);
             }
             Connections {
                 target: GlobalFocusGrab
@@ -55,6 +65,7 @@ Scope {
 
             WallpaperSelectorContent {
                 id: content
+                shown: GlobalStates.wallpaperSelectorOpen
                 anchors {
                     fill: parent
                 }

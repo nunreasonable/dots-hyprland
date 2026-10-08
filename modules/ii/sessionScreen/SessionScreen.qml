@@ -17,9 +17,12 @@ Scope {
 
     Loader {
         id: sessionLoader
-        active: GlobalStates.sessionOpen
-        onActiveChanged: {
-            if (sessionLoader.active)
+        property bool kept: false
+        readonly property bool open: GlobalStates.sessionOpen
+        active: sessionLoader.open || (Platform.isWindows && sessionLoader.kept)
+        onLoaded: sessionLoader.kept = true
+        onOpenChanged: {
+            if (sessionLoader.open)
                 SessionWarnings.refresh();
         }
 
@@ -34,7 +37,7 @@ Scope {
 
         sourceComponent: PanelWindow { // Session menu
             id: sessionRoot
-            visible: sessionLoader.active
+            visible: sessionLoader.open
             property string subtitle
 
             function hide() {
