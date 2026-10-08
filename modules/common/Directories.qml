@@ -6,7 +6,6 @@ import qs.modules.common
 import qs.modules.common.functions
 import QtCore
 import QtQuick
-import Qt.labs.folderlistmodel
 import Quickshell
 
 Singleton {
@@ -29,18 +28,21 @@ Singleton {
         if (!Platform.isWindows) return rawLocation;
         if (!WindowsNative.ready || !WindowsNative.fsUtils) return rawLocation;
 
+        const fs = WindowsNative.fsUtils;
         const rawPath = FileUtils.trimFileProtocol(rawLocation);
-        if (WindowsNative.fsUtils.isAccessibleDir(rawPath)) return rawLocation;
-
-        if (!Directories._warnedKnownFolders[rawPath]) {
-            Directories._warnedKnownFolders[rawPath] = true;
-            console.warn(`[Directories] ${fallbackName} folder is not accessible, falling back to %USERPROFILE%/${fallbackName}:`, rawPath);
-        }
+        if (fs.isAccessibleDir(rawPath)) return rawLocation;
 
         const userProfile = (Quickshell.env("USERPROFILE") || "").replace(/\\/g, "/");
         const fallbackPath = `${userProfile}/${fallbackName}`;
-        Quickshell.execDetached(["powershell", "-NoProfile", "-Command",
-            `New-Item -ItemType Directory -Force -Path "${fallbackPath}" | Out-Null`]);
+        if (!Directories._warnedKnownFolders[rawPath]) {
+            Directories._warnedKnownFolders[rawPath] = true;
+            console.warn(`[Directories] ${fallbackName} folder is not accessible, falling back to %USERPROFILE%/${fallbackName}:`, rawPath);
+            if (typeof fs.makePath === "function")
+                fs.makePath(fallbackPath);
+            else
+                Quickshell.execDetached(["powershell", "-NoProfile", "-Command",
+                    `New-Item -ItemType Directory -Force -Path "${fallbackPath}" | Out-Null`]);
+        }
         return `file:///${fallbackPath}`;
     }
 
@@ -94,19 +96,16 @@ Singleton {
     property string userAvatarPathAccountsService: Platform.isWindows ? "" : FileUtils.trimFileProtocol(`/var/lib/AccountsService/icons/${SystemInfo.username}`)
     property string userAvatarPathRicersAndWeirdSystems: FileUtils.trimFileProtocol(`${Directories.home}.face`)
     property string userAvatarPathRicersAndWeirdSystems2: FileUtils.trimFileProtocol(`${Directories.home}.face.icon`)
-    property string userAvatarPathWindows: (Platform.isWindows && accountPicturesFolder.count > 0)
-        ? FileUtils.trimFileProtocol(accountPicturesFolder.get(0, "filePath"))
+    property string userAvatarPathWindows: (Platform.isWindows && WindowsNative.ready)
+        ? Directories.findAccountPicture()
         : ""
 
-    FolderListModel {
-        id: accountPicturesFolder
-        folder: Platform.isWindows
-            ? Qt.resolvedUrl(`file:///${(Quickshell.env("APPDATA") || "").replace(/\\/g, "/")}/Microsoft/Windows/AccountPictures`)
-            : ""
-        nameFilters: ["*.jpg", "*.jpeg", "*.png", "*.bmp"]
-        showDirs: false
-        showHidden: false
-        sortField: FolderListModel.Name
+    function findAccountPicture() {
+        const fs = WindowsNative.fsUtils;
+        if (!fs || typeof fs.listDir !== "function") return "";
+        const folder = `${(Quickshell.env("APPDATA") || "").replace(/\\/g, "/")}/Microsoft/Windows/AccountPictures`;
+        const picture = fs.listDir(folder).find(name => /\.(jpe?g|png|bmp)$/i.test(name));
+        return picture ? `${folder}/${picture}` : "";
     }
 
     // Cleanup on init
