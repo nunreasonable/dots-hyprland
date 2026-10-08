@@ -25,6 +25,7 @@ Item { // Player instance
     property real maxVisualizerValue: 1000 // Max value in the data points
     property int visualizerSmoothing: 2 // Number of points to average for smoothing
     property real radius
+    property bool shown: true
 
     readonly property bool artIsLocal: Platform.isWindows && String(root.artUrl ?? "").startsWith("file:")
     property string displayedArtFilePath: root.artIsLocal ? root.artUrl : (root.downloaded ? (Platform.isWindows ? `file:///${artFilePath}` : Qt.resolvedUrl(artFilePath)) : "")
@@ -52,7 +53,7 @@ Item { // Player instance
     }
 
     Timer { // Force update for revision
-        running: root.player?.playbackState == MprisPlaybackState.Playing
+        running: root.shown && root.player?.playbackState == MprisPlaybackState.Playing
         interval: Config.options.resources.updateInterval
         repeat: true
         onTriggered: {
@@ -113,13 +114,22 @@ Item { // Player instance
         color: ColorUtils.applyAlpha(blendedColors.colLayer0, 1)
         radius: root.radius
 
-        layer.enabled: true
+        layer.enabled: !Platform.isWindows
         layer.effect: OpacityMask {
             maskSource: Rectangle {
                 width: background.width
                 height: background.height
                 radius: background.radius
             }
+        }
+
+        Rectangle {
+            id: cardMask
+            visible: false
+            layer.enabled: Platform.isWindows
+            width: background.width
+            height: background.height
+            radius: background.radius
         }
 
         StyledImage {
@@ -134,6 +144,11 @@ Item { // Player instance
             layer.enabled: true
             layer.effect: StyledBlurEffect {
                 source: blurredArt
+                autoPaddingEnabled: !Platform.isWindows
+                maskEnabled: Platform.isWindows
+                maskSource: Platform.isWindows ? cardMask : null
+                maskThresholdMin: 0.5
+                maskSpreadAtMin: 1
             }
 
             Rectangle {
@@ -151,6 +166,7 @@ Item { // Player instance
             maxVisualizerValue: root.maxVisualizerValue
             smoothing: root.visualizerSmoothing
             color: blendedColors.colPrimary
+            mask: Platform.isWindows ? cardMask : null
         }
 
         RowLayout {
@@ -252,6 +268,7 @@ Item { // Player instance
                                 active: root.player?.canSeek ?? false
                                 sourceComponent: StyledSlider { 
                                     configuration: StyledSlider.Configuration.Wavy
+                                    animateWave: !Platform.isWindows || (root.shown && (root.player?.isPlaying ?? false))
                                     highlightColor: blendedColors.colPrimary
                                     trackColor: blendedColors.colSecondaryContainer
                                     handleColor: blendedColors.colPrimary

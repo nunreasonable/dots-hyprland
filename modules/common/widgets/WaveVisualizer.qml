@@ -12,6 +12,7 @@ Canvas { // Visualizer
     property int smoothing: 2
     property bool live: true
     property color color: Appearance.m3colors.m3primary
+    property Item mask: null
 
     onPointsChanged: () => {
         root.requestPaint()
@@ -31,7 +32,7 @@ Canvas { // Visualizer
 
         // Smoothing: simple moving average (optional)
         var smoothWindow = root.smoothing; // adjust for more/less smoothing
-        root.smoothPoints = [];
+        var smoothed = new Array(n);
         for (var i = 0; i < n; ++i) {
             var sum = 0, count = 0;
             for (var j = -smoothWindow; j <= smoothWindow; ++j) {
@@ -39,15 +40,16 @@ Canvas { // Visualizer
                 sum += points[idx];
                 count++;
             }
-            root.smoothPoints.push(sum / count);
+            smoothed[i] = sum / count;
         }
-        if (!root.live) root.smoothPoints.fill(0); // If not playing, show no points
+        if (!root.live) smoothed.fill(0); // If not playing, show no points
+        root.smoothPoints = smoothed;
 
         ctx.beginPath();
         ctx.moveTo(0, h);
         for (var i = 0; i < n; ++i) {
             var x = i * w / (n - 1);
-            var y = h - (root.smoothPoints[i] / maxVal) * h;
+            var y = h - (smoothed[i] / maxVal) * h;
             ctx.lineTo(x, y);
         }
         ctx.lineTo(w, h);
@@ -69,5 +71,10 @@ Canvas { // Visualizer
         blurEnabled: true
         blurMax: 7
         blur: 1
+        autoPaddingEnabled: root.mask === null
+        maskEnabled: root.mask !== null
+        maskSource: root.mask
+        maskThresholdMin: 0.5
+        maskSpreadAtMin: 1
     }
 }

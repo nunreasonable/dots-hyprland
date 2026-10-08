@@ -75,7 +75,14 @@ Scope {
         when: Platform.isWindows && WindowsNative.ready
         target: WindowsNative.audioVisualizer
         property: "running"
-        value: mediaControlsLoader.active
+        value: GlobalStates.mediaControlsOpen
+    }
+
+    Binding {
+        when: Platform.isWindows && WindowsNative.ready
+        target: WindowsNative.audioVisualizer
+        property: "framerate"
+        value: 30
     }
 
     Connections {
@@ -87,16 +94,13 @@ Scope {
 
     Loader {
         id: mediaControlsLoader
-        active: GlobalStates.mediaControlsOpen
-        onActiveChanged: {
-            if (!mediaControlsLoader.active && root.realPlayers.length === 0) {
-                GlobalStates.mediaControlsOpen = false;
-            }
-        }
+        property bool kept: false
+        active: GlobalStates.mediaControlsOpen || (Platform.isWindows && mediaControlsLoader.kept)
+        onLoaded: mediaControlsLoader.kept = true
 
         sourceComponent: PanelWindow {
             id: panelWindow
-            visible: true
+            visible: GlobalStates.mediaControlsOpen
 
             exclusionMode: ExclusionMode.Ignore
             exclusiveZone: 0
@@ -123,10 +127,17 @@ Scope {
             }
 
             Component.onCompleted: {
-                GlobalFocusGrab.addDismissable(panelWindow);
+                if (panelWindow.visible)
+                    GlobalFocusGrab.addDismissable(panelWindow);
             }
             Component.onDestruction: {
                 GlobalFocusGrab.removeDismissable(panelWindow);
+            }
+            onVisibleChanged: {
+                if (panelWindow.visible)
+                    GlobalFocusGrab.addDismissable(panelWindow);
+                else
+                    GlobalFocusGrab.removeDismissable(panelWindow);
             }
             Connections {
                 target: GlobalFocusGrab
@@ -147,6 +158,7 @@ Scope {
                     delegate: PlayerControl {
                         required property MprisPlayer modelData
                         player: modelData
+                        shown: GlobalStates.mediaControlsOpen
                         visualizerPoints: root.visualizerPoints
                         implicitWidth: root.widgetWidth
                         implicitHeight: root.widgetHeight
@@ -206,17 +218,17 @@ Scope {
         target: "mediaControls"
 
         function toggle(): void {
-            mediaControlsLoader.active = !mediaControlsLoader.active;
-            if (mediaControlsLoader.active)
+            GlobalStates.mediaControlsOpen = !GlobalStates.mediaControlsOpen;
+            if (GlobalStates.mediaControlsOpen)
                 Notifications.timeoutAll();
         }
 
         function close(): void {
-            mediaControlsLoader.active = false;
+            GlobalStates.mediaControlsOpen = false;
         }
 
         function open(): void {
-            mediaControlsLoader.active = true;
+            GlobalStates.mediaControlsOpen = true;
             Notifications.timeoutAll();
         }
     }

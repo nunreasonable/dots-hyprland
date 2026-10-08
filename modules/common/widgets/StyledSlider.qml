@@ -54,7 +54,7 @@ Slider {
     property bool animateWave: true
     property real waveAmplitudeMultiplier: wavy ? 0.5 : 0
     property real waveFrequency: 6
-    property real waveFps: 60
+    property real waveFps: Platform.isWindows ? 30 : 60
 
     leftPadding: handleMargins
     rightPadding: handleMargins
@@ -157,8 +157,15 @@ Slider {
                         function onHighlightColorChanged() { wavyFill.requestPaint(); }
                     }
                     FrameAnimation {
-                        running: root.animateWave
+                        property real sinceLastPaint: 0
+                        running: root.animateWave && root.visible && root.Window.visibility !== Window.Hidden
                         onTriggered: {
+                            if (root.waveFps < 60) {
+                                sinceLastPaint += frameTime;
+                                if (sinceLastPaint * root.waveFps < 0.9)
+                                    return;
+                                sinceLastPaint = 0;
+                            }
                             wavyFill.requestPaint()
                         }
                     }
