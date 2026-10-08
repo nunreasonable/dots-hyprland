@@ -16,10 +16,7 @@ Singleton {
         packageManagerRunning = false;
         downloadRunning = false;
         if (Platform.isWindows) {
-            detectPackageManagerProcWin.running = false;
-            detectPackageManagerProcWin.running = true;
-            detectDownloadProcWin.running = false;
-            detectDownloadProcWin.running = true;
+            windowsCheckDelay.restart();
             return;
         }
         detectPackageManagerProc.running = false;
@@ -68,15 +65,26 @@ Singleton {
         }
     }
 
-    Process {
-        id: detectDownloadProcWin
-        command: ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command",
-            "Get-ChildItem -LiteralPath (Join-Path $env:USERPROFILE 'Downloads') -Include *.crdownload,*.part,*.partial,*.download -File -ErrorAction SilentlyContinue | Select-Object -First 1 -ExpandProperty Name"]
-        stdout: StdioCollector {
-            id: downloadCollectorWin
-            onStreamFinished: {
-                root.downloadRunning = downloadCollectorWin.text.trim().length > 0;
-            }
+    property list<string> windowsPartialDownloadExtensions: [".crdownload", ".part", ".partial", ".download"]
+
+    function detectDownloadsWindows() {
+        const fs = WindowsNative.fsUtils;
+        if (!fs)
+            return;
+        const files = fs.listDir(FileUtils.trimFileProtocol(Directories.downloads));
+        root.downloadRunning = files.some(name => {
+            const lower = name.toLowerCase();
+            return root.windowsPartialDownloadExtensions.some(ext => lower.endsWith(ext));
+        });
+    }
+
+    Timer {
+        id: windowsCheckDelay
+        interval: 250
+        onTriggered: {
+            detectPackageManagerProcWin.running = false;
+            detectPackageManagerProcWin.running = true;
+            root.detectDownloadsWindows();
         }
     }
 }
