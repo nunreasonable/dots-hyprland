@@ -18,21 +18,24 @@ ColumnLayout {
             visible: root.title && root.title.length > 0
             text: root.title
         }
-        MaterialSymbol {
-            visible: root.tooltip && root.tooltip.length > 0
-            text: "info"
-            iconSize: Appearance.font.pixelSize.large
-            
-            color: Appearance.colors.colSubtext
-            MouseArea {
-                id: infoMouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                cursorShape: Qt.WhatsThisCursor
-                StyledToolTip {
-                    extraVisibleCondition: false
-                    alternativeVisibleCondition: infoMouseArea.containsMouse
-                    text: root.tooltip
+        Loader {
+            active: root.tooltip.length > 0
+            visible: active
+            sourceComponent: MaterialSymbol {
+                text: "info"
+                iconSize: Appearance.font.pixelSize.large
+                
+                color: Appearance.colors.colSubtext
+                MouseArea {
+                    id: infoMouseArea
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    cursorShape: Qt.WhatsThisCursor
+                    StyledToolTip {
+                        extraVisibleCondition: false
+                        alternativeVisibleCondition: infoMouseArea.containsMouse
+                        text: root.tooltip
+                    }
                 }
             }
         }
