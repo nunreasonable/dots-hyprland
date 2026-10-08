@@ -19,9 +19,31 @@ Singleton {
     signal brightnessChanged()
 
     property var ddcMonitors: []
-    readonly property list<BrightnessMonitor> monitors: Quickshell.screens.map(screen => monitorComp.createObject(root, {
-        screen
-    }))
+    property list<BrightnessMonitor> monitors: []
+
+    function updateMonitors(): void {
+        const previous = Array.from(root.monitors);
+        const screens = Quickshell.screens;
+        if (previous.length === screens.length && previous.every((m, i) => m.screen === screens[i]))
+            return;
+        const next = screens.map(screen => previous.find(m => m.screen === screen) ?? monitorComp.createObject(root, {
+            screen
+        }));
+        root.monitors = next;
+        for (const monitor of previous) {
+            if (!next.includes(monitor))
+                monitor.destroy();
+        }
+    }
+
+    Connections {
+        target: Quickshell
+        function onScreensChanged() {
+            root.updateMonitors();
+        }
+    }
+
+    Component.onCompleted: updateMonitors()
 
     function getMonitorForScreen(screen: ShellScreen): var {
         return monitors.find(m => m.screen === screen);
@@ -114,7 +136,7 @@ Singleton {
         }
 
         Behavior on multipliedBrightness {
-            enabled: monitor.animateChanges
+            enabled: monitor.ready && monitor.animateChanges
             NumberAnimation {
                 duration: 200
                 easing.type: Easing.BezierSpline
@@ -122,6 +144,7 @@ Singleton {
             }
         }
         onMultipliedBrightnessChanged: {
+            if (!monitor.ready) return;
             if (monitor.animationEnabled) syncBrightness();
             else setTimer.restart();
         }
