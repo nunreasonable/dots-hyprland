@@ -40,8 +40,8 @@ Scope {
                 item: content
             }
 
-            implicitHeight: Appearance.sizes.wallpaperSelectorHeight
-            implicitWidth: Appearance.sizes.wallpaperSelectorWidth
+            implicitHeight: Math.min(Appearance.sizes.wallpaperSelectorHeight, (panelWindow.screen?.height ?? Appearance.sizes.wallpaperSelectorHeight) - panelWindow.margins.top - Appearance.sizes.hyprlandGapsOut)
+            implicitWidth: Math.min(Appearance.sizes.wallpaperSelectorWidth, (panelWindow.screen?.width ?? Appearance.sizes.wallpaperSelectorWidth) - 2 * Appearance.sizes.hyprlandGapsOut)
 
             Component.onCompleted: {
                 if (panelWindow.visible)
