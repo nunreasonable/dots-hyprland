@@ -153,7 +153,8 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-            layer.enabled: true
+            clip: Platform.isWindows
+            layer.enabled: !Platform.isWindows
             layer.effect: OpacityMask {
                 maskSource: Rectangle {
                     width: swipeView.width

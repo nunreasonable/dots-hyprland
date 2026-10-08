@@ -14,6 +14,7 @@ Scope { // Scope
     property bool pin: false
     property Component contentComponent: SidebarLeftContent {}
     property Item sidebarContent
+    property var contentIncubator: null
 
     function toggleDetach() {
         root.detach = !root.detach;
@@ -60,9 +61,51 @@ Scope { // Scope
 
     function ensureSidebarContent() {
         if (root.sidebarContent) return;
+        const incubator = root.contentIncubator;
+        if (incubator) {
+            incubator.forceCompletion();
+            if (incubator.status === Component.Ready)
+                root.adoptIncubatedContent(incubator);
+            if (root.sidebarContent) return;
+        }
         root.sidebarContent = contentComponent.createObject(null, {
             "scopeRoot": root,
         });
+    }
+
+    function preloadSidebarContent() {
+        if (root.sidebarContent || root.contentIncubator) return;
+        const incubator = contentComponent.incubateObject(root, {
+            "scopeRoot": root,
+        }, Qt.Asynchronous);
+        if (!incubator) return;
+        root.contentIncubator = incubator;
+        if (incubator.status === Component.Ready) {
+            root.adoptIncubatedContent(incubator);
+            return;
+        }
+        incubator.onStatusChanged = status => {
+            if (status === Component.Ready)
+                root.adoptIncubatedContent(incubator);
+            else if (status === Component.Error && root.contentIncubator === incubator)
+                root.contentIncubator = null;
+        };
+    }
+
+    function adoptIncubatedContent(incubator) {
+        if (root.contentIncubator === incubator)
+            root.contentIncubator = null;
+        if (root.sidebarContent || !incubator.object) return;
+        root.sidebarContent = incubator.object;
+        const contentParent = root.detach ? detachedSidebarLoader.item?.contentParent : sidebarLoader.item?.contentParent;
+        if (contentParent && root.sidebarContent.parent !== contentParent)
+            contentParent.children = [root.sidebarContent];
+    }
+
+    Timer {
+        interval: 8000
+        running: Platform.isWindows
+        onTriggered: root.preloadSidebarContent()
     }
 
     Component.onCompleted: {
@@ -124,9 +167,10 @@ Scope { // Scope
 
             onVisibleChanged: {
                 if (visible) {
-                    if (!root.sidebarContent) {
+                    if (!root.sidebarContent || root.sidebarContent.parent !== contentParent) {
                         root.ensureSidebarContent();
-                        contentParent.children = [root.sidebarContent];
+                        if (root.sidebarContent.parent !== contentParent)
+                            contentParent.children = [root.sidebarContent];
                     }
                     GlobalFocusGrab.addDismissable(panelWindow);
                 } else {

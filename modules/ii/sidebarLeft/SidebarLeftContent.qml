@@ -1,3 +1,4 @@
+import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
@@ -22,6 +23,7 @@ Item {
         ...((root.animeEnabled && !root.animeCloset) ? [{"icon": "bookmark_heart", "name": Translation.tr("Anime")}] : [])
     ]
     property int tabCount: swipeView.count
+    property bool loadAsync: Platform.isWindows && !GlobalStates.sidebarLeftOpen
 
     function focusActiveItem() {
         swipeView.currentItem.forceActiveFocus()
@@ -74,7 +76,7 @@ Item {
                 currentIndex: tabBar.currentIndex
 
                 clip: true
-                layer.enabled: true
+                layer.enabled: !Platform.isWindows
                 layer.effect: OpacityMask {
                     maskSource: Rectangle {
                         width: swipeView.width
@@ -94,15 +96,21 @@ Item {
 
         Component {
             id: aiChat
-            AiChat {}
+            SidebarLeftPage {
+                sourceComponent: AiChat {}
+            }
         }
         Component {
             id: translator
-            Translator {}
+            SidebarLeftPage {
+                sourceComponent: Translator {}
+            }
         }
         Component {
             id: anime
-            Anime {}
+            SidebarLeftPage {
+                sourceComponent: Anime {}
+            }
         }
         Component {
             id: placeholder
@@ -113,6 +121,18 @@ Item {
                     color: Appearance.colors.colSubtext
                 }
             }
+        }
+    }
+
+    component SidebarLeftPage: Loader {
+        id: page
+        property bool wasLoaded: false
+        readonly property bool current: page.SwipeView.isCurrentItem
+        active: !Platform.isWindows || page.current || page.wasLoaded || root.loadAsync
+        asynchronous: Platform.isWindows && (!page.current || root.loadAsync)
+        onLoaded: {
+            page.wasLoaded = true;
+            page.item.focus = Qt.binding(() => page.current);
         }
     }
 }
