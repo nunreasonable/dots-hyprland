@@ -163,10 +163,12 @@ Item { // Bar content region
                 visible: Battery.available
             }
 
-            BatteryIndicator {
-                visible: Battery.available
+            Loader {
+                active: Battery.available
+                visible: active
                 Layout.fillWidth: true
                 Layout.fillHeight: false
+                sourceComponent: BatteryIndicator {}
             }
             
         }

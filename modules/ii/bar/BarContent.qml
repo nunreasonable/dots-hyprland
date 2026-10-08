@@ -270,9 +270,11 @@ Item { // Bar content region
                     Layout.alignment: Qt.AlignVCenter
                 }
 
-                BatteryIndicator {
-                    visible: (root.useShortenedForm < 2 && Battery.available)
+                Loader {
+                    active: Battery.available
+                    visible: active && root.useShortenedForm < 2
                     Layout.alignment: Qt.AlignVCenter
+                    sourceComponent: BatteryIndicator {}
                 }
             }
         }
