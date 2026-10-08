@@ -11,7 +11,7 @@ Text {
     verticalAlignment: Text.AlignVCenter
     property bool shouldUseNumberFont: /^\d+$/.test(root.text)
     property var defaultFont: shouldUseNumberFont ? Appearance.font.family.numbers : Appearance.font.family.main
-    
+
     font {
         hintingPreference: Font.PreferDefaultHinting
         family: defaultFont
@@ -28,28 +28,44 @@ Text {
         easing.bezierCurve: Appearance.animation.elementMoveFast.bezierCurve
     }
 
-    Component.onCompleted: {
-        textAnimationBehavior.originalX = root.x;
-        textAnimationBehavior.originalY = root.y;
+    onAnimateChangeChanged: {
+        if (root.animateChange && !textAnimationBehavior.animation)
+            textAnimationBehavior.animation = textChangeAnimation.createObject(textAnimationBehavior);
     }
 
     Behavior on text {
         id: textAnimationBehavior
-        property real originalX: root.x
-        property real originalY: root.y
         enabled: root.animateChange
+    }
+
+    Component {
+        id: textChangeAnimation
 
         SequentialAnimation {
+            id: textChange
+            property real originalX: root.x
+            property real originalY: root.y
+            property bool originCaptured: false
             alwaysRunToEnd: true
+
+            ScriptAction {
+                script: {
+                    if (textChange.originCaptured)
+                        return;
+                    textChange.originCaptured = true;
+                    textChange.originalX = textChange.originalX;
+                    textChange.originalY = textChange.originalY;
+                }
+            }
             ParallelAnimation {
                 Anim {
                     property: "x"
-                    to: textAnimationBehavior.originalX - root.animationDistanceX
+                    to: textChange.originalX - root.animationDistanceX
                     easing.type: Easing.InSine
                 }
                 Anim {
                     property: "y"
-                    to: textAnimationBehavior.originalY - root.animationDistanceY
+                    to: textChange.originalY - root.animationDistanceY
                     easing.type: Easing.InSine
                 }
                 Anim {
@@ -62,22 +78,22 @@ Text {
             PropertyAction {
                 target: root
                 property: "x"
-                value: textAnimationBehavior.originalX + root.animationDistanceX
+                value: textChange.originalX + root.animationDistanceX
             }
             PropertyAction {
                 target: root
                 property: "y"
-                value: textAnimationBehavior.originalY + root.animationDistanceY
+                value: textChange.originalY + root.animationDistanceY
             }
             ParallelAnimation {
                 Anim {
                     property: "x"
-                    to: textAnimationBehavior.originalX
+                    to: textChange.originalX
                     easing.type: Easing.OutSine
                 }
                 Anim {
                     property: "y"
-                    to: textAnimationBehavior.originalY
+                    to: textChange.originalY
                     easing.type: Easing.OutSine
                 }
                 Anim {
