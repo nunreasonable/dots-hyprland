@@ -226,8 +226,14 @@ MouseArea { // Notification group area
                     }
                 }
 
-                StyledListView { // Notification body (expanded)
+                ListView { // Notification body (expanded)
                     id: notificationsColumn
+                    property int dragIndex: -1
+                    property real dragDistance: 0
+                    function resetDrag() {
+                        notificationsColumn.dragIndex = -1;
+                        notificationsColumn.dragDistance = 0;
+                    }
                     implicitHeight: contentHeight
                     Layout.fillWidth: true
                     spacing: expanded ? 5 : 3
@@ -235,6 +241,62 @@ MouseArea { // Notification group area
                     interactive: false
                     Behavior on spacing {
                         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+                    }
+                    add: Transition {
+                        NumberAnimation {
+                            properties: "opacity,scale"
+                            from: 0
+                            to: 1
+                            duration: Appearance.animation.elementMove.duration
+                            easing.type: Appearance.animation.elementMove.type
+                            easing.bezierCurve: Appearance.animation.elementMove.bezierCurve
+                        }
+                    }
+                    addDisplaced: Transition {
+                        NumberAnimation {
+                            property: "y"
+                            duration: Appearance.animation.elementMove.duration
+                            easing.type: Appearance.animation.elementMove.type
+                            easing.bezierCurve: Appearance.animation.elementMove.bezierCurve
+                        }
+                        NumberAnimation {
+                            properties: "opacity,scale"
+                            to: 1
+                            duration: Appearance.animation.elementMove.duration
+                            easing.type: Appearance.animation.elementMove.type
+                            easing.bezierCurve: Appearance.animation.elementMove.bezierCurve
+                        }
+                    }
+                    remove: Transition {
+                        NumberAnimation {
+                            property: "x"
+                            to: notificationsColumn.width + 20
+                            duration: Appearance.animation.elementMove.duration
+                            easing.type: Appearance.animation.elementMove.type
+                            easing.bezierCurve: Appearance.animation.elementMove.bezierCurve
+                        }
+                        NumberAnimation {
+                            property: "opacity"
+                            to: 0
+                            duration: Appearance.animation.elementMove.duration
+                            easing.type: Appearance.animation.elementMove.type
+                            easing.bezierCurve: Appearance.animation.elementMove.bezierCurve
+                        }
+                    }
+                    removeDisplaced: Transition {
+                        NumberAnimation {
+                            property: "y"
+                            duration: Appearance.animation.elementMove.duration
+                            easing.type: Appearance.animation.elementMove.type
+                            easing.bezierCurve: Appearance.animation.elementMove.bezierCurve
+                        }
+                        NumberAnimation {
+                            properties: "opacity,scale"
+                            to: 1
+                            duration: Appearance.animation.elementMove.duration
+                            easing.type: Appearance.animation.elementMove.type
+                            easing.bezierCurve: Appearance.animation.elementMove.bezierCurve
+                        }
                     }
                     model: ScriptModel {
                         values: root.expanded ? root.notifications.slice().reverse() : 

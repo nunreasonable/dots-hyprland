@@ -18,7 +18,7 @@ Item {
         anchors.bottomMargin: 5
 
         clip: true
-        layer.enabled: true
+        layer.enabled: !Platform.isWindows
         layer.effect: OpacityMask {
             maskSource: Rectangle {
                 width: listview.width
