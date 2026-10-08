@@ -10,7 +10,7 @@ LazyLoader {
     id: root
 
     property Item hoverTarget
-    default property Item contentItem
+    default property Component contentComponent
     property real popupBackgroundMargin: 0
 
     active: hoverTarget && hoverTarget.containsMouse
@@ -69,14 +69,19 @@ LazyLoader {
                 topMargin: Appearance.sizes.elevationMargin + root.popupBackgroundMargin * (!popupWindow.anchors.top)
                 bottomMargin: Appearance.sizes.elevationMargin + root.popupBackgroundMargin * (!popupWindow.anchors.bottom)
             }
-            implicitWidth: root.contentItem.implicitWidth + margin * 2
-            implicitHeight: root.contentItem.implicitHeight + margin * 2
+            implicitWidth: contentLoader.implicitWidth + margin * 2
+            implicitHeight: contentLoader.implicitHeight + margin * 2
             color: Appearance.m3colors.m3surfaceContainer
             radius: Appearance.rounding.small
-            children: [root.contentItem]
 
             border.width: 1
             border.color: Appearance.colors.colLayer0Border
+
+            Loader {
+                id: contentLoader
+                anchors.centerIn: parent
+                sourceComponent: root.contentComponent
+            }
         }
     }
 }

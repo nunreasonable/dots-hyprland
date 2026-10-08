@@ -55,7 +55,7 @@ Item {
     HyprlandFocusGrab {
         id: focusGrab
         active: false
-        windows: [trayOverflowLayout.QsWindow?.window, root.activeMenu]
+        windows: [overflowPopup.item, root.activeMenu]
         onCleared: {
             root.trayOverflowOpen = false;
             if (root.activeMenu) {
