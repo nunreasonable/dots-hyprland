@@ -838,7 +838,7 @@ q="$1"; h="$2"
                             visible: root.mode === "emoji" && root.items.length > 0
                             Layout.fillWidth: true
                             Layout.leftMargin: 8
-                            text: root.items[root.currentIndex] ?? ""
+                            text: root.mode === "emoji" ? (root.items[root.currentIndex] ?? "") : ""
                             elide: Text.ElideRight
                             font.pixelSize: Appearance.font.pixelSize.smaller
                             color: Appearance.colors.colSubtext
