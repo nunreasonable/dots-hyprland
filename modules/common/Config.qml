@@ -750,6 +750,21 @@ Singleton {
 
             property JsonObject sidebar: JsonObject {
                 property bool keepRightSidebarLoaded: true
+                property list<string> sectionOrder: ["banner", "sliders", "quickToggles", "media", "notifications", "bottom"]
+                property bool banner: false
+                property string bannerImage: ""
+                property real bannerFocusX: 0.5
+                property real bannerFocusY: 0.5
+                property bool bottomGroup: true
+                property bool mediaPlayer: false
+                property JsonObject media: JsonObject {
+                    property bool enable: false
+                    property bool artColors: false
+                    property string artShape: "Oval"
+                    property bool shapeArt: false
+                    property bool blurredBackground: false
+                    property bool showLyrics: false
+                }
                 property JsonObject translator: JsonObject {
                     property bool enable: false
                     property int delay: 300 // Delay before sending request. Reduces (potential) rate limits and lag.
@@ -775,6 +790,8 @@ Singleton {
                     property bool visualize: false
                     property bool clicklessCornerEnd: true
                     property int clicklessCornerVerticalOffset: 1
+                    property string bottomLeftAction: "sidebarLeftOpen"
+                    property string bottomRightAction: "sidebarRightOpen"
                 }
 
                 property JsonObject quickToggles: JsonObject {
