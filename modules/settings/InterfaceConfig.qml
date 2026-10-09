@@ -26,6 +26,78 @@ ContentPage {
     }
 
     ContentSection {
+        icon: "settings"
+        title: Translation.tr("Settings panel")
+
+        ContentSubsection {
+            title: Translation.tr("Style")
+            ConfigSelectionArray {
+                currentValue: Config.options.settings.style
+                onSelected: newValue => {
+                    Config.options.settings.style = newValue;
+                }
+                options: [
+                    { displayName: Translation.tr("Default"), icon: "settings_panorama", value: "default" },
+                    { displayName: Translation.tr("Minimal"), icon: "settings_heart", value: "minimal" },
+                    { displayName: Translation.tr("Dashboard"), icon: "dashboard", value: "dashboard" }
+                ]
+            }
+            StyledText {
+                text: Translation.tr("Minimal and Dashboard apply to the end4-pC settings layout")
+                font.pixelSize: Appearance.font.pixelSize.smaller
+                color: Appearance.colors.colSubtext
+            }
+        }
+
+        ContentSubsection {
+            title: Translation.tr("Dashboard animation speed")
+            ConfigSelectionArray {
+                enabled: Config.options.settings.style === "dashboard"
+                currentValue: Config.options.settings.animationSpeed
+                onSelected: newValue => {
+                    Config.options.settings.animationSpeed = newValue;
+                }
+                options: [
+                    { displayName: "1x", icon: "slow_motion_video", value: 1 },
+                    { displayName: "1.5x", icon: "play_arrow", value: 1.5 },
+                    { displayName: "2x", icon: "fast_forward", value: 2 },
+                    { displayName: "3x", icon: "bolt", value: 3 }
+                ]
+            }
+        }
+
+        ConfigSpinBox {
+            icon: "border_style"
+            text: Translation.tr("Border width")
+            value: Config.options.settings.borderSize
+            from: 0
+            to: 10
+            stepSize: 1
+            onValueChanged: { Config.options.settings.borderSize = value }
+        }
+        ColorSelectionArray {
+            icon: "format_paint"
+            text: Translation.tr("Border color")
+            options: ["primary", "secondary", "tertiary", "primaryContainer", "secondaryContainer", "tertiaryContainer", "layer0Border"]
+            currentValue: Config.options.settings.borderColor
+            onSelected: newValue => {
+                Config.options.settings.borderColor = newValue;
+            }
+        }
+        RippleButtonWithIcon {
+            Layout.fillWidth: true
+            materialIcon: "expand_all"
+            mainText: Translation.tr("Expand all collapsed sections")
+            colBackground: Appearance.colors.colSecondaryContainer
+            colBackgroundHover: Appearance.colors.colSecondaryContainerHover
+            colRipple: Appearance.colors.colSecondaryContainerActive
+            onClicked: {
+                Config.options.settings.collapsedSections = [];
+            }
+        }
+    }
+
+    ContentSection {
         icon: "keyboard"
         title: Translation.tr("Cheat sheet")
 

@@ -17,6 +17,108 @@ ContentPage {
     }
 
     ContentSection {
+        icon: "account_circle"
+        title: Translation.tr("Profile")
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 16
+
+            Rectangle {
+                id: avatarDropTarget
+                implicitWidth: 64
+                implicitHeight: 64
+                radius: width / 2
+                color: avatarDropTarget.hovered ? Appearance.colors.colPrimaryContainerHover : "transparent"
+                border.width: avatarDropTarget.hovered ? 2 : 0
+                border.color: Appearance.colors.colPrimary
+                property bool hovered: false
+
+                UserAvatar {
+                    anchors.fill: parent
+                    anchors.margins: 4
+                }
+
+                DropArea {
+                    anchors.fill: parent
+                    keys: ["text/uri-list"]
+                    onEntered: drag => {
+                        drag.accept(Qt.CopyAction);
+                        avatarDropTarget.hovered = true;
+                    }
+                    onExited: avatarDropTarget.hovered = false
+                    onDropped: drop => {
+                        avatarDropTarget.hovered = false;
+                        if (!drop.hasUrls || drop.urls.length === 0)
+                            return;
+                        const cleanPath = FileUtils.trimFileProtocol(drop.urls[0]);
+                        const ext = cleanPath.split(".").pop().toLowerCase();
+                        if (["png", "jpg", "jpeg", "webp", "bmp"].indexOf(ext) === -1)
+                            return;
+                        Config.options.profile.avatarPicture = cleanPath;
+                        Config.options.profile.avatarPath = cleanPath.substring(0, cleanPath.lastIndexOf("/"));
+                    }
+                }
+            }
+
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 4
+
+                StyledText {
+                    text: Translation.tr("Drag an image here to use it as your avatar")
+                    color: Appearance.colors.colOnLayer0
+                    wrapMode: Text.Wrap
+                    Layout.fillWidth: true
+                }
+
+                RippleButtonWithIcon {
+                    visible: Config.options.profile.avatarPicture !== ""
+                    materialIcon: "restart_alt"
+                    mainText: Translation.tr("Use Windows account picture")
+                    onClicked: {
+                        Config.options.profile.avatarPicture = "";
+                        Config.options.profile.avatarPath = "";
+                    }
+                }
+            }
+        }
+
+        MaterialTextArea {
+            Layout.fillWidth: true
+            placeholderText: SystemInfo.username
+            text: Config.options.profile.displayName
+            wrapMode: TextEdit.Wrap
+            onTextChanged: {
+                Config.options.profile.displayName = text;
+            }
+        }
+
+        ContentSubsection {
+            title: Translation.tr("Description text")
+            ConfigSelectionArray {
+                currentValue: Config.options.profile.descriptionText === "::uptime::" ? "uptime" : "distro"
+                onSelected: newValue => {
+                    Config.options.profile.descriptionText = newValue === "uptime" ? "::uptime::" : "::distro::";
+                }
+                options: [
+                    { displayName: Translation.tr("Distro"), icon: "deployed_code", value: "distro" },
+                    { displayName: Translation.tr("Uptime"), icon: "timelapse", value: "uptime" }
+                ]
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "cloud_download"
+            text: Translation.tr("Show online presets (end4-pC settings layout)")
+            checked: Config.options.profile.onlinePresets
+            onCheckedChanged: {
+                Config.options.profile.onlinePresets = checked;
+            }
+        }
+    }
+
+    ContentSection {
         icon: "palette"
         title: Translation.tr("Appearance")
 

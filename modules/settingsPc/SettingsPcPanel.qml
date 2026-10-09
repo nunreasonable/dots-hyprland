@@ -9,6 +9,8 @@ PanelWindow {
     id: panelWindow
     property bool forceShown: false
     readonly property bool shown: settingsContent.pageShown || panelWindow.forceShown
+    readonly property bool isMinimal: Config.options.settings.style === "minimal"
+    readonly property real sizeScale: panelWindow.isMinimal ? 0.75 : 1.0
 
     signal closeRequested
 
@@ -75,12 +77,12 @@ PanelWindow {
 
     Rectangle {
         id: settingsWindow
-        width: Math.min(parent.width - 80, 980)
-        height: Math.min(parent.height - 80, 665)
+        width: Math.min(parent.width - 80, 980 * panelWindow.sizeScale)
+        height: Math.min(parent.height - 80, 665 * panelWindow.sizeScale)
         color: Appearance.colors.colLayer0
-        border.width: 1
-        border.color: CF.ColorUtils.transparentize(Appearance.colors.colLayer0Border, 0.8)
-        radius: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 5
+        border.width: Config.options.settings.borderSize
+        border.color: CF.ColorUtils.transparentize(Appearance.getColorFromName(Config.options.settings.borderColor), 0.8)
+        radius: !panelWindow.isMinimal ? Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 5 : Appearance.rounding.screenRounding + 5
 
         property bool userMoved: false
         anchors.centerIn: userMoved ? undefined : parent

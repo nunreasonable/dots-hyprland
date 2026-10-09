@@ -8,10 +8,9 @@ Singleton {
     id: root
 
     readonly property string pagesDir: "modules/settingsPc/pages/"
-    readonly property list<string> ids: ["quick", "general", "bar", "desktop", "interface", "services", "about"]
-    readonly property list<string> files: ["QuickConfig.qml", "GeneralConfig.qml", "BarConfig.qml", "BackgroundConfig.qml", "InterfaceConfig.qml", "ServicesConfig.qml", "About.qml"]
+    readonly property list<string> ids: ["quick", "general", "bar", "desktop", "interface", "services", "profile", "about"]
+    readonly property list<string> files: ["QuickConfig.qml", "GeneralConfig.qml", "BarConfig.qml", "BackgroundConfig.qml", "InterfaceConfig.qml", "ServicesConfig.qml", "Profile.qml", "About.qml"]
     readonly property list<url> sources: root.files.map(file => Qt.resolvedUrl("../" + root.pagesDir + file))
-    property list<string> collapsedSections: []
     readonly property var fontCache: ({
             families: null
         })
@@ -24,6 +23,7 @@ Singleton {
             { id: "desktop",   name: Translation.tr("Desktop"),   icon: "texture",        file: "BackgroundConfig.qml" },
             { id: "interface", name: Translation.tr("Interface"), icon: "bottom_app_bar", file: "InterfaceConfig.qml" },
             { id: "services",  name: Translation.tr("Services"),  icon: "settings",       file: "ServicesConfig.qml" },
+            { id: "profile",   name: Translation.tr("Profile"),   icon: "account_circle", file: "Profile.qml" },
             { id: "about",     name: Translation.tr("About"),     icon: "info",           file: "About.qml" },
         ];
         return list.map(page => Object.assign({}, page, {

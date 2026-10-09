@@ -17,7 +17,7 @@ ColumnLayout {
     default property alias contentData: sectionContent.data
 
     readonly property string sectionId: root.title
-    readonly property bool collapsed: root.collapsible && SettingsPages.collapsedSections.includes(root.sectionId)
+    readonly property bool collapsed: root.collapsible && Config.options.settings.collapsedSections.includes(root.sectionId)
 
     property real flashScan: 0
     property real flashPop: 0
@@ -54,11 +54,11 @@ ColumnLayout {
 
     function toggleCollapsed() {
         if (!root.collapsible) return
-        let list = SettingsPages.collapsedSections.slice()
+        let list = Config.options.settings.collapsedSections.slice()
         const idx = list.indexOf(root.sectionId)
         if (idx === -1) list.push(root.sectionId)
         else list.splice(idx, 1)
-        SettingsPages.collapsedSections = list
+        Config.options.settings.collapsedSections = list
     }
 
     function collapseAllSiblings() {
@@ -72,11 +72,11 @@ ColumnLayout {
             }
         }
 
-        let current = SettingsPages.collapsedSections.slice()
+        let current = Config.options.settings.collapsedSections.slice()
         let preserved = current.filter(id => !siblingIds.includes(id))
         let result = preserved.concat(siblingIds)
 
-        SettingsPages.collapsedSections = result
+        Config.options.settings.collapsedSections = result
     }
 
     Layout.fillWidth: true
