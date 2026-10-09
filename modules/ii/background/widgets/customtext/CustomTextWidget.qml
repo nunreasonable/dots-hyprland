@@ -98,7 +98,7 @@ AbstractBackgroundWidget {
             pixelSize: root.fontSize
         }
 
-        layer.enabled: root.configEntry.shadow
+        layer.enabled: !Platform.isWindows && root.configEntry.shadow
         layer.effect: DropShadow {
             radius: 8
             samples: radius * 2 + 1

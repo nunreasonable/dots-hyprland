@@ -1538,6 +1538,7 @@ ContentPage {
                     }
                 }
                 ConfigSwitch {
+                    visible: !Platform.isWindows
                     buttonIcon: "shadow"
                     text: Translation.tr("Widget shadows")
                     checked: Config.options.background.widgets.shadow
@@ -1690,6 +1691,7 @@ ContentPage {
                     }
                 }
                 ConfigSwitch {
+                    visible: !Platform.isWindows
                     buttonIcon: "shadow"
                     text: Translation.tr("Shadow")
                     checked: Config.options.background.widgets.customText.shadow
