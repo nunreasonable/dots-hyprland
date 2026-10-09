@@ -11,7 +11,7 @@ Singleton {
     readonly property string applied: Config.options.appearance.visualStyleApplied
 
     function load() {
-        root.sync();
+        syncTimer.restart();
     }
 
     function sync() {
@@ -33,12 +33,18 @@ Singleton {
         Config.options.appearance.visualStyleApplied = style;
     }
 
-    onSelectedChanged: root.sync()
+    onSelectedChanged: syncTimer.restart()
+
+    Timer {
+        id: syncTimer
+        interval: 0
+        onTriggered: root.sync()
+    }
 
     Connections {
         target: Config
         function onReadyChanged() {
-            root.sync();
+            syncTimer.restart();
         }
     }
 }

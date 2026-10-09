@@ -5,6 +5,7 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Hyprland
 import qs.modules.common
+import qs.modules.settingsPc as SettingsPc
 
 Singleton {
     id: root

@@ -46,7 +46,10 @@ PanelWindow {
 
     onVisibleChanged: {
         if (panelWindow.visible) {
-            GlobalFocusGrab.addDismissable(panelWindow);
+            Qt.callLater(() => {
+                if (panelWindow.visible)
+                    GlobalFocusGrab.addDismissable(panelWindow);
+            });
             settingsWindow.userMoved = false;
             Qt.callLater(() => settingsContent.focusContent());
         } else {
