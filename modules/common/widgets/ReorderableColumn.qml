@@ -14,6 +14,7 @@ Item {
     property real cornerRadius: Appearance.rounding.normal
 
     property string fillKey: ""
+    property real fillHideBelow: 0
     property real fillMinHeight: 60
 
     signal reordered(var newOrder)
@@ -67,6 +68,8 @@ Item {
             if (keys[i] !== root.fillKey) others += root.naturalHeight(keys[i])
         }
         const remaining = root.height - others - Math.max(0, keys.length - 1) * root.itemSpacing
+        if (remaining < root.fillHideBelow)
+            return 0
         return Math.max(root.fillMinHeight, remaining)
     }
 
@@ -117,6 +120,7 @@ Item {
             width: root.width
             height: root.effectiveHeight(slot.modelData)
             visible: height > 0
+            clip: slot.modelData === root.fillKey
             y: slot.dragging ? slot.dragY : slot.baseY
             z: slot.dragging ? 100 : 0
 

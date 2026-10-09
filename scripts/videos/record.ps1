@@ -13,7 +13,7 @@ $ErrorActionPreference = "Stop"
 
 if ($Stop) {
     if (-not (Test-Path $PidFile)) { exit 0 }
-    $pidValue, $mkv = Get-Content $PidFile
+    $pidValue, $mkv = Get-Content -Encoding UTF8 $PidFile
     Remove-Item -Force $PidFile
 
     $proc = Get-Process -Id $pidValue -ErrorAction SilentlyContinue
@@ -74,4 +74,4 @@ $argLine = ($ffmpegArgs | ForEach-Object { Format-Arg "$_" }) -join " "
 
 New-Item -ItemType Directory -Force -Path (Split-Path -Parent $PidFile) | Out-Null
 $proc = Start-Process -FilePath "ffmpeg" -ArgumentList $argLine -WindowStyle Hidden -PassThru
-Set-Content -Path $PidFile -Value "$($proc.Id)`n$outFile" -NoNewline
+Set-Content -Encoding UTF8 -Path $PidFile -Value "$($proc.Id)`n$outFile" -NoNewline

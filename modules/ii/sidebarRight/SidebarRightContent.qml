@@ -95,7 +95,8 @@ Item {
             order: root.sectionOrder
             editMode: root.editMode && root.editTab === "layout"
             fillKey: "notifications"
-            fillMinHeight: 120
+            fillMinHeight: 0
+            fillHideBelow: 60
             onReordered: newOrder => Config.options.sidebar.sectionOrder = newOrder
             componentForKey: key => root.sectionComponents[key] ?? null
             isKeyActive: key => root.sectionActive(key)
