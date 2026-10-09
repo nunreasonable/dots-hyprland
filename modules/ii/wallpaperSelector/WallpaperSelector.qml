@@ -19,6 +19,22 @@ Scope {
         active: GlobalStates.wallpaperSelectorOpen || (Platform.isWindows && wallpaperSelectorLoader.kept)
         onLoaded: wallpaperSelectorLoader.kept = true
 
+        Connections {
+            target: GlobalStates
+            function onWallpaperSelectorOpenChanged() {
+                if (GlobalStates.wallpaperSelectorOpen)
+                    releaseTimer.stop();
+                else if (Platform.isWindows && wallpaperSelectorLoader.kept)
+                    releaseTimer.restart();
+            }
+        }
+
+        Timer {
+            id: releaseTimer
+            interval: 120000
+            onTriggered: wallpaperSelectorLoader.kept = false
+        }
+
         sourceComponent: PanelWindow {
             id: panelWindow
             visible: GlobalStates.wallpaperSelectorOpen
