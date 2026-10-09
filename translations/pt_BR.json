@@ -1028,5 +1028,11 @@
   "Niri-like": "Estilo Niri",
   "Symbols": "Símbolos",
   "Keybind": "Atalho",
-  "Symbol": "Símbolo"
+  "Symbol": "Símbolo",
+  "Pin": "Fixar",
+  "Unpin": "Desafixar",
+  "Show clipboard preview popups": "Mostrar pop-ups de pré-visualização da área de transferência",
+  "Shows a bigger preview of the selected clipboard entry next to the search box, instead of the inline thumbnail.": "Mostra uma pré-visualização maior do item selecionado da área de transferência, ao lado da caixa de busca, em vez da miniatura em linha.",
+  "Image · %1x%2": "Imagem · %1x%2",
+  "Text · %1 characters": "Texto · %1 caracteres"
 }

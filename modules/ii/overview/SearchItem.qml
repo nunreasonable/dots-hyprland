@@ -34,6 +34,8 @@ RippleButton {
     property string materialSymbol: entry?.iconType === LauncherSearchResult.IconType.Material ? entry?.iconName ?? "" : ""
     property string cliphistRawString: entry?.rawValue ?? ""
     property bool blurImage: entry?.blurImage ?? false
+    property bool pinned: entry?.pinned ?? false
+    property bool suppressInlinePreview: false
     
     visible: root.entryShown
     property int horizontalMargin: 10
@@ -192,6 +194,15 @@ RippleButton {
                 text: root.itemType
             }
             RowLayout {
+                Loader { // Pin indicator for pinned clipboard entries
+                    visible: root.cliphistRawString && root.pinned
+                    active: root.cliphistRawString && root.pinned
+                    sourceComponent: MaterialSymbol {
+                        text: "keep"
+                        font.pixelSize: Appearance.font.pixelSize.normal
+                        color: root.colForeground
+                    }
+                }
                 Loader { // Checkmark for copied clipboard entry
                     visible: itemName == Quickshell.clipboardText && root.cliphistRawString
                     active: itemName == Quickshell.clipboardText && root.cliphistRawString
@@ -230,7 +241,7 @@ RippleButton {
                 }
             }
             Loader { // Clipboard image preview
-                active: root.cliphistRawString && Cliphist.entryIsImage(root.cliphistRawString)
+                active: !root.suppressInlinePreview && root.cliphistRawString && Cliphist.entryIsImage(root.cliphistRawString)
                 sourceComponent: CliphistImage {
                     Layout.fillWidth: true
                     entry: root.cliphistRawString

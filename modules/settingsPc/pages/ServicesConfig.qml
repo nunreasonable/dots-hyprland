@@ -220,6 +220,17 @@ ContentPage {
                         text: Translation.tr("When off, these results only show once you type their prefix below (e.g. $, =, ?).")
                     }
                 }
+                ConfigSwitch {
+                    buttonIcon: "preview"
+                    text: Translation.tr("Show clipboard preview popups")
+                    checked: Config.options.search.clipboardPreviewPopup
+                    onCheckedChanged: {
+                        Config.options.search.clipboardPreviewPopup = checked;
+                    }
+                    W.StyledToolTip {
+                        text: Translation.tr("Shows a bigger preview of the selected clipboard entry next to the search box, instead of the inline thumbnail.")
+                    }
+                }
             }
 
             ContentSubsection {
