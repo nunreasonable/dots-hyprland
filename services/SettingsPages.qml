@@ -12,7 +12,9 @@ Singleton {
     readonly property list<string> files: ["QuickConfig.qml", "GeneralConfig.qml", "BarConfig.qml", "BackgroundConfig.qml", "InterfaceConfig.qml", "ServicesConfig.qml", "About.qml"]
     readonly property list<url> sources: root.files.map(file => Qt.resolvedUrl("../" + root.pagesDir + file))
     property list<string> collapsedSections: []
-    readonly property list<string> fontFamilies: Qt.fontFamilies().filter(name => !name.startsWith("@"))
+    readonly property var fontCache: ({
+            families: null
+        })
 
     readonly property var pages: {
         const list = [
@@ -30,9 +32,16 @@ Singleton {
         }));
     }
 
+    function fontFamilies() {
+        if (root.fontCache.families === null)
+            root.fontCache.families = Qt.fontFamilies().filter(name => !name.startsWith("@"));
+        return root.fontCache.families;
+    }
+
     function fontOptions(current) {
-        const options = root.fontFamilies.map(name => ({ displayName: name, value: name }));
-        if (current && !root.fontFamilies.includes(current))
+        const families = root.fontFamilies();
+        const options = families.map(name => ({ displayName: name, value: name }));
+        if (current && !families.includes(current))
             options.unshift({ displayName: current, value: current });
         return options;
     }
