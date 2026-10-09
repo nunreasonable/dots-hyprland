@@ -59,7 +59,8 @@ PanelWindow {
     Connections {
         target: GlobalFocusGrab
         function onDismissed() {
-            panelWindow.hide();
+            if (panelWindow.visible)
+                panelWindow.hide();
         }
     }
 
