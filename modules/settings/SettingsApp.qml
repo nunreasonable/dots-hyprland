@@ -12,7 +12,9 @@ Singleton {
     property bool isOpen: false
     property var target: null
     readonly property bool wantsPcLayout: (Config.options?.appearance?.settingsLayout ?? "ii") === "end4pc"
+    readonly property bool wantsDashboard: Config.options?.settings?.style === "dashboard"
     property bool pcLayout: false
+    property bool dashboardMode: false
     readonly property var activeLoader: root.pcLayout ? pcLoader : windowLoader
 
     function load() {
@@ -21,15 +23,17 @@ Singleton {
     function ensureSource() {
         if (root.pcLayout) {
             if (pcLoader.source == "")
-                pcLoader.source = Qt.resolvedUrl("../settingsPc/SettingsPcPanel.qml");
+                pcLoader.source = Qt.resolvedUrl(root.dashboardMode ? "../settingsPc/dashboard/SettingsPcDashboardWindow.qml" : "../settingsPc/SettingsPcPanel.qml");
         } else if (windowLoader.source == "") {
             windowLoader.source = Qt.resolvedUrl("SettingsAppWindow.qml");
         }
     }
 
     function open() {
-        if (!root.isOpen)
+        if (!root.isOpen) {
             root.pcLayout = root.wantsPcLayout;
+            root.dashboardMode = root.wantsDashboard;
+        }
         root.ensureSource();
         if (root.isOpen && root.activeLoader.item) {
             root.activeLoader.item.activate();
@@ -70,16 +74,21 @@ Singleton {
     }
 
     onWantsPcLayoutChanged: layoutSwitchTimer.restart()
+    onWantsDashboardChanged: layoutSwitchTimer.restart()
 
     Timer {
         id: layoutSwitchTimer
         interval: 0
         onTriggered: {
-            if (root.pcLayout === root.wantsPcLayout)
+            if (root.pcLayout === root.wantsPcLayout && root.dashboardMode === root.wantsDashboard)
                 return;
             const reopen = root.isOpen;
             root.isOpen = false;
             root.pcLayout = root.wantsPcLayout;
+            if (root.dashboardMode !== root.wantsDashboard) {
+                root.dashboardMode = root.wantsDashboard;
+                pcLoader.source = "";
+            }
             if (reopen) {
                 root.ensureSource();
                 root.isOpen = true;
