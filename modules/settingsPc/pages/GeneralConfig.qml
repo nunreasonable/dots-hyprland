@@ -68,6 +68,55 @@ ContentPage {
                     }
                 }
             }
+
+            ContentSubsection {
+                visible: Platform.isWindows
+                title: Translation.tr("Named color scheme")
+                tooltip: Translation.tr("Pick a fixed palette instead of colors extracted from the wallpaper.")
+
+                GroupedList {
+                    ConfigComboBox {
+                        buttonIcon: "palette"
+                        text: Translation.tr("Palette")
+                        fieldWidth: 220
+                        fixedWidth: true
+                        currentValue: Config.options.appearance.palette.namedScheme
+                        model: ColorSchemes.schemeOptions()
+                        onSelected: newValue => {
+                            Config.options.appearance.palette.namedScheme = newValue;
+                            Config.options.appearance.palette.namedSchemePrimary = "";
+                            Config.options.appearance.palette.namedSchemeSecondary = "";
+                            Wallpapers.reapplyPalette();
+                        }
+                    }
+                    ConfigComboBox {
+                        visible: Config.options.appearance.palette.namedScheme !== ""
+                        buttonIcon: "colors"
+                        text: Translation.tr("Primary accent")
+                        fieldWidth: 220
+                        fixedWidth: true
+                        currentValue: Config.options.appearance.palette.namedSchemePrimary
+                        model: ColorSchemes.accentOptions(Appearance.m3colors.darkmode)
+                        onSelected: newValue => {
+                            Config.options.appearance.palette.namedSchemePrimary = newValue;
+                            Wallpapers.reapplyPalette();
+                        }
+                    }
+                    ConfigComboBox {
+                        visible: Config.options.appearance.palette.namedScheme !== ""
+                        buttonIcon: "colors"
+                        text: Translation.tr("Secondary accent")
+                        fieldWidth: 220
+                        fixedWidth: true
+                        currentValue: Config.options.appearance.palette.namedSchemeSecondary
+                        model: ColorSchemes.accentOptions(Appearance.m3colors.darkmode)
+                        onSelected: newValue => {
+                            Config.options.appearance.palette.namedSchemeSecondary = newValue;
+                            Wallpapers.reapplyPalette();
+                        }
+                    }
+                }
+            }
         }
 
         ContentSection {

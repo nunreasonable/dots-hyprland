@@ -1034,5 +1034,11 @@
   "Show clipboard preview popups": "Mostrar pop-ups de pré-visualização da área de transferência",
   "Shows a bigger preview of the selected clipboard entry next to the search box, instead of the inline thumbnail.": "Mostra uma pré-visualização maior do item selecionado da área de transferência, ao lado da caixa de busca, em vez da miniatura em linha.",
   "Image · %1x%2": "Imagem · %1x%2",
-  "Text · %1 characters": "Texto · %1 caracteres"
+  "Text · %1 characters": "Texto · %1 caracteres",
+  "From wallpaper": "Do papel de parede",
+  "Named color scheme": "Esquema de cores nomeado",
+  "Pick a fixed palette instead of colors extracted from the wallpaper.": "Escolha uma paleta fixa em vez de cores extraídas do papel de parede.",
+  "Palette": "Paleta",
+  "Primary accent": "Destaque primário",
+  "Secondary accent": "Destaque secundário"
 }

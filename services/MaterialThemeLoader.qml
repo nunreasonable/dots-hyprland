@@ -47,6 +47,9 @@ Singleton {
 
         Appearance.m3colors.darkmode = (Appearance.m3colors.m3background.hslLightness < 0.5)
 
+        if (Platform.isWindows)
+            ColorSchemes.applySecondaryOverride()
+
         if (Platform.isWindows && json.primary)
             root.syncAccentColor(json.primary)
         root.ready = true

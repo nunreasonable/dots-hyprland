@@ -178,9 +178,13 @@ Singleton {
             return;
         }
 
+        const namedScheme = Config.options.appearance.palette.namedScheme;
+        const namedAccentColor = namedScheme ? ColorSchemes.currentAccent("primary", darkMode) : "";
+        const hasNamedAccentColor = /^#[0-9a-fA-F]{6}$/.test(namedAccentColor ?? "");
+
         const accentColor = Config.options.appearance.palette.accentColor;
-        const hasAccentColor = /^#[0-9a-fA-F]{6}$/.test(accentColor ?? "");
-        if (!hasAccentColor && !hasPath) return;
+        const hasAccentColor = !hasNamedAccentColor && /^#[0-9a-fA-F]{6}$/.test(accentColor ?? "");
+        if (!hasNamedAccentColor && !hasAccentColor && !hasPath) return;
 
         const matugenExe = wn.matugenPath();
         if (!matugenExe) {
@@ -196,7 +200,9 @@ Singleton {
         }
 
         const args = [matugenExe, "--source-color-index", "0", "-c", windowsMatugenConfig.path, "-m", darkMode ? "dark" : "light", "-t", schemeType];
-        if (hasAccentColor) {
+        if (hasNamedAccentColor) {
+            args.push("color", "hex", namedAccentColor);
+        } else if (hasAccentColor) {
             args.push("color", "hex", accentColor);
         } else {
             args.push("image", path);

@@ -1,0 +1,224 @@
+{
+  "catppuccin": {
+    "name": "Catppuccin",
+    "defaults": {
+      "primary": "mauve",
+      "secondary": "blue"
+    },
+    "accents": {
+      "dark": {
+        "red": "#f38ba8",
+        "peach": "#fab387",
+        "yellow": "#f9e2af",
+        "green": "#a6e3a1",
+        "teal": "#94e2d5",
+        "blue": "#89b4fa",
+        "mauve": "#cba6f7",
+        "pink": "#f5c2e7",
+        "lavender": "#b4befe"
+      },
+      "light": {
+        "red": "#d20f39",
+        "peach": "#fe640b",
+        "yellow": "#df8e1d",
+        "green": "#40a02b",
+        "teal": "#179299",
+        "blue": "#1e66f5",
+        "mauve": "#8839ef",
+        "pink": "#ea76cb",
+        "lavender": "#7287fd"
+      }
+    }
+  },
+  "dracula": {
+    "name": "Dracula",
+    "defaults": {
+      "primary": "purple",
+      "secondary": "pink"
+    },
+    "accents": {
+      "dark": {
+        "red": "#ff5555",
+        "orange": "#ffb86c",
+        "yellow": "#f1fa8c",
+        "green": "#50fa7b",
+        "cyan": "#8be9fd",
+        "purple": "#bd93f9",
+        "pink": "#ff79c6"
+      },
+      "light": {
+        "red": "#cb3a2a",
+        "orange": "#a34d14",
+        "yellow": "#846e15",
+        "green": "#14710a",
+        "cyan": "#036a96",
+        "purple": "#644ac9",
+        "pink": "#a3144d"
+      }
+    }
+  },
+  "everforest": {
+    "name": "Everforest",
+    "defaults": {
+      "primary": "green",
+      "secondary": "aqua"
+    },
+    "accents": {
+      "dark": {
+        "red": "#e67e80",
+        "orange": "#e69875",
+        "yellow": "#dbbc7f",
+        "green": "#a7c080",
+        "aqua": "#83c092",
+        "blue": "#7fbbb3",
+        "purple": "#d699b6"
+      },
+      "light": {
+        "red": "#f85552",
+        "orange": "#f57d26",
+        "yellow": "#dfa000",
+        "green": "#8da101",
+        "aqua": "#35a77c",
+        "blue": "#3a94c5",
+        "purple": "#df69ba"
+      }
+    }
+  },
+  "gruvbox": {
+    "name": "Gruvbox",
+    "defaults": {
+      "primary": "yellow",
+      "secondary": "aqua"
+    },
+    "accents": {
+      "dark": {
+        "red": "#fb4934",
+        "orange": "#fe8019",
+        "yellow": "#fabd2f",
+        "green": "#b8bb26",
+        "aqua": "#8ec07c",
+        "blue": "#83a598",
+        "purple": "#d3869b"
+      },
+      "light": {
+        "red": "#9d0006",
+        "orange": "#af3a03",
+        "yellow": "#b57614",
+        "green": "#79740e",
+        "aqua": "#427b58",
+        "blue": "#076678",
+        "purple": "#8f3f71"
+      }
+    }
+  },
+  "nord": {
+    "name": "Nord",
+    "defaults": {
+      "primary": "cyan",
+      "secondary": "blue"
+    },
+    "accents": {
+      "dark": {
+        "red": "#bf616a",
+        "orange": "#d08770",
+        "yellow": "#ebcb8b",
+        "green": "#a3be8c",
+        "teal": "#8fbcbb",
+        "cyan": "#88c0d0",
+        "blue": "#81a1c1",
+        "purple": "#b48ead"
+      },
+      "light": {
+        "red": "#a8434f",
+        "orange": "#b8603f",
+        "yellow": "#a98021",
+        "green": "#6a8a52",
+        "teal": "#4f8a89",
+        "cyan": "#3f8aa0",
+        "blue": "#5e81ac",
+        "purple": "#8a6784"
+      }
+    }
+  },
+  "onedark": {
+    "name": "One Dark",
+    "defaults": {
+      "primary": "blue",
+      "secondary": "purple"
+    },
+    "accents": {
+      "dark": {
+        "red": "#e06c75",
+        "orange": "#d19a66",
+        "yellow": "#e5c07b",
+        "green": "#98c379",
+        "cyan": "#56b6c2",
+        "blue": "#61afef",
+        "purple": "#c678dd"
+      },
+      "light": {
+        "red": "#e45649",
+        "orange": "#986801",
+        "yellow": "#c18401",
+        "green": "#50a14f",
+        "cyan": "#0184bc",
+        "blue": "#4078f2",
+        "purple": "#a626a4"
+      }
+    }
+  },
+  "rosepine": {
+    "name": "Rosé Pine",
+    "defaults": {
+      "primary": "iris",
+      "secondary": "rose"
+    },
+    "accents": {
+      "dark": {
+        "love": "#eb6f92",
+        "gold": "#f6c177",
+        "rose": "#ebbcba",
+        "pine": "#31748f",
+        "foam": "#9ccfd8",
+        "iris": "#c4a7e7"
+      },
+      "light": {
+        "love": "#b4637a",
+        "gold": "#ea9d34",
+        "rose": "#d7827e",
+        "pine": "#286983",
+        "foam": "#56949f",
+        "iris": "#907aa9"
+      }
+    }
+  },
+  "tokyonight": {
+    "name": "Tokyo Night",
+    "defaults": {
+      "primary": "blue",
+      "secondary": "cyan"
+    },
+    "accents": {
+      "dark": {
+        "red": "#f7768e",
+        "orange": "#ff9e64",
+        "yellow": "#e0af68",
+        "green": "#9ece6a",
+        "teal": "#1abc9c",
+        "cyan": "#7dcfff",
+        "blue": "#7aa2f7",
+        "purple": "#bb9af7"
+      },
+      "light": {
+        "red": "#f52a65",
+        "orange": "#b15c00",
+        "yellow": "#8c6c3e",
+        "green": "#587539",
+        "teal": "#118c74",
+        "cyan": "#007197",
+        "blue": "#2e7de9",
+        "purple": "#9854f1"
+      }
+    }
+  }
+}
