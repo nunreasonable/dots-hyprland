@@ -151,7 +151,7 @@ Item {
     Component {
         id: bannerComponent
         Item {
-            implicitHeight: 160
+            implicitHeight: 180
 
             Rectangle {
                 id: bannerRect
@@ -173,8 +173,15 @@ Item {
                     readonly property real focusX: overflowX > 0 ? Math.max(0, Math.min(1, Config.options.sidebar.bannerFocusX - dragDX / overflowX)) : 0.5
                     readonly property real focusY: overflowY > 0 ? Math.max(0, Math.min(1, Config.options.sidebar.bannerFocusY - dragDY / overflowY)) : 0.5
 
-                    anchors.fill: parent
-                    anchors.margins: bannerRect.inset
+                    anchors {
+                        top: parent.top
+                        left: parent.left
+                        right: parent.right
+                        topMargin: bannerRect.inset
+                        leftMargin: bannerRect.inset
+                        rightMargin: bannerRect.inset
+                    }
+                    height: 120
                     radius: Math.max(0, bannerRect.radius - bannerRect.inset)
                     color: "transparent"
 
@@ -243,7 +250,7 @@ Item {
                         onEntered: drag => drag.accept(Qt.CopyAction)
                         onDropped: drop => {
                             if (!drop.hasUrls || drop.urls.length === 0) return;
-                            const cleanPath = drop.urls[0].toString().replace(/^file:\/\//, "");
+                            const cleanPath = FileUtils.trimFileProtocol(drop.urls[0]);
                             const ext = cleanPath.split(".").pop().toLowerCase();
                             const accepted = ["png", "jpg", "jpeg", "webp", "bmp", "gif"];
                             if (accepted.indexOf(ext) !== -1) {
@@ -255,9 +262,11 @@ Item {
                     }
 
                     MouseArea {
+                        id: bannerMouse
                         property real lastX: 0
                         property real lastY: 0
                         anchors.fill: parent
+                        hoverEnabled: true
                         cursorShape: wallpaperRect.panning ? Qt.ClosedHandCursor : Qt.OpenHandCursor
                         acceptedButtons: Qt.LeftButton | Qt.RightButton
                         onPressed: mouse => {
@@ -295,41 +304,37 @@ Item {
                             }
                         }
                         StyledToolTip {
+                            extraVisibleCondition: bannerMouse.containsMouse && !wallpaperRect.panning
                             text: Translation.tr("Drag an image here to set it as the banner\nRight-click to reset")
                         }
                     }
                 }
 
-                Row {
+                Column {
                     anchors {
                         left: parent.left
                         bottom: parent.bottom
                         leftMargin: bannerRect.inset + 8
                         bottomMargin: 8
                     }
-                    spacing: 8
+                    spacing: 1
 
                     UserAvatar {
-                        width: 40
-                        height: 40
+                        width: 48
+                        height: 48
                     }
 
-                    Column {
-                        anchors.verticalCenter: parent.verticalCenter
-                        spacing: 0
-
-                        StyledText {
-                            text: SystemInfo.username
-                            font.pixelSize: Appearance.font.pixelSize.small
-                            font.weight: Font.DemiBold
-                            color: Appearance.colors.colOnLayer1
-                        }
-                        StyledText {
-                            text: Translation.tr("Up %1").arg(DateTime.uptime)
-                            font.pixelSize: Appearance.font.pixelSize.smaller
-                            color: Appearance.colors.colOnLayer1
-                            opacity: 0.6
-                        }
+                    StyledText {
+                        text: (Config.options.profile.displayName === "" ? SystemInfo.username : Config.options.profile.displayName) + (SystemInfo.hostname === "" ? "" : "@" + SystemInfo.hostname)
+                        font.pixelSize: Appearance.font.pixelSize.small
+                        font.weight: Font.DemiBold
+                        color: Appearance.colors.colOnLayer1
+                    }
+                    StyledText {
+                        text: Translation.tr("Up • %1").arg(DateTime.uptime)
+                        font.pixelSize: Appearance.font.pixelSize.smaller
+                        color: Appearance.colors.colOnLayer1
+                        opacity: 0.6
                     }
                 }
 

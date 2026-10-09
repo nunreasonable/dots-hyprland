@@ -15,6 +15,7 @@ Singleton {
     property string distroId: "unknown"
     property string distroIcon: "linux-symbolic"
     property string username: "user"
+    property string hostname: Platform.isWindows ? (Quickshell.env("COMPUTERNAME") ?? "") : ""
     property string homeUrl: ""
     property string documentationUrl: ""
     property string supportUrl: ""
@@ -144,5 +145,10 @@ Singleton {
     FileView {
         id: fileOsRelease
         path: Platform.isWindows ? "" : "/etc/os-release"
+    }
+
+    FileView {
+        path: Platform.isWindows ? "" : "/etc/hostname"
+        onLoaded: root.hostname = text().trim()
     }
 }

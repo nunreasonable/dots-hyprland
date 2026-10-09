@@ -34,6 +34,8 @@ Singleton {
         Config.options.bar.layouts.middleLayout = pc ? BarLayouts.end4pcMiddle : BarLayouts.classicMiddle;
         Config.options.bar.layouts.rightLayout = pc ? BarLayouts.end4pcRight : BarLayouts.classicRight;
         Config.options.sidebar.quickSliders.enable = pc;
+        Config.options.sidebar.banner = pc;
+        Config.options.sidebar.sectionOrder = pc ? ["banner", "quickToggles", "sliders", "media", "notifications", "bottom"] : ["banner", "sliders", "quickToggles", "media", "notifications", "bottom"];
         Config.options.appearance.settingsLayout = style;
         Config.options.appearance.visualStyleApplied = style;
     }
