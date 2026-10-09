@@ -50,7 +50,8 @@ Singleton {
     property var frameHover: ({})
     readonly property bool dynamicIslandEnabled: !Config.options.bar.vertical
         && Config.options.bar.layouts.middleLayout.includes("dynamicIsland")
-    readonly property bool dynamicIslandActive: root.dynamicIslandEnabled && root.barOpen && !root.screenLocked
+    property int dynamicIslandsShown: 0
+    readonly property bool dynamicIslandActive: root.dynamicIslandEnabled && root.dynamicIslandsShown > 0 && root.barOpen && !root.screenLocked
         && !(Platform.isWindows && Config.options.windowsPort.nativeTaskbar)
 
     function setFrameHover(screenName, side, hovered) {

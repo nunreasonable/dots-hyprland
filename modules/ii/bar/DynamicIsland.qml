@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Services.Mpris
 import qs
 import qs.services
@@ -73,28 +74,27 @@ Item {
         onTriggered: root.recordingElapsedSeconds++
     }
 
-    property string engagedTimerKind: ""
+    readonly property bool pomodoroEngaged: TimerService.pomodoroRunning || TimerService.pomodoroSecondsLeft < TimerService.pomodoroLapDuration
+    readonly property bool stopwatchEngaged: TimerService.stopwatchRunning || TimerService.stopwatchTime > 0
+    readonly property string engagedTimerKind: root.pomodoroEngaged ? "pomodoro" : root.stopwatchEngaged ? "stopwatch" : ""
     readonly property bool hasActiveTimer: root.engagedTimerKind !== ""
 
-    Component.onCompleted: {
-        if (TimerService.pomodoroRunning)
-            root.engagedTimerKind = "pomodoro";
-        else if (TimerService.stopwatchRunning)
-            root.engagedTimerKind = "stopwatch";
+    readonly property bool reallyShown: !root.vertical && (QsWindow.window?.visible ?? false)
+        && !Config.options.bar.autoHide.enable
+        && !(Hyprland.focusedWorkspace?.hasFullscreen ?? false)
+    property bool registeredShown: false
+
+    function syncShown(alive) {
+        const want = alive && root.reallyShown;
+        if (want === root.registeredShown)
+            return;
+        GlobalStates.dynamicIslandsShown += want ? 1 : -1;
+        root.registeredShown = want;
     }
 
-    Connections {
-        target: TimerService
-        ignoreUnknownSignals: true
-        function onPomodoroRunningChanged() {
-            if (TimerService.pomodoroRunning)
-                root.engagedTimerKind = "pomodoro";
-        }
-        function onStopwatchRunningChanged() {
-            if (TimerService.stopwatchRunning)
-                root.engagedTimerKind = "stopwatch";
-        }
-    }
+    onReallyShownChanged: root.syncShown(true)
+    Component.onCompleted: root.syncShown(true)
+    Component.onDestruction: root.syncShown(false)
 
     function timerIcon() {
         switch (root.engagedTimerKind) {
@@ -147,7 +147,6 @@ Item {
             TimerService.stopwatchReset();
             break;
         }
-        root.engagedTimerKind = "";
     }
 
     function stopRecording() {
@@ -290,7 +289,7 @@ Item {
     readonly property var activeOthers: root.contentProviders.filter(p => !root.alwaysWinIds.includes(p.id) && p.active)
 
     readonly property var activeProvider: {
-        const forcedTop = root.contentProviders.find(p => root.alwaysWinIds.includes(p.id) && p.active);
+        const forcedTop = ["session", "osd", "battery", "notification"].map(id => root.contentProviders.find(p => p.id === id && p.active)).find(p => p !== undefined);
         if (forcedTop)
             return forcedTop;
         if (root.manualFocusId !== "") {

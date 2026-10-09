@@ -16,7 +16,7 @@ Item {
     readonly property var effectiveLeftLayout: root.filterTray(BarLayouts.leftLayout)
     readonly property var effectiveMiddleLayout: root.filterTray(BarLayouts.middleLayout)
     readonly property var effectiveRightLayout: root.filterTray(BarLayouts.rightLayout)
-    readonly property bool centerOnly: root.effectiveLeftLayout.length === 0 && root.effectiveRightLayout.length === 0
+    readonly property bool centerOnly: BarLayouts.centerOnly
     readonly property color barColor: Config.options.bar.followFrameColor ? Appearance.getColorFromName(Config.options.bar.frameColor) : Appearance.colors.colLayer0
     readonly property real groupSpacing: Config.options.bar.borderless ? -7 : 2
     readonly property real sideMargin: Config.options.bar.cornerStyle === 1 ? 4 : 8

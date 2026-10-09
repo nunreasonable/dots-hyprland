@@ -1,10 +1,12 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Quickshell.Services.Mpris
 import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.utils
 
 Item {
     id: root
@@ -20,6 +22,11 @@ Item {
     property real dotSpacing: 3
     property real maxBarHeight: (vertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight) * 0.7
     property real maxVisualizerValue: 1000
+    readonly property bool onScreen: root.visible && (QsWindow.window?.visible ?? false)
+
+    SpectrumConsumer {
+        active: root.onScreen
+    }
 
     implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : barCount * (dotSize + dotSpacing)
     implicitHeight: vertical ? barCount * (dotSize + dotSpacing) : Appearance.sizes.barHeight

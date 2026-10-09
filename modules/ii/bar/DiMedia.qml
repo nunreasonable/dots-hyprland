@@ -7,6 +7,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.utils
 
 Item {
     id: diMediaRoot
@@ -139,6 +140,10 @@ Item {
         smoothing: 2
         color: Appearance.colors.colOnLayer0
         visible: Config.options.bar.dynamicIsland.visualizerStyle === "wave"
+    }
+
+    SpectrumConsumer {
+        active: visualizerCanvas.visible && (visualizerCanvas.QsWindow.window?.visible ?? false)
     }
 
     Visualizer {

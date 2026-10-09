@@ -132,12 +132,16 @@ Item {
         }
     }
 
-    function _handleMouseWheel(event) {
+    function cancelTouchpad() {
         physicsLoop.running = false;
         liftTimer.stop();
         root._velocity = 0;
         root._velocitySamples = [];
         root.touchpadActive = false;
+    }
+
+    function _handleMouseWheel(event) {
+        root.cancelTouchpad();
         var direction = event.angleDelta.y > 0 ? -1 : 1;
         var maxY = Math.max(0, root.flickable.contentHeight - root.flickable.height);
         var base = wheelAnim.running ? root._wheelTargetY : root.flickable.contentY;

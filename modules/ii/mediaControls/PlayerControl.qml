@@ -354,7 +354,7 @@ Item { // Player instance
 
         Loader {
             id: lyricsLoader
-            active: root.lyricsShown
+            active: root.lyricsShown && root.shown
             visible: active
             clip: true
             anchors {

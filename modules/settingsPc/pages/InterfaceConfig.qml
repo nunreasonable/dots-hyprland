@@ -1412,21 +1412,6 @@ ContentPage {
                         Config.options.interactions.scrolling.mouseScrollFactor = value;
                     }
                 }
-                ConfigSpinBox {
-                    enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
-                    icon: "swipe"
-                    text: Translation.tr("Touchpad scroll factor")
-                    value: Config.options.interactions.scrolling.touchpadScrollFactor
-                    from: 10
-                    to: 2000
-                    stepSize: 10
-                    onValueChanged: {
-                        Config.options.interactions.scrolling.touchpadScrollFactor = value;
-                    }
-                    W.StyledToolTip {
-                        text: Translation.tr("Higher moves more per scroll notch/swipe. No longer used for touchpad input now that it runs through the inertial engine below.")
-                    }
-                }
             }
 
             ContentSubsection {

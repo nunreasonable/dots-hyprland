@@ -204,9 +204,18 @@ Singleton {
     }
 
     onWantedChanged: {
-        if (root.wanted && root.loadedKey !== root.trackKey())
+        if (!root.wanted) {
+            if (root.status === "loading")
+                root.loadedKey = "";
+            root.requestToken++;
+            timeoutTimer.stop();
+            root.request?.abort();
+            root.request = null;
+            return;
+        }
+        if (root.loadedKey !== root.trackKey())
             root.restartLyrics();
-        else if (root.wanted)
+        else
             root.resync();
     }
 

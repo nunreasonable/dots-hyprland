@@ -3,6 +3,7 @@ import qs
 import qs.modules.common
 import QtQuick
 import Quickshell
+import Quickshell.Services.SystemTray
 
 Singleton {
     id: root
@@ -51,7 +52,12 @@ Singleton {
         && root.sameList(Config.options.bar.layouts.middleLayout, root.classicMiddle)
         && root.sameList(Config.options.bar.layouts.rightLayout, root.classicRight)
 
-    readonly property bool centerOnly: !root.classic && root.leftLayout.length === 0 && root.rightLayout.length === 0
+    readonly property bool trayHasItems: SystemTray.items.values.length > 0
+    readonly property bool centerOnly: !root.classic && root.withoutEmptyTray(root.leftLayout).length === 0 && root.withoutEmptyTray(root.rightLayout).length === 0
+
+    function withoutEmptyTray(layout) {
+        return root.trayHasItems ? layout : layout.filter(name => name !== "sysTray");
+    }
     readonly property string barEdge: Config.options.bar.vertical ? (Config.options.bar.bottom ? "right" : "left") : (Config.options.bar.bottom ? "bottom" : "top")
     readonly property real windowsFrameInset: (Platform.isWindows && root.frameVisibleFor(root.barEdge)) ? Config.options.bar.frameThickness : 0
 

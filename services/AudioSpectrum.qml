@@ -13,11 +13,9 @@ Singleton {
 
     property list<real> points: []
     readonly property bool playing: MprisController.activePlayer?.isPlaying ?? false
-    readonly property bool barShown: GlobalStates.barOpen && !GlobalStates.screenLocked && !(Platform.isWindows && Config.options.windowsPort.nativeTaskbar)
-    readonly property bool barVisualizer: !BarLayouts.classic && (BarLayouts.leftLayout.includes("visualizer") || BarLayouts.middleLayout.includes("visualizer") || BarLayouts.rightLayout.includes("visualizer"))
-    readonly property bool islandVisualizer: !Config.options.bar.vertical && BarLayouts.middleLayout.includes("dynamicIsland") && (Config.options.bar.dynamicIsland.visualizerStyle === "wave" || (Config.options.bar.dynamicIsland.visualizerStyle === "dots" && !Config.options.bar.dynamicIsland.showMediaControls))
+    property int consumers: 0
     readonly property bool desktopVisualizer: Config.options.background.widgets.visualizer.enable
-    readonly property bool wanted: GlobalStates.mediaControlsOpen || root.desktopVisualizer || (root.barShown && root.playing && (root.barVisualizer || root.islandVisualizer))
+    readonly property bool wanted: GlobalStates.mediaControlsOpen || root.desktopVisualizer || (root.playing && root.consumers > 0)
 
     onWantedChanged: {
         if (!root.wanted)

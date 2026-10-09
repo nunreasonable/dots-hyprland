@@ -43,6 +43,7 @@ ListView {
         acceptedButtons: Qt.NoButton
         onWheel: function(wheelEvent) {
             if (Math.abs(wheelEvent.angleDelta.y) >= root.mouseScrollDeltaThreshold) {
+                inertialScrollEngine.cancelTouchpad();
                 const delta = wheelEvent.angleDelta.y / root.mouseScrollDeltaThreshold;
                 const maxY = Math.max(0, root.contentHeight - root.height);
                 const base = scrollAnim.running ? root.scrollTargetY : root.contentY;

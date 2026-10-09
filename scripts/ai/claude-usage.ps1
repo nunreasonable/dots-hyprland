@@ -9,7 +9,7 @@ $cutoff = $now - 2 * $window
 $sessions = New-Object System.Collections.ArrayList
 foreach ($file in (Get-ChildItem -LiteralPath (Join-Path $claudeDir "sessions") -Filter "*.json" -File)) {
     try {
-        $session = Get-Content -Raw -LiteralPath $file.FullName | ConvertFrom-Json
+        $session = Get-Content -Raw -Encoding UTF8 -LiteralPath $file.FullName | ConvertFrom-Json
     } catch {
         continue
     }
