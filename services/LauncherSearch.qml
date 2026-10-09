@@ -135,6 +135,21 @@ Singleton {
         return enabled && sensitiveNetwork;
     }
 
+    // Same bit order as CheatsheetKeybindsCategory.qml's modMaskToStringList, kept local since it's a few lines
+    function keybindToString(bind) {
+        const modmask = bind.modmask ?? 0;
+        const mods = [];
+        if (modmask & (1 << 2))
+            mods.push("Ctrl");
+        if (modmask & (1 << 6))
+            mods.push("Super");
+        if (modmask & (1 << 0))
+            mods.push("Shift");
+        if (modmask & (1 << 3))
+            mods.push("Alt");
+        return [...mods, bind.key].filter(part => part).join(" + ");
+    }
+
     function containsUnsafeLink(entry) {
         if (entry == undefined)
             return false;
@@ -203,22 +218,31 @@ Singleton {
         if (root.query.startsWith(Config.options.search.prefix.clipboard)) {
             // Clipboard
             const searchString = StringUtils.cleanPrefix(root.query, Config.options.search.prefix.clipboard);
-            return Cliphist.fuzzyQuery(searchString).map((entry, index, array) => {
+            const clipboardResults = Cliphist.fuzzyQuery(searchString).map((entry, index, array) => {
                 const mightBlurImage = Cliphist.entryIsImage(entry) && root.clipboardWorkSafetyActive;
                 let shouldBlurImage = mightBlurImage;
                 if (mightBlurImage) {
                     shouldBlurImage = shouldBlurImage && (root.containsUnsafeLink(array[index - 1]) || root.containsUnsafeLink(array[index + 1]));
                 }
                 const type = `#${entry.match(/^\s*(\S+)/)?.[1] || ""}`;
+                const pinned = Cliphist.isPinned(entry);
                 return resultComp.createObject(null, {
                     rawValue: entry,
                     name: StringUtils.cleanCliphistEntry(entry),
                     verb: "",
                     type: type,
+                    pinned: pinned,
                     execute: () => {
                         Cliphist.copy(entry);
                     },
                     actions: [resultComp.createObject(null, {
+                            name: pinned ? Translation.tr("Unpin") : Translation.tr("Pin"),
+                            iconName: pinned ? "keep_off" : "keep",
+                            iconType: LauncherSearchResult.IconType.Material,
+                            execute: () => {
+                                Cliphist.togglePin(entry);
+                            }
+                        }), resultComp.createObject(null, {
                             name: Translation.tr("Copy"),
                             iconName: "content_copy",
                             iconType: LauncherSearchResult.IconType.Material,
@@ -236,6 +260,7 @@ Singleton {
                     blurImage: shouldBlurImage
                 });
             }).filter(Boolean);
+            return [...clipboardResults.filter(r => r.pinned), ...clipboardResults.filter(r => !r.pinned)];
         } else if (root.query.startsWith(Config.options.search.prefix.emojis)) {
             // Clipboard
             const searchString = StringUtils.cleanPrefix(root.query, Config.options.search.prefix.emojis);
@@ -250,6 +275,47 @@ Singleton {
                     type: Translation.tr("Emoji"),
                     execute: () => {
                         Quickshell.clipboardText = entry.match(/^\s*(\S+)/)?.[1];
+                    }
+                });
+            }).filter(Boolean);
+        } else if (root.query.startsWith(Config.options.search.prefix.keybinds)) {
+            // Keybinds: look up the user's own shortcuts, copy the key combo
+            const searchString = StringUtils.cleanPrefix(root.query, Config.options.search.prefix.keybinds).toLowerCase();
+            return HyprlandKeybinds.keybinds.filter(bind => {
+                if (!bind.description && !bind.key)
+                    return false;
+                if (searchString === "")
+                    return true;
+                return (bind.description ?? "").toLowerCase().includes(searchString) || (bind.key ?? "").toLowerCase().includes(searchString);
+            }).slice(0, 50).map(bind => {
+                const keyStr = root.keybindToString(bind);
+                return resultComp.createObject(null, {
+                    id: `${bind.key}:${bind.modmask}:${bind.dispatcher}:${bind.arg}`,
+                    name: bind.description ? `${bind.description}  ·  ${keyStr}` : keyStr,
+                    verb: Translation.tr("Copy"),
+                    type: Translation.tr("Keybind"),
+                    fontType: LauncherSearchResult.FontType.Monospace,
+                    iconName: 'keyboard_command_key',
+                    iconType: LauncherSearchResult.IconType.Material,
+                    execute: () => {
+                        Quickshell.clipboardText = keyStr;
+                    }
+                });
+            });
+        } else if (root.query.startsWith(Config.options.search.prefix.symbols)) {
+            // Material Symbols icon names, distinct from the emoji picker above
+            const searchString = StringUtils.cleanPrefix(root.query, Config.options.search.prefix.symbols);
+            return MaterialSymbolsSearch.fuzzyQuery(searchString).map(entry => {
+                const symbolName = entry.split("\t")[0] ?? "";
+                return resultComp.createObject(null, {
+                    rawValue: entry,
+                    name: symbolName,
+                    iconName: symbolName,
+                    iconType: LauncherSearchResult.IconType.Material,
+                    verb: Translation.tr("Copy"),
+                    type: Translation.tr("Symbol"),
+                    execute: () => {
+                        Quickshell.clipboardText = symbolName;
                     }
                 });
             }).filter(Boolean);

@@ -494,6 +494,62 @@ ContentPage {
             title: Translation.tr("Notifications")
 
             GroupedList {
+                ConfigRow {
+                    uniform: true
+                    Layout.alignment: Qt.AlignHCenter
+                    ConfigSelectionArray {
+                        Layout.alignment: Qt.AlignHCenter
+                        currentValue: Config.options.notifications.position
+                        onSelected: newValue => {
+                            Config.options.notifications.position = newValue;
+                        }
+                        options: [
+                            {
+                                displayName: Translation.tr("Top left"),
+                                icon: "north_west",
+                                value: "top_left"
+                            },
+                            {
+                                displayName: Translation.tr("Top center"),
+                                icon: "north",
+                                value: "top_center"
+                            },
+                            {
+                                displayName: Translation.tr("Top right"),
+                                icon: "north_east",
+                                value: "top_right"
+                            }
+                        ]
+                    }
+                }
+                ConfigRow {
+                    uniform: true
+                    Layout.alignment: Qt.AlignHCenter
+                    ConfigSelectionArray {
+                        Layout.alignment: Qt.AlignHCenter
+                        currentValue: Config.options.notifications.position
+                        onSelected: newValue => {
+                            Config.options.notifications.position = newValue;
+                        }
+                        options: [
+                            {
+                                displayName: Translation.tr("Bottom left"),
+                                icon: "south_west",
+                                value: "bottom_left"
+                            },
+                            {
+                                displayName: Translation.tr("Bottom center"),
+                                icon: "south",
+                                value: "bottom_center"
+                            },
+                            {
+                                displayName: Translation.tr("Bottom right"),
+                                icon: "south_east",
+                                value: "bottom_right"
+                            }
+                        ]
+                    }
+                }
                 ConfigSwitch {
                     buttonIcon: "monitor"
                     text: Translation.tr("Force specific monitor")

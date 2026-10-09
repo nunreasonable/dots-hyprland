@@ -204,6 +204,62 @@ ContentPage {
             ]
         }
 
+        ContentSubsection {
+            title: Translation.tr("Named color scheme")
+            tooltip: Translation.tr("Pick a fixed palette instead of colors extracted from the wallpaper.")
+            visible: Platform.isWindows
+
+            StyledComboBox {
+                id: namedSchemeSelector
+                buttonIcon: "palette"
+                textRole: "displayName"
+                model: ColorSchemes.schemeOptions()
+                currentIndex: {
+                    const index = model.findIndex(item => item.value === Config.options.appearance.palette.namedScheme);
+                    return index !== -1 ? index : 0;
+                }
+                onActivated: index => {
+                    Config.options.appearance.palette.namedScheme = model[index].value;
+                    Config.options.appearance.palette.namedSchemePrimary = "";
+                    Config.options.appearance.palette.namedSchemeSecondary = "";
+                    Wallpapers.reapplyPalette();
+                }
+            }
+
+            ConfigRow {
+                uniform: true
+                visible: Config.options.appearance.palette.namedScheme !== ""
+                StyledComboBox {
+                    id: namedSchemePrimarySelector
+                    buttonIcon: "colors"
+                    textRole: "displayName"
+                    model: ColorSchemes.accentOptions(Appearance.m3colors.darkmode)
+                    currentIndex: {
+                        const index = model.findIndex(item => item.value === Config.options.appearance.palette.namedSchemePrimary);
+                        return index !== -1 ? index : 0;
+                    }
+                    onActivated: index => {
+                        Config.options.appearance.palette.namedSchemePrimary = model[index].value;
+                        Wallpapers.reapplyPalette();
+                    }
+                }
+                StyledComboBox {
+                    id: namedSchemeSecondarySelector
+                    buttonIcon: "colors"
+                    textRole: "displayName"
+                    model: ColorSchemes.accentOptions(Appearance.m3colors.darkmode)
+                    currentIndex: {
+                        const index = model.findIndex(item => item.value === Config.options.appearance.palette.namedSchemeSecondary);
+                        return index !== -1 ? index : 0;
+                    }
+                    onActivated: index => {
+                        Config.options.appearance.palette.namedSchemeSecondary = model[index].value;
+                        Wallpapers.reapplyPalette();
+                    }
+                }
+            }
+        }
+
         ConfigSwitch {
             buttonIcon: "ev_shadow"
             text: Translation.tr("Transparency")

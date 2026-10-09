@@ -195,6 +195,17 @@ ContentPage {
             }
         }
 
+        ConfigSwitch {
+            text: Translation.tr("Show clipboard preview popups")
+            checked: Config.options.search.clipboardPreviewPopup
+            onCheckedChanged: {
+                Config.options.search.clipboardPreviewPopup = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Shows a bigger preview of the selected clipboard entry next to the search box, instead of the inline thumbnail.")
+            }
+        }
+
         ContentSubsection {
             title: Translation.tr("Prefixes")
             ConfigRow {
@@ -233,6 +244,28 @@ ContentPage {
                     wrapMode: TextEdit.Wrap
                     onTextChanged: {
                         Config.options.search.prefix.emojis = text;
+                    }
+                }
+            }
+
+            ConfigRow {
+                uniform: true
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Keybinds")
+                    text: Config.options.search.prefix.keybinds
+                    wrapMode: TextEdit.Wrap
+                    onTextChanged: {
+                        Config.options.search.prefix.keybinds = text;
+                    }
+                }
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Symbols")
+                    text: Config.options.search.prefix.symbols
+                    wrapMode: TextEdit.Wrap
+                    onTextChanged: {
+                        Config.options.search.prefix.symbols = text;
                     }
                 }
             }

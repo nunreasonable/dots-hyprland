@@ -179,7 +179,7 @@ Item {
                 anchors.fill: parent
                 spacing: 10
                 
-                touchpadScrollFactor: Config.options.interactions.scrolling.touchpadScrollFactor * 1.4
+                touchpadSensitivity: Config.options.interactions.scrolling.touchpadSensitivity * 1.4
                 mouseScrollFactor: Config.options.interactions.scrolling.mouseScrollFactor * 1.4
 
                 property int lastResponseLength: 0

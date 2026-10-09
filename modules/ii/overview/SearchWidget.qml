@@ -24,6 +24,20 @@ Item { // Wrapper
     implicitWidth: searchWidgetContent.implicitWidth + Appearance.sizes.elevationMargin * 2
     implicitHeight: searchWidgetContent.implicitHeight + searchBar.verticalPadding * 2 + Appearance.sizes.elevationMargin * 2
 
+    property string previewEntry: ""
+    readonly property real absoluteX: root.mapToItem(null, 0, 0).x
+    readonly property real screenWidth: root.QsWindow.window?.width ?? 0
+
+    function setPreviewItem(entry, isSelected) {
+        const rawValue = entry?.rawValue ?? "";
+        const wantsPreview = isSelected && Config.options.search.clipboardPreviewPopup && rawValue !== "";
+        if (wantsPreview) {
+            root.previewEntry = rawValue;
+        } else if (root.previewEntry !== "" && rawValue === root.previewEntry) {
+            root.previewEntry = "";
+        }
+    }
+
     function focusFirstItem() {
         appResults.currentIndex = 0;
     }
@@ -212,7 +226,12 @@ Item { // Wrapper
                     anchors.left: parent?.left
                     anchors.right: parent?.right
                     entry: modelData
+                    suppressInlinePreview: Config.options.search.clipboardPreviewPopup
                     query: StringUtils.cleanOnePrefix(root.searchingText, [Config.options.search.prefix.action, Config.options.search.prefix.app, Config.options.search.prefix.clipboard, Config.options.search.prefix.emojis, Config.options.search.prefix.math, Config.options.search.prefix.shellCommand, Config.options.search.prefix.webSearch])
+
+                    onSelectedChanged: {
+                        root.setPreviewItem(searchItem.modelData, searchItem.selected);
+                    }
 
                     Keys.onPressed: event => {
                         if (event.key === Qt.Key_Tab) {
@@ -227,6 +246,20 @@ Item { // Wrapper
                     }
                 }
             }
+        }
+    }
+
+    Loader {
+        id: clipboardPopoverLoader
+        active: root.previewEntry !== ""
+        visible: active
+        anchors.top: searchWidgetContent.top
+        anchors.left: (root.absoluteX + searchWidgetContent.width + 328 <= root.screenWidth) ? searchWidgetContent.right : undefined
+        anchors.right: (root.absoluteX + searchWidgetContent.width + 328 <= root.screenWidth) ? undefined : searchWidgetContent.left
+        anchors.leftMargin: 8
+        anchors.rightMargin: 8
+        sourceComponent: ClipboardPopover {
+            entry: root.previewEntry
         }
     }
 }

@@ -7,6 +7,8 @@ Scope {
     PanelLoader { deferred: false; extraCondition: !Config.options.bar.vertical && !(Platform.isWindows && Config.options.windowsPort.nativeTaskbar); panelSource: "../modules/ii/bar/Bar.qml" }
     PanelLoader { deferPriority: 2; panelSource: "../modules/ii/background/Background.qml" }
     PanelLoader { panelSource: "../modules/ii/cheatsheet/Cheatsheet.qml" }
+    PanelLoader { deferPriority: 1; panelSource: "../modules/ii/desktopMenu/DesktopMenu.qml" }
+    PanelLoader { deferPriority: 1; panelSource: "../modules/ii/dropover/DropShelfPanel.qml" }
     PanelLoader { extraCondition: Platform.isWindows; panelSource: "../modules/ii/colorPicker/ColorPicker.qml" }
     PanelLoader { deferPriority: 1; extraCondition: Config.options.dock.enable; panelSource: "../modules/ii/dock/Dock.qml" }
     PanelLoader { deferPriority: 2; extraCondition: Config.options.bar.showFrame; panelSource: "../modules/ii/frame/ScreenFrame.qml" }

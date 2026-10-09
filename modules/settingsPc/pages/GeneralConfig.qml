@@ -68,6 +68,55 @@ ContentPage {
                     }
                 }
             }
+
+            ContentSubsection {
+                visible: Platform.isWindows
+                title: Translation.tr("Named color scheme")
+                tooltip: Translation.tr("Pick a fixed palette instead of colors extracted from the wallpaper.")
+
+                GroupedList {
+                    ConfigComboBox {
+                        buttonIcon: "palette"
+                        text: Translation.tr("Palette")
+                        fieldWidth: 220
+                        fixedWidth: true
+                        currentValue: Config.options.appearance.palette.namedScheme
+                        model: ColorSchemes.schemeOptions()
+                        onSelected: newValue => {
+                            Config.options.appearance.palette.namedScheme = newValue;
+                            Config.options.appearance.palette.namedSchemePrimary = "";
+                            Config.options.appearance.palette.namedSchemeSecondary = "";
+                            Wallpapers.reapplyPalette();
+                        }
+                    }
+                    ConfigComboBox {
+                        visible: Config.options.appearance.palette.namedScheme !== ""
+                        buttonIcon: "colors"
+                        text: Translation.tr("Primary accent")
+                        fieldWidth: 220
+                        fixedWidth: true
+                        currentValue: Config.options.appearance.palette.namedSchemePrimary
+                        model: ColorSchemes.accentOptions(Appearance.m3colors.darkmode)
+                        onSelected: newValue => {
+                            Config.options.appearance.palette.namedSchemePrimary = newValue;
+                            Wallpapers.reapplyPalette();
+                        }
+                    }
+                    ConfigComboBox {
+                        visible: Config.options.appearance.palette.namedScheme !== ""
+                        buttonIcon: "colors"
+                        text: Translation.tr("Secondary accent")
+                        fieldWidth: 220
+                        fixedWidth: true
+                        currentValue: Config.options.appearance.palette.namedSchemeSecondary
+                        model: ColorSchemes.accentOptions(Appearance.m3colors.darkmode)
+                        onSelected: newValue => {
+                            Config.options.appearance.palette.namedSchemeSecondary = newValue;
+                            Wallpapers.reapplyPalette();
+                        }
+                    }
+                }
+            }
         }
 
         ContentSection {
@@ -339,6 +388,48 @@ ContentPage {
                         stepSize: 5
                         onValueChanged: {
                             Config.options.battery.full = value;
+                        }
+                    }
+                }
+            }
+
+            ContentSubsection {
+                title: Translation.tr("Bluetooth peripherals")
+                tooltip: Translation.tr("Warns when a paired Bluetooth device's own battery is running low.")
+
+                GroupedList {
+                    ConfigSwitch {
+                        buttonIcon: "notifications"
+                        text: Translation.tr("Notify on low peripheral battery")
+                        checked: Config.options.battery.peripheralNotify
+                        onCheckedChanged: {
+                            Config.options.battery.peripheralNotify = checked;
+                        }
+                    }
+                    ConfigRow {
+                        uniform: true
+                        enabled: Config.options.battery.peripheralNotify
+                        ConfigSpinBox {
+                            icon: "warning"
+                            text: Translation.tr("Low warning")
+                            value: Config.options.battery.peripheralLow
+                            from: 0
+                            to: 100
+                            stepSize: 5
+                            onValueChanged: {
+                                Config.options.battery.peripheralLow = value;
+                            }
+                        }
+                        ConfigSpinBox {
+                            icon: "dangerous"
+                            text: Translation.tr("Critical warning")
+                            value: Config.options.battery.peripheralCritical
+                            from: 0
+                            to: 100
+                            stepSize: 5
+                            onValueChanged: {
+                                Config.options.battery.peripheralCritical = value;
+                            }
                         }
                     }
                 }

@@ -220,6 +220,17 @@ ContentPage {
                         text: Translation.tr("When off, these results only show once you type their prefix below (e.g. $, =, ?).")
                     }
                 }
+                ConfigSwitch {
+                    buttonIcon: "preview"
+                    text: Translation.tr("Show clipboard preview popups")
+                    checked: Config.options.search.clipboardPreviewPopup
+                    onCheckedChanged: {
+                        Config.options.search.clipboardPreviewPopup = checked;
+                    }
+                    W.StyledToolTip {
+                        text: Translation.tr("Shows a bigger preview of the selected clipboard entry next to the search box, instead of the inline thumbnail.")
+                    }
+                }
             }
 
             ContentSubsection {
@@ -270,6 +281,30 @@ ContentPage {
                             value: Config.options.search.prefix.emojis
                             onValueChanged: {
                                 Config.options.search.prefix.emojis = value;
+                            }
+                        }
+                    }
+
+                    ConfigRow {
+                        uniform: true
+                        ConfigTextArea {
+                            Layout.fillWidth: true
+                            buttonIcon: "keyboard_command_key"
+                            fieldWidth: 100
+                            text: Translation.tr("Keybinds")
+                            value: Config.options.search.prefix.keybinds
+                            onValueChanged: {
+                                Config.options.search.prefix.keybinds = value;
+                            }
+                        }
+                        ConfigTextArea {
+                            Layout.fillWidth: true
+                            buttonIcon: "emoji_symbols"
+                            fieldWidth: 100
+                            text: Translation.tr("Symbols")
+                            value: Config.options.search.prefix.symbols
+                            onValueChanged: {
+                                Config.options.search.prefix.symbols = value;
                             }
                         }
                     }

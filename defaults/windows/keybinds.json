@@ -22,6 +22,8 @@
     {"keys": "Super+M", "action": "global", "name": "mediaControlsToggle", "description": "Shell: Toggle media controls"},
     {"keys": "Super+G", "action": "global", "name": "overlayToggle", "description": "Shell: Toggle widget overlay"},
     {"keys": "Super+J", "action": "global", "name": "barToggle", "description": "Shell: Toggle bar"},
+    {"keys": "Shift+Super+W", "action": "global", "name": "desktopMenuToggle", "description": "Shell: Toggle desktop menu"},
+    {"keys": "Shift+Super+D", "action": "global", "name": "dropoverToggle", "description": "Shell: Toggle drag-and-drop shelf"},
     {"keys": "Alt+Shift+Super+Slash", "action": "exec", "command": "qsw.exe -p \"%SHELL%/welcome.qml\""},
     {"keys": "Ctrl+Super+T", "action": "global", "name": "wallpaperSelectorToggle", "description": "Shell: Change wallpaper"},
     {"keys": "Ctrl+Alt+Super+T", "action": "global", "name": "wallpaperSelectorRandom", "description": "Shell: Random wallpaper"},

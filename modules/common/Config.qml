@@ -139,6 +139,9 @@ Singleton {
                 property JsonObject palette: JsonObject {
                     property string type: "auto" // Allowed: auto, scheme-content, scheme-expressive, scheme-fidelity, scheme-fruit-salad, scheme-monochrome, scheme-neutral, scheme-rainbow, scheme-tonal-spot
                     property string accentColor: ""
+                    property string namedScheme: "" // "" = from wallpaper. Allowed: any scheme id in assets/color_schemes.json (gruvbox, nord, ...)
+                    property string namedSchemePrimary: ""
+                    property string namedSchemeSecondary: ""
                 }
             }
 
@@ -477,6 +480,9 @@ Singleton {
                 property int full: 101
                 property bool automaticSuspend: true
                 property int suspend: 3
+                property int peripheralLow: 20
+                property int peripheralCritical: 5
+                property bool peripheralNotify: true
             }
 
             property JsonObject calendar: JsonObject {
@@ -542,6 +548,13 @@ Singleton {
                     property int mouseScrollDeltaThreshold: 120 // delta >= this then it gets detected as mouse scroll rather than touchpad
                     property int mouseScrollFactor: 120
                     property int touchpadScrollFactor: 450
+                    property real bounceDamping: 0.3
+                    property real flingFriction: 0.002
+                    property real flingStopThreshold: 0.01
+                    property real touchpadSensitivity: 3.75
+                    property int wheelDurationMax: 400
+                    property int wheelDurationMin: 200
+                    property int wheelScrollAmount: 120
                 }
                 property JsonObject deadPixelWorkaround: JsonObject { // Hyprland leaves out 1 pixel on the right for interactions
                     property bool enable: false
@@ -628,6 +641,7 @@ Singleton {
 
             property JsonObject notifications: JsonObject {
                 property int timeout: 7000
+                property string position: "top_right" // Allowed: top_left, top_center, top_right, bottom_left, bottom_center, bottom_right
                 property JsonObject forceMonitor: JsonObject {
                     property bool enable: false
                     property string name: ""
@@ -659,6 +673,7 @@ Singleton {
 
             property JsonObject overview: JsonObject {
                 property bool enable: true
+                property string style: "default" // Allowed: default, niri
                 property real scale: 0.18 // Relative to screen size
                 property real rows: 2
                 property real columns: 5
@@ -711,6 +726,8 @@ Singleton {
                 property int nonAppResultDelay: 30 // This prevents lagging when typing
                 property string engineBaseUrl: "https://www.google.com/search?q="
                 property list<string> excludedSites: ["quora.com", "facebook.com"]
+                property list<var> clipboardPins: []
+                property bool clipboardPreviewPopup: false
                 property bool sloppy: false // Uses levenshtein distance based scoring instead of fuzzy sort. Very weird.
                 property bool spotlight: true // Super opens a Spotlight-like search; Super+Tab opens the workspaces overview without search
                 property JsonObject prefix: JsonObject {
@@ -719,6 +736,8 @@ Singleton {
                     property string app: ">"
                     property string clipboard: ";"
                     property string emojis: ":"
+                    property string keybinds: "<"
+                    property string symbols: "."
                     property string math: "="
                     property string shellCommand: "$"
                     property string webSearch: "?"
