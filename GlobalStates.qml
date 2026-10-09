@@ -72,14 +72,14 @@ Singleton {
         { displayName: Translation.tr("None"), value: "none" },
         { displayName: Translation.tr("Left Sidebar"), value: "sidebarLeftOpen" },
         { displayName: Translation.tr("Right Sidebar"), value: "sidebarRightOpen" },
-        { displayName: Translation.tr("Overview Launcher"), value: "overviewOpen" },
-        { displayName: Translation.tr("Spotlight Search"), value: "spotlightOpen" },
-        { displayName: Translation.tr("Wallpaper Selector"), value: "wallpaperSelectorOpen" },
+        { displayName: Translation.tr("Overview"), value: "overviewOpen" },
+        { displayName: Translation.tr("Spotlight search"), value: "spotlightOpen" },
+        { displayName: Translation.tr("Wallpaper selector"), value: "wallpaperSelectorOpen" },
         { displayName: Translation.tr("Media Controls"), value: "mediaControlsOpen" },
         { displayName: Translation.tr("Overlay"), value: "overlayOpen" },
         { displayName: Translation.tr("Screenshot Region"), value: "regionSelectorOpen" },
         { displayName: Translation.tr("Screen Translator"), value: "screenTranslatorOpen" },
-        { displayName: Translation.tr("On-screen Keyboard"), value: "oskOpen" },
+        { displayName: Translation.tr("On-screen keyboard"), value: "oskOpen" },
         { displayName: Translation.tr("Session Menu"), value: "sessionOpen" }
     ]
 
