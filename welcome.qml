@@ -69,26 +69,6 @@ ApplicationWindow {
     color: Appearance.m3colors.m3background
 
     Process {
-        id: konachanWallProc
-        property string status: ""
-        command: Platform.isWindows
-            ? ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
-                FileUtils.trimFileProtocol(Quickshell.shellPath("scripts/colors/random/random_wall.ps1")),
-                "-Source", "konachan", "-UserAgent", Config.options.networking.userAgent ?? "",
-                "-Current", Config.options.background.wallpaperPath ?? ""]
-            : ["bash", "-c", Quickshell.shellPath("scripts/colors/random/random_konachan_wall.sh")]
-        stdout: SplitParser {
-            onRead: data => {
-                console.log(`Konachan wall proc output: ${data}`);
-                konachanWallProc.status = data.trim();
-            }
-        }
-        onExited: (exitCode, exitStatus) => {
-            if (Platform.isWindows && exitCode === 0 && konachanWallProc.status) Wallpapers.apply(konachanWallProc.status);
-        }
-    }
-
-    Process {
         id: translationProc
         property string locale: ""
         command: [Directories.aiTranslationScriptPath, translationProc.locale]
@@ -328,13 +308,15 @@ ApplicationWindow {
                                 Layout.alignment: Qt.AlignHCenter
                                 buttonRadius: Appearance.rounding.small
                                 materialIcon: "ifl"
-                                mainText: konachanWallProc.running ? Translation.tr("Be patient...") : Translation.tr("Random: Konachan")
+                                enabled: !RandomWallpaper.running
+                                mainText: RandomWallpaper.running ? Translation.tr("Be patient...") : Translation.tr("Random: Konachan")
                                 onClicked: {
-                                    console.log(konachanWallProc.command.join(" "));
-                                    konachanWallProc.running = true;
+                                    RandomWallpaper.fetch("konachan");
                                 }
                                 StyledToolTip {
-                                    text: Translation.tr("Random SFW Anime wallpaper from Konachan\nImage is saved to ~/Pictures/Wallpapers")
+                                    text: SpicyStuff.konachan
+                                        ? Translation.tr("Random Anime wallpaper from Konachan, Spicy Stuff included\nImage is saved to ~/Pictures/Wallpapers")
+                                        : Translation.tr("Random SFW Anime wallpaper from Konachan\nImage is saved to ~/Pictures/Wallpapers")
                                 }
                             }
                             RippleButtonWithIcon {

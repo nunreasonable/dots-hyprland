@@ -16,7 +16,7 @@ Singleton {
     signal tagSuggestion(string query, var suggestions)
     signal responseFinished()
 
-    property string failMessage: Translation.tr("That didn't work. Tips:\n- Check your tags and NSFW settings\n- If you don't have a tag in mind, type a page number")
+    property string failMessage: Translation.tr("That didn't work. Tips:\n- Check your tags and Spicy Stuff settings\n- If you don't have a tag in mind, type a page number")
     property var responses: []
     property int runningRequests: 0
     property var defaultUserAgent: Config.options?.networking?.userAgent || "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
@@ -95,7 +95,7 @@ Singleton {
             "name": "Zerochan",
             "url": "https://www.zerochan.net",
             "api": "https://www.zerochan.net/?json",
-            "description": Translation.tr("Clean stuff | Excellent quality, no NSFW"),
+            "description": Translation.tr("Clean stuff | Excellent quality, no Spicy Stuff"),
             "mapFunc": (response) => {
                 response = response.items
                 return response.map(item => {
@@ -156,7 +156,7 @@ Singleton {
             "name": "Gelbooru",
             "url": "https://gelbooru.com",
             "api": "https://gelbooru.com/index.php?page=dapi&s=post&q=index&json=1",
-            "description": Translation.tr("The hentai one | Great quantity, a lot of NSFW, quality varies wildly"),
+            "description": Translation.tr("The spicy one | Great quantity, a lot of Spicy Stuff, quality varies wildly"),
             "mapFunc": (response) => {
                 response = response.post
                 return response.map(item => {
@@ -221,7 +221,7 @@ Singleton {
             "name": "Alcy",
             "url": "https://t.alcy.cc",
             "api": "https://t.alcy.cc/",
-            "description": Translation.tr("Large images | God tier quality, no NSFW."),
+            "description": Translation.tr("Large images | God tier quality, no Spicy Stuff."),
             "fixedTags": [
                 {
                     "name": "ycy",

@@ -38,6 +38,7 @@ Singleton {
     readonly property QtObject blur: _impl ? _impl.blur : null
     readonly property QtObject systemMonitor: _impl ? _impl.systemMonitor : null
     readonly property QtObject fileIndex: _impl ? _impl.fileIndex : null
+    readonly property QtObject accountAge: _impl ? _impl.accountAge : null
 
     Component.onCompleted: {
         if (!Platform.isWindows) return;

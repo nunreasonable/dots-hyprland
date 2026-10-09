@@ -71,15 +71,19 @@ Item {
         },
         {
             name: "safe",
-            description: Translation.tr("Disable NSFW content"),
+            description: Translation.tr("Turn off Spicy Stuff"),
             execute: () => {
                 Persistent.states.booru.allowNsfw = false;
             }
         },
         {
             name: "lewd",
-            description: Translation.tr("Allow NSFW content"),
+            description: Translation.tr("Allow Spicy Stuff"),
             execute: () => {
+                if (!SpicyStuff.allowed) {
+                    Booru.addSystemMessage(SpicyStuff.restriction);
+                    return;
+                }
                 Persistent.states.booru.allowNsfw = true;
             }
         },
@@ -111,7 +115,7 @@ Item {
                     break;
                 }
             }
-            Booru.makeRequest(tagList, Persistent.states.booru.allowNsfw, Config.options.sidebar.booru.limit, pageIndex);
+            Booru.makeRequest(tagList, Persistent.states.booru.allowNsfw && SpicyStuff.allowed, Config.options.sidebar.booru.limit, pageIndex);
         }
     }
 
@@ -503,7 +507,8 @@ Item {
                     text: "•"
                 }
 
-                MouseArea { // NSFW toggle
+                MouseArea {
+                    id: spicyToggleArea
                     visible: width > 0
                     implicitWidth: switchesRow.implicitWidth
                     Layout.fillHeight: true
@@ -511,7 +516,10 @@ Item {
                     hoverEnabled: true
                     PointingHandInteraction {}
                     onPressed: {
-                        nsfwSwitch.checked = !nsfwSwitch.checked
+                        if (!SpicyStuff.allowed)
+                            Booru.addSystemMessage(SpicyStuff.restriction);
+                        else if (nsfwSwitch.enabled)
+                            nsfwSwitch.checked = !nsfwSwitch.checked
                     }
 
                     RowLayout {
@@ -525,14 +533,21 @@ Item {
                             Layout.alignment: Qt.AlignVCenter
                             font.pixelSize: Appearance.font.pixelSize.smaller
                             color: nsfwSwitch.enabled ? Appearance.colors.colOnLayer1 : Appearance.m3colors.m3outline
-                            text: Translation.tr("Allow NSFW")
+                            text: Translation.tr("Spicy Stuff")
+                        }
+                        MaterialSymbol {
+                            visible: !SpicyStuff.allowed
+                            Layout.alignment: Qt.AlignVCenter
+                            text: "lock"
+                            iconSize: Appearance.font.pixelSize.small
+                            color: Appearance.m3colors.m3outline
                         }
                         StyledSwitch {
                             id: nsfwSwitch
-                            enabled: Booru.currentProvider !== "zerochan"
+                            enabled: Booru.currentProvider !== "zerochan" && SpicyStuff.allowed
                             scale: 0.6
                             Layout.alignment: Qt.AlignVCenter
-                            checked: (Persistent.states.booru.allowNsfw && Booru.currentProvider !== "zerochan")
+                            checked: (Persistent.states.booru.allowNsfw && Booru.currentProvider !== "zerochan" && SpicyStuff.allowed)
                             onCheckedChanged: {
                                 if (!nsfwSwitch.enabled) return;
                                 Persistent.states.booru.allowNsfw = checked;

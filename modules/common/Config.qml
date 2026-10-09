@@ -222,6 +222,9 @@ Singleton {
                 property string wallpaperPath: ""
                 property string thumbnailPath: ""
                 property bool hideWhenFullscreen: true
+                property bool konachanSpicy: false
+                property bool konachanOnlyYuri: false
+                property string konachanExtraTags: ""
                 property JsonObject parallax: JsonObject {
                     property bool vertical: false
                     property bool autoVertical: false

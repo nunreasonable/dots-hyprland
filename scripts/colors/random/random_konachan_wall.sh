@@ -28,16 +28,38 @@ STATE_DIR="$XDG_STATE_HOME/quickshell"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 mkdir -p "$PICTURES_DIR/Wallpapers"
-page=$((1 + RANDOM % 1000));
 illogicalImpulseConfigPath="$HOME/.config/illogical-impulse/config.json"
 userAgent=$(jq -r '.networking.userAgent // empty' "$illogicalImpulseConfigPath" 2>/dev/null)
-response=$(curl -A "$userAgent" "https://konachan.net/post.json?tags=rating%3Asafe&limit=1&page=$page")
-link=$(echo "$response" | jq '.[0].file_url' -r);
-ext=$(echo "$link" | awk -F. '{print $NF}')
-downloadPath="$PICTURES_DIR/Wallpapers/random_wallpaper.$ext"
-currentWallpaperPath=$(jq -r '.background.wallpaperPath' "$illogicalImpulseConfigPath")
-if [ "$downloadPath" == "$currentWallpaperPath" ]; then
-    downloadPath="$PICTURES_DIR/Wallpapers/random_wallpaper-1.$ext"
+configFlag() { [ "$(jq -r ".background.$1 // false" "$illogicalImpulseConfigPath" 2>/dev/null)" == "true" ]; }
+tags=("width:>=1600" "height:>=900" "score:>=30")
+site="https://konachan.net"
+if configFlag konachanSpicy; then
+    site="https://konachan.com"
+else
+    tags+=("rating:safe")
 fi
-curl -A "$userAgent" "$link" -o "$downloadPath"
+configFlag konachanOnlyYuri && tags+=("yuri")
+if configFlag konachanSpicy; then
+    read -ra extraTags <<< "$(jq -r '.background.konachanExtraTags // empty' "$illogicalImpulseConfigPath" 2>/dev/null)"
+    for tag in "${extraTags[@]}"; do
+        [ ${#tags[@]} -ge 5 ] && break
+        [[ "$tag" =~ ^(order|limit|page): ]] && continue
+        tags+=("$tag")
+    done
+fi
+tags+=("order:random")
+response=$(curl -sG -A "$userAgent" "$site/post.json" -d limit=20 --data-urlencode "tags=${tags[*]}")
+post=$(echo "$response" | jq -c '([.[] | select(.height > 0 and .width / .height >= 1.5 and .width / .height <= 2.4)][0]) // .[0] // empty')
+link=$(echo "$post" | jq -r '.file_url // empty')
+postId=$(echo "$post" | jq -r '.id // empty')
+[ -z "$link" ] && { echo "Konachan returned no usable post" >&2; exit 1; }
+ext=$(echo "$link" | awk -F. '{print $NF}')
+downloadPath="$PICTURES_DIR/Wallpapers/konachan-$postId.$ext"
+curl -sf -A "$userAgent" "$link" -o "$downloadPath.part" && mv "$downloadPath.part" "$downloadPath" \
+    || { rm -f "$downloadPath.part"; echo "Download failed" >&2; exit 1; }
 "$SCRIPT_DIR/../switchwall.sh" --image "$downloadPath"
+
+currentWallpaperPath=$(jq -r '.background.wallpaperPath' "$illogicalImpulseConfigPath")
+ls -1t "$PICTURES_DIR/Wallpapers"/konachan-* 2>/dev/null | grep -v '\.part$' | tail -n +11 | while read -r old; do
+    [ "$old" != "$currentWallpaperPath" ] && rm -f "$old"
+done

@@ -5,10 +5,8 @@ import QtQml
 QtObject {
     id: root
 
-    readonly property bool full: {
-        const process = Quickshell.env("IIW_PROCESS");
-        return !process || process === "shell";
-    }
+    readonly property string process: Quickshell.env("IIW_PROCESS") ?? ""
+    readonly property bool full: !root.process || root.process === "shell"
 
     readonly property QtObject session: QSWin.Session
     readonly property QtObject stats: root.full ? QSWin.SystemStats : null
@@ -37,4 +35,5 @@ QtObject {
     readonly property QtObject blur: root.full ? QSWin.BackdropBlur : null
     readonly property QtObject systemMonitor: root.full ? QSWin.SystemMonitor : null
     readonly property QtObject fileIndex: root.full ? QSWin.FileIndex : null
+    readonly property QtObject accountAge: root.full || root.process === "settings" || root.process === "welcome" ? QSWin.AccountAge : null
 }

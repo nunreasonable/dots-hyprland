@@ -11,27 +11,6 @@ import qs.modules.common.functions
 ContentPage {
     forceWidth: true
 
-    Process {
-        id: randomWallProc
-        property string status: ""
-        property string scriptPath: `${Directories.scriptPath}/colors/random/random_konachan_wall.sh`
-        command: Platform.isWindows
-            ? ["powershell", "-NoProfile", "-ExecutionPolicy", "Bypass", "-File",
-                FileUtils.trimFileProtocol(`${Directories.scriptPath}/colors/random/random_wall.ps1`),
-                "-Source", randomWallProc.scriptPath.includes("osu") ? "osu" : "konachan",
-                "-UserAgent", Config.options.networking.userAgent ?? "",
-                "-Current", Config.options.background.wallpaperPath ?? ""]
-            : ["bash", "-c", FileUtils.trimFileProtocol(randomWallProc.scriptPath)]
-        stdout: SplitParser {
-            onRead: data => {
-                randomWallProc.status = data.trim();
-            }
-        }
-        onExited: (exitCode, exitStatus) => {
-            if (Platform.isWindows && exitCode === 0 && randomWallProc.status) Wallpapers.apply(randomWallProc.status);
-        }
-    }
-
     component SmallLightDarkPreferenceButton: RippleButton {
         id: smallLightDarkPreferenceButton
         required property bool dark
@@ -96,30 +75,30 @@ ContentPage {
 
             ColumnLayout {
                 RippleButtonWithIcon {
-                    enabled: !randomWallProc.running
+                    enabled: !RandomWallpaper.running
                     visible: Config.options.policies.weeb === 1
                     Layout.fillWidth: true
                     buttonRadius: Appearance.rounding.small
                     materialIcon: "ifl"
-                    mainText: randomWallProc.running ? Translation.tr("Be patient...") : Translation.tr("Random: Konachan")
+                    mainText: RandomWallpaper.running ? Translation.tr("Be patient...") : Translation.tr("Random: Konachan")
                     onClicked: {
-                        randomWallProc.scriptPath = `${Directories.scriptPath}/colors/random/random_konachan_wall.sh`;
-                        randomWallProc.running = true;
+                        RandomWallpaper.fetch("konachan");
                     }
                     StyledToolTip {
-                        text: Translation.tr("Random SFW Anime wallpaper from Konachan\nImage is saved to ~/Pictures/Wallpapers")
+                        text: SpicyStuff.konachan
+                            ? Translation.tr("Random Anime wallpaper from Konachan, Spicy Stuff included\nImage is saved to ~/Pictures/Wallpapers")
+                            : Translation.tr("Random SFW Anime wallpaper from Konachan\nImage is saved to ~/Pictures/Wallpapers")
                     }
                 }
                 RippleButtonWithIcon {
-                    enabled: !randomWallProc.running
+                    enabled: !RandomWallpaper.running
                     visible: Config.options.policies.weeb === 1
                     Layout.fillWidth: true
                     buttonRadius: Appearance.rounding.small
                     materialIcon: "ifl"
-                    mainText: randomWallProc.running ? Translation.tr("Be patient...") : Translation.tr("Random: osu! seasonal")
+                    mainText: RandomWallpaper.running ? Translation.tr("Be patient...") : Translation.tr("Random: osu! seasonal")
                     onClicked: {
-                        randomWallProc.scriptPath = `${Directories.scriptPath}/colors/random/random_osu_wall.sh`;
-                        randomWallProc.running = true;
+                        RandomWallpaper.fetch("osu");
                     }
                     StyledToolTip {
                         text: Translation.tr("Random osu! seasonal background\nImage is saved to ~/Pictures/Wallpapers")
@@ -231,6 +210,56 @@ ContentPage {
             checked: Config.options.appearance.transparency.enable
             onCheckedChanged: {
                 Config.options.appearance.transparency.enable = checked;
+            }
+        }
+
+        ContentSubsection {
+            visible: Config.options.policies.weeb === 1
+            title: Translation.tr("Random Konachan wallpaper")
+
+            ConfigRow {
+                uniform: true
+                ConfigSwitch {
+                    buttonIcon: "local_fire_department"
+                    text: Translation.tr("Spicy Stuff")
+                    enabled: SpicyStuff.allowed
+                    checked: Config.options.background.konachanSpicy && SpicyStuff.allowed
+                    onCheckedChanged: {
+                        if (SpicyStuff.allowed)
+                            Config.options.background.konachanSpicy = checked;
+                    }
+                    StyledToolTip {
+                        text: Translation.tr("Lets Konachan pick wallpapers of any rating, not only safe ones")
+                    }
+                }
+                ConfigSwitch {
+                    buttonIcon: "favorite"
+                    text: Translation.tr("Only yuri")
+                    checked: Config.options.background.konachanOnlyYuri
+                    onCheckedChanged: {
+                        Config.options.background.konachanOnlyYuri = checked;
+                    }
+                }
+            }
+
+            NoticeBox {
+                Layout.fillWidth: true
+                visible: !SpicyStuff.allowed
+                materialIcon: SpicyStuff.checking ? "hourglass_top" : "lock"
+                text: SpicyStuff.restriction
+            }
+
+            MaterialTextArea {
+                Layout.fillWidth: true
+                enabled: SpicyStuff.konachan
+                placeholderText: SpicyStuff.konachan
+                    ? Translation.tr("Extra tags, separated by spaces (up to %1)").arg(SpicyStuff.maxExtraTags)
+                    : Translation.tr("Extra tags (turn on Spicy Stuff first)")
+                text: Config.options.background.konachanExtraTags
+                wrapMode: TextEdit.Wrap
+                onTextChanged: {
+                    Config.options.background.konachanExtraTags = text;
+                }
             }
         }
     }
