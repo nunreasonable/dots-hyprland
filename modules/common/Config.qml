@@ -341,6 +341,21 @@ Singleton {
                 property list<string> pinnedApps: [ // IDs of pinned entries
                     "org.kde.dolphin", "kitty",]
                 property list<string> ignoredAppRegexes: []
+                property bool showBackground: true
+                property string style: "float" // float | hug
+                property string position: "bottom" // bottom | left | right
+                property bool showBorder: true
+                property real borderWidth: 1
+                property string borderColor: "layer0Border"
+                property string backgroundColor: "layer0"
+                property real radius: 23
+                property bool followFrameColor: false
+                property bool showPreviews: true
+                property real iconSize: 35
+                property real iconSpacing: 0
+                property bool showPinButton: true
+                property bool showAppsButton: true
+                property bool showMedia: false
             }
 
             property JsonObject interactions: JsonObject {
