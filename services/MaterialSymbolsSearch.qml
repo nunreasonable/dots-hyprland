@@ -9,7 +9,6 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    // Raw list loaded from JSON: [{name, tags, categories}]
     property var allSymbols: []
 
     FileView {
@@ -26,7 +25,6 @@ Singleton {
         }
     }
 
-    // Returns a list of plain strings formatted as "<name>\t<tag1>, <tag2>, ..."
     function fuzzyQuery(query) {
         if (!query || query.length === 0)
             return root.allSymbols.slice(0, 30).map(sym => root._format(sym));

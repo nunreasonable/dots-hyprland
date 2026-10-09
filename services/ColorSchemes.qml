@@ -9,7 +9,6 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    // id -> {name, defaults: {primary, secondary}, accents: {dark: {role: hex}, light: {role: hex}}}
     property var schemes: ({})
 
     FileView {
@@ -61,7 +60,6 @@ Singleton {
                 }));
     }
 
-    // slot: "primary" or "secondary"
     function currentAccent(slot, dark) {
         const scheme = root.currentScheme;
         if (!scheme)
@@ -77,9 +75,6 @@ Singleton {
         return values.length > 0 ? values[0] : "";
     }
 
-    // Applied after MaterialThemeLoader loads the primary-driven matugen scheme:
-    // retints the secondary role group towards the scheme's secondary accent,
-    // keeping each role's own lightness/contrast (see ColorUtils.adaptToAccent).
     function applySecondaryOverride() {
         if (!Config.options.appearance.palette.namedScheme)
             return;

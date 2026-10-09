@@ -301,7 +301,7 @@ Singleton {
     }
 
     function _sortReversed() {
-        return root.sortMode === "time_rev" || root.sortMode === "name_rev" || root.sortMode === "size";
+        return root.sortMode === "time_rev" || root.sortMode === "name_rev" || root.sortMode === "size_rev";
     }
 
     function select(filePath, isDirectory, darkMode = Appearance.m3colors.darkmode) {

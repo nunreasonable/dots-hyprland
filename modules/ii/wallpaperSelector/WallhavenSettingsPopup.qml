@@ -6,10 +6,6 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 
-/**
-* Popup dialog for configuring Wallhaven search filters.
-* Used within the wallpaper selector when Wallhaven mode is active.
-*/
 WindowDialog {
     id: root
     backgroundWidth: 620
@@ -389,7 +385,9 @@ WindowDialog {
                         buttonRadius: height / 2
                         leftPadding: 14
                         rightPadding: 14
-                        toggled: WallhavenSearch.purity.charAt(1) === "1"
+                        enabled: SpicyStuff.allowed
+                        opacity: enabled ? 1 : 0.4
+                        toggled: WallhavenSearch.purity.charAt(1) === "1" && SpicyStuff.allowed
                         colBackgroundToggled: Appearance.colors.colPrimary
                         onClicked: {
                             var p = WallhavenSearch.purity;
@@ -407,11 +405,13 @@ WindowDialog {
 
                     RippleButton {
                         visible: WallhavenSearch.apiKey.length > 0
+                        enabled: SpicyStuff.allowed
+                        opacity: enabled ? 1 : 0.4
                         implicitHeight: 32
                         buttonRadius: height / 2
                         leftPadding: 14
                         rightPadding: 14
-                        toggled: WallhavenSearch.purity.charAt(2) === "1"
+                        toggled: WallhavenSearch.purity.charAt(2) === "1" && SpicyStuff.allowed
                         colBackgroundToggled: Appearance.m3colors.m3error
                         onClicked: {
                             var p = WallhavenSearch.purity;
@@ -426,6 +426,15 @@ WindowDialog {
                                                     Appearance.colors.colOnLayer1
                         }
                     }
+                }
+
+                StyledText {
+                    Layout.fillWidth: true
+                    visible: !SpicyStuff.allowed
+                    wrapMode: Text.Wrap
+                    text: SpicyStuff.restriction
+                    font.pixelSize: Appearance.font.pixelSize.smaller
+                    color: Appearance.colors.colSubtext
                 }
             }
 

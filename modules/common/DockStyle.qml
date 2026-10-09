@@ -35,6 +35,7 @@ Singleton {
     readonly property real separatorInset: Appearance.sizes.elevationMargin + padding + Appearance.rounding.normal
     readonly property real mediaLength: 240
     readonly property real windowGap: Appearance.sizes.hyprlandGapsOut
+    readonly property real appsButtonInset: windowGap + padding
     readonly property real thickness: Config.options.dock.height + (iconSize - defaultIconSize) + Appearance.sizes.elevationMargin + windowGap
-    readonly property real zone: thickness - Appearance.sizes.elevationMargin - (hug ? windowGap : 0) + windowGap
+    readonly property real zone: thickness - Appearance.sizes.elevationMargin
 }

@@ -168,7 +168,7 @@ MouseArea {
             GlobalStates.wallpaperSelectorOpen = false;
             event.accepted = true;
         } else if ((event.modifiers & Qt.ControlModifier) && event.key
-                   === Qt.Key_V) { // Intercept Ctrl+V to handle "paste to go to" in pickers
+                   === Qt.Key_V) {
 
             root.handleFilePasting(event);
         } else if ((event.modifiers & Qt.ControlModifier) && event.key === Qt.Key_F) {
@@ -765,7 +765,7 @@ MouseArea {
 
                                 Keys.onPressed: event => {
                                     if ((event.modifiers & Qt.ControlModifier) && event.key
-                                            === Qt.Key_V) { // Intercept Ctrl+V to handle "paste to go to" in pickers
+                                            === Qt.Key_V) {
 
                                         root.handleFilePasting(event);
                                         return;

@@ -1875,8 +1875,11 @@ ContentPage {
             ConfigSwitch {
                 buttonIcon: "warning"
                 text: Translation.tr('Sketchy')
-                checked: Config.options.wallpaperSelector.wallhavenPurity.charAt(1) === "1"
+                enabled: SpicyStuff.allowed
+                checked: Config.options.wallpaperSelector.wallhavenPurity.charAt(1) === "1" && SpicyStuff.allowed
                 onCheckedChanged: {
+                    if (!SpicyStuff.allowed)
+                        return;
                     const p = Config.options.wallpaperSelector.wallhavenPurity;
                     Config.options.wallpaperSelector.wallhavenPurity = p.charAt(0) + (checked ? "1" : "0") + p.charAt(2);
                     WallhavenSearch.purity = Config.options.wallpaperSelector.wallhavenPurity;
@@ -1886,13 +1889,23 @@ ContentPage {
                 visible: Config.options.wallpaperSelector.wallhavenApiKey.length > 0
                 buttonIcon: "whatshot"
                 text: Translation.tr('Spicy')
-                checked: Config.options.wallpaperSelector.wallhavenPurity.charAt(2) === "1"
+                enabled: SpicyStuff.allowed
+                checked: Config.options.wallpaperSelector.wallhavenPurity.charAt(2) === "1" && SpicyStuff.allowed
                 onCheckedChanged: {
+                    if (!SpicyStuff.allowed)
+                        return;
                     const p = Config.options.wallpaperSelector.wallhavenPurity;
                     Config.options.wallpaperSelector.wallhavenPurity = p.charAt(0) + p.charAt(1) + (checked ? "1" : "0");
                     WallhavenSearch.purity = Config.options.wallpaperSelector.wallhavenPurity;
                 }
             }
+        }
+
+        NoticeBox {
+            Layout.fillWidth: true
+            visible: !SpicyStuff.allowed
+            materialIcon: SpicyStuff.checking ? "hourglass_top" : "lock"
+            text: SpicyStuff.restriction
         }
 
         ConfigSelectionArray {

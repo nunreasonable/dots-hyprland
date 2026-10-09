@@ -187,7 +187,7 @@ Item {
                 color: ColorUtils.transparentize(root.blendedColors.colLayer1, 0.5)
                 radius: Appearance.rounding.small
 
-                layer.enabled: true
+                layer.enabled: !Platform.isWindows
                 layer.effect: OpacityMask {
                     maskSource: Rectangle {
                         width: artRect.width

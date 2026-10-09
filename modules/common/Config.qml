@@ -139,7 +139,7 @@ Singleton {
                 property JsonObject palette: JsonObject {
                     property string type: "auto" // Allowed: auto, scheme-content, scheme-expressive, scheme-fidelity, scheme-fruit-salad, scheme-monochrome, scheme-neutral, scheme-rainbow, scheme-tonal-spot
                     property string accentColor: ""
-                    property string namedScheme: "" // "" = from wallpaper. Allowed: any scheme id in assets/color_schemes.json (gruvbox, nord, ...)
+                    property string namedScheme: ""
                     property string namedSchemePrimary: ""
                     property string namedSchemeSecondary: ""
                 }
@@ -526,8 +526,8 @@ Singleton {
                     "org.kde.dolphin", "kitty",]
                 property list<string> ignoredAppRegexes: []
                 property bool showBackground: true
-                property string style: "float" // float | hug
-                property string position: "bottom" // bottom | left | right
+                property string style: "float"
+                property string position: "bottom"
                 property bool showBorder: true
                 property real borderWidth: 1
                 property string borderColor: "layer0Border"
@@ -641,7 +641,7 @@ Singleton {
 
             property JsonObject notifications: JsonObject {
                 property int timeout: 7000
-                property string position: "top_right" // Allowed: top_left, top_center, top_right, bottom_left, bottom_center, bottom_right
+                property string position: "top_right"
                 property JsonObject forceMonitor: JsonObject {
                     property bool enable: false
                     property string name: ""
@@ -673,7 +673,7 @@ Singleton {
 
             property JsonObject overview: JsonObject {
                 property bool enable: true
-                property string style: "default" // Allowed: default, niri
+                property string style: "default"
                 property real scale: 0.18 // Relative to screen size
                 property real rows: 2
                 property real columns: 5

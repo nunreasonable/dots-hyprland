@@ -194,7 +194,7 @@ RippleButton {
                 text: root.itemType
             }
             RowLayout {
-                Loader { // Pin indicator for pinned clipboard entries
+                Loader {
                     visible: root.cliphistRawString && root.pinned
                     active: root.cliphistRawString && root.pinned
                     sourceComponent: MaterialSymbol {

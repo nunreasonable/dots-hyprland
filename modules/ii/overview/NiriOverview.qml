@@ -10,11 +10,10 @@ import Quickshell
 import Quickshell.Wayland
 import Quickshell.Hyprland
 
-Item { // Continuously scrollable strip of workspaces, one row each
+Item {
     id: root
     required property var screen
     readonly property HyprlandMonitor monitor: Hyprland.monitorFor(screen)
-    // Clamp to avoid lock-screen temp workspace (2147483647 - N) leaking into UI
     readonly property int effectiveActiveWorkspaceId: Math.max(1, Math.min(100, monitor?.activeWorkspace?.id ?? 1))
     property bool monitorIsFocused: (Hyprland.focusedMonitor?.name == monitor?.name)
     property bool live: true
@@ -120,7 +119,7 @@ Item { // Continuously scrollable strip of workspaces, one row each
     StyledRectangularShadow {
         target: overviewBackground
     }
-    Rectangle { // Background
+    Rectangle {
         id: overviewBackground
         property real padding: 10
         anchors.fill: parent
@@ -147,7 +146,7 @@ Item { // Continuously scrollable strip of workspaces, one row each
             boundsBehavior: Flickable.StopAtBounds
             clip: true
 
-            Column { // Workspaces, one per row
+            Column {
                 id: wsColumn
                 width: flick.width
                 spacing: root.rowSpacing

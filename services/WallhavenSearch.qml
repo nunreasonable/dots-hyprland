@@ -8,9 +8,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-/**
-* Service for searching and downloading wallpapers from wallhaven.cc
-*/
 Singleton {
     id: root
 
@@ -107,7 +104,9 @@ Singleton {
         }
 
         params.push("categories=" + categories);
-        var safePurity = (purity === "000") ? "100" : purity;
+        var safePurity = SpicyStuff.allowed ? purity : purity.charAt(0) + "00";
+        if (safePurity === "000")
+            safePurity = "100";
         params.push("purity=" + safePurity);
         params.push("sorting=" + sorting);
         params.push("order=" + order);

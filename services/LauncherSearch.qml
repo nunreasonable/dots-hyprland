@@ -135,7 +135,6 @@ Singleton {
         return enabled && sensitiveNetwork;
     }
 
-    // Same bit order as CheatsheetKeybindsCategory.qml's modMaskToStringList, kept local since it's a few lines
     function keybindToString(bind) {
         const modmask = bind.modmask ?? 0;
         const mods = [];
@@ -279,7 +278,6 @@ Singleton {
                 });
             }).filter(Boolean);
         } else if (root.query.startsWith(Config.options.search.prefix.keybinds)) {
-            // Keybinds: look up the user's own shortcuts, copy the key combo
             const searchString = StringUtils.cleanPrefix(root.query, Config.options.search.prefix.keybinds).toLowerCase();
             return HyprlandKeybinds.keybinds.filter(bind => {
                 if (!bind.description && !bind.key)
@@ -303,7 +301,6 @@ Singleton {
                 });
             });
         } else if (root.query.startsWith(Config.options.search.prefix.symbols)) {
-            // Material Symbols icon names, distinct from the emoji picker above
             const searchString = StringUtils.cleanPrefix(root.query, Config.options.search.prefix.symbols);
             return MaterialSymbolsSearch.fuzzyQuery(searchString).map(entry => {
                 const symbolName = entry.split("\t")[0] ?? "";
