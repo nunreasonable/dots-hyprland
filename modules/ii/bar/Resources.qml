@@ -13,7 +13,8 @@ MouseArea {
     property bool vertical: false
     readonly property bool showCpuTemp: Config.options.bar.resources.alwaysShowCpuTemp && ResourceUsage.cpuTempAvailable
     readonly property bool showDisk: Config.options.bar.resources.alwaysShowDisk
-    readonly property var order: root.classic ? ["ram", "swap", "cpu", "temp", "disk"] : ["ram", "cpu", "temp", "disk", "swap"]
+    readonly property var optional: (root.showCpuTemp ? ["temp"] : []).concat(root.showDisk ? ["disk"] : [])
+    readonly property var order: root.classic ? ["ram", "swap", "cpu"].concat(root.optional) : ["ram", "cpu"].concat(root.optional, ["swap"])
     readonly property real horizontalPadding: root.classic ? 4 : 6
 
     implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth : rowLayout.implicitWidth + root.horizontalPadding * 2
