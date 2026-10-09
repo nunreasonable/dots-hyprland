@@ -61,7 +61,7 @@ Item {
             Layout.fillHeight: true
             source: root.widgetUrl(group.modelData)
             onLoaded: {
-                if (item && item.hasOwnProperty("mirrored"))
+                if (item && (group.modelData === "visualizer" || group.modelData === "dynamicIsland"))
                     item.mirrored = root.mirroredFor(group.sectionLayout, group.index);
             }
         }
