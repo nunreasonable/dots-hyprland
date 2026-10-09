@@ -352,6 +352,13 @@ Singleton {
                     property int mouseScrollDeltaThreshold: 120 // delta >= this then it gets detected as mouse scroll rather than touchpad
                     property int mouseScrollFactor: 120
                     property int touchpadScrollFactor: 450
+                    property real bounceDamping: 0.3
+                    property real flingFriction: 0.002
+                    property real flingStopThreshold: 0.01
+                    property real touchpadSensitivity: 3.75
+                    property int wheelDurationMax: 400
+                    property int wheelDurationMin: 200
+                    property int wheelScrollAmount: 120
                 }
                 property JsonObject deadPixelWorkaround: JsonObject { // Hyprland leaves out 1 pixel on the right for interactions
                     property bool enable: false

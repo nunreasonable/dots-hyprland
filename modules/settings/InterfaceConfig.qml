@@ -362,7 +362,111 @@ ContentPage {
                 Config.options.interactions.scrolling.touchpadScrollFactor = value;
             }
             StyledToolTip {
-                text: Translation.tr("Higher moves more per scroll notch/swipe")
+                text: Translation.tr("Higher moves more per scroll notch/swipe. No longer used for touchpad input now that it runs through the inertial engine below.")
+            }
+        }
+
+        ContentSubsection {
+            title: Translation.tr("Inertial scrolling (touchpad)")
+            tooltip: Translation.tr("Fling and bounce physics used for touchpad input once faster scrolling is enabled above.")
+
+            ConfigRow {
+                uniform: true
+                ConfigSpinBox {
+                    enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
+                    icon: "swipe"
+                    text: Translation.tr("Touchpad sensitivity")
+                    value: Config.options.interactions.scrolling.touchpadSensitivity * 100
+                    from: 50
+                    to: 2000
+                    stepSize: 10
+                    onValueChanged: {
+                        Config.options.interactions.scrolling.touchpadSensitivity = value / 100;
+                    }
+                }
+                ConfigSpinBox {
+                    enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
+                    icon: "speed"
+                    text: Translation.tr("Fling friction")
+                    value: Config.options.interactions.scrolling.flingFriction * 10000
+                    from: 1
+                    to: 500
+                    stepSize: 1
+                    onValueChanged: {
+                        Config.options.interactions.scrolling.flingFriction = value / 10000;
+                    }
+                }
+            }
+            ConfigRow {
+                uniform: true
+                ConfigSpinBox {
+                    enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
+                    icon: "stop_circle"
+                    text: Translation.tr("Fling stop threshold")
+                    value: Config.options.interactions.scrolling.flingStopThreshold * 1000
+                    from: 1
+                    to: 200
+                    stepSize: 1
+                    onValueChanged: {
+                        Config.options.interactions.scrolling.flingStopThreshold = value / 1000;
+                    }
+                }
+                ConfigSpinBox {
+                    enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
+                    icon: "vertical_align_center"
+                    text: Translation.tr("Bounce damping")
+                    value: Config.options.interactions.scrolling.bounceDamping * 100
+                    from: 0
+                    to: 100
+                    stepSize: 5
+                    onValueChanged: {
+                        Config.options.interactions.scrolling.bounceDamping = value / 100;
+                    }
+                }
+            }
+        }
+
+        ContentSubsection {
+            title: Translation.tr("Inertial scrolling (mouse wheel)")
+
+            ConfigSpinBox {
+                enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
+                icon: "mouse"
+                text: Translation.tr("Wheel scroll amount")
+                value: Config.options.interactions.scrolling.wheelScrollAmount
+                from: 10
+                to: 2000
+                stepSize: 10
+                onValueChanged: {
+                    Config.options.interactions.scrolling.wheelScrollAmount = value;
+                }
+            }
+            ConfigRow {
+                uniform: true
+                ConfigSpinBox {
+                    enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
+                    icon: "timer"
+                    text: Translation.tr("Minimum duration (ms)")
+                    value: Config.options.interactions.scrolling.wheelDurationMin
+                    from: 50
+                    to: 1000
+                    stepSize: 10
+                    onValueChanged: {
+                        Config.options.interactions.scrolling.wheelDurationMin = value;
+                    }
+                }
+                ConfigSpinBox {
+                    enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
+                    icon: "timer"
+                    text: Translation.tr("Maximum duration (ms)")
+                    value: Config.options.interactions.scrolling.wheelDurationMax
+                    from: 50
+                    to: 2000
+                    stepSize: 10
+                    onValueChanged: {
+                        Config.options.interactions.scrolling.wheelDurationMax = value;
+                    }
+                }
             }
         }
 
