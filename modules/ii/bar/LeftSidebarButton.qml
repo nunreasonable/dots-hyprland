@@ -3,11 +3,29 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.functions
 
 RippleButton {
     id: root
 
     property bool showPing: false
+    property color contentColor: Appearance.colors.colOnLayer0
+    property bool contentColorOverridden: false
+    property bool vertical: Config.options.bar.vertical
+    readonly property bool customIcon: Config.options.custom.distroIcon !== ""
+    readonly property string customFolder: {
+        if (!root.customIcon)
+            return "";
+        const url = FileUtils.folderUrl(Config.options.custom.iconsPath);
+        if (url === "" || !Platform.isWindows)
+            return Config.options.custom.iconsPath;
+        return (WindowsNative.fsUtils?.isAccessibleDir(FileUtils.trimFileProtocol(url)) ?? false) ? Config.options.custom.iconsPath : "";
+    }
+    readonly property string iconSource: root.customIcon ? Config.options.custom.distroIcon : Config.options.bar.topLeftIcon == 'distro' ? SystemInfo.distroIcon : `${Config.options.bar.topLeftIcon}-symbolic`
+    readonly property color iconColor: {
+        const name = Config.options.custom.iconColor || "onLayer0";
+        return Appearance.colors[`col${name.charAt(0).toUpperCase()}${name.slice(1)}`] ?? Appearance.colors.colOnLayer0;
+    }
 
     property bool aiChatEnabled: Config.options.policies.ai !== 0
     property bool translatorEnabled: Config.options.sidebar.translator.enable
@@ -61,9 +79,10 @@ RippleButton {
         anchors.centerIn: parent
         width: 19.5
         height: 19.5
-        source: Config.options.bar.topLeftIcon == 'distro' ? SystemInfo.distroIcon : `${Config.options.bar.topLeftIcon}-symbolic`
-        colorize: true
-        color: Appearance.colors.colOnLayer0
+        source: root.iconSource
+        customFolder: root.customFolder
+        colorize: Config.options.custom.colorizeIcon
+        color: root.iconColor
 
         Rectangle {
             opacity: root.showPing ? 1 : 0

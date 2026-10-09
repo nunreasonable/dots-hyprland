@@ -13,6 +13,9 @@ import Quickshell.Hyprland
 
 ButtonMouseArea {
     id: root
+    property color contentColor: Appearance.colors.colOnLayer1
+    property bool contentColorOverridden: false
+    signal styleEditorRequested
 
     readonly property HyprlandMonitor monitor: Hyprland.monitorFor(root.QsWindow.window?.screen)
     WorkspaceModel {
@@ -32,13 +35,16 @@ ButtonMouseArea {
     property real workspaceIconMarginShrinked: -4
     property int workspaceIndexInGroup: (monitor?.activeWorkspace?.id - 1) % wsModel.shownCount
     property real specialTextSize: workspaceButtonWidth * 0.5
+    readonly property string style: Config.options.bar.workspaces.style ?? "default"
+    readonly property bool altStyle: root.style !== "default"
+    readonly property real slotLength: root.style === "gnome" ? 16 : root.style === "dots" ? 24 : root.style === "ticks" ? 16 : root.workspaceButtonWidth
 
     Layout.alignment: vertical ? Qt.AlignHCenter : Qt.AlignVCenter
     Layout.fillWidth: vertical
     Layout.fillHeight: !vertical
     readonly property real barThickness: vertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight
-    implicitWidth: vertical ? barThickness : occupiedIndicators.implicitWidth
-    implicitHeight: vertical ? occupiedIndicators.implicitHeight : barThickness
+    implicitWidth: vertical ? barThickness : (altStyle ? (altLoader.item?.implicitWidth ?? 0) : occupiedIndicators.implicitWidth)
+    implicitHeight: vertical ? (altStyle ? (altLoader.item?.implicitHeight ?? 0) : occupiedIndicators.implicitHeight) : barThickness
 
     property real specialBlur: (wsModel.specialWorkspaceActive && !containsMouse) ? 1 : 0
     Behavior on specialBlur {
@@ -50,7 +56,9 @@ ButtonMouseArea {
     hoverEnabled: true
     property int hoverIndex: {
         const position = root.vertical ? mouseY : mouseX;
-        return Math.floor(position / root.workspaceButtonWidth);
+        if (root.altStyle && altLoader.item)
+            return altLoader.item.indexAt(position);
+        return Math.floor(position / root.slotLength);
     }
 
     function switchWorkspaceToHovered() {
@@ -64,10 +72,16 @@ ButtonMouseArea {
     onPressed: mouse => {
         if (mouse.button == Qt.LeftButton)
             switchWorkspaceToHovered();
-        else if (mouse.button == Qt.RightButton)
-            GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
         else if (mouse.button == Qt.BackButton) 
             toggleSpecial()
+    }
+    onClicked: mouse => {
+        if (mouse.button == Qt.RightButton)
+            GlobalStates.overviewOpen = !GlobalStates.overviewOpen;
+    }
+    onPressAndHold: mouse => {
+        if (mouse.button == Qt.RightButton)
+            root.styleEditorRequested();
     }
     onWheel: event => {
         if (event.angleDelta.y < 0)
@@ -76,10 +90,30 @@ ButtonMouseArea {
             Hyprland.dispatch(`hl.dsp.focus({workspace = "r-1"})`);
     }
 
+    Loader {
+        id: altLoader
+        active: root.altStyle
+        anchors.centerIn: parent
+        scale: 1 - 0.08 * root.specialBlur
+        layer.smooth: true
+        layer.enabled: root.altStyle && root.specialBlur > 0
+        layer.effect: MultiEffect {
+            brightness: -0.1 * root.specialBlur
+            blurEnabled: true
+            blur: root.specialBlur
+            blurMax: 32
+        }
+        sourceComponent: WorkspacesAlt {
+            host: root
+            model: wsModel
+        }
+    }
+
     // Indications
     Item {
         id: regularWorkspaces
         anchors.fill: parent
+        visible: !root.altStyle
 
         scale: 1 - 0.08 * root.specialBlur
         layer.smooth: true
@@ -394,7 +428,7 @@ ButtonMouseArea {
         id: wsNum
         property bool hasBiggestWindow: !!wsModel.biggestWindow[index]
         property int wsId: wsModel.getWorkspaceIdAt(index)
-        property color contentColor: (wsModel.occupied[wsNum.index] && wsId !== wsModel.fakeWorkspace) ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer1Inactive
+        property color contentColor: (wsModel.occupied[wsNum.index] && wsId !== wsModel.fakeWorkspace) ? Appearance.colors.colOnSecondaryContainer : (root.contentColorOverridden ? Qt.alpha(root.contentColor, 0.5) : Appearance.colors.colOnLayer1Inactive)
         property bool showingNumbers: {
             if (root.superPressAndHeld)
                 return true;
@@ -408,10 +442,53 @@ ButtonMouseArea {
         FadeLoader {
             shown: !wsNum.showingNumbers
             anchors.centerIn: parent
-            Circle {
+            Loader {
                 anchors.centerIn: parent
-                diameter: root.workspaceButtonWidth * 0.18
-                color: wsNum.contentColor
+                sourceComponent: (Config.options?.bar.workspaces.indicatorStyle ?? "dot") === "icon" ? iconComponent : dotComponent
+
+                Component {
+                    id: dotComponent
+                    Circle {
+                        anchors.centerIn: parent
+                        diameter: root.workspaceButtonWidth * 0.18
+                        color: wsNum.contentColor
+                    }
+                }
+
+                Component {
+                    id: iconComponent
+                    MaterialSymbol {
+                        anchors.centerIn: parent
+                        iconSize: root.workspaceButtonWidth * 0.50
+                        color: wsNum.contentColor
+                        text: {
+                            switch (wsNum.wsId) {
+                            case 1:
+                                return "code";
+                            case 2:
+                                return "public";
+                            case 3:
+                                return "music_note";
+                            case 4:
+                                return "edit_square";
+                            case 5:
+                                return "image";
+                            case 6:
+                                return "forum";
+                            case 7:
+                                return "browser_updated";
+                            case 8:
+                                return "finance_mode";
+                            case 9:
+                                return "monitor";
+                            case 10:
+                                return "analytics";
+                            default:
+                                return "circle";
+                            }
+                        }
+                    }
+                }
             }
         }
         FadeLoader {

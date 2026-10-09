@@ -6,6 +6,9 @@ import QtQuick.Layouts
 
 MouseArea {
     id: root
+    property color contentColor: Appearance.colors.colOnSecondaryContainer
+    property bool contentColorOverridden: false
+    property bool vertical: false
     property bool borderless: Config.options.bar.borderless
     readonly property var chargeState: Battery.chargeState
     readonly property bool isCharging: Battery.isCharging
@@ -13,8 +16,8 @@ MouseArea {
     readonly property real percentage: Battery.percentage
     readonly property bool isLow: percentage <= Config.options.battery.low / 100
 
-    implicitWidth: batteryProgress.implicitWidth
-    implicitHeight: Appearance.sizes.barHeight
+    implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth : batteryProgress.implicitWidth
+    implicitHeight: root.vertical ? batteryProgress.valueBarWidth + 8 : Appearance.sizes.barHeight
 
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
 
@@ -22,7 +25,8 @@ MouseArea {
         id: batteryProgress
         anchors.centerIn: parent
         value: percentage
-        highlightColor: (isLow && !isCharging) ? Appearance.m3colors.m3error : Appearance.colors.colOnSecondaryContainer
+        rotation: root.vertical ? -90 : 0
+        highlightColor: (isLow && !isCharging) ? Appearance.m3colors.m3error : root.contentColor
 
         Item {
             anchors.centerIn: parent
@@ -30,6 +34,7 @@ MouseArea {
             height: batteryProgress.valueBarHeight
 
             RowLayout {
+                rotation: root.vertical ? 90 : 0
                 anchors {
                     horizontalCenter: parent.horizontalCenter
                     bottom: parent.bottom

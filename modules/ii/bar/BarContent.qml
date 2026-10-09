@@ -175,6 +175,7 @@ Item { // Bar content region
 
             ActiveWindow {
                 id: activeWindow
+                classic: true
                 Layout.leftMargin: 10 + (leftSidebarButton.visible ? 0 : Appearance.rounding.screenRounding)
                 Layout.rightMargin: Appearance.rounding.screenRounding
                 Layout.fillWidth: true
@@ -205,11 +206,13 @@ Item { // Bar content region
             implicitWidth: root.centerSideModuleWidth
 
             Resources {
+                classic: true
                 alwaysShowAllResources: root.useShortenedForm === 2
                 Layout.fillWidth: root.useShortenedForm === 2
             }
 
             Media {
+                classic: true
                 visible: root.useShortenedForm < 2
                 Layout.fillWidth: true
             }
@@ -259,12 +262,14 @@ Item { // Bar content region
                 anchors.fill: parent
 
                 ClockWidget {
+                    classic: true
                     showDate: (Config.options.bar.verbose && root.useShortenedForm < 2)
                     Layout.alignment: Qt.AlignVCenter
                     Layout.fillWidth: true
                 }
 
                 UtilButtons {
+                    classic: true
                     visible: (Config.options.bar.verbose && root.useShortenedForm === 0)
                     Layout.alignment: Qt.AlignVCenter
                 }
@@ -398,6 +403,7 @@ Item { // Bar content region
                         }
                         NotificationUnreadCount {
                             id: notificationUnreadCount
+                            color: rightSidebarButton.colText
                         }
                     }
                     MaterialSymbol {
@@ -416,6 +422,7 @@ Item { // Bar content region
             }
 
             SysTray {
+                classic: true
                 visible: root.useShortenedForm === 0
                 Layout.fillWidth: false
                 Layout.fillHeight: true

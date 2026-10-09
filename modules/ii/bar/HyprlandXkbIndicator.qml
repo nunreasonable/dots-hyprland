@@ -7,6 +7,8 @@ Loader {
     id: root
     property bool vertical: false
     property color color: Appearance.colors.colOnSurfaceVariant
+    property color contentColor: Appearance.colors.colOnLayer0
+    property bool contentColorOverridden: false
     active: HyprlandXkb.layoutCodes.length > 1
     visible: active
 
@@ -27,7 +29,7 @@ Loader {
             horizontalAlignment: Text.AlignHCenter
             text: abbreviateLayoutCode(HyprlandXkb.currentLayoutCode)
             font.pixelSize: text.includes("\n") ? Appearance.font.pixelSize.smallie : Appearance.font.pixelSize.small
-            color: root.color
+            color: root.contentColorOverridden ? root.contentColor : root.color
             animateChange: true
         }
     }

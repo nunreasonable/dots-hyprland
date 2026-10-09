@@ -6,34 +6,115 @@ import QtQuick.Layouts
 
 Item {
     id: root
+    property color contentColor: Appearance.colors.colOnLayer1
+    property bool contentColorOverridden: false
     property bool borderless: Config.options.bar.borderless
     property bool showDate: Config.options.bar.verbose
-    implicitWidth: rowLayout.implicitWidth
-    implicitHeight: Appearance.sizes.barHeight
+    property bool classic: false
+    property bool vertical: false
+    readonly property string dateTimeString: DateTime.time
+    readonly property bool hasAmPm: root.dateTimeString.toLowerCase().includes("am") || root.dateTimeString.toLowerCase().includes("pm")
 
-    RowLayout {
-        id: rowLayout
+    implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth : contentLoader.implicitWidth + (root.classic ? 0 : 12)
+    implicitHeight: root.vertical ? contentLoader.implicitHeight : Appearance.sizes.barHeight
+
+    Loader {
+        id: contentLoader
         anchors.centerIn: parent
-        spacing: 4
+        sourceComponent: root.vertical ? columnContent : root.classic ? classicRow : layoutRow
+    }
 
-        StyledText {
-            font.pixelSize: Appearance.font.pixelSize.large
-            color: Appearance.colors.colOnLayer1
-            text: DateTime.time
+    Component {
+        id: classicRow
+        RowLayout {
+            spacing: 4
+
+            StyledText {
+                font.pixelSize: Appearance.font.pixelSize.large
+                color: root.contentColor
+                text: DateTime.time
+            }
+
+            StyledText {
+                visible: root.showDate
+                font.pixelSize: Appearance.font.pixelSize.small
+                color: root.contentColor
+                text: "•"
+            }
+
+            StyledText {
+                visible: root.showDate
+                font.pixelSize: Appearance.font.pixelSize.small
+                color: root.contentColor
+                text: DateTime.longDate
+            }
         }
+    }
 
-        StyledText {
-            visible: root.showDate
-            font.pixelSize: Appearance.font.pixelSize.small
-            color: Appearance.colors.colOnLayer1
-            text: "•"
+    Component {
+        id: layoutRow
+        RowLayout {
+            spacing: 4
+
+            StyledText {
+                visible: root.showDate
+                font.pixelSize: Appearance.font.pixelSize.small
+                color: root.contentColor
+                text: DateTime.longDate
+            }
+
+            StyledText {
+                visible: root.showDate
+                font.pixelSize: Appearance.font.pixelSize.small
+                color: root.contentColor
+                text: "•"
+            }
+
+            StyledText {
+                font.pixelSize: Appearance.font.pixelSize.small
+                color: root.contentColor
+                text: DateTime.time
+                font.letterSpacing: -0.4
+                font.features: {
+                    "tnum": 1
+                }
+            }
         }
+    }
 
-        StyledText {
-            visible: root.showDate
-            font.pixelSize: Appearance.font.pixelSize.small
-            color: Appearance.colors.colOnLayer1
-            text: DateTime.longDate
+    Component {
+        id: columnContent
+        ColumnLayout {
+            spacing: root.hasAmPm ? 1 : 0
+
+            Column {
+                Layout.alignment: Qt.AlignHCenter
+                spacing: -4
+
+                Repeater {
+                    model: root.dateTimeString.split(/[: ]/)
+                    delegate: StyledText {
+                        required property string modelData
+                        width: implicitWidth
+                        horizontalAlignment: Text.AlignHCenter
+                        font.letterSpacing: -0.9
+                        font.features: {
+                            "tnum": 1
+                        }
+                        font.pixelSize: modelData.match(/am|pm/i) ? Appearance.font.pixelSize.smaller : Appearance.font.pixelSize.large
+                        color: root.contentColor
+                        text: modelData.padStart(2, "0")
+                    }
+                }
+            }
+
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.bottomMargin: 5
+                font.pixelSize: Appearance.font.pixelSize.smallest
+                color: root.contentColor
+                text: DateTime.shortDate
+            }
         }
     }
 

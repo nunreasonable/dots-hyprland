@@ -279,6 +279,7 @@ MouseArea {
 
         // Keyboard layout (Fcitx)
         Bar.SysTray {
+            classic: true
             Layout.rightMargin: 10
             Layout.alignment: Qt.AlignVCenter
             showSeparator: false

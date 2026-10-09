@@ -68,7 +68,7 @@ MouseArea {
 
     Bar.StyledPopup {
         hoverTarget: root
-        active: GlobalStates.mediaControlsOpen ? false : root.containsMouse
+        active: GlobalStates.mediaControlsOpen ? false : (root.containsMouse && Config.options.bar.tooltips.enable)
 
         Column {
             anchors.centerIn: parent
