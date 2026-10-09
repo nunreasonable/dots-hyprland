@@ -20,14 +20,8 @@ MouseArea {
     property bool showControls: false
     readonly property bool toolbarVisible: root.showControls || Config.options.wallpaperSelector.showSearchbar
 
-    readonly property string spicyDirPath: FileUtils.trimFileProtocol((
-                                                                          Config.options.wallpaperSelector.wppSpicyFolder
-                                                                          ?? "").toString())
     property bool spicyRevealed: false
-    readonly property bool inSpicyDir: root.spicyDirPath.length > 0 && (Wallpapers.effectiveDirectory
-                                                                        === root.spicyDirPath
-                                                                        || Wallpapers.effectiveDirectory.startsWith(
-                                                                            root.spicyDirPath + "/"))
+    readonly property bool inSpicyDir: Wallpapers.isInSpicyFolder(Wallpapers.effectiveDirectory)
     readonly property bool spicyBlurActive: root.source === "local" && root.inSpicyDir && !root.spicyRevealed
     onInSpicyDirChanged: if (!root.inSpicyDir)
                              root.spicyRevealed = false
@@ -363,8 +357,8 @@ MouseArea {
                                 right: parent.right
                             }
                             onClicked: Wallpapers.setDirectory(quickDirButton.modelData.path)
-                            enabled: modelData.icon.length > 0 && !quickDirButton.spicyDisabled
-                            toggled: Wallpapers.directory === Qt.resolvedUrl(modelData.path)
+                            enabled: modelData.icon.length > 0
+                            toggled: Wallpapers.normalizedPath(Wallpapers.effectiveDirectory) === Wallpapers.normalizedPath(modelData.path)
                             colBackgroundToggled: Appearance.colors.colSecondaryContainer
                             colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
                             colRippleToggled: Appearance.colors.colSecondaryContainerActive
@@ -375,7 +369,7 @@ MouseArea {
                                 MaterialSymbol {
                                     color: quickDirButton.toggled ? Appearance.colors.colOnSecondaryContainer :
                                                                     Appearance.colors.colOnLayer1
-                                    opacity: quickDirButton.enabled ? 1 : 0.4
+                                    opacity: quickDirButton.enabled && !quickDirButton.spicyDisabled ? 1 : 0.4
                                     iconSize: Appearance.font.pixelSize.larger
                                     text: quickDirButton.modelData.icon
                                     fill: quickDirButton.toggled ? 1 : 0
@@ -383,16 +377,18 @@ MouseArea {
                                 StyledText {
                                     Layout.fillWidth: true
                                     horizontalAlignment: Text.AlignLeft
-                                    opacity: quickDirButton.enabled ? 1 : 0.4
+                                    opacity: quickDirButton.enabled && !quickDirButton.spicyDisabled ? 1 : 0.4
                                     color: quickDirButton.toggled ? Appearance.colors.colOnSecondaryContainer :
                                                                     Appearance.colors.colOnLayer1
                                     text: Translation.tr(quickDirButton.modelData.name)
                                 }
-                            }
-
-                            StyledToolTip {
-                                visible: quickDirButton.spicyDisabled && SpicyStuff.restriction.length > 0
-                                text: SpicyStuff.restriction
+                                MaterialSymbol {
+                                    visible: quickDirButton.spicyDisabled
+                                    opacity: 0.6
+                                    iconSize: Appearance.font.pixelSize.normal
+                                    color: Appearance.colors.colOnLayer1
+                                    text: "lock"
+                                }
                             }
                         }
                     }
@@ -624,7 +620,9 @@ MouseArea {
                                     }
                                     StyledText {
                                         Layout.alignment: Qt.AlignHCenter
+                                        Layout.maximumWidth: 420
                                         horizontalAlignment: Text.AlignHCenter
+                                        wrapMode: Text.Wrap
                                         text: SpicyStuff.allowed ? Translation.tr(
                                                                        "This folder contains spicy wallpapers.\nMake sure no one is looking before showing it.") :
                                                                    SpicyStuff.restriction

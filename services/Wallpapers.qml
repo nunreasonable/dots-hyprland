@@ -112,8 +112,23 @@ Singleton {
         Quickshell.execDetached(Directories.wallpaperSwitchScriptPath);
     }
 
+    function normalizedPath(path) {
+        const trimmed = FileUtils.trimFileProtocol((path ?? "").toString()).replace(/\\/g, "/").replace(/\/+$/, "");
+        return Platform.isWindows ? trimmed.toLowerCase() : trimmed;
+    }
+
+    function isInSpicyFolder(path) {
+        const base = root.normalizedPath(Config.options.wallpaperSelector.wppSpicyFolder);
+        const target = root.normalizedPath(path);
+        return base.length > 0 && (target === base || target.startsWith(base + "/"));
+    }
+
     function apply(path, darkMode = Appearance.m3colors.darkmode) {
         if (!path || path.length === 0) return;
+        if (!SpicyStuff.allowed && root.isInSpicyFolder(path)) {
+            console.warn("[Wallpapers] Not applying a wallpaper from the Spicy Stuff folder:", SpicyStuff.restriction);
+            return;
+        }
         if (Platform.isWindows) {
             Config.options.appearance.palette.accentColor = "";
             root._retheme(path, darkMode);

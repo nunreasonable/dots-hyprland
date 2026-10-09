@@ -14,7 +14,10 @@ StyledImage {
 
     property bool generateThumbnail: true
     required property string sourcePath
-    property string thumbnailSizeName: Images.thumbnailSizeNameForDimensions(sourceSize.width, sourceSize.height)
+    property string thumbnailSizeName: {
+        const dpr = (QsWindow.window as QsWindow)?.devicePixelRatio ?? 1;
+        return Images.thumbnailSizeNameForDimensions(width * dpr, height * dpr);
+    }
     property string thumbnailPath: Images.thumbnailPathFor(sourcePath, thumbnailSizeName)
     source: thumbnailPath
 
