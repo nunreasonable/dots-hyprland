@@ -10,7 +10,9 @@ Rectangle {
     property real iconSize: 32
     property color iconColor: Appearance.colors.colOnPrimaryContainer
     readonly property bool imageReady: avatarImage.status === Image.Ready
-    readonly property string picturePath: Platform.isWindows ? Directories.userAvatarPathWindows : Directories.userAvatarPathAccountsService
+    readonly property string picturePath: Config.options.profile.avatarPicture !== ""
+        ? Config.options.profile.avatarPicture
+        : (Platform.isWindows ? Directories.userAvatarPathWindows : Directories.userAvatarPathAccountsService)
     readonly property list<string> fallbackPaths: Platform.isWindows ? [] : [Directories.userAvatarPathRicersAndWeirdSystems, Directories.userAvatarPathRicersAndWeirdSystems2]
 
     implicitWidth: 48

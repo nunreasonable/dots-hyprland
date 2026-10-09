@@ -13,6 +13,7 @@ Item {
     property bool asynchronousFirstPage: true
     property int currentPage: 0
     readonly property bool lookReady: Config.ready && MaterialThemeLoader.ready && Translation.ready
+    readonly property bool isMinimal: Config.options.settings.style === "minimal"
     property bool ready: false
     readonly property bool pageShown: pageArea.shownPage !== -1
     readonly property var pages: SettingsPages.pages
@@ -110,7 +111,7 @@ Item {
                 id: navRailWrapper
                 Layout.fillHeight: true
                 Layout.margins: 0
-                implicitWidth: navRail.expanded ? 195 : fab.baseSize + 40
+                implicitWidth: navRail.expanded ? (root.isMinimal ? 150 : 195) : fab.baseSize + 40
                 color: Appearance.colors.colLayer1
                 radius: Appearance.rounding.normal
 
@@ -150,10 +151,10 @@ Item {
                             ColumnLayout {
                                 spacing: 2
                                 Layout.fillWidth: true
-                                visible: navRail.expanded
+                                visible: navRail.expanded && !root.isMinimal
 
                                 StyledText {
-                                    text: SystemInfo.username
+                                    text: Config.options.profile.displayName !== "" ? Config.options.profile.displayName : SystemInfo.username
                                     font.pixelSize: Appearance.font.pixelSize.normal
                                     color: Appearance.colors.colOnLayer1
                                     font.weight: Font.Medium
@@ -166,8 +167,18 @@ Item {
                                     color: Appearance.colors.colSubtext
                                     elide: Text.ElideRight
                                     Layout.maximumWidth: 100
-                                    text: SystemInfo.distroName
+                                    text: Config.options.profile.descriptionText === "::uptime::" ? Translation.tr("Up • %1").arg(DateTime.uptime) : SystemInfo.distroName
                                 }
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                const idx = SettingsPages.indexOf("profile");
+                                if (idx >= 0)
+                                    root.currentPage = idx;
                             }
                         }
                     }
@@ -188,6 +199,7 @@ Item {
 
                     FloatingActionButton {
                         id: fab
+                        visible: !root.isMinimal
                         Layout.bottomMargin: -25
                         property bool justCopied: false
                         iconText: justCopied ? "check" : "edit"
