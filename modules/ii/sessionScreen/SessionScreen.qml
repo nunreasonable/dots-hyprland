@@ -22,8 +22,18 @@ Scope {
         active: sessionLoader.open || (Platform.isWindows && sessionLoader.kept)
         onLoaded: sessionLoader.kept = true
         onOpenChanged: {
-            if (sessionLoader.open)
+            if (sessionLoader.open) {
                 SessionWarnings.refresh();
+                releaseTimer.stop();
+            } else if (Platform.isWindows && sessionLoader.kept) {
+                releaseTimer.restart();
+            }
+        }
+
+        Timer {
+            id: releaseTimer
+            interval: 120000
+            onTriggered: sessionLoader.kept = false
         }
 
         Connections {
