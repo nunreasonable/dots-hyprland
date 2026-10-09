@@ -22,7 +22,8 @@ Scope {
     readonly property real widgetWidth: Appearance.sizes.mediaControlsWidth
     readonly property real widgetHeight: Appearance.sizes.mediaControlsHeight
     property real popupRounding: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
-    property list<real> visualizerPoints: []
+    readonly property list<real> visualizerPoints: GlobalStates.visualizerPoints
+    readonly property bool visualizerWidgetWantsAudio: Config.options.background.widgets.visualizer.enable
 
     function filterDuplicatePlayers(players) {
         let filtered = [];
@@ -55,10 +56,10 @@ Scope {
 
     Process {
         id: cavaProc
-        running: mediaControlsLoader.active && !Platform.isWindows
+        running: (mediaControlsLoader.active || root.visualizerWidgetWantsAudio) && !Platform.isWindows
         onRunningChanged: {
             if (!cavaProc.running) {
-                root.visualizerPoints = [];
+                GlobalStates.visualizerPoints = [];
             }
         }
         command: ["cava", "-p", `${FileUtils.trimFileProtocol(Directories.scriptPath)}/cava/raw_output_config.txt`]
@@ -66,7 +67,7 @@ Scope {
             onRead: data => {
                 // Parse `;`-separated values into the visualizerPoints array
                 let points = data.split(";").map(p => parseFloat(p.trim())).filter(p => !isNaN(p));
-                root.visualizerPoints = points;
+                GlobalStates.visualizerPoints = points;
             }
         }
     }
@@ -75,7 +76,7 @@ Scope {
         when: Platform.isWindows && WindowsNative.ready
         target: WindowsNative.audioVisualizer
         property: "running"
-        value: GlobalStates.mediaControlsOpen
+        value: GlobalStates.mediaControlsOpen || root.visualizerWidgetWantsAudio
     }
 
     Binding {
@@ -88,7 +89,7 @@ Scope {
     Connections {
         target: Platform.isWindows ? WindowsNative.audioVisualizer : null
         function onValuesChanged() {
-            root.visualizerPoints = WindowsNative.audioVisualizer.values;
+            GlobalStates.visualizerPoints = WindowsNative.audioVisualizer.values;
         }
     }
 
