@@ -3,6 +3,7 @@ pragma Singleton
 import qs.modules.common
 import qs.modules.common.models
 import qs.modules.common.functions
+import qs.modules.settings
 import QtQuick
 import Qt.labs.folderlistmodel
 import Quickshell
@@ -338,6 +339,22 @@ Singleton {
                 Qt.openUrlExternally(url);
             }
         });
+        const settingsEntries = Config.options.appearance.settingsLayout === "end4pc" ? SettingsSearchIndex.search(root.query, 8) : [];
+        const settingsResults = settingsEntries.map(entry => {
+            const breadcrumb = entry.kind === "page" ? Translation.tr("Settings") : [entry.pageName, entry.kind === "option" ? entry.section : "", entry.kind === "option" ? entry.subsection : ""].filter(part => part).join(" › ");
+            return resultComp.createObject(null, {
+                name: entry.label,
+                comment: breadcrumb,
+                verb: Translation.tr("Go"),
+                type: [Translation.tr("Settings"), entry.pageName, entry.kind === "option" ? entry.section : "", entry.kind === "option" ? entry.subsection : ""].filter(part => part).join(" • "),
+                iconName: entry.icon,
+                iconType: LauncherSearchResult.IconType.Material,
+                execute: () => {
+                    root.query = "";
+                    SettingsApp.openAt(entry.pageId, entry.kind === "page" ? "" : entry.label, entry.section, entry.subsection);
+                }
+            });
+        });
         const launcherActionObjects = root.allActions.map(action => {
             const actionString = `${Config.options.search.prefix.action}${action.action}`;
             if (actionString.startsWith(root.query) || root.query.startsWith(actionString)) {
@@ -371,6 +388,9 @@ Singleton {
 
         //////////////// Apps //////////////////
         result = result.concat(appResultObjects);
+
+        ////////////// Settings ////////////////
+        result = result.concat(settingsResults);
 
         ////////// Launcher actions ////////////
         result = result.concat(launcherActionObjects);
