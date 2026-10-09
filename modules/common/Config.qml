@@ -167,6 +167,23 @@ Singleton {
                 property string volumeMixer: `~/.config/hypr/hyprland/scripts/launch_first_available.sh "pavucontrol-qt" "pavucontrol"`
             }
 
+            property JsonObject profile: JsonObject {
+                property string displayName: ""
+                property string descriptionText: "::distro::"
+                property string avatarPath: ""
+                property string avatarPicture: ""
+                property bool onlinePresets: false
+                property bool uploadGuideSeen: false
+            }
+
+            property JsonObject settings: JsonObject {
+                property string style: "default"
+                property real borderSize: 1
+                property real animationSpeed: 1
+                property string borderColor: "layer0Border"
+                property list<string> collapsedSections: []
+            }
+
             property JsonObject background: JsonObject {
                 property bool widgetsLocked: false
                 property bool showGrid: true
