@@ -14,7 +14,7 @@ ContentPage {
     id: page
     property string openPopup: ""
     forceWidth: true
-    baseWidth: 700
+    baseWidth: Math.max(600, Math.min(700, page.width - 40))
     bottomContentPadding: 35
 
     Process {
