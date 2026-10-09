@@ -1,5 +1,5 @@
 $ErrorActionPreference = "SilentlyContinue"
-[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
 
 $claudeDir = Join-Path $env:USERPROFILE ".claude"
 $now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
