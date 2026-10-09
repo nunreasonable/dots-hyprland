@@ -468,4 +468,35 @@ WindowDialog {
             }
         }
     }
+
+    ColumnLayout {
+        Layout.fillWidth: true
+        spacing: 4
+
+        StyledText {
+            text: Translation.tr("Colors")
+            font.pixelSize: Appearance.font.pixelSize.small
+            color: Appearance.colors.colSubtext
+        }
+
+        CustomColorSelectionArray {
+            currentValue: WallhavenSearch.colors
+            options: [{ value: "", displayName: Translation.tr("All colors"), color: "transparent", rainbow: true }].concat([
+                { hex: "cc0000", name: Translation.tr("Red"), q: "660000,990000,cc0000,cc3333" },
+                { hex: "ff6600", name: Translation.tr("Orange"), q: "ffcc33,ff9900,ff6600" },
+                { hex: "cccc33", name: Translation.tr("Yellow"), q: "666600,999900,cccc33,ffff00" },
+                { hex: "669900", name: Translation.tr("Green"), q: "77cc33,669900,336600" },
+                { hex: "66cccc", name: Translation.tr("Cyan"), q: "66cccc,0099cc" },
+                { hex: "0066cc", name: Translation.tr("Blue"), q: "0066cc,0099cc,333399" },
+                { hex: "663399", name: Translation.tr("Purple"), q: "ea4c88,993399,663399,333399" },
+                { hex: "996633", name: Translation.tr("Brown"), q: "cc6633,996633,663300" },
+                { hex: "999999", name: Translation.tr("Grayscale"), q: "000000,999999,cccccc,ffffff,424153" },
+            ].map(g => ({ value: g.q, displayName: g.name, color: "#" + g.hex })))
+            onSelected: newValue => {
+                if (newValue === "" && WallhavenSearch.colors === "")
+                    return;
+                WallhavenSearch.setColor(newValue);
+            }
+        }
+    }
 }
