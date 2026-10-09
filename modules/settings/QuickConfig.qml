@@ -242,7 +242,7 @@ ContentPage {
         ConfigRow {
             ContentSubsection {
                 title: Translation.tr("Visual style")
-                tooltip: Translation.tr("Switching the style resets the bar buttons, workspace numbers, quick sliders and settings layout to that style's defaults")
+                tooltip: Translation.tr("Switching the style resets the bar layout and buttons, workspace numbers, quick sliders and settings layout to that style's defaults")
 
                 ConfigSelectionArray {
                     currentValue: Config.options.appearance.visualStyle

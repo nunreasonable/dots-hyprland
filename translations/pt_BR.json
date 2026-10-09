@@ -987,7 +987,7 @@
   "Style": "Estilo",
   "Visual style": "Estilo visual",
   "Settings layout": "Layout das configurações",
-  "Switching the style resets the bar buttons, workspace numbers, quick sliders and settings layout to that style's defaults": "Trocar o estilo redefine os botões da barra, os números das áreas de trabalho, os controles rápidos e o layout das configurações para o padrão desse estilo",
+  "Switching the style resets the bar layout and buttons, workspace numbers, quick sliders and settings layout to that style's defaults": "Trocar o estilo redefine o layout e os botões da barra, os números das áreas de trabalho, os controles rápidos e o layout das configurações para o padrão desse estilo",
   "Color scheme": "Esquema de cores",
   "Locale code": "Código de localidade",
   "e.g. fr_FR, de_DE, zh_CN...": "ex.: pt_BR, en_US, de_DE...",

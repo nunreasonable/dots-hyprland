@@ -663,7 +663,7 @@ ContentPage {
             icon: "style"
             shape: W.MaterialShape.Shape.SoftBurst
             title: Translation.tr("Style")
-            hint: Translation.tr("Switching the style resets the bar buttons, workspace numbers, quick sliders and settings layout to that style's defaults")
+            hint: Translation.tr("Switching the style resets the bar layout and buttons, workspace numbers, quick sliders and settings layout to that style's defaults")
 
             GroupedList {
                 ConfigSelectionArray {

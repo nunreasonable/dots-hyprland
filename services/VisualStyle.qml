@@ -28,6 +28,11 @@ Singleton {
         Config.options.bar.workspaces.alwaysShowNumbers = pc;
         Config.options.bar.workspaces.showAppIcons = !pc;
         Config.options.bar.resources.alwaysShowSwap = !pc;
+        Config.options.bar.resources.showValue = !pc;
+        Config.options.bar.utilButtons.showWallpaperToggle = pc;
+        Config.options.bar.layouts.leftLayout = pc ? BarLayouts.end4pcLeft : BarLayouts.classicLeft;
+        Config.options.bar.layouts.middleLayout = pc ? BarLayouts.end4pcMiddle : BarLayouts.classicMiddle;
+        Config.options.bar.layouts.rightLayout = pc ? BarLayouts.end4pcRight : BarLayouts.classicRight;
         Config.options.sidebar.quickSliders.enable = pc;
         Config.options.appearance.settingsLayout = style;
         Config.options.appearance.visualStyleApplied = style;
