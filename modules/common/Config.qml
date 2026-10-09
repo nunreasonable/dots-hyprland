@@ -404,6 +404,7 @@ Singleton {
 
             property JsonObject windowsPort: JsonObject {
                 property bool taskbarHoverOnly: true
+                property bool nativeTaskbar: false
                 property bool backgroundBehindIcons: true
                 property bool ownWallpaper: false
                 property bool superDrag: true

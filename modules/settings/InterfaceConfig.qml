@@ -203,7 +203,20 @@ ContentPage {
         title: Translation.tr("Windows taskbar")
 
         ConfigSwitch {
+            buttonIcon: "dock_to_bottom"
+            text: Translation.tr("Use the Windows taskbar instead of ii's bar")
+            checked: Config.options.windowsPort.nativeTaskbar
+            onCheckedChanged: {
+                Config.options.windowsPort.nativeTaskbar = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Hides ii's bar and brings back the normal Windows taskbar. Desktop widgets, sidebars, search and shortcuts stay as they are. Ctrl+Super+P switches it")
+            }
+        }
+
+        ConfigSwitch {
             buttonIcon: "web_traffic"
+            enabled: !Config.options.windowsPort.nativeTaskbar
             text: Translation.tr("Show only when the cursor touches its screen edge")
             checked: Config.options.windowsPort.taskbarHoverOnly
             onCheckedChanged: {

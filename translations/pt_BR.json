@@ -1014,5 +1014,7 @@
   "Paste": "Colar",
   "Select All": "Selecionar tudo",
   "Search...": "Buscar...",
-  "Go": "Ir"
+  "Go": "Ir",
+  "Use the Windows taskbar instead of ii's bar": "Usar a barra de tarefas do Windows no lugar da barra do ii",
+  "Hides ii's bar and brings back the normal Windows taskbar. Desktop widgets, sidebars, search and shortcuts stay as they are. Ctrl+Super+P switches it": "Esconde a barra do ii e traz de volta a barra de tarefas normal do Windows. Os widgets da área de trabalho, as barras laterais, a busca e os atalhos continuam iguais. Ctrl+Super+P alterna"
 }

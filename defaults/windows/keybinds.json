@@ -27,7 +27,7 @@
     {"keys": "Ctrl+Alt+Super+T", "action": "global", "name": "wallpaperSelectorRandom", "description": "Shell: Random wallpaper"},
     {"keys": "Ctrl+Shift+Super+D", "action": "global", "name": "toggleLightDark", "description": "Shell: Toggle light/dark mode"},
     {"keys": "Ctrl+Super+R", "action": "reload", "description": "Shell: Restart widgets"},
-    {"keys": "Ctrl+Super+P", "action": "global", "name": "panelFamilyCycle", "description": "Shell: Cycle panel family"},
+    {"keys": "Ctrl+Super+P", "action": "global", "name": "panelFamilyCycle", "description": "Shell: Windows taskbar instead of ii's bar (toggle)"},
     {"keys": "Shift+Super+S", "action": "global", "name": "regionScreenshot", "description": "Utilities: Screen snip"},
     {"keys": "Shift+Super+A", "action": "global", "name": "regionSearch", "description": "Utilities: Google Lens"},
     {"keys": "Shift+Super+X", "action": "global", "name": "regionOcr", "description": "Utilities: Character recognition >> clipboard"},

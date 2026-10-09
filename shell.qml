@@ -53,7 +53,12 @@ ShellRoot {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.taskbar
         property: "hoverOnly"
-        value: Config.options.windowsPort.taskbarHoverOnly
+        value: Config.options.windowsPort.taskbarHoverOnly && !Config.options.windowsPort.nativeTaskbar
+    }
+    readonly property bool nativeTaskbarTakesOver: Platform.isWindows && Config.ready && WindowsNative.ready && Config.options.windowsPort.nativeTaskbar && Config.options.windowsPort.taskbarHoverOnly
+    onNativeTaskbarTakesOverChanged: {
+        if (root.nativeTaskbarTakesOver)
+            Qt.callLater(() => WindowsNative.taskbar.turnOffAutoHide());
     }
     Binding {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
@@ -113,6 +118,13 @@ ShellRoot {
     // Panel families
     property list<string> families: ["ii", "waffle"]
     function cyclePanelFamily() {
+        if (Platform.isWindows) {
+            if (Config.options.panelFamily !== "ii")
+                Config.options.panelFamily = "ii";
+            else
+                Config.options.windowsPort.nativeTaskbar = !Config.options.windowsPort.nativeTaskbar;
+            return;
+        }
         const currentIndex = families.indexOf(Config.options.panelFamily)
         const nextIndex = (currentIndex + 1) % families.length
         Config.options.panelFamily = families[nextIndex]
