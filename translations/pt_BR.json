@@ -1051,5 +1051,8 @@
   "Inertial scrolling (mouse wheel)": "Rolagem inercial (roda do mouse)",
   "Wheel scroll amount": "Quantidade de rolagem da roda",
   "Minimum duration (ms)": "Duração mínima (ms)",
-  "Maximum duration (ms)": "Duração máxima (ms)"
+  "Maximum duration (ms)": "Duração máxima (ms)",
+  "Bluetooth peripherals": "Periféricos Bluetooth",
+  "Warns when a paired Bluetooth device's own battery is running low.": "Avisa quando a bateria de um dispositivo Bluetooth pareado está acabando.",
+  "Notify on low peripheral battery": "Notificar quando a bateria de um periférico estiver fraca"
 }

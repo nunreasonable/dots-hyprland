@@ -392,6 +392,48 @@ ContentPage {
                     }
                 }
             }
+
+            ContentSubsection {
+                title: Translation.tr("Bluetooth peripherals")
+                tooltip: Translation.tr("Warns when a paired Bluetooth device's own battery is running low.")
+
+                GroupedList {
+                    ConfigSwitch {
+                        buttonIcon: "notifications"
+                        text: Translation.tr("Notify on low peripheral battery")
+                        checked: Config.options.battery.peripheralNotify
+                        onCheckedChanged: {
+                            Config.options.battery.peripheralNotify = checked;
+                        }
+                    }
+                    ConfigRow {
+                        uniform: true
+                        enabled: Config.options.battery.peripheralNotify
+                        ConfigSpinBox {
+                            icon: "warning"
+                            text: Translation.tr("Low warning")
+                            value: Config.options.battery.peripheralLow
+                            from: 0
+                            to: 100
+                            stepSize: 5
+                            onValueChanged: {
+                                Config.options.battery.peripheralLow = value;
+                            }
+                        }
+                        ConfigSpinBox {
+                            icon: "dangerous"
+                            text: Translation.tr("Critical warning")
+                            value: Config.options.battery.peripheralCritical
+                            from: 0
+                            to: 100
+                            stepSize: 5
+                            onValueChanged: {
+                                Config.options.battery.peripheralCritical = value;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         ContentSection {
