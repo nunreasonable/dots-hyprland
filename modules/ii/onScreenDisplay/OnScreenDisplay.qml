@@ -16,6 +16,7 @@ Scope {
     property var focusedScreen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)
 
     property string currentIndicator: "volume"
+    onCurrentIndicatorChanged: GlobalStates.osdIndicatorType = currentIndicator
     property var indicators: [
         {
             id: "volume",
@@ -95,7 +96,7 @@ Scope {
     Loader {
         id: osdLoader
         property bool kept: false
-        active: GlobalStates.osdVolumeOpen || (Platform.isWindows && osdLoader.kept)
+        active: (GlobalStates.osdVolumeOpen && !GlobalStates.dynamicIslandActive) || (Platform.isWindows && osdLoader.kept)
         onLoaded: osdLoader.kept = true
 
         sourceComponent: PanelWindow {
@@ -128,7 +129,7 @@ Scope {
 
             implicitWidth: columnLayout.implicitWidth
             implicitHeight: columnLayout.implicitHeight
-            visible: GlobalStates.osdVolumeOpen
+            visible: GlobalStates.osdVolumeOpen && !GlobalStates.dynamicIslandActive
 
             ColumnLayout {
                 id: columnLayout
