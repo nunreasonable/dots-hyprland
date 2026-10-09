@@ -18,6 +18,16 @@ import qs.modules.ii.background.widgets
 import qs.modules.ii.background.widgets.clock
 import qs.modules.ii.background.widgets.weather
 import qs.modules.ii.background.widgets.resources
+import qs.modules.ii.background.widgets.calendar
+import qs.modules.ii.background.widgets.customtext
+import qs.modules.ii.background.widgets.images
+import qs.modules.ii.background.widgets.media
+import qs.modules.ii.background.widgets.notes
+import qs.modules.ii.background.widgets.timers
+import qs.modules.ii.background.widgets.todo
+import qs.modules.ii.background.widgets.usercard
+import qs.modules.ii.background.widgets.visualizer
+import qs.modules.ii.background.widgets.worldclock
 
 Variants {
     id: root
@@ -94,6 +104,7 @@ Variants {
         WlrLayershell.layer: (GlobalStates.screenLocked && !scaleAnim.running) ? WlrLayer.Overlay : (Platform.isWindows ? WlrLayer.Background : WlrLayer.Bottom)
         // WlrLayershell.layer: WlrLayer.Bottom
         WlrLayershell.namespace: "quickshell:background"
+        WlrLayershell.keyboardFocus: GlobalStates.desktopWidgetKeyboardFocus ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
         anchors {
             top: true
             bottom: true
@@ -174,6 +185,7 @@ Variants {
                 exclusionMode: ExclusionMode.Ignore
                 WlrLayershell.layer: WlrLayer.Bottom
                 WlrLayershell.namespace: "quickshell:backgroundWidgets"
+                WlrLayershell.keyboardFocus: GlobalStates.desktopWidgetKeyboardFocus ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
                 anchors {
                     top: true
                     bottom: true
@@ -193,6 +205,58 @@ Variants {
                     }
                     WidgetMaskRegion {
                         loader: resourcesLoader
+                        canvas: widgetCanvas
+                    }
+                    WidgetMaskRegion {
+                        loader: calendarLoader
+                        canvas: widgetCanvas
+                    }
+                    WidgetMaskRegion {
+                        loader: customTextLoader
+                        canvas: widgetCanvas
+                    }
+                    WidgetMaskRegion {
+                        loader: customImageLoader
+                        canvas: widgetCanvas
+                    }
+                    WidgetMaskRegion {
+                        loader: imageCardLoader
+                        canvas: widgetCanvas
+                    }
+                    WidgetMaskRegion {
+                        loader: stickerLoader
+                        canvas: widgetCanvas
+                    }
+                    WidgetMaskRegion {
+                        loader: imageConverterLoader
+                        canvas: widgetCanvas
+                    }
+                    WidgetMaskRegion {
+                        loader: mediaWidgetLoader
+                        canvas: widgetCanvas
+                    }
+                    WidgetMaskRegion {
+                        loader: notesLoader
+                        canvas: widgetCanvas
+                    }
+                    WidgetMaskRegion {
+                        loader: timersLoader
+                        canvas: widgetCanvas
+                    }
+                    WidgetMaskRegion {
+                        loader: todoLoader
+                        canvas: widgetCanvas
+                    }
+                    WidgetMaskRegion {
+                        loader: userCardLoader
+                        canvas: widgetCanvas
+                    }
+                    WidgetMaskRegion {
+                        loader: visualizerLoader
+                        canvas: widgetCanvas
+                    }
+                    WidgetMaskRegion {
+                        loader: worldClockLoader
                         canvas: widgetCanvas
                     }
                 }
@@ -373,6 +437,188 @@ Variants {
                         scaledScreenWidth: bgRoot.screen.width
                         scaledScreenHeight: bgRoot.screen.height
                         wallpaperScale: 1
+                    }
+                }
+
+                FadeLoader {
+                    id: calendarLoader
+                    asynchronous: Platform.isWindows
+                    shown: Config.options.background.widgets.calendar.enable
+                    sourceComponent: CalendarWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                        wallpaperItem: wallpaper
+                    }
+                }
+
+                FadeLoader {
+                    id: customTextLoader
+                    asynchronous: Platform.isWindows
+                    shown: Config.options.background.widgets.customText.enable
+                    sourceComponent: CustomTextWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                        wallpaperItem: wallpaper
+                    }
+                }
+
+                FadeLoader {
+                    id: customImageLoader
+                    asynchronous: Platform.isWindows
+                    shown: Config.options.background.widgets.customImage.enable
+                    sourceComponent: CustomImage {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                        wallpaperItem: wallpaper
+                    }
+                }
+
+                FadeLoader {
+                    id: imageCardLoader
+                    asynchronous: Platform.isWindows
+                    shown: Config.options.background.widgets.imageCard.enable
+                    sourceComponent: ImageCardWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                        wallpaperItem: wallpaper
+                    }
+                }
+
+                FadeLoader {
+                    id: stickerLoader
+                    asynchronous: Platform.isWindows
+                    shown: Config.options.background.widgets.sticker.enable
+                    sourceComponent: StickerWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                        wallpaperItem: wallpaper
+                    }
+                }
+
+                FadeLoader {
+                    id: imageConverterLoader
+                    asynchronous: Platform.isWindows
+                    shown: Config.options.background.widgets.images.enable
+                    sourceComponent: ImageConverterWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                        wallpaperItem: wallpaper
+                    }
+                }
+
+                FadeLoader {
+                    id: mediaWidgetLoader
+                    asynchronous: Platform.isWindows
+                    shown: Config.options.background.widgets.media.enable
+                    sourceComponent: MediaWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                        wallpaperItem: wallpaper
+                    }
+                }
+
+                FadeLoader {
+                    id: notesLoader
+                    asynchronous: Platform.isWindows
+                    shown: Config.options.background.widgets.notes.enable
+                    sourceComponent: NotesWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                        wallpaperItem: wallpaper
+                    }
+                }
+
+                FadeLoader {
+                    id: timersLoader
+                    asynchronous: Platform.isWindows
+                    shown: Config.options.background.widgets.timers.enable
+                    sourceComponent: TimerWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                        wallpaperItem: wallpaper
+                    }
+                }
+
+                FadeLoader {
+                    id: todoLoader
+                    asynchronous: Platform.isWindows
+                    shown: Config.options.background.widgets.todo.enable
+                    sourceComponent: TodoWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                        wallpaperItem: wallpaper
+                    }
+                }
+
+                FadeLoader {
+                    id: userCardLoader
+                    asynchronous: Platform.isWindows
+                    shown: Config.options.background.widgets.userCard.enable
+                    sourceComponent: UserCardWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                        wallpaperItem: wallpaper
+                    }
+                }
+
+                FadeLoader {
+                    id: visualizerLoader
+                    asynchronous: Platform.isWindows
+                    shown: Config.options.background.widgets.visualizer.enable
+                    sourceComponent: VisualizerWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                        wallpaperItem: wallpaper
+                    }
+                }
+
+                FadeLoader {
+                    id: worldClockLoader
+                    asynchronous: Platform.isWindows
+                    shown: Config.options.background.widgets.worldClock.enable
+                    sourceComponent: WorldClockWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                        wallpaperItem: wallpaper
                     }
                 }
             }

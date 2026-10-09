@@ -657,58 +657,708 @@ ContentPage {
                 columns: 2
                 rowSpacing: 8
                 columnSpacing: 8
-                Repeater {
-                    model: ["weather", "resources"]
-                    delegate: Rectangle {
-                        id: widgetCard
-                        required property string modelData
-                        readonly property bool isWeather: modelData === "weather"
-                        readonly property string icon: isWeather ? "weather_mix" : "memory"
-                        readonly property string name: isWeather ? Translation.tr("Weather") : Translation.tr("Resources")
-                        readonly property bool widgetEnabled: isWeather ? Config.options.background.widgets.weather.enable : Config.options.background.widgets.resources.enable
-                        Layout.fillWidth: true
-                        Layout.preferredHeight: 105
-                        radius: Appearance.rounding.normal
-                        color: Appearance.colors.colLayer1
-                        border.width: 1
-                        border.color: Appearance.colors.colLayer0Border
-                        ColumnLayout {
-                            anchors {
-                                top: parent.top
-                                left: parent.left
-                                right: parent.right
-                                margins: 12
+                Rectangle {
+                    id: weatherCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.weather.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "weather_mix"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
                             }
-                            spacing: 0
-                            RowLayout {
+                            Item {
                                 Layout.fillWidth: true
-                                W.MaterialSymbol {
-                                    text: widgetCard.icon
-                                    iconSize: Appearance.font.pixelSize.normal + 5
-                                    color: Appearance.colors.colPrimary
-                                }
-                                Item { Layout.fillWidth: true }
-                                ConfigSwitch {
-                                    Layout.fillWidth: false
-                                    checked: widgetCard.widgetEnabled
-                                    onCheckedChanged: {
-                                        if (widgetCard.isWeather)
-                                            Config.options.background.widgets.weather.enable = checked
-                                        else
-                                            Config.options.background.widgets.resources.enable = checked
-                                    }
+                            }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: weatherCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.weather.enable = checked;
                                 }
                             }
-                            W.StyledText {
-                                text: widgetCard.name
-                                font.pixelSize: Appearance.font.pixelSize.normal
-                                color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: Translation.tr("Weather")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: weatherCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                }
+                Rectangle {
+                    id: resourcesCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.resources.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "memory"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
                             }
-                            W.StyledText {
-                                text: widgetCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
-                                font.pixelSize: Appearance.font.pixelSize.small
-                                color: Appearance.colors.colSubtext
+                            Item {
+                                Layout.fillWidth: true
                             }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: resourcesCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.resources.enable = checked;
+                                }
+                            }
+                        }
+                        W.StyledText {
+                            text: Translation.tr("Resources")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: resourcesCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                }
+                Rectangle {
+                    id: calendarCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.calendar.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "calendar_month"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: calendarCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.calendar.enable = checked;
+                                }
+                            }
+                        }
+                        W.StyledText {
+                            text: Translation.tr("Calendar")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: calendarCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                }
+                Rectangle {
+                    id: customTextCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.customText.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "text_fields"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: customTextCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.customText.enable = checked;
+                                }
+                            }
+                        }
+                        W.StyledText {
+                            text: Translation.tr("Custom text")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: customTextCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                }
+                Rectangle {
+                    id: customImageCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.customImage.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "sticky_note_2"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: customImageCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.customImage.enable = checked;
+                                }
+                            }
+                        }
+                        W.StyledText {
+                            text: Translation.tr("Custom image")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: customImageCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                }
+                Rectangle {
+                    id: imageCardCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.imageCard.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "image"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: imageCardCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.imageCard.enable = checked;
+                                }
+                            }
+                        }
+                        W.StyledText {
+                            text: Translation.tr("Image card")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: imageCardCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                }
+                Rectangle {
+                    id: stickerCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.sticker.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "sticky_note_2"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: stickerCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.sticker.enable = checked;
+                                }
+                            }
+                        }
+                        W.StyledText {
+                            text: Translation.tr("Sticker")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: stickerCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                }
+                Rectangle {
+                    id: imagesCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.images.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "transform"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: imagesCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.images.enable = checked;
+                                }
+                            }
+                        }
+                        W.StyledText {
+                            text: Translation.tr("Image converter")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: imagesCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                }
+                Rectangle {
+                    id: mediaCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.media.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "music_note"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: mediaCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.media.enable = checked;
+                                }
+                            }
+                        }
+                        W.StyledText {
+                            text: Translation.tr("Media")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: mediaCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                }
+                Rectangle {
+                    id: notesCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.notes.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "sticky_note_2"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: notesCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.notes.enable = checked;
+                                }
+                            }
+                        }
+                        W.StyledText {
+                            text: Translation.tr("Notes")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: notesCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                }
+                Rectangle {
+                    id: timersCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.timers.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "timer"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: timersCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.timers.enable = checked;
+                                }
+                            }
+                        }
+                        W.StyledText {
+                            text: Translation.tr("Timers")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: timersCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                }
+                Rectangle {
+                    id: todoCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.todo.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "checklist"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: todoCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.todo.enable = checked;
+                                }
+                            }
+                        }
+                        W.StyledText {
+                            text: Translation.tr("To-Do")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: todoCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                }
+                Rectangle {
+                    id: userCardCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.userCard.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "badge"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: userCardCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.userCard.enable = checked;
+                                }
+                            }
+                        }
+                        W.StyledText {
+                            text: Translation.tr("User card")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: userCardCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                }
+                Rectangle {
+                    id: visualizerCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.visualizer.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "graphic_eq"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: visualizerCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.visualizer.enable = checked;
+                                }
+                            }
+                        }
+                        W.StyledText {
+                            text: Translation.tr("Visualizer")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: visualizerCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                }
+                Rectangle {
+                    id: worldClockCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.worldClock.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "public"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: worldClockCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.worldClock.enable = checked;
+                                }
+                            }
+                        }
+                        W.StyledText {
+                            text: Translation.tr("World clock")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: worldClockCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
                         }
                     }
                 }
@@ -736,6 +1386,744 @@ ContentPage {
                         }
                         options: page.placementOptions
                     }
+                    ConfigSelectionArray {
+                        text: Translation.tr("Calendar")
+                        icon: "calendar_month"
+                        currentValue: Config.options.background.widgets.calendar.placementStrategy
+                        onSelected: newValue => {
+                            Config.options.background.widgets.calendar.placementStrategy = newValue;
+                        }
+                        options: page.placementOptions
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("Custom text")
+                        icon: "text_fields"
+                        currentValue: Config.options.background.widgets.customText.placementStrategy
+                        onSelected: newValue => {
+                            Config.options.background.widgets.customText.placementStrategy = newValue;
+                        }
+                        options: page.placementOptions
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("Custom image")
+                        icon: "sticky_note_2"
+                        currentValue: Config.options.background.widgets.customImage.placementStrategy
+                        onSelected: newValue => {
+                            Config.options.background.widgets.customImage.placementStrategy = newValue;
+                        }
+                        options: page.placementOptions
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("Image card")
+                        icon: "image"
+                        currentValue: Config.options.background.widgets.imageCard.placementStrategy
+                        onSelected: newValue => {
+                            Config.options.background.widgets.imageCard.placementStrategy = newValue;
+                        }
+                        options: page.placementOptions
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("Sticker")
+                        icon: "sticky_note_2"
+                        currentValue: Config.options.background.widgets.sticker.placementStrategy
+                        onSelected: newValue => {
+                            Config.options.background.widgets.sticker.placementStrategy = newValue;
+                        }
+                        options: page.placementOptions
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("Image converter")
+                        icon: "transform"
+                        currentValue: Config.options.background.widgets.images.placementStrategy
+                        onSelected: newValue => {
+                            Config.options.background.widgets.images.placementStrategy = newValue;
+                        }
+                        options: page.placementOptions
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("Media")
+                        icon: "music_note"
+                        currentValue: Config.options.background.widgets.media.placementStrategy
+                        onSelected: newValue => {
+                            Config.options.background.widgets.media.placementStrategy = newValue;
+                        }
+                        options: page.placementOptions
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("Notes")
+                        icon: "sticky_note_2"
+                        currentValue: Config.options.background.widgets.notes.placementStrategy
+                        onSelected: newValue => {
+                            Config.options.background.widgets.notes.placementStrategy = newValue;
+                        }
+                        options: page.placementOptions
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("Timers")
+                        icon: "timer"
+                        currentValue: Config.options.background.widgets.timers.placementStrategy
+                        onSelected: newValue => {
+                            Config.options.background.widgets.timers.placementStrategy = newValue;
+                        }
+                        options: page.placementOptions
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("To-Do")
+                        icon: "checklist"
+                        currentValue: Config.options.background.widgets.todo.placementStrategy
+                        onSelected: newValue => {
+                            Config.options.background.widgets.todo.placementStrategy = newValue;
+                        }
+                        options: page.placementOptions
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("User card")
+                        icon: "badge"
+                        currentValue: Config.options.background.widgets.userCard.placementStrategy
+                        onSelected: newValue => {
+                            Config.options.background.widgets.userCard.placementStrategy = newValue;
+                        }
+                        options: page.placementOptions
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("Visualizer")
+                        icon: "graphic_eq"
+                        currentValue: Config.options.background.widgets.visualizer.placementStrategy
+                        onSelected: newValue => {
+                            Config.options.background.widgets.visualizer.placementStrategy = newValue;
+                        }
+                        options: page.placementOptions
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("World clock")
+                        icon: "public"
+                        currentValue: Config.options.background.widgets.worldClock.placementStrategy
+                        onSelected: newValue => {
+                            Config.options.background.widgets.worldClock.placementStrategy = newValue;
+                        }
+                        options: page.placementOptions
+                    }
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "tune"
+            shape: W.MaterialShape.Shape.Flower
+            title: Translation.tr("Desktop widgets")
+
+            GroupedList {
+                ConfigSwitch {
+                    buttonIcon: "grid_on"
+                    text: Translation.tr("Show grid while dragging")
+                    checked: Config.options.background.showGrid
+                    onCheckedChanged: {
+                        Config.options.background.showGrid = checked;
+                    }
+                }
+                ConfigSwitch {
+                    buttonIcon: "straighten"
+                    text: Translation.tr("Show snap lines")
+                    checked: Config.options.background.showSnapLines
+                    onCheckedChanged: {
+                        Config.options.background.showSnapLines = checked;
+                    }
+                }
+                ConfigSwitch {
+                    buttonIcon: "lock"
+                    text: Translation.tr("Lock widget positions")
+                    checked: Config.options.background.widgetsLocked
+                    onCheckedChanged: {
+                        Config.options.background.widgetsLocked = checked;
+                    }
+                }
+                ConfigSwitch {
+                    visible: !Platform.isWindows
+                    buttonIcon: "shadow"
+                    text: Translation.tr("Widget shadows")
+                    checked: Config.options.background.widgets.shadow
+                    onCheckedChanged: {
+                        Config.options.background.widgets.shadow = checked;
+                    }
+                }
+                ConfigSwitch {
+                    buttonIcon: "lock_person"
+                    text: Translation.tr("Show widgets on the lock screen")
+                    checked: Config.options.lock.showWidgets
+                    onCheckedChanged: {
+                        Config.options.lock.showWidgets = checked;
+                    }
+                }
+            }
+
+            Loader {
+                Layout.fillWidth: true
+                active: !Platform.isWindows
+                visible: active
+                sourceComponent: GroupedList {
+                    ConfigSwitch {
+                        buttonIcon: "blur_on"
+                        text: Translation.tr("Blur widget backgrounds")
+                        checked: Config.options.background.widgets.blurWidgets
+                        onCheckedChanged: {
+                            Config.options.background.widgets.blurWidgets = checked;
+                        }
+                    }
+                    ConfigSlider {
+                        visible: Config.options.background.widgets.blurWidgets
+                        text: Translation.tr("Widget blur radius")
+                        buttonIcon: "aspect_ratio"
+                        usePercentTooltip: false
+                        value: Config.options.background.widgets.blurRadius
+                        from: 1
+                        to: 64
+                        stopIndicatorValues: [32]
+                        onValueChanged: {
+                            Config.options.background.widgets.blurRadius = value;
+                        }
+                    }
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "calendar_month"
+            shape: W.MaterialShape.Shape.SemiCircle
+            title: Translation.tr("Widget: Calendar")
+
+            GroupedList {
+                ConfigSelectionArray {
+                    text: Translation.tr("Size")
+                    icon: "aspect_ratio"
+                    currentValue: Config.options.background.widgets.calendar.sizeMode
+                    onSelected: newValue => {
+                        Config.options.background.widgets.calendar.sizeMode = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: "1×1",
+                            icon: "crop_square",
+                            value: "1x1"
+                        },
+                        {
+                            displayName: "1×2",
+                            icon: "crop_landscape",
+                            value: "1x2"
+                        },
+                        {
+                            displayName: "2×2",
+                            icon: "crop_square",
+                            value: "2x2"
+                        },
+                        {
+                            displayName: "2×3",
+                            icon: "crop_portrait",
+                            value: "2x3"
+                        },
+                    ]
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "text_fields"
+            shape: W.MaterialShape.Shape.Diamond
+            title: Translation.tr("Widget: Custom text")
+
+            GroupedList {
+                ConfigTextArea {
+                    Layout.fillWidth: true
+                    fieldWidth: 300
+                    buttonIcon: "edit"
+                    text: Translation.tr("Content")
+                    placeholderText: Translation.tr("Content")
+                    value: Config.options.background.widgets.customText.content
+                    onValueChanged: {
+                        Config.options.background.widgets.customText.content = value;
+                    }
+                }
+                ConfigTextArea {
+                    Layout.fillWidth: true
+                    fieldWidth: 220
+                    buttonIcon: "font_download"
+                    text: Translation.tr("Font family")
+                    placeholderText: Translation.tr("Font family")
+                    value: Config.options.background.widgets.customText.fontFamily
+                    onValueChanged: {
+                        Config.options.background.widgets.customText.fontFamily = value;
+                    }
+                }
+                ConfigSelectionArray {
+                    text: Translation.tr("Alignment")
+                    icon: "format_align_center"
+                    currentValue: Config.options.background.widgets.customText.alignment
+                    onSelected: newValue => {
+                        Config.options.background.widgets.customText.alignment = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: "",
+                            icon: "format_align_left",
+                            value: "left"
+                        },
+                        {
+                            displayName: "",
+                            icon: "format_align_center",
+                            value: "center"
+                        },
+                        {
+                            displayName: "",
+                            icon: "format_align_right",
+                            value: "right"
+                        },
+                    ]
+                }
+                ConfigSlider {
+                    text: Translation.tr("Font size")
+                    buttonIcon: "format_size"
+                    usePercentTooltip: false
+                    value: Config.options.background.widgets.customText.fontSize
+                    from: 12
+                    to: 400
+                    stopIndicatorValues: [72]
+                    onValueChanged: {
+                        Config.options.background.widgets.customText.fontSize = value;
+                    }
+                }
+                ConfigSwitch {
+                    visible: !Platform.isWindows
+                    buttonIcon: "shadow"
+                    text: Translation.tr("Shadow")
+                    checked: Config.options.background.widgets.customText.shadow
+                    onCheckedChanged: {
+                        Config.options.background.widgets.customText.shadow = checked;
+                    }
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "sticky_note_2"
+            shape: W.MaterialShape.Shape.ClamShell
+            title: Translation.tr("Widget: Custom image")
+
+            GroupedList {
+                ConfigTextArea {
+                    Layout.fillWidth: true
+                    fieldWidth: 300
+                    buttonIcon: "folder_open"
+                    text: Translation.tr("Image path")
+                    placeholderText: Translation.tr("Or drop an image on the widget")
+                    value: Config.options.background.widgets.customImage.path
+                    onValueChanged: {
+                        Config.options.background.widgets.customImage.path = value;
+                    }
+                }
+                ConfigSelectionArray {
+                    text: Translation.tr("Shape")
+                    icon: "category"
+                    currentValue: Config.options.background.widgets.customImage.shape
+                    onSelected: newValue => {
+                        Config.options.background.widgets.customImage.shape = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: "",
+                            icon: "circle",
+                            value: "Circle"
+                        },
+                        {
+                            displayName: "",
+                            icon: "square",
+                            value: "Square"
+                        },
+                        {
+                            displayName: "",
+                            icon: "cookie",
+                            value: "Cookie4Sided"
+                        },
+                        {
+                            displayName: "",
+                            icon: "cookie",
+                            value: "Cookie7Sided"
+                        },
+                        {
+                            displayName: "",
+                            icon: "bubble_chart",
+                            value: "Oval"
+                        },
+                        {
+                            displayName: "",
+                            icon: "favorite",
+                            value: "Heart"
+                        },
+                    ]
+                }
+                ConfigSlider {
+                    text: Translation.tr("Size")
+                    buttonIcon: "aspect_ratio"
+                    usePercentTooltip: false
+                    value: Config.options.background.widgets.customImage.size
+                    from: 80
+                    to: 500
+                    stopIndicatorValues: [200]
+                    onValueChanged: {
+                        Config.options.background.widgets.customImage.size = value;
+                    }
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "image"
+            shape: W.MaterialShape.Shape.Boom
+            title: Translation.tr("Widget: Image card")
+
+            GroupedList {
+                ConfigTextArea {
+                    Layout.fillWidth: true
+                    fieldWidth: 300
+                    buttonIcon: "folder_open"
+                    text: Translation.tr("Image path")
+                    placeholderText: Translation.tr("Or drop an image on the widget")
+                    value: Config.options.background.widgets.imageCard.path
+                    onValueChanged: {
+                        Config.options.background.widgets.imageCard.path = value;
+                    }
+                }
+                ConfigSelectionArray {
+                    text: Translation.tr("Size")
+                    icon: "aspect_ratio"
+                    currentValue: Config.options.background.widgets.imageCard.sizeMode
+                    onSelected: newValue => {
+                        Config.options.background.widgets.imageCard.sizeMode = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: "1×1",
+                            icon: "crop_square",
+                            value: "1x1"
+                        },
+                        {
+                            displayName: "1×2",
+                            icon: "crop_landscape",
+                            value: "1x2"
+                        },
+                        {
+                            displayName: "2×2",
+                            icon: "crop_square",
+                            value: "2x2"
+                        },
+                        {
+                            displayName: "2×3",
+                            icon: "crop_portrait",
+                            value: "2x3"
+                        },
+                    ]
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "sticky_note_2"
+            shape: W.MaterialShape.Shape.Puffy
+            title: Translation.tr("Widget: Sticker")
+
+            GroupedList {
+                ConfigTextArea {
+                    Layout.fillWidth: true
+                    fieldWidth: 300
+                    buttonIcon: "folder_open"
+                    text: Translation.tr("Image path")
+                    placeholderText: Translation.tr("Or drop an image on the widget")
+                    value: Config.options.background.widgets.sticker.path
+                    onValueChanged: {
+                        Config.options.background.widgets.sticker.path = value;
+                    }
+                }
+                ConfigSlider {
+                    text: Translation.tr("Size")
+                    buttonIcon: "aspect_ratio"
+                    usePercentTooltip: false
+                    value: Config.options.background.widgets.sticker.size
+                    from: 60
+                    to: 500
+                    stopIndicatorValues: [200]
+                    onValueChanged: {
+                        Config.options.background.widgets.sticker.size = value;
+                    }
+                }
+                ConfigSlider {
+                    text: Translation.tr("Outline width")
+                    buttonIcon: "line_weight"
+                    usePercentTooltip: false
+                    value: Config.options.background.widgets.sticker.outlineWidth
+                    from: 0
+                    to: 24
+                    stopIndicatorValues: [8]
+                    onValueChanged: {
+                        Config.options.background.widgets.sticker.outlineWidth = value;
+                    }
+                }
+                ConfigTextArea {
+                    Layout.fillWidth: true
+                    fieldWidth: 160
+                    buttonIcon: "format_color_fill"
+                    text: Translation.tr("Outline color")
+                    placeholderText: "#ffffff"
+                    value: Config.options.background.widgets.sticker.outlineColor
+                    onValueChanged: {
+                        Config.options.background.widgets.sticker.outlineColor = value;
+                    }
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "transform"
+            shape: W.MaterialShape.Shape.SoftBoom
+            title: Translation.tr("Widget: Image converter")
+
+            GroupedList {
+                W.StyledText {
+                    Layout.fillWidth: true
+                    wrapMode: Text.Wrap
+                    text: Translation.tr("Drop images on the widget to convert them. Needs ffmpeg (and ImageMagick for PDF) on PATH.")
+                    font.pixelSize: Appearance.font.pixelSize.small
+                    color: Appearance.colors.colSubtext
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "music_note"
+            shape: W.MaterialShape.Shape.Burst
+            title: Translation.tr("Widget: Media")
+
+            GroupedList {
+                ConfigSelectionArray {
+                    text: Translation.tr("Size")
+                    icon: "aspect_ratio"
+                    currentValue: Config.options.background.widgets.media.sizeMode
+                    onSelected: newValue => {
+                        Config.options.background.widgets.media.sizeMode = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: "1×1",
+                            icon: "crop_square",
+                            value: "1x1"
+                        },
+                        {
+                            displayName: "1×2",
+                            icon: "crop_landscape",
+                            value: "1x2"
+                        },
+                        {
+                            displayName: "2×2",
+                            icon: "crop_square",
+                            value: "2x2"
+                        },
+                        {
+                            displayName: "1×3",
+                            icon: "crop_landscape",
+                            value: "1x3"
+                        },
+                    ]
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "timer"
+            shape: W.MaterialShape.Shape.SoftBurst
+            title: Translation.tr("Widget: Timers")
+
+            GroupedList {
+                ConfigSwitch {
+                    buttonIcon: "swap_horiz"
+                    text: Translation.tr("Stack vertically")
+                    checked: Config.options.background.widgets.timers.vertical
+                    onCheckedChanged: {
+                        Config.options.background.widgets.timers.vertical = checked;
+                    }
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "badge"
+            shape: W.MaterialShape.Shape.Gem
+            title: Translation.tr("Widget: User card")
+
+            GroupedList {
+                ConfigSelectionArray {
+                    text: Translation.tr("Size")
+                    icon: "aspect_ratio"
+                    currentValue: Config.options.background.widgets.userCard.sizeMode
+                    onSelected: newValue => {
+                        Config.options.background.widgets.userCard.sizeMode = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: "1×1",
+                            icon: "crop_square",
+                            value: "1x1"
+                        },
+                        {
+                            displayName: "1×2",
+                            icon: "crop_landscape",
+                            value: "1x2"
+                        },
+                        {
+                            displayName: "2×2",
+                            icon: "crop_square",
+                            value: "2x2"
+                        },
+                        {
+                            displayName: "2×3",
+                            icon: "crop_portrait",
+                            value: "2x3"
+                        },
+                    ]
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "graphic_eq"
+            shape: W.MaterialShape.Shape.Sunny
+            title: Translation.tr("Widget: Visualizer")
+
+            GroupedList {
+                ConfigSelectionArray {
+                    text: Translation.tr("Style")
+                    icon: "bar_chart"
+                    currentValue: Config.options.background.widgets.visualizer.style
+                    onSelected: newValue => {
+                        Config.options.background.widgets.visualizer.style = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: Translation.tr("Bars"),
+                            icon: "bar_chart",
+                            value: "bars"
+                        },
+                        {
+                            displayName: Translation.tr("Mirror"),
+                            icon: "flip",
+                            value: "mirror"
+                        },
+                        {
+                            displayName: Translation.tr("Aurora"),
+                            icon: "gradient",
+                            value: "aurora"
+                        },
+                        {
+                            displayName: Translation.tr("Ring"),
+                            icon: "data_usage",
+                            value: "ring"
+                        },
+                        {
+                            displayName: Translation.tr("Dots"),
+                            icon: "grain",
+                            value: "dots"
+                        },
+                    ]
+                }
+                ConfigSelectionArray {
+                    text: Translation.tr("Color")
+                    icon: "palette"
+                    currentValue: Config.options.background.widgets.visualizer.colorSource
+                    onSelected: newValue => {
+                        Config.options.background.widgets.visualizer.colorSource = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: Translation.tr("Theme"),
+                            icon: "palette",
+                            value: "theme"
+                        },
+                        {
+                            displayName: Translation.tr("Album cover"),
+                            icon: "album",
+                            value: "cover"
+                        },
+                    ]
+                }
+                ConfigSlider {
+                    text: Translation.tr("Sensitivity")
+                    buttonIcon: "tune"
+                    usePercentTooltip: false
+                    value: Config.options.background.widgets.visualizer.sensitivity * 100
+                    from: 10
+                    to: 300
+                    stopIndicatorValues: [100]
+                    onValueChanged: {
+                        Config.options.background.widgets.visualizer.sensitivity = value / 100;
+                    }
+                }
+                W.StyledText {
+                    Layout.fillWidth: true
+                    wrapMode: Text.Wrap
+                    text: Translation.tr("Only the Bars style is implemented on Windows so far; the others fall back to it.")
+                    font.pixelSize: Appearance.font.pixelSize.small
+                    color: Appearance.colors.colSubtext
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "public"
+            shape: W.MaterialShape.Shape.PuffyDiamond
+            title: Translation.tr("Widget: World clock")
+
+            GroupedList {
+                ConfigSelectionArray {
+                    text: Translation.tr("Size")
+                    icon: "aspect_ratio"
+                    currentValue: Config.options.background.widgets.worldClock.sizeMode
+                    onSelected: newValue => {
+                        Config.options.background.widgets.worldClock.sizeMode = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: "2×2",
+                            icon: "crop_square",
+                            value: "2x2"
+                        },
+                        {
+                            displayName: "4×1",
+                            icon: "view_column",
+                            value: "4x1"
+                        },
+                    ]
+                }
+                ConfigSwitch {
+                    buttonIcon: "swap_horiz"
+                    text: Translation.tr("Stack vertically")
+                    checked: Config.options.background.widgets.worldClock.vertical
+                    onCheckedChanged: {
+                        Config.options.background.widgets.worldClock.vertical = checked;
+                    }
+                }
+                ConfigSpinBox {
+                    icon: "numbers"
+                    text: Translation.tr("Clocks shown")
+                    value: Config.options.background.widgets.worldClock.clockCount
+                    from: 1
+                    to: 4
+                    stepSize: 1
+                    onValueChanged: {
+                        Config.options.background.widgets.worldClock.clockCount = value;
+                    }
+                }
+                W.StyledText {
+                    Layout.fillWidth: true
+                    wrapMode: Text.Wrap
+                    text: Translation.tr("Pick the actual time zones from the widget's own settings flip (the gear icon on the widget).")
+                    font.pixelSize: Appearance.font.pixelSize.small
+                    color: Appearance.colors.colSubtext
                 }
             }
         }

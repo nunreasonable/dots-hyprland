@@ -15,13 +15,16 @@ AbstractWidget {
     required property int scaledScreenWidth
     required property int scaledScreenHeight
     required property real wallpaperScale
-    property bool visibleWhenLocked: false
+    property Item wallpaperItem: null
+    property bool visibleWhenLocked: Config.options.lock.showWidgets
     property var configEntry: Config.options.background.widgets[configEntryName]
     property string placementStrategy: configEntry.placementStrategy
     property real targetX: Math.max(0, Math.min(configEntry.x, scaledScreenWidth - width))
     property real targetY : Math.max(0, Math.min(configEntry.y, scaledScreenHeight - height))
+    property real targetZ: configEntry.z ?? 0
     x: targetX
     y: targetY
+    z: targetZ
     visible: opacity > 0
     opacity: (GlobalStates.screenLocked && !visibleWhenLocked) ? 0 : 1
     Behavior on opacity {
@@ -32,13 +35,29 @@ AbstractWidget {
         animation: Appearance.animation.elementResize.numberAnimation.createObject(this)
     }
 
-    draggable: placementStrategy === "free"
-    onReleased: {
-        root.targetX = root.x;
-        root.targetY = root.y;
-        configEntry.x = root.targetX;
-        configEntry.y = root.targetY;
+    draggable: placementStrategy === "free" && !Config.options.background.widgetsLocked
+
+    function requestDelete() {
+        Config.options.background.widgets[root.configEntryName].enable = false;
     }
+
+    function restoreXYBinding() {
+        root.x = Qt.binding(() => root.targetX);
+        root.y = Qt.binding(() => root.targetY);
+        root.z = Qt.binding(() => root.targetZ);
+    }
+
+    function commitPosition() {
+        configEntry.x = root.x;
+        configEntry.y = root.y;
+        configEntry.z = root.z;
+        root.targetX = Qt.binding(() => Math.max(0, Math.min(configEntry.x, scaledScreenWidth - width)));
+        root.targetY = Qt.binding(() => Math.max(0, Math.min(configEntry.y, scaledScreenHeight - height)));
+        root.targetZ = Qt.binding(() => configEntry.z ?? 0);
+        root.restoreXYBinding();
+    }
+
+    onReleased: root.commitPosition()
 
     property bool needsColText: false
     property color dominantColor: Appearance.colors.colPrimary

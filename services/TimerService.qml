@@ -31,10 +31,24 @@ Singleton {
     property int stopwatchStart: Persistent.states.timer.stopwatch.start
     property var stopwatchLaps: Persistent.states.timer.stopwatch.laps
 
+    property bool countdownRunning: Persistent.states.timer.countdown.running
+    property int countdownDuration: Persistent.states.timer.countdown.duration
+    property int countdownStart: Persistent.states.timer.countdown.start
+    property int countdownSecondsLeft: countdownDuration
+
     // General
     Component.onCompleted: {
         if (!stopwatchRunning)
             stopwatchReset();
+        if (!countdownRunning)
+            countdownSecondsLeft = countdownDuration;
+    }
+
+    function formatSeconds(totalSeconds) {
+        const s = Math.max(0, Math.round(totalSeconds));
+        const m = Math.floor(s / 60);
+        const sec = s % 60;
+        return `${m}:${sec.toString().padStart(2, "0")}`;
     }
 
     function getCurrentTimeInSeconds() {  // Pomodoro uses Seconds
@@ -138,5 +152,55 @@ Singleton {
 
     function stopwatchRecordLap() {
         Persistent.states.timer.stopwatch.laps.push(stopwatchTime);
+    }
+
+    function refreshCountdown() {
+        if (!Persistent.states.timer.countdown.running)
+            return;
+
+        const elapsed = getCurrentTimeInSeconds() - Persistent.states.timer.countdown.start;
+        let left = Persistent.states.timer.countdown.duration - elapsed;
+
+        if (left <= 0) {
+            left = 0;
+            Persistent.states.timer.countdown.running = false;
+            Persistent.states.timer.countdown.duration = 0;
+            Notifications.sendDesktop("Timers", Translation.tr("⏰ Countdown finished"), ["-a", "Shell"]);
+        }
+
+        countdownSecondsLeft = left;
+    }
+
+    Timer {
+        id: countdownTimer
+        interval: 200
+        running: root.countdownRunning
+        repeat: true
+        onTriggered: refreshCountdown()
+    }
+
+    function addCountdownMinutes(minutes) {
+        const addSeconds = minutes * 60;
+        if (root.countdownRunning) {
+            Persistent.states.timer.countdown.duration += addSeconds;
+        } else {
+            Persistent.states.timer.countdown.duration = (Persistent.states.timer.countdown.duration ?? 0) + addSeconds;
+            countdownSecondsLeft = Persistent.states.timer.countdown.duration;
+        }
+    }
+
+    function toggleCountdown() {
+        if (countdownDuration <= 0)
+            return;
+        Persistent.states.timer.countdown.running = !countdownRunning;
+        if (Persistent.states.timer.countdown.running) {
+            Persistent.states.timer.countdown.start = getCurrentTimeInSeconds() - (countdownDuration - countdownSecondsLeft);
+        }
+    }
+
+    function resetCountdown() {
+        Persistent.states.timer.countdown.running = false;
+        Persistent.states.timer.countdown.duration = 0;
+        countdownSecondsLeft = 0;
     }
 }

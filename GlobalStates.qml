@@ -58,6 +58,7 @@ Singleton {
     function isFrameHovered(screenName, side) {
         return root.frameHover[`${screenName}:${side}`] ?? false;
     }
+    property bool desktopWidgetKeyboardFocus: false
 
     onSidebarRightOpenChanged: {
         if (GlobalStates.sidebarRightOpen) {
