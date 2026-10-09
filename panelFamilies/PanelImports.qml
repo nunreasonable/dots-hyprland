@@ -6,6 +6,7 @@ import qs.modules.ii.bar
 import qs.modules.ii.cheatsheet
 import qs.modules.ii.colorPicker
 import qs.modules.ii.dock
+import qs.modules.ii.frame
 import qs.modules.ii.lock
 import qs.modules.ii.mediaControls
 import qs.modules.ii.notificationPopup
