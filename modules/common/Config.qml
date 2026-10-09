@@ -643,6 +643,26 @@ Singleton {
             
             property JsonObject wallpaperSelector: JsonObject {
                 property bool useSystemFileDialog: false
+                property bool showBlurBackground: false
+                property bool showHomePath: true
+                property string userPath: ""
+                property string liveWallpapersPath: ""
+                property string wppFolder: `${FileUtils.trimFileProtocol(Directories.home)}/Downloads/Wpp`
+                property string wppSpicyFolder: `${FileUtils.trimFileProtocol(Directories.home)}/Downloads/Wpp_spicy`
+                property bool showSearchbar: true
+                property int columns: 4
+                property bool closeAfterSelection: true
+                property int changeInterval: 0
+                property string sortMode: "time"
+                property string wallhavenApiKey: ""
+                property string wallhavenCategories: "111"
+                property string wallhavenPurity: "100"
+                property string wallhavenSorting: "relevance"
+                property string wallhavenOrder: "desc"
+                property string wallhavenRatios: ""
+                property string wallhavenColors: ""
+                property string wallhavenQuery: ""
+                property string wallhavenTopRange: "1y"
             }
             
             property JsonObject windows: JsonObject {

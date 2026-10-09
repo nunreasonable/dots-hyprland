@@ -32,6 +32,7 @@ Singleton {
     readonly property list<string> videoExtensions: ["mp4", "webm", "mkv", "avi", "mov"]
     readonly property bool thumbnailGenerationRunning: thumbgenProc.running || _windowsThumbnailTotal > 0
     property real thumbnailGenerationProgress: 0
+    readonly property string sortMode: Config.options?.wallpaperSelector.sortMode || "time"
 
     signal changed()
     signal thumbnailGenerated(directory: string)
@@ -260,6 +261,28 @@ Singleton {
         }
     }
 
+    function setSortMode(mode) {
+        if (!Config.ready) return;
+        Config.options.wallpaperSelector.sortMode = mode;
+    }
+
+    function _sortField() {
+        switch (root.sortMode) {
+        case "name":
+        case "name_rev":
+            return FolderListModel.Name;
+        case "size":
+        case "size_rev":
+            return FolderListModel.Size;
+        default:
+            return FolderListModel.Time;
+        }
+    }
+
+    function _sortReversed() {
+        return root.sortMode === "time_rev" || root.sortMode === "name_rev" || root.sortMode === "size";
+    }
+
     function select(filePath, isDirectory, darkMode = Appearance.m3colors.darkmode) {
         if (isDirectory) {
             root.setDirectory(filePath);
@@ -385,8 +408,8 @@ Singleton {
             showDirs: true
             showDotAndDotDot: false
             showOnlyReadable: true
-            sortField: FolderListModel.Time
-            sortReversed: false
+            sortField: root._sortField()
+            sortReversed: root._sortReversed()
             onStatusChanged: root._onFolderModelStatus(status)
         }
     }
@@ -481,6 +504,14 @@ Singleton {
                 root.thumbnailGenerated(root.directory);
             }
         }
+    }
+
+    Timer {
+        id: changeIntervalTimer
+        interval: Config.options?.wallpaperSelector.changeInterval ?? 0
+        running: Config.ready && (Config.options?.wallpaperSelector.changeInterval ?? 0) > 0
+        repeat: true
+        onTriggered: root.randomFromCurrentFolder()
     }
 
     IpcHandler {
