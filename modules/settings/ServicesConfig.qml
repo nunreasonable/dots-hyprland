@@ -241,6 +241,28 @@ ContentPage {
                 uniform: true
                 MaterialTextArea {
                     Layout.fillWidth: true
+                    placeholderText: Translation.tr("Keybinds")
+                    text: Config.options.search.prefix.keybinds
+                    wrapMode: TextEdit.Wrap
+                    onTextChanged: {
+                        Config.options.search.prefix.keybinds = text;
+                    }
+                }
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: Translation.tr("Symbols")
+                    text: Config.options.search.prefix.symbols
+                    wrapMode: TextEdit.Wrap
+                    onTextChanged: {
+                        Config.options.search.prefix.symbols = text;
+                    }
+                }
+            }
+
+            ConfigRow {
+                uniform: true
+                MaterialTextArea {
+                    Layout.fillWidth: true
                     placeholderText: Translation.tr("Math")
                     text: Config.options.search.prefix.math
                     wrapMode: TextEdit.Wrap

@@ -278,6 +278,30 @@ ContentPage {
                         uniform: true
                         ConfigTextArea {
                             Layout.fillWidth: true
+                            buttonIcon: "keyboard_command_key"
+                            fieldWidth: 100
+                            text: Translation.tr("Keybinds")
+                            value: Config.options.search.prefix.keybinds
+                            onValueChanged: {
+                                Config.options.search.prefix.keybinds = value;
+                            }
+                        }
+                        ConfigTextArea {
+                            Layout.fillWidth: true
+                            buttonIcon: "emoji_symbols"
+                            fieldWidth: 100
+                            text: Translation.tr("Symbols")
+                            value: Config.options.search.prefix.symbols
+                            onValueChanged: {
+                                Config.options.search.prefix.symbols = value;
+                            }
+                        }
+                    }
+
+                    ConfigRow {
+                        uniform: true
+                        ConfigTextArea {
+                            Layout.fillWidth: true
                             buttonIcon: "calculate"
                             fieldWidth: 100
                             text: Translation.tr("Math")
