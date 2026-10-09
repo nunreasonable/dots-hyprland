@@ -35,6 +35,7 @@ ShellRoot {
             Updates.load()
         }
         Wallpapers.load()
+        VisualStyle.load()
         if (Platform.isWindows) {
             WindowsTerminalTheme.load()
             SettingsApp.load()

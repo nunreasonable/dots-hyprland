@@ -236,6 +236,59 @@ ContentPage {
     }
 
     ContentSection {
+        icon: "style"
+        title: Translation.tr("Style")
+
+        ConfigRow {
+            ContentSubsection {
+                title: Translation.tr("Visual style")
+                tooltip: Translation.tr("Switching the style resets the bar buttons, workspace numbers, quick sliders and settings layout to that style's defaults")
+
+                ConfigSelectionArray {
+                    currentValue: Config.options.appearance.visualStyle
+                    onSelected: newValue => {
+                        Config.options.appearance.visualStyle = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: "illogical-impulse",
+                            icon: "auto_awesome",
+                            value: "ii"
+                        },
+                        {
+                            displayName: "end4-pC",
+                            icon: "dashboard_customize",
+                            value: "end4pc"
+                        }
+                    ]
+                }
+            }
+            ContentSubsection {
+                title: Translation.tr("Settings layout")
+
+                ConfigSelectionArray {
+                    currentValue: Config.options.appearance.settingsLayout
+                    onSelected: newValue => {
+                        Config.options.appearance.settingsLayout = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: "illogical-impulse",
+                            icon: "view_sidebar",
+                            value: "ii"
+                        },
+                        {
+                            displayName: "end4-pC",
+                            icon: "web_asset",
+                            value: "end4pc"
+                        }
+                    ]
+                }
+            }
+        }
+    }
+
+    ContentSection {
         icon: "screenshot_monitor"
         title: Translation.tr("Bar & screen")
 

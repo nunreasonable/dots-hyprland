@@ -983,5 +983,9 @@
   "Unsafe link keywords": "Palavras de links inseguros",
   "Comma-separated keywords used to flag unsafe links in search results.": "Palavras separadas por vírgula usadas para marcar links inseguros nos resultados de pesquisa.",
   "e.g. hentai, porn, rule34": "ex.: hentai, porn, rule34",
-  "Panel content": "Conteúdo dos painéis"
+  "Panel content": "Conteúdo dos painéis",
+  "Style": "Estilo",
+  "Visual style": "Estilo visual",
+  "Settings layout": "Layout das configurações",
+  "Switching the style resets the bar buttons, workspace numbers, quick sliders and settings layout to that style's defaults": "Trocar o estilo redefine os botões da barra, os números das áreas de trabalho, os controles rápidos e o layout das configurações para o padrão desse estilo"
 }
