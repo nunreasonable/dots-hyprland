@@ -1016,5 +1016,19 @@
   "Search...": "Buscar...",
   "Go": "Ir",
   "Use the Windows taskbar instead of ii's bar": "Usar a barra de tarefas do Windows no lugar da barra do ii",
-  "Hides ii's bar and brings back the normal Windows taskbar. Desktop widgets, sidebars, search and shortcuts stay as they are. Ctrl+Super+P switches it": "Esconde a barra do ii e traz de volta a barra de tarefas normal do Windows. Os widgets da área de trabalho, as barras laterais, a busca e os atalhos continuam iguais. Ctrl+Super+P alterna"
+  "Hides ii's bar and brings back the normal Windows taskbar. Desktop widgets, sidebars, search and shortcuts stay as they are. Ctrl+Super+P switches it": "Esconde a barra do ii e traz de volta a barra de tarefas normal do Windows. Os widgets da área de trabalho, as barras laterais, a busca e os atalhos continuam iguais. Ctrl+Super+P alterna",
+  "Position": "Posição",
+  "Corner radius": "Raio dos cantos",
+  "Background color": "Cor do fundo",
+  "Follow frame color": "Seguir a cor da moldura",
+  "Border width": "Largura da borda",
+  "Border color": "Cor da borda",
+  "Icons": "Ícones",
+  "Window previews": "Pré-visualizações de janelas",
+  "Icon size": "Tamanho dos ícones",
+  "Icon spacing": "Espaçamento dos ícones",
+  "Buttons & Media": "Botões e mídia",
+  "Media Player": "Player de mídia",
+  "Show Pin Button": "Mostrar botão de fixar",
+  "Show Apps Button": "Mostrar botão de apps"
 }
