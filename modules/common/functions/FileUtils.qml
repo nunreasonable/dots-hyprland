@@ -15,6 +15,23 @@ Singleton {
         return s.startsWith("file://") ? s.slice(7).replace(/^\/([A-Za-z]:\/)/, "$1") : s;
     }
 
+    function folderUrl(path) {
+        let trimmed = root.trimFileProtocol(path ?? "").trim();
+        if (trimmed === "")
+            return "";
+        trimmed = trimmed.replace(/%([A-Za-z0-9_()]+)%/g, (match, name) => Quickshell.env(name) || match);
+        if (trimmed.startsWith("~"))
+            trimmed = (Quickshell.env("USERPROFILE") || Quickshell.env("HOME") || "") + trimmed.slice(1);
+        trimmed = trimmed.replace(/\\/g, "/").replace(/\/+$/, "");
+        if (/^[A-Za-z]:$/.test(trimmed))
+            trimmed += "/";
+        if (/^[A-Za-z]:\//.test(trimmed))
+            return "file:///" + trimmed;
+        if (trimmed.startsWith("//"))
+            return "file:" + trimmed;
+        return "file://" + trimmed;
+    }
+
     /**
      * Extracts the file name from a file path
      * @param {string} str
