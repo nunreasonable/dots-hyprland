@@ -16,7 +16,7 @@ Rectangle {
     StyledRectangularShadow {
         target: root
         z: -2
-        visible: root.shadowed
+        visible: !Platform.isWindows && root.shadowed
     }
 
     Loader {
