@@ -1,0 +1,49 @@
+import qs.modules.common
+import qs.modules.common.widgets
+import qs.services
+import QtQuick
+import QtQuick.Layouts
+
+MouseArea {
+    id: root
+    property color contentColor: Appearance.colors.colOnLayer1
+    property bool contentColorOverridden: false
+    property bool vertical: false
+    readonly property bool active: ClaudeUsage.activeSessions > 0
+    readonly property color shownColor: root.active ? root.contentColor : (root.contentColorOverridden ? Qt.alpha(root.contentColor, 0.6) : Appearance.colors.colSubtext)
+
+    implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth : content.implicitWidth + 12
+    implicitHeight: root.vertical ? content.implicitHeight + 10 : Appearance.sizes.barHeight
+    hoverEnabled: !Config.options.bar.tooltips.clickToShow
+
+    Component.onCompleted: ClaudeUsage.consumers++
+    Component.onDestruction: ClaudeUsage.consumers--
+
+    GridLayout {
+        id: content
+        anchors.centerIn: parent
+        columns: root.vertical ? 1 : 2
+        columnSpacing: 5
+        rowSpacing: 2
+
+        CustomIcon {
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            width: 15
+            height: 15
+            source: "claude-symbolic"
+            colorize: true
+            color: root.shownColor
+        }
+
+        StyledText {
+            Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
+            text: `${Math.round(ClaudeUsage.percentage * 100)}%`
+            font.pixelSize: root.vertical ? Appearance.font.pixelSize.smaller : Appearance.font.pixelSize.small
+            color: root.shownColor
+        }
+    }
+
+    AiUsagePopup {
+        hoverTarget: root
+    }
+}

@@ -26,6 +26,8 @@ Item { // Player instance
     property int visualizerSmoothing: 2 // Number of points to average for smoothing
     property real radius
     property bool shown: true
+    readonly property real lyricsHeight: 150
+    readonly property bool lyricsShown: Config.options.bar.media.showLyrics && root.player === MprisController.activePlayer
 
     readonly property bool artIsLocal: Platform.isWindows && String(root.artUrl ?? "").startsWith("file:")
     property string displayedArtFilePath: root.artIsLocal ? root.artUrl : (root.downloaded ? (Platform.isWindows ? `file:///${artFilePath}` : Qt.resolvedUrl(artFilePath)) : "")
@@ -170,8 +172,14 @@ Item { // Player instance
         }
 
         RowLayout {
-            anchors.fill: parent
-            anchors.margins: 13
+            id: playerRow
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: parent.top
+                margins: 13
+            }
+            height: Appearance.sizes.mediaControlsHeight - Appearance.sizes.elevationMargin * 2 - 26
             spacing: 15
 
             Rectangle { // Art background
@@ -301,6 +309,16 @@ Item { // Player instance
                             iconName: "skip_next"
                             downAction: () => root.player?.next()
                         }
+                        TrackChangeButton {
+                            iconName: "lyrics"
+                            toggled: Config.options.bar.media.showLyrics
+                            colBackgroundToggled: blendedColors.colSecondaryContainer
+                            colBackgroundToggledHover: blendedColors.colSecondaryContainerHover
+                            colRippleToggled: blendedColors.colSecondaryContainerActive
+                            downAction: () => {
+                                Config.options.bar.media.showLyrics = !Config.options.bar.media.showLyrics;
+                            }
+                        }
                     }
 
                     RippleButton {
@@ -331,6 +349,30 @@ Item { // Player instance
                         }
                     }
                 }
+            }
+        }
+
+        Loader {
+            id: lyricsLoader
+            active: root.lyricsShown
+            visible: active
+            clip: true
+            anchors {
+                left: parent.left
+                right: parent.right
+                top: playerRow.bottom
+                bottom: parent.bottom
+                leftMargin: 13
+                rightMargin: 13
+                topMargin: 10
+                bottomMargin: 12
+            }
+            sourceComponent: Lyrics {
+                textColor: blendedColors.colOnLayer0
+                activeColor: blendedColors.colPrimary
+                indicatorColor: blendedColors.colPrimaryContainer
+                textAlignment: Text.AlignHCenter
+                lineSpacing: 2
             }
         }
     }

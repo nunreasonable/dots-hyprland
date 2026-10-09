@@ -9,6 +9,7 @@ Scope {
     PanelLoader { panelSource: "../modules/ii/cheatsheet/Cheatsheet.qml" }
     PanelLoader { extraCondition: Platform.isWindows; panelSource: "../modules/ii/colorPicker/ColorPicker.qml" }
     PanelLoader { deferPriority: 1; extraCondition: Config.options.dock.enable; panelSource: "../modules/ii/dock/Dock.qml" }
+    PanelLoader { deferPriority: 2; extraCondition: Config.options.bar.showFrame; panelSource: "../modules/ii/frame/ScreenFrame.qml" }
     PanelLoader { deferred: Platform.isWindows && !Config.options.lock.launchOnStartup; panelSource: "../modules/ii/lock/Lock.qml" }
     PanelLoader { panelSource: "../modules/ii/mediaControls/MediaControls.qml" }
     PanelLoader { panelSource: "../modules/ii/notificationPopup/NotificationPopup.qml" }

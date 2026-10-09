@@ -29,6 +29,14 @@ Singleton {
     property list<var> connectedDevices: Bluetooth.devices.values.filter(d => d.connected).sort(sortFunction)
     property list<var> pairedButNotConnectedDevices: Bluetooth.devices.values.filter(d => d.paired && !d.connected).sort(sortFunction)
     property list<var> unpairedDevices: Bluetooth.devices.values.filter(d => !d.paired && !d.connected).sort(sortFunction)
+    readonly property list<var> connectedBatteryDevices: connectedDevices.filter(device => root.hasBattery(device))
+    readonly property var primaryConnectedDevice: firstActiveDevice ?? connectedDevices[0] ?? null
+    readonly property var primaryBatteryDevice: hasBattery(primaryConnectedDevice) ? primaryConnectedDevice : connectedBatteryDevices[0] ?? null
+
+    function hasBattery(device): bool {
+        return !!device && device.batteryAvailable && Number.isFinite(Number(device.battery));
+    }
+
     property list<var> friendlyDeviceList: [
         ...connectedDevices,
         ...pairedButNotConnectedDevices,

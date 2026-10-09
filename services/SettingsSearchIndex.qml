@@ -51,7 +51,7 @@ Singleton {
             const closes = (line.match(/\}/g) || []).length;
             for (let i = 0; i < closes; i++) stack.pop();
             const typeMatch = line.match(typeOpen);
-            for (let i = 0; i < opens; i++) stack.push({ type: i === 0 && typeMatch ? typeMatch[1] : null, hidden: false });
+            for (let i = 0; i < opens; i++) stack.push({ type: i === 0 && typeMatch ? typeMatch[1].split(".").pop() : null, hidden: false });
         }
         return entries;
     }

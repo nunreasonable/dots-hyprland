@@ -9,6 +9,7 @@ pragma ComponentBehavior: Bound
 
 Singleton {
     id: root
+    signal requestBluetoothDialog
     property bool barOpen: true
     property bool colorPickerOpen: false
     property string colorPickerAction: "copy"
@@ -34,6 +35,29 @@ Singleton {
     property string spotlightMode: ""
     property bool wallpaperSelectorOpen: false
     property bool workspaceShowNumbers: false
+    property bool barStyleEditorOpen: false
+    property bool barCenterOnly: false
+    property bool diSessionOpen: false
+    property string osdIndicatorType: "volume"
+    property var frameHover: ({})
+    readonly property bool dynamicIslandEnabled: Config.options.bar.layouts.leftLayout.includes("dynamicIsland")
+        || Config.options.bar.layouts.middleLayout.includes("dynamicIsland")
+        || Config.options.bar.layouts.rightLayout.includes("dynamicIsland")
+    readonly property bool dynamicIslandActive: root.dynamicIslandEnabled && root.barOpen && !root.screenLocked
+        && !(Platform.isWindows && Config.options.windowsPort.nativeTaskbar)
+
+    function setFrameHover(screenName, side, hovered) {
+        const key = `${screenName}:${side}`;
+        if ((root.frameHover[key] ?? false) === hovered)
+            return;
+        const next = Object.assign({}, root.frameHover);
+        next[key] = hovered;
+        root.frameHover = next;
+    }
+
+    function isFrameHovered(screenName, side) {
+        return root.frameHover[`${screenName}:${side}`] ?? false;
+    }
 
     onSidebarRightOpenChanged: {
         if (GlobalStates.sidebarRightOpen) {

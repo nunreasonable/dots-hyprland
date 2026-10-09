@@ -79,9 +79,7 @@ RowLayout {
                     width: slot.isSelected ? parent.width - 8 : parent.width - 8
                     height: slot.isSelected ? parent.height - 8 : parent.height - 8
                     radius: slot.isSelected ? Appearance.rounding.normal - 4 : width / 2
-                    color: slot.modelData === "black" || slot.modelData === "transparent"
-                        ? slot.modelData
-                        : Appearance.colors["col" + slot.modelData.charAt(0).toUpperCase() + slot.modelData.slice(1)]
+                    color: slot.modelData === "black" || slot.modelData === "transparent" ? slot.modelData : (Appearance.colors["col" + slot.modelData.charAt(0).toUpperCase() + slot.modelData.slice(1)] ?? "transparent")
                     border.width: slot.modelData === "transparent" ? 1 : 0
                     border.color: Appearance.colors.colOutlineVariant
 

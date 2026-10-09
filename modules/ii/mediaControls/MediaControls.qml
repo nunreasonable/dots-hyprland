@@ -17,12 +17,18 @@ Scope {
     property bool visible: false
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property var realPlayers: MprisController.players
-    readonly property var meaningfulPlayers: filterDuplicatePlayers(realPlayers)
+    readonly property var meaningfulPlayers: {
+        const preferred = (Config.options.bar.media.preferredPlayer ?? "").trim().toLowerCase();
+        if (preferred.length === 0)
+            return filterDuplicatePlayers(realPlayers);
+        const filtered = realPlayers.filter(p => (p.identity ?? "").toLowerCase().includes(preferred) || (p.desktopEntry ?? "").toLowerCase().includes(preferred));
+        return filterDuplicatePlayers(filtered.length > 0 ? filtered : realPlayers);
+    }
+    readonly property bool pinned: Config.options.bar.media.alwaysVisible
     readonly property real osdWidth: Appearance.sizes.osdWidth
     readonly property real widgetWidth: Appearance.sizes.mediaControlsWidth
     readonly property real widgetHeight: Appearance.sizes.mediaControlsHeight
     property real popupRounding: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
-    property list<real> visualizerPoints: []
 
     function filterDuplicatePlayers(players) {
         let filtered = [];
@@ -51,45 +57,6 @@ Scope {
             group.forEach(idx => used.add(idx));
         }
         return filtered;
-    }
-
-    Process {
-        id: cavaProc
-        running: mediaControlsLoader.active && !Platform.isWindows
-        onRunningChanged: {
-            if (!cavaProc.running) {
-                root.visualizerPoints = [];
-            }
-        }
-        command: ["cava", "-p", `${FileUtils.trimFileProtocol(Directories.scriptPath)}/cava/raw_output_config.txt`]
-        stdout: SplitParser {
-            onRead: data => {
-                // Parse `;`-separated values into the visualizerPoints array
-                let points = data.split(";").map(p => parseFloat(p.trim())).filter(p => !isNaN(p));
-                root.visualizerPoints = points;
-            }
-        }
-    }
-
-    Binding {
-        when: Platform.isWindows && WindowsNative.ready
-        target: WindowsNative.audioVisualizer
-        property: "running"
-        value: GlobalStates.mediaControlsOpen
-    }
-
-    Binding {
-        when: Platform.isWindows && WindowsNative.ready
-        target: WindowsNative.audioVisualizer
-        property: "framerate"
-        value: 30
-    }
-
-    Connections {
-        target: Platform.isWindows ? WindowsNative.audioVisualizer : null
-        function onValuesChanged() {
-            root.visualizerPoints = WindowsNative.audioVisualizer.values;
-        }
     }
 
     Loader {
@@ -126,23 +93,28 @@ Scope {
                 item: playerColumnLayout
             }
 
-            Component.onCompleted: {
-                if (panelWindow.visible)
-                    GlobalFocusGrab.addDismissable(panelWindow);
-            }
-            Component.onDestruction: {
-                GlobalFocusGrab.removeDismissable(panelWindow);
-            }
-            onVisibleChanged: {
-                if (panelWindow.visible)
+            function updateDismissable() {
+                if (panelWindow.visible && !root.pinned)
                     GlobalFocusGrab.addDismissable(panelWindow);
                 else
                     GlobalFocusGrab.removeDismissable(panelWindow);
             }
+            Component.onCompleted: panelWindow.updateDismissable()
+            Component.onDestruction: {
+                GlobalFocusGrab.removeDismissable(panelWindow);
+            }
+            onVisibleChanged: panelWindow.updateDismissable()
+            Connections {
+                target: root
+                function onPinnedChanged() {
+                    panelWindow.updateDismissable();
+                }
+            }
             Connections {
                 target: GlobalFocusGrab
                 function onDismissed() {
-                    GlobalStates.mediaControlsOpen = false;
+                    if (!root.pinned)
+                        GlobalStates.mediaControlsOpen = false;
                 }
             }
 
@@ -159,9 +131,9 @@ Scope {
                         required property MprisPlayer modelData
                         player: modelData
                         shown: GlobalStates.mediaControlsOpen
-                        visualizerPoints: root.visualizerPoints
+                        visualizerPoints: AudioSpectrum.points
                         implicitWidth: root.widgetWidth
-                        implicitHeight: root.widgetHeight
+                        implicitHeight: root.widgetHeight + (lyricsShown ? lyricsHeight : 0)
                         radius: root.popupRounding
                     }
                 }

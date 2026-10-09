@@ -23,9 +23,14 @@ RowLayout {
     property real from: slider.from
     property real to: slider.to
     property real textWidth: 120
+    property alias stepSize: slider.stepSize
+    readonly property alias pressed: slider.pressed
+    property bool showLabel: true
+    signal moved
 
     RowLayout {
         id: row
+        visible: root.showLabel
         spacing: 10
 
         OptionalMaterialSymbol {
@@ -48,5 +53,6 @@ RowLayout {
         value: root.value
         from: root.from
         to: root.to
+        onMoved: root.moved()
     }
 }

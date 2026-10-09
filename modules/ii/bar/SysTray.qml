@@ -9,10 +9,14 @@ import qs.modules.common.widgets
 
 Item {
     id: root
-    implicitWidth: gridLayout.implicitWidth
-    implicitHeight: gridLayout.implicitHeight
+    property color contentColor: Appearance.colors.colOnLayer2
+    property bool contentColorOverridden: false
+    signal styleEditorRequested
+    property bool classic: false
+    implicitWidth: root.classic ? gridLayout.implicitWidth : root.vertical ? Appearance.sizes.verticalBarWidth : gridLayout.implicitWidth + 4
+    implicitHeight: root.classic ? gridLayout.implicitHeight : root.vertical ? gridLayout.implicitHeight + 6 : Appearance.sizes.barHeight
     property bool vertical: false
-    property bool invertSide: false
+    property bool invertSide: !root.classic && Config.options.bar.bottom
     property bool trayOverflowOpen: false
     property bool showSeparator: true
     property bool showOverflowMenu: true
@@ -68,9 +72,10 @@ Item {
     GridLayout {
         id: gridLayout
         columns: root.vertical ? 1 : -1
-        anchors.fill: parent
-        rowSpacing: 8
-        columnSpacing: 15
+        anchors.fill: root.classic ? parent : undefined
+        anchors.centerIn: root.classic ? undefined : parent
+        rowSpacing: root.classic ? 8 : 4
+        columnSpacing: root.classic ? 15 : 8
 
         RippleButton {
             id: trayOverflowButton
@@ -94,7 +99,7 @@ Item {
                 iconSize: Appearance.font.pixelSize.larger
                 text: "expand_more"
                 horizontalAlignment: Text.AlignHCenter
-                color: root.trayOverflowOpen ? Appearance.colors.colOnSecondaryContainer : Appearance.colors.colOnLayer2
+                color: root.trayOverflowOpen ? Appearance.colors.colOnSecondaryContainer : root.contentColor
                 rotation: (root.trayOverflowOpen ? 180 : 0) - (90 * root.vertical) + (180 * root.invertSide)
                 Behavior on rotation {
                     animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
@@ -151,7 +156,7 @@ Item {
             font.pixelSize: Appearance.font.pixelSize.larger
             color: Appearance.colors.colSubtext
             text: "•"
-            visible: root.showSeparator && SystemTray.items.values.length > 0
+            visible: root.classic && root.showSeparator && SystemTray.items.values.length > 0
         }
     }
 }

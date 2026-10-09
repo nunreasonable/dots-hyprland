@@ -9,9 +9,13 @@ import QtQuick.Layouts
 
 MouseArea {
     id: root
+    property color contentColor: Appearance.colors.colOnLayer1
+    property bool contentColorOverridden: false
+    signal styleEditorRequested
+    property bool vertical: false
     property bool hovered: false
-    implicitWidth: rowLayout.implicitWidth + 10 * 2
-    implicitHeight: Appearance.sizes.barHeight
+    implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth : rowLayout.implicitWidth + 10 * 2
+    implicitHeight: root.vertical ? columnLayout.implicitHeight : Appearance.sizes.barHeight
 
     acceptedButtons: Qt.LeftButton | Qt.RightButton
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
@@ -30,22 +34,45 @@ MouseArea {
 
     RowLayout {
         id: rowLayout
+        visible: !root.vertical
         anchors.centerIn: parent
 
         MaterialSymbol {
             fill: 0
             text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
             iconSize: Appearance.font.pixelSize.large
-            color: Appearance.colors.colOnLayer1
+            color: root.contentColor
             Layout.alignment: Qt.AlignVCenter
         }
 
         StyledText {
             visible: true
             font.pixelSize: Appearance.font.pixelSize.small
-            color: Appearance.colors.colOnLayer1
+            color: root.contentColor
             text: Weather.data?.temp ?? "--°"
             Layout.alignment: Qt.AlignVCenter
+        }
+    }
+
+    ColumnLayout {
+        id: columnLayout
+        visible: root.vertical
+        anchors.centerIn: parent
+        spacing: 0
+
+        MaterialSymbol {
+            fill: 0
+            text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
+            iconSize: Appearance.font.pixelSize.large
+            color: root.contentColor
+            Layout.alignment: Qt.AlignHCenter
+        }
+
+        StyledText {
+            font.pixelSize: Appearance.font.pixelSize.small
+            color: root.contentColor
+            text: (Weather.data?.temp ?? "--°").replace(/[CF]$/, "")
+            Layout.alignment: Qt.AlignHCenter
         }
     }
 

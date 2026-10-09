@@ -55,9 +55,14 @@ Scope {
                 }
                 property bool superShow: false
                 property bool mustShow: hoverRegion.containsMouse || superShow
-                exclusionMode: ExclusionMode.Ignore
-                exclusiveZone: (Config?.options.bar.autoHide.enable && (!mustShow || !Config?.options.bar.autoHide.pushWindows)) ? 0 :
+                    || (Config.options.bar.autoHide.enable && GlobalStates.isFrameHovered(barRoot.screen?.name, Config.options.bar.bottom ? "right" : "left"))
+                readonly property real frameInset: BarLayouts.windowsFrameInset
+                readonly property int normalExclusiveZone: (Config?.options.bar.autoHide.enable && (!mustShow || !Config?.options.bar.autoHide.pushWindows)) ? 0 :
                     Appearance.sizes.baseVerticalBarWidth + (Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut : 0)
+                exclusionMode: ExclusionMode.Ignore
+                exclusiveZone: (barContent.centerOnly && Config.options.bar.showFrame && Config.options.bar.centerOnlyReserveFrame)
+                    ? Config.options.bar.frameThickness
+                    : normalExclusiveZone + barRoot.frameInset
                 WlrLayershell.namespace: "quickshell:verticalBar"
                 // WlrLayershell.layer: WlrLayer.Overlay // TODO enable this when bar can hide when fullscreen
                 implicitWidth: Appearance.sizes.verticalBarWidth + Appearance.rounding.screenRounding
@@ -72,6 +77,11 @@ Scope {
                     right: Config.options.bar.bottom
                     top: true
                     bottom: true
+                }
+
+                margins {
+                    left: Config.options.bar.bottom ? 0 : barRoot.frameInset
+                    right: Config.options.bar.bottom ? barRoot.frameInset : 0
                 }
 
                 // Include in focus grab
@@ -96,10 +106,22 @@ Scope {
                         }
                     }
 
-                    VerticalBarContent {
+                    Component {
+                        id: classicContent
+                        VerticalBarContent {}
+                    }
+
+                    Component {
+                        id: layoutContent
+                        VerticalBarLayoutContent {}
+                    }
+
+                    Loader {
                         id: barContent
-                        
-                        implicitWidth: Appearance.sizes.verticalBarWidth
+                        readonly property bool centerOnly: barContent.item?.centerOnly ?? false
+
+                        width: Appearance.sizes.verticalBarWidth
+                        sourceComponent: BarLayouts.classic ? classicContent : layoutContent
                         anchors {
                             top: parent.top
                             bottom: parent.bottom
@@ -145,7 +167,7 @@ Scope {
                             right: undefined
                         }
                         width: Appearance.rounding.screenRounding
-                        active: showBarBackground && Config.options.bar.cornerStyle === 0 // Hug
+                        active: showBarBackground && Config.options.bar.cornerStyle === 0 && !barContent.centerOnly
 
                         states: State {
                             name: "right"
@@ -163,6 +185,7 @@ Scope {
 
                         sourceComponent: Item {
                             implicitHeight: Appearance.rounding.screenRounding
+                            readonly property color decoratorColor: !showBarBackground ? "transparent" : Config.options.bar.followFrameColor ? Appearance.getColorFromName(Config.options.bar.frameColor) : Appearance.colors.colLayer0
                             RoundCorner {
                                 id: topCorner
                                 anchors {
@@ -172,7 +195,7 @@ Scope {
                                 }
 
                                 implicitSize: Appearance.rounding.screenRounding
-                                color: showBarBackground ? Appearance.colors.colLayer0 : "transparent"
+                                color: parent.decoratorColor
 
                                 corner: RoundCorner.CornerEnum.TopLeft
                                 states: State {
@@ -191,7 +214,7 @@ Scope {
                                     right: Config.options.bar.bottom ? parent.right : undefined
                                 }
                                 implicitSize: Appearance.rounding.screenRounding
-                                color: showBarBackground ? Appearance.colors.colLayer0 : "transparent"
+                                color: parent.decoratorColor
 
                                 corner: RoundCorner.CornerEnum.BottomLeft
                                 states: State {

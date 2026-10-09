@@ -211,6 +211,7 @@ Item { // Bar content region
             }
 
             Bar.SysTray {
+                classic: true
                 vertical: true
                 Layout.fillWidth: true
                 Layout.fillHeight: false
@@ -297,6 +298,7 @@ Item { // Bar content region
                         }
                         Bar.NotificationUnreadCount {
                             id: notificationUnreadCount
+                            color: rightSidebarButton.colText
                         }
                     }
                     MaterialSymbol {
