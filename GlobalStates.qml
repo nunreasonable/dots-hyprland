@@ -68,6 +68,26 @@ Singleton {
     }
     property bool desktopWidgetKeyboardFocus: false
 
+    readonly property var hotCornerOptions: [
+        { displayName: Translation.tr("None"), value: "none" },
+        { displayName: Translation.tr("Left Sidebar"), value: "sidebarLeftOpen" },
+        { displayName: Translation.tr("Right Sidebar"), value: "sidebarRightOpen" },
+        { displayName: Translation.tr("Overview Launcher"), value: "overviewOpen" },
+        { displayName: Translation.tr("Spotlight Search"), value: "spotlightOpen" },
+        { displayName: Translation.tr("Wallpaper Selector"), value: "wallpaperSelectorOpen" },
+        { displayName: Translation.tr("Media Controls"), value: "mediaControlsOpen" },
+        { displayName: Translation.tr("Overlay"), value: "overlayOpen" },
+        { displayName: Translation.tr("Screenshot Region"), value: "regionSelectorOpen" },
+        { displayName: Translation.tr("Screen Translator"), value: "screenTranslatorOpen" },
+        { displayName: Translation.tr("On-screen Keyboard"), value: "oskOpen" },
+        { displayName: Translation.tr("Session Menu"), value: "sessionOpen" }
+    ]
+
+    function toggleState(name) {
+        if (!name || name === "none") return;
+        root[name] = !root[name];
+    }
+
     onSidebarRightOpenChanged: {
         if (GlobalStates.sidebarRightOpen) {
             Notifications.timeoutAll();
