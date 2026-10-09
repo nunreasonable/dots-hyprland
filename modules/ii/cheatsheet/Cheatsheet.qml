@@ -39,12 +39,6 @@ Scope { // Scope
     readonly property int systemTabIndex: Platform.isWindows ? 1 : -1
     property bool open: false
 
-    Timer {
-        interval: 20000
-        running: Platform.isWindows
-        onTriggered: cheatsheetLoader.kept = true
-    }
-
     Loader {
         id: cheatsheetLoader
         property bool kept: false
