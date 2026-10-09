@@ -142,7 +142,7 @@ Item {
                     clip: true
 
                     Behavior on implicitWidth {
-                        NumberAnimation { duration: 180; easing.type: Easing.OutCubic }
+                        NumberAnimation { duration: 180 / Math.max(0.5, Config.options.settings.animationSpeed ?? 1); easing.type: Easing.OutCubic }
                     }
 
                     W.RippleButton {
