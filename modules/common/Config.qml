@@ -289,15 +289,11 @@ Singleton {
                     }
                     property JsonObject media: JsonObject {
                         property bool enable: false
-                        property bool showControls: true
-                        property bool showLyrics: false
-                        property bool showTitles: true
-                        property string backgroundShape: "Cookie4Sided"
                         property string placementStrategy: "free" // "free", "leastBusy", "mostBusy"
                         property real x: 800
                         property real y: 500
                         property real z: 0
-                        property string sizeMode: "1x3" // "1x1", "1x2", "2x2", "1x3", "2x3"
+                        property string sizeMode: "1x3" // "1x1", "1x2", "2x2", "1x3"
                     }
                     property JsonObject notes: JsonObject {
                         property bool enable: false
