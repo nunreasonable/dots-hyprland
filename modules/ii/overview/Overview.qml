@@ -115,10 +115,22 @@ Scope {
                 anchors.horizontalCenter: parent.horizontalCenter
                 active: (GlobalStates.overviewOpen || (Platform.isWindows && overviewLoader.kept)) && (Config?.options.overview.enable ?? true)
                 onLoaded: overviewLoader.kept = true
-                sourceComponent: OverviewWidget {
-                    screen: panelWindow.screen
-                    visible: (panelWindow.searchingText == "")
-                    live: !Platform.isWindows || GlobalStates.overviewOpen
+                sourceComponent: (Config?.options.overview.style ?? "default") === "niri" ? niriComponent : defaultComponent
+                Component {
+                    id: defaultComponent
+                    OverviewWidget {
+                        screen: panelWindow.screen
+                        visible: (panelWindow.searchingText == "")
+                        live: !Platform.isWindows || GlobalStates.overviewOpen
+                    }
+                }
+                Component {
+                    id: niriComponent
+                    NiriOverview {
+                        screen: panelWindow.screen
+                        visible: (panelWindow.searchingText == "")
+                        live: !Platform.isWindows || GlobalStates.overviewOpen
+                    }
                 }
             }
         }

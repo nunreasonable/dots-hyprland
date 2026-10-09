@@ -392,6 +392,29 @@ ContentPage {
                         Config.options.overview.centerIcons = checked;
                     }
                 }
+                ConfigRow {
+                    uniform: true
+                    Layout.alignment: Qt.AlignHCenter
+                    ConfigSelectionArray {
+                        Layout.alignment: Qt.AlignHCenter
+                        currentValue: Config.options.overview.style
+                        onSelected: newValue => {
+                            Config.options.overview.style = newValue;
+                        }
+                        options: [
+                            {
+                                displayName: Translation.tr("Default"),
+                                icon: "grid_on",
+                                value: "default"
+                            },
+                            {
+                                displayName: Translation.tr("Niri-like"),
+                                icon: "view_agenda",
+                                value: "niri"
+                            }
+                        ]
+                    }
+                }
                 ConfigSpinBox {
                     icon: "loupe"
                     text: Translation.tr("Scale (%)")
@@ -405,6 +428,8 @@ ContentPage {
                 }
                 ConfigRow {
                     uniform: true
+                    enabled: Config.options.overview.style !== "niri"
+                    opacity: enabled ? 1 : 0.4
                     ConfigSpinBox {
                         icon: "splitscreen_bottom"
                         text: Translation.tr("Rows")
@@ -431,6 +456,8 @@ ContentPage {
                 ConfigRow {
                     uniform: true
                     Layout.alignment: Qt.AlignHCenter
+                    enabled: Config.options.overview.style !== "niri"
+                    opacity: enabled ? 1 : 0.4
                     ConfigSelectionArray {
                         Layout.alignment: Qt.AlignHCenter
                         currentValue: Config.options.overview.orderRightLeft
