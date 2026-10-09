@@ -23,6 +23,8 @@ MouseArea {
     cursorShape: (draggable && containsPress) ? Qt.ClosedHandCursor : draggable ? Qt.OpenHandCursor : Qt.ArrowCursor
 
     onPressed: mouse => {
+        if (mouse.button !== Qt.LeftButton)
+            return;
         const canvas = findCanvas(root.parent);
         if (canvas) {
             canvas.bringToFront(root);

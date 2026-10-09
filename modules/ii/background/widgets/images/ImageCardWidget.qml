@@ -2,6 +2,7 @@ import QtQuick
 import Quickshell.Widgets
 import qs
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.ii.background.widgets
 
@@ -65,7 +66,7 @@ AbstractBackgroundWidget {
 
     function acceptDrop(drop) {
         if (drop.hasUrls && drop.urls.length > 0) {
-            const cleanPath = drop.urls[0].toString().replace(/^file:\/\//, "");
+            const cleanPath = drop.FileUtils.trimFileProtocol(urls[0]);
             const ext = cleanPath.split(".").pop().toLowerCase();
             const accepted = ["png", "jpg", "jpeg", "webp", "avif", "bmp", "gif", "tiff", "tif"];
             if (accepted.indexOf(ext) !== -1)

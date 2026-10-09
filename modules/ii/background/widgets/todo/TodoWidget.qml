@@ -23,6 +23,10 @@ AbstractBackgroundWidget {
     property string mode: "list"
     property string editingText: ""
     onModeChanged: GlobalStates.desktopWidgetKeyboardFocus = (mode === "edit")
+    Component.onDestruction: {
+        if (root.mode === "edit")
+            GlobalStates.desktopWidgetKeyboardFocus = false;
+    }
 
     function toggleFlip() {
         cardWrapper.flip();

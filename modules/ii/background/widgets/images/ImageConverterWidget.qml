@@ -164,7 +164,7 @@ AbstractBackgroundWidget {
 
         const valid = [];
         for (let i = 0; i < urls.length; i++) {
-            const cleanPath = urls[i].toString().replace(/^file:\/\//, "");
+            const cleanPath = FileUtils.trimFileProtocol(urls[i]);
             const ext = cleanPath.split(".").pop().toLowerCase();
             if (root.acceptedExtensions.indexOf(ext) !== -1)
                 valid.push(cleanPath);

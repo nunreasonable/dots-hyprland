@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
 import Quickshell
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.ii.background.widgets
 
@@ -89,7 +90,7 @@ AbstractBackgroundWidget {
             }
             onDropped: drop => {
                 if (drop.hasUrls && drop.urls.length > 0) {
-                    const cleanPath = drop.urls[0].toString().replace(/^file:\/\//, "");
+                    const cleanPath = drop.FileUtils.trimFileProtocol(urls[0]);
                     const ext = cleanPath.split(".").pop().toLowerCase();
                     const accepted = ["png", "svg", "webp", "gif"];
                     if (accepted.indexOf(ext) !== -1) {
