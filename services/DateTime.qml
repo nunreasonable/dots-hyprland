@@ -24,6 +24,7 @@ Singleton {
     property string longDate: Qt.locale().toString(clock.date, Config.options?.time.dateFormat ?? "dddd, dd/MM")
     property string collapsedCalendarFormat: Qt.locale().toString(clock.date, "dddd, MMMM dd")
     property string uptime: "0h, 0m"
+    property real uptimeSeconds: 0
 
     function formatUptime(uptimeSeconds) {
         // Convert seconds to days, hours, and minutes
@@ -48,7 +49,10 @@ Singleton {
         repeat: true
         triggeredOnStart: true
         onTriggered: {
-            if (WindowsNative.stats) uptime = formatUptime(WindowsNative.stats.uptimeSeconds);
+            if (WindowsNative.stats) {
+                uptimeSeconds = WindowsNative.stats.uptimeSeconds;
+                uptime = formatUptime(uptimeSeconds);
+            }
         }
     }
 
@@ -59,7 +63,7 @@ Singleton {
         onTriggered: {
             fileUptime.reload();
             const textUptime = fileUptime.text();
-            const uptimeSeconds = Number(textUptime.split(" ")[0] ?? 0);
+            uptimeSeconds = Number(textUptime.split(" ")[0] ?? 0);
             uptime = formatUptime(uptimeSeconds);
             interval = Config.options?.resources?.updateInterval ?? 3000;
         }
