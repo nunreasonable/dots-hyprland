@@ -66,7 +66,7 @@ AbstractBackgroundWidget {
 
     function acceptDrop(drop) {
         if (drop.hasUrls && drop.urls.length > 0) {
-            const cleanPath = drop.FileUtils.trimFileProtocol(urls[0]);
+            const cleanPath = FileUtils.trimFileProtocol(drop.urls[0]);
             const ext = cleanPath.split(".").pop().toLowerCase();
             const accepted = ["png", "jpg", "jpeg", "webp", "avif", "bmp", "gif", "tiff", "tif"];
             if (accepted.indexOf(ext) !== -1)

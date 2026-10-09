@@ -96,7 +96,7 @@ Scope {
     Loader {
         id: osdLoader
         property bool kept: false
-        active: (GlobalStates.osdVolumeOpen && (!GlobalStates.dynamicIslandActive || root.protectionMessage.length > 0)) || (Platform.isWindows && osdLoader.kept)
+        active: (GlobalStates.osdVolumeOpen && (!GlobalStates.islandShownOn(root.focusedScreen?.name) || root.protectionMessage.length > 0)) || (Platform.isWindows && osdLoader.kept)
         onLoaded: osdLoader.kept = true
 
         sourceComponent: PanelWindow {
@@ -129,7 +129,7 @@ Scope {
 
             implicitWidth: columnLayout.implicitWidth
             implicitHeight: columnLayout.implicitHeight
-            visible: GlobalStates.osdVolumeOpen && (!GlobalStates.dynamicIslandActive || root.protectionMessage.length > 0)
+            visible: GlobalStates.osdVolumeOpen && (!GlobalStates.islandShownOn(root.focusedScreen?.name) || root.protectionMessage.length > 0)
 
             ColumnLayout {
                 id: columnLayout

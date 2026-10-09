@@ -4,7 +4,7 @@
     "Copy to %LOCALAPPDATA%\\illogical-impulse\\keybinds.json to customize; that file wins over this one and is reloaded on save.",
     "keys: Ctrl+Alt+Shift+Super+<key>, or a lone modifier (\"Super\"): with onRelease it fires when tapped alone, otherwise on press and release.",
     "action: global (GlobalShortcut name, appid:name), dispatch (Hyprland.dispatch), exec (command; %SHELL% = config dir, %VAR% = environment; \"cmd1 || cmd2\" tries cmd2 if cmd1 isn't found, e.g. for a program missing on older Windows versions; console programs open in a console window of their own, `conhost.exe --headless <command>` runs one hidden), ipc (target, function, args), key (inject a key), reload, native (Windows or Quickshell handles it; listed for the cheatsheet only; keys may name a mouse button such as mouse:272).",
-    "repeat: fire again on key auto-repeat. description: \"Section: text\" shows in the cheatsheet."
+    "repeat: fire again on key auto-repeat. description: \"Section: text\" shows in the cheatsheet. since: version that added a global bind; such binds are added to a custom keybinds.json that doesn't use their name or keys yet."
   ],
   "binds": [
     {"keys": "Super", "action": "global", "name": "searchToggleRelease", "onRelease": true, "description": "Shell: Toggle search"},
@@ -22,8 +22,8 @@
     {"keys": "Super+M", "action": "global", "name": "mediaControlsToggle", "description": "Shell: Toggle media controls"},
     {"keys": "Super+G", "action": "global", "name": "overlayToggle", "description": "Shell: Toggle widget overlay"},
     {"keys": "Super+J", "action": "global", "name": "barToggle", "description": "Shell: Toggle bar"},
-    {"keys": "Shift+Super+W", "action": "global", "name": "desktopMenuToggle", "description": "Shell: Toggle desktop menu"},
-    {"keys": "Shift+Super+D", "action": "global", "name": "dropoverToggle", "description": "Shell: Toggle drag-and-drop shelf"},
+    {"keys": "Shift+Super+W", "action": "global", "name": "desktopMenuToggle", "since": "0.9.0", "description": "Shell: Toggle desktop menu"},
+    {"keys": "Shift+Super+D", "action": "global", "name": "dropoverToggle", "since": "0.9.0", "description": "Shell: Toggle drag-and-drop shelf"},
     {"keys": "Alt+Shift+Super+Slash", "action": "exec", "command": "qsw.exe -p \"%SHELL%/welcome.qml\""},
     {"keys": "Ctrl+Super+T", "action": "global", "name": "wallpaperSelectorToggle", "description": "Shell: Change wallpaper"},
     {"keys": "Ctrl+Alt+Super+T", "action": "global", "name": "wallpaperSelectorRandom", "description": "Shell: Random wallpaper"},

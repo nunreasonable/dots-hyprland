@@ -90,7 +90,7 @@ AbstractBackgroundWidget {
             }
             onDropped: drop => {
                 if (drop.hasUrls && drop.urls.length > 0) {
-                    const cleanPath = drop.FileUtils.trimFileProtocol(urls[0]);
+                    const cleanPath = FileUtils.trimFileProtocol(drop.urls[0]);
                     const ext = cleanPath.split(".").pop().toLowerCase();
                     const accepted = ["png", "svg", "webp", "gif"];
                     if (accepted.indexOf(ext) !== -1) {

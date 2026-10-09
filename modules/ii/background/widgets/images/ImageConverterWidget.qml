@@ -70,19 +70,8 @@ AbstractBackgroundWidget {
     Component.onCompleted: {
         if (!Platform.isWindows)
             return;
-        ffmpegProbe.running = true;
-        magickProbe.running = true;
-    }
-
-    Process {
-        id: ffmpegProbe
-        command: ["cmd", "/c", "where", "ffmpeg"]
-        onExited: exitCode => root.ffmpegAvailable = exitCode === 0
-    }
-    Process {
-        id: magickProbe
-        command: ["cmd", "/c", "where", "magick"]
-        onExited: exitCode => root.magickAvailable = exitCode === 0
+        root.ffmpegAvailable = (WindowsNative.fsUtils?.findExecutable("ffmpeg") ?? "") !== "";
+        root.magickAvailable = (WindowsNative.fsUtils?.findExecutable("magick") ?? "") !== "";
     }
 
     implicitWidth: 276

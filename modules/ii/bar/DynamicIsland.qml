@@ -83,15 +83,23 @@ Item {
         && !Config.options.bar.autoHide.enable
         && !(Hyprland.focusedWorkspace?.hasFullscreen ?? false)
     property bool registeredShown: false
+    property string registeredScreen: ""
 
     function syncShown(alive) {
         const want = alive && root.reallyShown;
-        if (want === root.registeredShown)
+        const screenName = root.islandScreenName;
+        if (want === root.registeredShown && (!want || screenName === root.registeredScreen))
             return;
-        GlobalStates.dynamicIslandsShown += want ? 1 : -1;
+        if (root.registeredShown)
+            GlobalStates.setIslandShown(root.registeredScreen, false);
+        if (want)
+            GlobalStates.setIslandShown(screenName, true);
         root.registeredShown = want;
+        root.registeredScreen = want ? screenName : "";
     }
 
+    readonly property string islandScreenName: QsWindow.window?.screen?.name ?? ""
+    onIslandScreenNameChanged: root.syncShown(true)
     onReallyShownChanged: root.syncShown(true)
     Component.onCompleted: root.syncShown(true)
     Component.onDestruction: root.syncShown(false)

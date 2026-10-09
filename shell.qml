@@ -56,7 +56,7 @@ ShellRoot {
         property: "hoverOnly"
         value: Config.options.windowsPort.taskbarHoverOnly && !Config.options.windowsPort.nativeTaskbar
     }
-    readonly property bool nativeTaskbarTakesOver: Platform.isWindows && Config.ready && WindowsNative.ready && Config.options.windowsPort.nativeTaskbar && Config.options.windowsPort.taskbarHoverOnly
+    readonly property bool nativeTaskbarTakesOver: Platform.isWindows && Config.ready && WindowsNative.ready && Config.options.panelFamily === "ii" && Config.options.windowsPort.nativeTaskbar && Config.options.windowsPort.taskbarHoverOnly
     onNativeTaskbarTakesOverChanged: {
         if (root.nativeTaskbarTakesOver)
             Qt.callLater(() => WindowsNative.taskbar.turnOffAutoHide());

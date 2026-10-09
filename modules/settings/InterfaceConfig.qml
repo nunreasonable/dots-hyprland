@@ -1939,6 +1939,7 @@ ContentPage {
 
         MaterialTextArea {
             Layout.fillWidth: true
+            enabled: SpicyStuff.allowed
             placeholderText: Translation.tr("Wpp (Spicy) folder")
             text: Config.options.wallpaperSelector.wppSpicyFolder ?? ""
             wrapMode: TextEdit.NoWrap
@@ -1946,7 +1947,7 @@ ContentPage {
                 Config.options.wallpaperSelector.wppSpicyFolder = text;
             }
             StyledToolTip {
-                text: Translation.tr("On Windows this folder is only reachable from an age-verified Microsoft account")
+                text: Translation.tr("Wallpapers here stay blurred and can't be applied unless Spicy Stuff is available on this account")
             }
         }
     }

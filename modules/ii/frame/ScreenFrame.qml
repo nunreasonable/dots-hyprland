@@ -15,7 +15,11 @@ Scope {
     readonly property real cornerSize: Math.max(0, Appearance.rounding.screenRounding - root.frameThickness)
 
     function edgeNeedsInput(side) {
-        return BarLayouts.frameVisibleFor(side) && Config.options.bar.autoHide.enable && BarLayouts.barEdge === side;
+        if (!BarLayouts.frameVisibleFor(side))
+            return false;
+        const dockWants = Config.options.dock.enable && Config.options.dock.hoverToReveal && Config.options.dock.position === side;
+        const barWants = Config.options.bar.autoHide.enable && BarLayouts.barEdge === side;
+        return dockWants || barWants;
     }
 
     component FrameHoverArea: MouseArea {

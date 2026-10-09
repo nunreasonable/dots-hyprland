@@ -26,7 +26,7 @@ Singleton {
         if (SpicyStuff.konachan) command.push("-Spicy");
         if (Config.options.background.konachanOnlyYuri) command.push("-OnlyYuri");
         const extra = SpicyStuff.extraTags();
-        if (extra.length > 0) command.push("-ExtraTags", extra.join(" "));
+        if (extra.length > 0) command.push(`-ExtraTags:${extra.join(" ")}`);
         return command;
     }
 

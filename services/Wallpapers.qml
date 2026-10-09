@@ -117,9 +117,16 @@ Singleton {
         return Platform.isWindows ? trimmed.toLowerCase() : trimmed;
     }
 
+    function canonicalPath(path) {
+        const trimmed = FileUtils.trimFileProtocol((path ?? "").toString());
+        if (Platform.isWindows && WindowsNative.fsUtils && trimmed.length > 0)
+            return root.normalizedPath(WindowsNative.fsUtils.canonicalPath(trimmed));
+        return root.normalizedPath(trimmed);
+    }
+
     function isInSpicyFolder(path) {
-        const base = root.normalizedPath(Config.options.wallpaperSelector.wppSpicyFolder);
-        const target = root.normalizedPath(path);
+        const base = root.canonicalPath(Config.options.wallpaperSelector.wppSpicyFolder);
+        const target = root.canonicalPath(path);
         return base.length > 0 && (target === base || target.startsWith(base + "/"));
     }
 
@@ -176,6 +183,10 @@ Singleton {
     function _retheme(path, darkMode, applyToSystem = true) {
         const wn = WindowsNative.wallpaper;
         if (!wn) return;
+        if (!SpicyStuff.allowed && root.isInSpicyFolder(path)) {
+            console.warn("[Wallpapers] Not using a wallpaper from the Spicy Stuff folder:", SpicyStuff.restriction);
+            return;
+        }
 
         const hasPath = !!path && path.length > 0;
         if (hasPath && root.isVideoPath(path)) {
@@ -321,12 +332,15 @@ Singleton {
             }
             return;
         }
-        if (model.count === 0) return;
-        const randomIndex = Math.floor(Math.random() * model.count);
-        const filePath = model.get(randomIndex, "filePath");
-        const isDirectory = model.get(randomIndex, "fileIsDir");
+        const files = [];
+        for (let i = 0; i < model.count; i++) {
+            if (!model.get(i, "fileIsDir"))
+                files.push(model.get(i, "filePath"));
+        }
+        if (files.length === 0) return;
+        const filePath = files[Math.floor(Math.random() * files.length)];
         print("Randomly selected wallpaper:", filePath);
-        root.select(filePath, isDirectory, darkMode);
+        root.select(filePath, false, darkMode);
     }
 
     Process {
@@ -439,6 +453,8 @@ Singleton {
     function generateThumbnail(size: string) {
         if (!["normal", "large", "x-large", "xx-large"].includes(size)) throw new Error("Invalid thumbnail size");
         root.thumbnailGenerationProgress = 0
+        if (!SpicyStuff.allowed && root.isInSpicyFolder(root.directory))
+            return;
         if (Platform.isWindows) {
             root._generateThumbnailsWindows(size, root.directory);
             return;

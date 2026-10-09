@@ -103,43 +103,39 @@ Singleton {
             params.push("q=" + encodeURIComponent(currentQuery));
         }
 
-        params.push("categories=" + categories);
-        var safePurity = SpicyStuff.allowed ? purity : purity.charAt(0) + "00";
+        const valid = (value, pattern, fallback) => pattern.test(String(value ?? "")) ? String(value) : fallback;
+        params.push("categories=" + valid(categories, /^[01]{3}$/, "111"));
+        var safePurity = valid(purity, /^[01]{3}$/, "100");
+        if (!SpicyStuff.allowed)
+            safePurity = safePurity.charAt(0) + "00";
         if (safePurity === "000")
             safePurity = "100";
         params.push("purity=" + safePurity);
-        params.push("sorting=" + sorting);
-        params.push("order=" + order);
+        const safeSorting = valid(sorting, /^(date_added|relevance|random|views|favorites|toplist|hot)$/, "date_added");
+        params.push("sorting=" + safeSorting);
+        params.push("order=" + valid(order, /^(desc|asc)$/, "desc"));
 
-        if (sorting === "toplist") {
-            params.push("topRange=" + topRange);
-        }
+        if (safeSorting === "toplist")
+            params.push("topRange=" + valid(topRange, /^(1d|3d|1w|1M|3M|6M|1y)$/, "1M"));
 
-        if (sorting === "random" && seed) {
+        if (safeSorting === "random" && /^[A-Za-z0-9]{1,16}$/.test(seed ?? ""))
             params.push("seed=" + seed);
-        }
 
-        if (minResolution) {
+        if (/^\d{2,5}x\d{2,5}$/.test(minResolution ?? ""))
             params.push("atleast=" + minResolution);
-        }
 
-        if (ratios) {
-            params.push("ratios=" + ratios);
-        }
+        const safeRatios = String(ratios ?? "").split(",").filter(r => /^(\d{1,2}x\d{1,2}|landscape|portrait)$/.test(r)).join(",");
+        if (safeRatios)
+            params.push("ratios=" + encodeURIComponent(safeRatios));
 
-        if (colors) {
+        if (/^[0-9a-fA-F]{6}$/.test(colors ?? ""))
             params.push("colors=" + colors);
-        }
-
-        if (apiKey) {
-            params.push("apikey=" + apiKey);
-        }
 
         params.push("page=" + currentPage);
 
         url += "?" + params.join("&");
 
-        console.log("[WallhavenSearch] Searching:", url.replace(/apikey=[^&]+/, "apikey=***"));
+        console.log("[WallhavenSearch] Searching:", url);
 
         var xhr = new XMLHttpRequest();
         xhr.onreadystatechange = function () {
@@ -149,7 +145,7 @@ Singleton {
                     try {
                         var response = JSON.parse(xhr.responseText);
                         if (response.data && Array.isArray(response.data)) {
-                            currentResults = response.data;
+                            currentResults = SpicyStuff.allowed ? response.data : response.data.filter(item => item?.purity === "sfw");
                             currentMeta = response.meta || {};
                             lastPage = currentMeta.last_page || 1;
                             if (currentMeta.seed) {
@@ -185,6 +181,8 @@ Singleton {
         };
 
         xhr.open("GET", url);
+        if (/^[A-Za-z0-9]{32}$/.test(apiKey ?? ""))
+            xhr.setRequestHeader("X-API-Key", apiKey);
         xhr.send();
     }
 
@@ -246,8 +244,15 @@ Singleton {
             return;
         }
 
-        var wallpaperId = wallpaper.id || "unknown";
-        var extension = url.split('.').pop() || "jpg";
+        var wallpaperId = String(wallpaper.id ?? "");
+        var extension = (url.split('.').pop() || "").toLowerCase();
+        if (!/^[a-z0-9]{1,16}$/.test(wallpaperId) || !["jpg", "jpeg", "png", "webp"].includes(extension)
+                || !/^https:\/\/w\.wallhaven\.cc\//.test(url)) {
+            console.warn("[WallhavenSearch] Refusing unexpected wallpaper data", wallpaperId);
+            if (callback)
+                callback(false, "");
+            return;
+        }
         var localPath = downloadDirectory + "/wallhaven_" + wallpaperId + "." + extension;
 
         console.log("[WallhavenSearch] Downloading wallpaper", wallpaperId, "to", localPath);
@@ -255,9 +260,7 @@ Singleton {
         downloadProc.localPath = localPath;
         downloadProc.callback = callback;
         downloadProc.wallpaperId = wallpaperId;
-        downloadProc.command = Platform.isWindows ? ["curl", "--create-dirs", "-sSL", url, "-o", localPath] :
-                                                    ["bash", "-c", `mkdir -p '${downloadDirectory}' && curl -L -s -o '
-${localPath}' '${url}'`];
+        downloadProc.command = ["curl", "--create-dirs", "-sSL", "--max-filesize", "60000000", "-o", localPath, "--url", url];
         downloadProc.running = true;
     }
 

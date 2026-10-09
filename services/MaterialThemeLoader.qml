@@ -47,7 +47,7 @@ Singleton {
 
         Appearance.m3colors.darkmode = (Appearance.m3colors.m3background.hslLightness < 0.5)
 
-        if (Platform.isWindows)
+        if (Platform.isWindows && (Config.options.appearance.palette.namedScheme ?? "") !== "")
             ColorSchemes.applySecondaryOverride()
 
         if (Platform.isWindows && json.primary)

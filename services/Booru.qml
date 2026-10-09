@@ -132,7 +132,7 @@ Singleton {
                         "aspect_ratio": item.image_width / item.image_height,
                         "tags": item.tag_string,
                         "rating": item.rating,
-                        "is_nsfw": (item.rating != 's'),
+                        "is_nsfw": (item.rating != 'g'),
                         "md5": item.md5,
                         "preview_url": item.preview_file_url,
                         "sample_url": item.file_url ?? item.large_file_url,
@@ -167,7 +167,7 @@ Singleton {
                         "aspect_ratio": item.width / item.height,
                         "tags": item.tags,
                         "rating": item.rating.replace('general', 's').charAt(0),
-                        "is_nsfw": (item.rating != 's'),
+                        "is_nsfw": (item.rating != 'general'),
                         "md5": item.md5,
                         "preview_url": item.preview_url,
                         "sample_url": item.sample_url ?? item.file_url,
@@ -312,7 +312,7 @@ Singleton {
         var url = baseUrl
         var tagString = tags.join(" ")
         if (!nsfw && !(["zerochan", "waifu.im", "t.alcy.cc"].includes(currentProvider))) {
-            if (currentProvider == "gelbooru") 
+            if (currentProvider == "gelbooru" || currentProvider == "danbooru")
                 tagString += " rating:general";
             else 
                 tagString += " rating:safe";

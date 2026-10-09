@@ -503,7 +503,7 @@ MouseArea {
 
                             GridView {
                                 id: grid
-                                visible: Wallpapers.folderModel.count > 0
+                                visible: Wallpapers.folderModel.count > 0 && !(root.inSpicyDir && !SpicyStuff.allowed)
 
                                 readonly property int columns: root.columns
                                 readonly property int rows: Math.max(1, Math.ceil(count / columns))

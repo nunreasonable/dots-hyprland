@@ -13,7 +13,7 @@ Scope {
 
     PanelWindow {
         id: root
-        visible: (Notifications.popupList.length > 0) && !GlobalStates.screenLocked && !GlobalStates.dynamicIslandActive
+        visible: (Notifications.popupList.length > 0) && !GlobalStates.screenLocked && !GlobalStates.islandShownOn(root.screen?.name)
         screen: Quickshell.screens.find(s => Config.options.notifications.forceMonitor.enable ? s.name === Config.options.notifications.forceMonitor.name : s.name === Hyprland.focusedMonitor?.name) ?? null
 
         property string position: {

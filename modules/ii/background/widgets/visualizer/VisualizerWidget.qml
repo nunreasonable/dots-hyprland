@@ -57,7 +57,7 @@ AbstractBackgroundWidget {
         id: coverDownloader
         property string targetFile: root.artUrl
         property string artFilePath: root.artFilePath
-        command: Platform.isWindows ? ["curl", "-4", "-sSL", targetFile, "-o", artFilePath] : ["bash", "-c", `[ -f ${artFilePath} ] || curl -4 -sSL '${targetFile}' -o '${artFilePath}'`]
+        command: Platform.isWindows ? ["curl", "-4", "-sSL", "-o", artFilePath, "--url", targetFile] : ["bash", "-c", '[ -f "$2" ] || curl -4 -sSL -o "$2" --url "$1"', "art", targetFile, artFilePath]
         onExited: (exitCode, exitStatus) => {
             root.artDownloaded = !Platform.isWindows || exitCode === 0;
         }

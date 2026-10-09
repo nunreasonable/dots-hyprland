@@ -51,7 +51,7 @@ Singleton {
     function _listNext() {
         const src = root.sources[root._sourceIndex];
         listProc.source = src;
-        listProc.command = [root.curlBin, "-sSL",
+        listProc.command = [root.curlBin, "-sSL", "--max-time", "30", "--max-filesize", "20000000",
             "-H", "Accept: application/vnd.github+json",
             "-H", "User-Agent: ii-windows-quickshell",
             `https://api.github.com/repos/${src.repo}/git/trees/${src.branch}?recursive=1`];
@@ -101,7 +101,7 @@ Singleton {
                         || g.images.find(path => !/pfp|avatar|banner/i.test(path))
                         || g.images[0];
                     presets.push({
-                        name: src.prefix + folder,
+                        name: Presets.sanitizeName(src.prefix + folder),
                         title: folder.replace(/[-_]+/g, " ").replace(/\b\w/g, c => c.toUpperCase()),
                         author: src.repo.split("/")[0],
                         repo: src.repo,
@@ -139,7 +139,7 @@ Singleton {
         root.error = "";
         root.downloadingName = entry.name;
         downloadProc.entryName = entry.name;
-        downloadProc.command = [root.curlBin, "-sSL", entry.jsonUrl];
+        downloadProc.command = [root.curlBin, "-sSL", "--max-time", "30", "--max-filesize", "2000000", entry.jsonUrl];
         downloadProc.running = true;
     }
 
@@ -168,7 +168,7 @@ Singleton {
     FileView {
         id: onlineWriteFile
         property string presetName: ""
-        path: presetName.length > 0 ? `${Directories.onlinePresetsPath}/${presetName}.json` : ""
+        path: presetName.length > 0 ? `${Directories.onlinePresetsPath}/${Presets.sanitizeName(presetName)}.json` : ""
         blockLoading: true
         printErrors: false
     }

@@ -40,15 +40,19 @@ if ($Source -eq "konachan") {
     $post = $posts | Where-Object { $_.height -gt 0 -and ($_.width / $_.height) -ge 1.5 -and ($_.width / $_.height) -le 2.4 } | Select-Object -First 1
     if (-not $post) { $post = $posts[0] }
     $link = $post.file_url
+    if ("$($post.id)" -notmatch '^\d{1,12}$') { throw "Unexpected post id" }
     $name = "konachan-$($post.id)"
 } else {
     $backgrounds = (Invoke-RestMethod @web "https://osu.ppy.sh/api/v2/seasonal-backgrounds").backgrounds
     $link = ($backgrounds | Get-Random).url
-    $name = "osu-" + [IO.Path]::GetFileNameWithoutExtension(([Uri]$link).AbsolutePath)
+    $name = "osu-" + ([IO.Path]::GetFileNameWithoutExtension(([Uri]$link).AbsolutePath) -replace '[^A-Za-z0-9_-]', '_')
 }
 
 if (-not $link) { throw "No image link" }
-$ext = [IO.Path]::GetExtension(([Uri]$link).AbsolutePath)
+$uri = [Uri]$link
+if ($uri.Scheme -ne "https") { throw "Unexpected image link" }
+$ext = [IO.Path]::GetExtension($uri.AbsolutePath).ToLowerInvariant()
+if ($ext -notin @(".jpg", ".jpeg", ".png", ".webp")) { throw "Unexpected image type" }
 $out = Join-Path $dir "$name$ext"
 $part = "$out.part"
 

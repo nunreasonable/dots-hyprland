@@ -129,8 +129,8 @@ Singleton {
         }
         if (offsetProc.running)
             return;
-        const pairs = root.timezones.map(tz => `${tz}:${root.effectiveZone(tz)}`).join(" ");
-        offsetProc.command = ["bash", "-c", `for pair in ${pairs}; do tz="\${pair%%:*}"; eff="\${pair##*:}"; if [ -f "/usr/share/zoneinfo/$eff" ]; then printf '%s %s\\n' "$tz" "$(TZ="$eff" date +%z)"; else printf '%s invalid\\n' "$tz"; fi; done`];
+        const pairs = root.timezones.map(tz => `${tz}:${root.effectiveZone(tz)}`);
+        offsetProc.command = ["bash", "-c", `for pair in "$@"; do tz="\${pair%%:*}"; eff="\${pair##*:}"; case "$eff" in *..*|/*) printf '%s invalid\\n' "$tz"; continue;; esac; if [ -f "/usr/share/zoneinfo/$eff" ]; then printf '%s %s\\n' "$tz" "$(TZ="$eff" date +%z)"; else printf '%s invalid\\n' "$tz"; fi; done`, "worldclock"].concat(pairs);
         offsetProc.running = true;
     }
 

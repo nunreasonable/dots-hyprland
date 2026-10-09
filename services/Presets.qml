@@ -16,14 +16,21 @@ Singleton {
 
     property list<string> lastSkippedKeys: []
 
-    readonly property var skippedRoots: ["windowsPort", "policies"]
+    readonly property var allowedRoots: ["appearance", "background", "bar", "calendar", "cheatsheet", "crosshair", "custom", "dock", "interactions", "lock", "notifications", "osd", "overview", "settings", "sidebar", "time", "waffles", "wallpaperSelector"]
+    readonly property var forbiddenParts: ["__proto__", "prototype", "constructor"]
     readonly property var spicyKeys: [
         "background.konachanSpicy",
         "background.konachanExtraTags",
         "wallpaperSelector.wallhavenPurity",
-        "wallpaperSelector.wallhavenApiKey"
+        "wallpaperSelector.wallhavenApiKey",
+        "wallpaperSelector.wppFolder",
+        "wallpaperSelector.wppSpicyFolder",
+        "dock.pinnedApps",
+        "bar.screenList",
+        "notifications.forceMonitor"
     ]
     readonly property var sensitiveNamePattern: /(api[-_]?key|token|secret|credential|password|useragent)/i
+    readonly property var pathLikeLeafPattern: /(path|url|uri|folder|dir|file|picture|image|icon|city|username|prompt|location|pins)$/i
 
     property bool dirsReady: false
 
@@ -92,20 +99,26 @@ Singleton {
     }
 
     function previewImage(data) {
-        return data?.background?.wallpaperPath ?? "";
+        const path = String(data?._presetMeta?.preview ?? data?.background?.wallpaperPath ?? "");
+        if (/^https:\/\//i.test(path) || /^[A-Za-z]:[\\/]/.test(path) || (!Platform.isWindows && path.startsWith("/")))
+            return path;
+        return "";
     }
 
     function isSkippedKey(dottedKey) {
+        const parts = dottedKey.split(".");
+        if (parts.some(part => root.forbiddenParts.includes(part)))
+            return true;
+        if (!root.allowedRoots.includes(parts[0]))
+            return true;
         const lower = dottedKey.toLowerCase();
-        for (const rootKey of root.skippedRoots) {
-            if (lower === rootKey.toLowerCase() || lower.startsWith(rootKey.toLowerCase() + "."))
-                return true;
-        }
         for (const spicy of root.spicyKeys) {
             if (lower === spicy.toLowerCase())
                 return true;
         }
         if (root.sensitiveNamePattern.test(dottedKey.replace(/[._-]/g, "")))
+            return true;
+        if (root.pathLikeLeafPattern.test(parts[parts.length - 1]))
             return true;
         return false;
     }
@@ -114,7 +127,7 @@ Singleton {
         const parts = dottedKey.split(".");
         let node = Config.options;
         for (const part of parts) {
-            if (node === null || typeof node !== "object" || !(part in node))
+            if (node === null || typeof node !== "object" || root.forbiddenParts.includes(part) || !(part in node) || typeof node[part] === "function")
                 return false;
             node = node[part];
         }
@@ -160,7 +173,10 @@ Singleton {
     }
 
     function sanitizeName(rawName) {
-        return String(rawName).trim().replace(/[\\/:*?"<>|]/g, "_").replace(/\s+/g, "_");
+        let name = String(rawName).trim().replace(/[\\/:*?"<>|\x00-\x1f]/g, "_").replace(/\s+/g, "_").replace(/^\.+/, "").slice(0, 80);
+        if (/^(con|prn|aux|nul|com\d|lpt\d)$/i.test(name))
+            name = "_" + name;
+        return name.length > 0 ? name : "preset";
     }
 
     FileView {
@@ -225,8 +241,9 @@ Singleton {
             return;
         }
         const filtered = root.filterForSave(parsed, "");
+        filtered._presetMeta = { preview: String(parsed?.background?.wallpaperPath ?? "") };
         if (root._pendingSaveDescription !== "")
-            filtered._presetMeta = { description: root._pendingSaveDescription };
+            filtered._presetMeta.description = root._pendingSaveDescription;
         presetWriteFile.targetPath = `${Directories.userPresetsPath}/${root._pendingSaveName}.json`;
         presetWriteFile.setText(JSON.stringify(filtered, null, 2));
         root.refresh();
@@ -253,6 +270,7 @@ Singleton {
         const skipped = [];
         root.applyFiltered(parsed, "", skipped);
         root.lastSkippedKeys = skipped;
+        Qt.callLater(() => Wallpapers.reapplyPalette());
     }
 
     function remove(name) {

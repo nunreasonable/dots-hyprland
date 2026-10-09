@@ -94,6 +94,10 @@ Scope {
     }
 
     function lock() {
+        if (Platform.isWindows) {
+            Session.lock();
+            return;
+        }
         if (Config.options.lock.useHyprlock && !Platform.isWindows) {
             Quickshell.execDetached(["bash", "-c", "pidof hyprlock || hyprlock"]);
             return;

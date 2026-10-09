@@ -49,9 +49,24 @@ Singleton {
     property var frameHover: ({})
     readonly property bool dynamicIslandEnabled: !Config.options.bar.vertical
         && Config.options.bar.layouts.middleLayout.includes("dynamicIsland")
-    property int dynamicIslandsShown: 0
-    readonly property bool dynamicIslandActive: root.dynamicIslandEnabled && root.dynamicIslandsShown > 0 && root.barOpen && !root.screenLocked
+    property var islandScreens: ({})
+    readonly property bool islandsAllowed: root.dynamicIslandEnabled && root.barOpen && !root.screenLocked
         && !(Platform.isWindows && Config.options.windowsPort.nativeTaskbar)
+    readonly property bool dynamicIslandActive: root.islandsAllowed && Object.keys(root.islandScreens).length > 0
+
+    function setIslandShown(screenName, shown) {
+        const next = Object.assign({}, root.islandScreens);
+        const count = (next[screenName] ?? 0) + (shown ? 1 : -1);
+        if (count > 0)
+            next[screenName] = count;
+        else
+            delete next[screenName];
+        root.islandScreens = next;
+    }
+
+    function islandShownOn(screenName) {
+        return root.islandsAllowed && (root.islandScreens[screenName ?? ""] ?? 0) > 0;
+    }
 
     function setFrameHover(screenName, side, hovered) {
         const key = `${screenName}:${side}`;

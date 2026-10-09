@@ -518,8 +518,8 @@ Item {
                     onPressed: {
                         if (!SpicyStuff.allowed)
                             Booru.addSystemMessage(SpicyStuff.restriction);
-                        else if (nsfwSwitch.enabled)
-                            nsfwSwitch.checked = !nsfwSwitch.checked
+                        else if (spicySwitch.enabled)
+                            spicySwitch.checked = !spicySwitch.checked
                     }
 
                     RowLayout {
@@ -532,7 +532,7 @@ Item {
                             Layout.leftMargin: 10
                             Layout.alignment: Qt.AlignVCenter
                             font.pixelSize: Appearance.font.pixelSize.smaller
-                            color: nsfwSwitch.enabled ? Appearance.colors.colOnLayer1 : Appearance.m3colors.m3outline
+                            color: spicySwitch.enabled ? Appearance.colors.colOnLayer1 : Appearance.m3colors.m3outline
                             text: Translation.tr("Spicy Stuff")
                         }
                         MaterialSymbol {
@@ -543,13 +543,13 @@ Item {
                             color: Appearance.m3colors.m3outline
                         }
                         StyledSwitch {
-                            id: nsfwSwitch
+                            id: spicySwitch
                             enabled: Booru.currentProvider !== "zerochan" && SpicyStuff.allowed
                             scale: 0.6
                             Layout.alignment: Qt.AlignVCenter
                             checked: (Persistent.states.booru.allowNsfw && Booru.currentProvider !== "zerochan" && SpicyStuff.allowed)
                             onCheckedChanged: {
-                                if (!nsfwSwitch.enabled) return;
+                                if (!spicySwitch.enabled) return;
                                 Persistent.states.booru.allowNsfw = checked;
                             }
                         }

@@ -337,7 +337,7 @@ AbstractBackgroundWidget {
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: GlobalStates.screenLocked = true
+                            onClicked: Session.lock()
                         }
                     }
 
@@ -494,7 +494,7 @@ AbstractBackgroundWidget {
                         MouseArea {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
-                            onClicked: GlobalStates.screenLocked = true
+                            onClicked: Session.lock()
                         }
                     }
 
