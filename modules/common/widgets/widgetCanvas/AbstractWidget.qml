@@ -26,7 +26,8 @@ MouseArea {
         const canvas = findCanvas(root.parent);
         if (canvas) {
             canvas.bringToFront(root);
-            GlobalStates.desktopWidgetKeyboardFocus = true;
+            if (!Platform.isWindows)
+                GlobalStates.desktopWidgetKeyboardFocus = true;
             canvas.forceActiveFocus();
         }
     }
