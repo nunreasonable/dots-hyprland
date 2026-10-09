@@ -175,6 +175,20 @@ Scope {
                             Wallpapers.openFallbackPicker();
                         }
                     }
+                    DesktopMenuItem {
+                        iconName: "stacks"
+                        buttonText: Translation.tr("Drop shelf")
+                        onClicked: {
+                            const screen = GlobalStates.desktopMenuScreen;
+                            const x = GlobalStates.desktopMenuX;
+                            const y = GlobalStates.desktopMenuY;
+                            GlobalStates.desktopMenuOpen = false;
+                            GlobalStates.dropoverScreen = screen;
+                            GlobalStates.dropoverX = x;
+                            GlobalStates.dropoverY = y;
+                            GlobalStates.dropoverOpen = true;
+                        }
+                    }
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.topMargin: 2

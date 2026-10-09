@@ -17,6 +17,10 @@ Singleton {
     property var desktopMenuScreen: null
     property real desktopMenuX: 0
     property real desktopMenuY: 0
+    property bool dropoverOpen: false
+    property var dropoverScreen: null
+    property real dropoverX: 0
+    property real dropoverY: 0
     property bool sidebarLeftOpen: false
     property bool sidebarRightOpen: false
     property bool mediaControlsOpen: false
