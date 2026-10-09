@@ -34,6 +34,8 @@ Singleton {
     property string spotlightMode: ""
     property bool wallpaperSelectorOpen: false
     property bool workspaceShowNumbers: false
+    property bool desktopWidgetKeyboardFocus: false
+    property list<real> visualizerPoints: []
 
     onSidebarRightOpenChanged: {
         if (GlobalStates.sidebarRightOpen) {

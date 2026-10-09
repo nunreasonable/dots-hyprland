@@ -165,7 +165,13 @@ Singleton {
             }
 
             property JsonObject background: JsonObject {
+                property bool widgetsLocked: false
+                property bool showGrid: true
+                property bool showSnapLines: true
                 property JsonObject widgets: JsonObject {
+                    property bool blurWidgets: false
+                    property real blurRadius: 32
+                    property bool shadow: true
                     property JsonObject clock: JsonObject {
                         property bool enable: true
                         property bool showOnlyWhenLocked: false
@@ -217,6 +223,131 @@ Singleton {
                         property string placementStrategy: "free" // "free", "leastBusy", "mostBusy"
                         property real x: 220
                         property real y: 100
+                    }
+                    property JsonObject calendar: JsonObject {
+                        property bool enable: false
+                        property string placementStrategy: "free" // "free", "leastBusy", "mostBusy"
+                        property real x: 400
+                        property real y: 100
+                        property real z: 0
+                        property string sizeMode: "2x2" // "1x1", "1x2", "2x2", "2x3"
+                    }
+                    property JsonObject customText: JsonObject {
+                        property bool enable: false
+                        property string placementStrategy: "free"
+                        property real x: 400
+                        property real y: 300
+                        property real z: 0
+                        property string content: "Hello world"
+                        property string fontFamily: "Caveat"
+                        property int fontSize: 72
+                        property string color: "" // "" = automatic, otherwise an Appearance color name
+                        property string alignment: "center" // "left", "center", "right"
+                        property bool shadow: true
+                    }
+                    property JsonObject customImage: JsonObject {
+                        property bool enable: false
+                        property string placementStrategy: "free"
+                        property real x: 400
+                        property real y: 100
+                        property real z: 0
+                        property string path: ""
+                        property string shape: "Cookie4Sided"
+                        property real size: 200
+                    }
+                    property JsonObject imageCard: JsonObject {
+                        property bool enable: false
+                        property string placementStrategy: "free"
+                        property real x: 400
+                        property real y: 100
+                        property real z: 0
+                        property string path: ""
+                        property string sizeMode: "1x2" // "1x1", "1x2", "2x2", "2x3"
+                    }
+                    property JsonObject images: JsonObject { // Image format converter
+                        property bool enable: false
+                        property string placementStrategy: "free"
+                        property real x: 400
+                        property real y: 100
+                        property real z: 0
+                    }
+                    property JsonObject sticker: JsonObject {
+                        property bool enable: false
+                        property list<var> items: []
+                        property string placementStrategy: "free"
+                        property real x: 400
+                        property real y: 100
+                        property real z: 0
+                        property string path: ""
+                        property real size: 200
+                        property real rotation: 0
+                        property string outlineColor: "#ffffff"
+                        property real outlineWidth: 8
+                    }
+                    property JsonObject media: JsonObject {
+                        property bool enable: false
+                        property bool showControls: true
+                        property bool showLyrics: false
+                        property bool showTitles: true
+                        property string backgroundShape: "Cookie4Sided"
+                        property string placementStrategy: "free" // "free", "leastBusy", "mostBusy"
+                        property real x: 800
+                        property real y: 500
+                        property real z: 0
+                        property string sizeMode: "1x3" // "1x1", "1x2", "2x2", "1x3", "2x3"
+                    }
+                    property JsonObject notes: JsonObject {
+                        property bool enable: false
+                        property string placementStrategy: "free"
+                        property real x: 400
+                        property real y: 100
+                        property real z: 0
+                    }
+                    property JsonObject timers: JsonObject {
+                        property bool enable: false
+                        property string placementStrategy: "free"
+                        property real x: 400
+                        property real y: 100
+                        property real z: 0
+                        property bool vertical: false
+                    }
+                    property JsonObject todo: JsonObject {
+                        property bool enable: false
+                        property string placementStrategy: "free"
+                        property real x: 400
+                        property real y: 100
+                        property real z: 0
+                    }
+                    property JsonObject userCard: JsonObject {
+                        property bool enable: false
+                        property string placementStrategy: "free"
+                        property real x: 400
+                        property real y: 100
+                        property real z: 0
+                        property string sizeMode: "2x2" // "1x1", "1x2", "2x2", "2x3"
+                    }
+                    property JsonObject visualizer: JsonObject {
+                        property bool enable: false
+                        property string placementStrategy: "free"
+                        property real x: 0
+                        property real y: 0
+                        property real z: -1000
+                        property string style: "bars" // "bars", "mirror", "aurora", "ring", "dots"
+                        property string colorSource: "theme" // "theme", "cover"
+                        property real sensitivity: 1
+                        property int height: 260 // mirror, aurora and dots
+                        property int ringSize: 380
+                    }
+                    property JsonObject worldClock: JsonObject {
+                        property bool enable: false
+                        property list<string> timezones: ["Australia/Sydney", "Asia/Tokyo", "Europe/London", "America/New_York"]
+                        property string placementStrategy: "free"
+                        property real x: 400
+                        property real y: 100
+                        property real z: 0
+                        property string sizeMode: "2x2" // "2x2", "4x1"
+                        property bool vertical: false
+                        property int clockCount: 4
                     }
                 }
                 property string wallpaperPath: ""
@@ -390,6 +521,7 @@ Singleton {
                 }
                 property bool centerClock: true
                 property bool showLockedText: true
+                property bool showWidgets: false
                 property JsonObject security: JsonObject {
                     property bool unlockKeyring: true
                     property bool requirePasswordToPower: false
