@@ -8,7 +8,10 @@ import Quickshell
 
 WindowDialog {
     id: root
-    backgroundHeight: Vpn.profiles.length === 0 ? 330 : 480
+    backgroundHeight: 480
+
+    Component.onCompleted: Vpn.dialogOpen = true
+    Component.onDestruction: Vpn.dialogOpen = false
 
     WindowDialogTitle {
         text: Translation.tr("VPN")

@@ -9,7 +9,6 @@ pragma ComponentBehavior: Bound
 
 Singleton {
     id: root
-    signal requestBluetoothDialog
     property bool barOpen: true
     property bool colorPickerOpen: false
     property string colorPickerAction: "copy"
@@ -67,6 +66,15 @@ Singleton {
         return root.frameHover[`${screenName}:${side}`] ?? false;
     }
     property bool desktopWidgetKeyboardFocus: false
+
+    readonly property var centeredShapeOptions: [
+        "Circle", "Square", "Slanted", "Arch", "Arrow", "SemiCircle", "Oval", "Pill",
+        "Triangle", "Diamond", "ClamShell", "Pentagon", "Gem", "Sunny", "VerySunny",
+        "Cookie4Sided", "Cookie6Sided", "Cookie7Sided", "Cookie9Sided", "Cookie12Sided",
+        "Ghostish", "Clover4Leaf", "Clover8Leaf", "Burst", "SoftBurst", "Flower",
+        "Puffy", "PuffyDiamond", "PixelCircle", "Bun", "Heart"
+    ]
+    property bool bluetoothDialogRequested: false
 
     readonly property var hotCornerOptions: [
         { displayName: Translation.tr("None"), value: "none" },

@@ -37,8 +37,8 @@ MouseArea {
 
     onClicked: mouse => {
         if (mouse.button === Qt.RightButton) {
+            GlobalStates.bluetoothDialogRequested = true;
             GlobalStates.sidebarRightOpen = true;
-            GlobalStates.requestBluetoothDialog();
         }
     }
 

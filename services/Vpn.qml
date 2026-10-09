@@ -127,8 +127,12 @@ Singleton {
         Notifications.sendDesktop("VPN", message, ["-a", "Shell"]);
     }
 
+    property bool dialogOpen: false
+    readonly property bool toggleShown: Config.options.sidebar.quickToggles.style === "android"
+        && Config.options.sidebar.quickToggles.android.toggles.some(toggle => toggle.type === "vpn")
+
     Timer {
-        running: GlobalStates.sidebarRightOpen
+        running: GlobalStates.sidebarRightOpen && (root.dialogOpen || root.toggleShown)
         interval: 4000
         repeat: true
         triggeredOnStart: true

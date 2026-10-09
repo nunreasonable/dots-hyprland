@@ -33,6 +33,16 @@ Item {
     property bool showNightLightDialog: false
     property bool showWifiDialog: false
     property bool showVpnDialog: false
+
+    function takeBluetoothRequest() {
+        if (!GlobalStates.bluetoothDialogRequested)
+            return;
+        GlobalStates.bluetoothDialogRequested = false;
+        if (Bluetooth.defaultAdapter)
+            root.showBluetoothDialog = true;
+    }
+
+    Component.onCompleted: root.takeBluetoothRequest()
     property bool editMode: false
     property string editTab: Config.options.sidebar.quickToggles.style === "android" ? "toggles" : "layout"
     readonly property var editTabs: Config.options.sidebar.quickToggles.style === "android"
@@ -53,10 +63,8 @@ Item {
 
     Connections {
         target: GlobalStates
-        function onRequestBluetoothDialog() {
-            if (!Bluetooth.defaultAdapter) return;
-            root.showBluetoothDialog = true;
-            GlobalStates.sidebarRightOpen = true;
+        function onBluetoothDialogRequestedChanged() {
+            root.takeBluetoothRequest();
         }
         function onSidebarRightOpenChanged() {
             if (!GlobalStates.sidebarRightOpen) {
