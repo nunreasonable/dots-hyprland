@@ -45,6 +45,90 @@ ContentPage {
     }
 
     ContentSection {
+        icon: "widgets"
+        title: Translation.tr("Desktop widgets")
+
+        ConfigRow {
+            uniform: true
+            ConfigSwitch {
+                buttonIcon: "grid_on"
+                text: Translation.tr("Show grid while dragging")
+                checked: Config.options.background.showGrid
+                onCheckedChanged: {
+                    Config.options.background.showGrid = checked;
+                }
+            }
+            ConfigSwitch {
+                buttonIcon: "straighten"
+                text: Translation.tr("Show snap lines")
+                checked: Config.options.background.showSnapLines
+                onCheckedChanged: {
+                    Config.options.background.showSnapLines = checked;
+                }
+            }
+        }
+
+        ConfigRow {
+            uniform: true
+            ConfigSwitch {
+                buttonIcon: "lock"
+                text: Translation.tr("Lock widget positions")
+                checked: Config.options.background.widgetsLocked
+                onCheckedChanged: {
+                    Config.options.background.widgetsLocked = checked;
+                }
+            }
+            ConfigSwitch {
+                buttonIcon: "shadow"
+                text: Translation.tr("Widget shadows")
+                checked: Config.options.background.widgets.shadow
+                onCheckedChanged: {
+                    Config.options.background.widgets.shadow = checked;
+                }
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "lock_person"
+            text: Translation.tr("Show widgets on the lock screen")
+            checked: Config.options.lock.showWidgets
+            onCheckedChanged: {
+                Config.options.lock.showWidgets = checked;
+            }
+        }
+
+        ConfigSwitch {
+            visible: !Platform.isWindows
+            buttonIcon: "blur_on"
+            text: Translation.tr("Blur widget backgrounds")
+            checked: Config.options.background.widgets.blurWidgets
+            onCheckedChanged: {
+                Config.options.background.widgets.blurWidgets = checked;
+            }
+        }
+
+        Loader {
+            Layout.fillWidth: true
+            Layout.leftMargin: 8
+            Layout.rightMargin: 8
+            active: !Platform.isWindows && Config.options.background.widgets.blurWidgets
+            visible: active
+            sourceComponent: ConfigSlider {
+                text: Translation.tr("Widget blur radius")
+                buttonIcon: "aspect_ratio"
+                usePercentTooltip: false
+                value: Config.options.background.widgets.blurRadius
+                from: 1
+                to: 64
+                stopIndicatorValues: [32]
+                onValueChanged: {
+                    Config.options.background.widgets.blurRadius = value;
+                }
+            }
+        }
+    }
+
+    ContentSection {
         visible: Platform.isWindows
         icon: "desktop_windows"
         title: Translation.tr("Windows desktop")
@@ -757,6 +841,1046 @@ ContentPage {
                     },
                 ]
             }
+        }
+    }
+
+
+    ContentSection {
+        icon: "calendar_month"
+        title: Translation.tr("Widget: Calendar")
+
+        ConfigRow {
+            Layout.fillWidth: true
+
+            ConfigSwitch {
+                Layout.fillWidth: false
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.widgets.calendar.enable
+                onCheckedChanged: {
+                    Config.options.background.widgets.calendar.enable = checked;
+                }
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            ConfigSelectionArray {
+                Layout.fillWidth: false
+                currentValue: Config.options.background.widgets.calendar.placementStrategy
+                onSelected: newValue => {
+                    Config.options.background.widgets.calendar.placementStrategy = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Draggable"),
+                        icon: "drag_pan",
+                        value: "free"
+                    },
+                    {
+                        displayName: Translation.tr("Least busy"),
+                        icon: "category",
+                        value: "leastBusy"
+                    },
+                    {
+                        displayName: Translation.tr("Most busy"),
+                        icon: "shapes",
+                        value: "mostBusy"
+                    },
+                ]
+            }
+        }
+
+        ConfigSelectionArray {
+            text: Translation.tr("Size")
+            currentValue: Config.options.background.widgets.calendar.sizeMode
+            onSelected: newValue => {
+                Config.options.background.widgets.calendar.sizeMode = newValue;
+            }
+            options: [
+                {
+                    displayName: "1×1",
+                    icon: "crop_square",
+                    value: "1x1"
+                },
+                {
+                    displayName: "1×2",
+                    icon: "crop_landscape",
+                    value: "1x2"
+                },
+                {
+                    displayName: "2×2",
+                    icon: "crop_square",
+                    value: "2x2"
+                },
+                {
+                    displayName: "2×3",
+                    icon: "crop_portrait",
+                    value: "2x3"
+                },
+            ]
+        }
+    }
+
+    ContentSection {
+        icon: "text_fields"
+        title: Translation.tr("Widget: Custom text")
+
+        ConfigRow {
+            Layout.fillWidth: true
+
+            ConfigSwitch {
+                Layout.fillWidth: false
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.widgets.customText.enable
+                onCheckedChanged: {
+                    Config.options.background.widgets.customText.enable = checked;
+                }
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            ConfigSelectionArray {
+                Layout.fillWidth: false
+                currentValue: Config.options.background.widgets.customText.placementStrategy
+                onSelected: newValue => {
+                    Config.options.background.widgets.customText.placementStrategy = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Draggable"),
+                        icon: "drag_pan",
+                        value: "free"
+                    },
+                    {
+                        displayName: Translation.tr("Least busy"),
+                        icon: "category",
+                        value: "leastBusy"
+                    },
+                    {
+                        displayName: Translation.tr("Most busy"),
+                        icon: "shapes",
+                        value: "mostBusy"
+                    },
+                ]
+            }
+        }
+
+        MaterialTextArea {
+            Layout.fillWidth: true
+            placeholderText: Translation.tr("Content")
+            text: Config.options.background.widgets.customText.content
+            wrapMode: TextEdit.Wrap
+            onTextChanged: {
+                Config.options.background.widgets.customText.content = text;
+            }
+        }
+
+        ConfigRow {
+            uniform: true
+            MaterialTextArea {
+                Layout.fillWidth: true
+                placeholderText: Translation.tr("Font family")
+                text: Config.options.background.widgets.customText.fontFamily
+                wrapMode: TextEdit.Wrap
+                onTextChanged: {
+                    Config.options.background.widgets.customText.fontFamily = text;
+                }
+            }
+            ConfigSelectionArray {
+                currentValue: Config.options.background.widgets.customText.alignment
+                onSelected: newValue => {
+                    Config.options.background.widgets.customText.alignment = newValue;
+                }
+                options: [
+                    {
+                        displayName: "",
+                        icon: "format_align_left",
+                        value: "left"
+                    },
+                    {
+                        displayName: "",
+                        icon: "format_align_center",
+                        value: "center"
+                    },
+                    {
+                        displayName: "",
+                        icon: "format_align_right",
+                        value: "right"
+                    },
+                ]
+            }
+        }
+
+        ConfigSlider {
+            text: Translation.tr("Font size")
+            buttonIcon: "format_size"
+            usePercentTooltip: false
+            value: Config.options.background.widgets.customText.fontSize
+            from: 12
+            to: 400
+            stopIndicatorValues: [72]
+            onValueChanged: {
+                Config.options.background.widgets.customText.fontSize = value;
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "shadow"
+            text: Translation.tr("Shadow")
+            checked: Config.options.background.widgets.customText.shadow
+            onCheckedChanged: {
+                Config.options.background.widgets.customText.shadow = checked;
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "sticky_note_2"
+        title: Translation.tr("Widget: Custom image")
+
+        ConfigRow {
+            Layout.fillWidth: true
+
+            ConfigSwitch {
+                Layout.fillWidth: false
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.widgets.customImage.enable
+                onCheckedChanged: {
+                    Config.options.background.widgets.customImage.enable = checked;
+                }
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            ConfigSelectionArray {
+                Layout.fillWidth: false
+                currentValue: Config.options.background.widgets.customImage.placementStrategy
+                onSelected: newValue => {
+                    Config.options.background.widgets.customImage.placementStrategy = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Draggable"),
+                        icon: "drag_pan",
+                        value: "free"
+                    },
+                    {
+                        displayName: Translation.tr("Least busy"),
+                        icon: "category",
+                        value: "leastBusy"
+                    },
+                    {
+                        displayName: Translation.tr("Most busy"),
+                        icon: "shapes",
+                        value: "mostBusy"
+                    },
+                ]
+            }
+        }
+
+        MaterialTextArea {
+            Layout.fillWidth: true
+            placeholderText: Translation.tr("Image path (or drop an image on the widget)")
+            text: Config.options.background.widgets.customImage.path
+            wrapMode: TextEdit.Wrap
+            onTextChanged: {
+                Config.options.background.widgets.customImage.path = text;
+            }
+        }
+
+        ConfigSelectionArray {
+            text: Translation.tr("Shape")
+            currentValue: Config.options.background.widgets.customImage.shape
+            onSelected: newValue => {
+                Config.options.background.widgets.customImage.shape = newValue;
+            }
+            options: [
+                {
+                    displayName: "",
+                    icon: "circle",
+                    value: "Circle"
+                },
+                {
+                    displayName: "",
+                    icon: "square",
+                    value: "Square"
+                },
+                {
+                    displayName: "",
+                    icon: "cookie",
+                    value: "Cookie4Sided"
+                },
+                {
+                    displayName: "",
+                    icon: "cookie",
+                    value: "Cookie7Sided"
+                },
+                {
+                    displayName: "",
+                    icon: "bubble_chart",
+                    value: "Oval"
+                },
+                {
+                    displayName: "",
+                    icon: "favorite",
+                    value: "Heart"
+                },
+            ]
+        }
+
+        ConfigSlider {
+            text: Translation.tr("Size")
+            buttonIcon: "aspect_ratio"
+            usePercentTooltip: false
+            value: Config.options.background.widgets.customImage.size
+            from: 80
+            to: 500
+            stopIndicatorValues: [200]
+            onValueChanged: {
+                Config.options.background.widgets.customImage.size = value;
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "image"
+        title: Translation.tr("Widget: Image card")
+
+        ConfigRow {
+            Layout.fillWidth: true
+
+            ConfigSwitch {
+                Layout.fillWidth: false
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.widgets.imageCard.enable
+                onCheckedChanged: {
+                    Config.options.background.widgets.imageCard.enable = checked;
+                }
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            ConfigSelectionArray {
+                Layout.fillWidth: false
+                currentValue: Config.options.background.widgets.imageCard.placementStrategy
+                onSelected: newValue => {
+                    Config.options.background.widgets.imageCard.placementStrategy = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Draggable"),
+                        icon: "drag_pan",
+                        value: "free"
+                    },
+                    {
+                        displayName: Translation.tr("Least busy"),
+                        icon: "category",
+                        value: "leastBusy"
+                    },
+                    {
+                        displayName: Translation.tr("Most busy"),
+                        icon: "shapes",
+                        value: "mostBusy"
+                    },
+                ]
+            }
+        }
+
+        MaterialTextArea {
+            Layout.fillWidth: true
+            placeholderText: Translation.tr("Image path (or drop an image on the widget)")
+            text: Config.options.background.widgets.imageCard.path
+            wrapMode: TextEdit.Wrap
+            onTextChanged: {
+                Config.options.background.widgets.imageCard.path = text;
+            }
+        }
+
+        ConfigSelectionArray {
+            text: Translation.tr("Size")
+            currentValue: Config.options.background.widgets.imageCard.sizeMode
+            onSelected: newValue => {
+                Config.options.background.widgets.imageCard.sizeMode = newValue;
+            }
+            options: [
+                {
+                    displayName: "1×1",
+                    icon: "crop_square",
+                    value: "1x1"
+                },
+                {
+                    displayName: "1×2",
+                    icon: "crop_landscape",
+                    value: "1x2"
+                },
+                {
+                    displayName: "2×2",
+                    icon: "crop_square",
+                    value: "2x2"
+                },
+                {
+                    displayName: "2×3",
+                    icon: "crop_portrait",
+                    value: "2x3"
+                },
+            ]
+        }
+    }
+
+    ContentSection {
+        icon: "sticky_note_2"
+        title: Translation.tr("Widget: Sticker")
+
+        ConfigRow {
+            Layout.fillWidth: true
+
+            ConfigSwitch {
+                Layout.fillWidth: false
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.widgets.sticker.enable
+                onCheckedChanged: {
+                    Config.options.background.widgets.sticker.enable = checked;
+                }
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            ConfigSelectionArray {
+                Layout.fillWidth: false
+                currentValue: Config.options.background.widgets.sticker.placementStrategy
+                onSelected: newValue => {
+                    Config.options.background.widgets.sticker.placementStrategy = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Draggable"),
+                        icon: "drag_pan",
+                        value: "free"
+                    },
+                    {
+                        displayName: Translation.tr("Least busy"),
+                        icon: "category",
+                        value: "leastBusy"
+                    },
+                    {
+                        displayName: Translation.tr("Most busy"),
+                        icon: "shapes",
+                        value: "mostBusy"
+                    },
+                ]
+            }
+        }
+
+        MaterialTextArea {
+            Layout.fillWidth: true
+            placeholderText: Translation.tr("Image path (or drop an image on the widget)")
+            text: Config.options.background.widgets.sticker.path
+            wrapMode: TextEdit.Wrap
+            onTextChanged: {
+                Config.options.background.widgets.sticker.path = text;
+            }
+        }
+
+        ConfigRow {
+            uniform: true
+            ConfigSlider {
+                text: Translation.tr("Size")
+                buttonIcon: "aspect_ratio"
+                usePercentTooltip: false
+                value: Config.options.background.widgets.sticker.size
+                from: 60
+                to: 500
+                stopIndicatorValues: [200]
+                onValueChanged: {
+                    Config.options.background.widgets.sticker.size = value;
+                }
+            }
+            ConfigSlider {
+                text: Translation.tr("Outline width")
+                buttonIcon: "line_weight"
+                usePercentTooltip: false
+                value: Config.options.background.widgets.sticker.outlineWidth
+                from: 0
+                to: 24
+                stopIndicatorValues: [8]
+                onValueChanged: {
+                    Config.options.background.widgets.sticker.outlineWidth = value;
+                }
+            }
+        }
+
+        MaterialTextArea {
+            Layout.fillWidth: true
+            placeholderText: Translation.tr("Outline color (e.g. #ffffff)")
+            text: Config.options.background.widgets.sticker.outlineColor
+            wrapMode: TextEdit.Wrap
+            onTextChanged: {
+                Config.options.background.widgets.sticker.outlineColor = text;
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "transform"
+        title: Translation.tr("Widget: Image converter")
+
+        ConfigRow {
+            Layout.fillWidth: true
+
+            ConfigSwitch {
+                Layout.fillWidth: false
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.widgets.images.enable
+                onCheckedChanged: {
+                    Config.options.background.widgets.images.enable = checked;
+                }
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            ConfigSelectionArray {
+                Layout.fillWidth: false
+                currentValue: Config.options.background.widgets.images.placementStrategy
+                onSelected: newValue => {
+                    Config.options.background.widgets.images.placementStrategy = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Draggable"),
+                        icon: "drag_pan",
+                        value: "free"
+                    },
+                    {
+                        displayName: Translation.tr("Least busy"),
+                        icon: "category",
+                        value: "leastBusy"
+                    },
+                    {
+                        displayName: Translation.tr("Most busy"),
+                        icon: "shapes",
+                        value: "mostBusy"
+                    },
+                ]
+            }
+        }
+
+        StyledToolTip {
+            text: Translation.tr("Drop images on the widget to convert them. Needs ffmpeg (and ImageMagick for PDF) on PATH.")
+        }
+    }
+
+    ContentSection {
+        icon: "music_note"
+        title: Translation.tr("Widget: Media")
+
+        ConfigRow {
+            Layout.fillWidth: true
+
+            ConfigSwitch {
+                Layout.fillWidth: false
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.widgets.media.enable
+                onCheckedChanged: {
+                    Config.options.background.widgets.media.enable = checked;
+                }
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            ConfigSelectionArray {
+                Layout.fillWidth: false
+                currentValue: Config.options.background.widgets.media.placementStrategy
+                onSelected: newValue => {
+                    Config.options.background.widgets.media.placementStrategy = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Draggable"),
+                        icon: "drag_pan",
+                        value: "free"
+                    },
+                    {
+                        displayName: Translation.tr("Least busy"),
+                        icon: "category",
+                        value: "leastBusy"
+                    },
+                    {
+                        displayName: Translation.tr("Most busy"),
+                        icon: "shapes",
+                        value: "mostBusy"
+                    },
+                ]
+            }
+        }
+
+        ConfigSelectionArray {
+            text: Translation.tr("Size")
+            currentValue: Config.options.background.widgets.media.sizeMode
+            onSelected: newValue => {
+                Config.options.background.widgets.media.sizeMode = newValue;
+            }
+            options: [
+                {
+                    displayName: "1×1",
+                    icon: "crop_square",
+                    value: "1x1"
+                },
+                {
+                    displayName: "1×2",
+                    icon: "crop_landscape",
+                    value: "1x2"
+                },
+                {
+                    displayName: "2×2",
+                    icon: "crop_square",
+                    value: "2x2"
+                },
+                {
+                    displayName: "1×3",
+                    icon: "crop_landscape",
+                    value: "1x3"
+                },
+            ]
+        }
+    }
+
+    ContentSection {
+        icon: "sticky_note_2"
+        title: Translation.tr("Widget: Notes")
+
+        ConfigRow {
+            Layout.fillWidth: true
+
+            ConfigSwitch {
+                Layout.fillWidth: false
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.widgets.notes.enable
+                onCheckedChanged: {
+                    Config.options.background.widgets.notes.enable = checked;
+                }
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            ConfigSelectionArray {
+                Layout.fillWidth: false
+                currentValue: Config.options.background.widgets.notes.placementStrategy
+                onSelected: newValue => {
+                    Config.options.background.widgets.notes.placementStrategy = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Draggable"),
+                        icon: "drag_pan",
+                        value: "free"
+                    },
+                    {
+                        displayName: Translation.tr("Least busy"),
+                        icon: "category",
+                        value: "leastBusy"
+                    },
+                    {
+                        displayName: Translation.tr("Most busy"),
+                        icon: "shapes",
+                        value: "mostBusy"
+                    },
+                ]
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "timer"
+        title: Translation.tr("Widget: Timers")
+
+        ConfigRow {
+            Layout.fillWidth: true
+
+            ConfigSwitch {
+                Layout.fillWidth: false
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.widgets.timers.enable
+                onCheckedChanged: {
+                    Config.options.background.widgets.timers.enable = checked;
+                }
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            ConfigSelectionArray {
+                Layout.fillWidth: false
+                currentValue: Config.options.background.widgets.timers.placementStrategy
+                onSelected: newValue => {
+                    Config.options.background.widgets.timers.placementStrategy = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Draggable"),
+                        icon: "drag_pan",
+                        value: "free"
+                    },
+                    {
+                        displayName: Translation.tr("Least busy"),
+                        icon: "category",
+                        value: "leastBusy"
+                    },
+                    {
+                        displayName: Translation.tr("Most busy"),
+                        icon: "shapes",
+                        value: "mostBusy"
+                    },
+                ]
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "swap_horiz"
+            text: Translation.tr("Stack vertically")
+            checked: Config.options.background.widgets.timers.vertical
+            onCheckedChanged: {
+                Config.options.background.widgets.timers.vertical = checked;
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "checklist"
+        title: Translation.tr("Widget: To-Do")
+
+        ConfigRow {
+            Layout.fillWidth: true
+
+            ConfigSwitch {
+                Layout.fillWidth: false
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.widgets.todo.enable
+                onCheckedChanged: {
+                    Config.options.background.widgets.todo.enable = checked;
+                }
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            ConfigSelectionArray {
+                Layout.fillWidth: false
+                currentValue: Config.options.background.widgets.todo.placementStrategy
+                onSelected: newValue => {
+                    Config.options.background.widgets.todo.placementStrategy = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Draggable"),
+                        icon: "drag_pan",
+                        value: "free"
+                    },
+                    {
+                        displayName: Translation.tr("Least busy"),
+                        icon: "category",
+                        value: "leastBusy"
+                    },
+                    {
+                        displayName: Translation.tr("Most busy"),
+                        icon: "shapes",
+                        value: "mostBusy"
+                    },
+                ]
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "badge"
+        title: Translation.tr("Widget: User card")
+
+        ConfigRow {
+            Layout.fillWidth: true
+
+            ConfigSwitch {
+                Layout.fillWidth: false
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.widgets.userCard.enable
+                onCheckedChanged: {
+                    Config.options.background.widgets.userCard.enable = checked;
+                }
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            ConfigSelectionArray {
+                Layout.fillWidth: false
+                currentValue: Config.options.background.widgets.userCard.placementStrategy
+                onSelected: newValue => {
+                    Config.options.background.widgets.userCard.placementStrategy = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Draggable"),
+                        icon: "drag_pan",
+                        value: "free"
+                    },
+                    {
+                        displayName: Translation.tr("Least busy"),
+                        icon: "category",
+                        value: "leastBusy"
+                    },
+                    {
+                        displayName: Translation.tr("Most busy"),
+                        icon: "shapes",
+                        value: "mostBusy"
+                    },
+                ]
+            }
+        }
+
+        ConfigSelectionArray {
+            text: Translation.tr("Size")
+            currentValue: Config.options.background.widgets.userCard.sizeMode
+            onSelected: newValue => {
+                Config.options.background.widgets.userCard.sizeMode = newValue;
+            }
+            options: [
+                {
+                    displayName: "1×1",
+                    icon: "crop_square",
+                    value: "1x1"
+                },
+                {
+                    displayName: "1×2",
+                    icon: "crop_landscape",
+                    value: "1x2"
+                },
+                {
+                    displayName: "2×2",
+                    icon: "crop_square",
+                    value: "2x2"
+                },
+                {
+                    displayName: "2×3",
+                    icon: "crop_portrait",
+                    value: "2x3"
+                },
+            ]
+        }
+    }
+
+    ContentSection {
+        icon: "graphic_eq"
+        title: Translation.tr("Widget: Visualizer")
+
+        ConfigRow {
+            Layout.fillWidth: true
+
+            ConfigSwitch {
+                Layout.fillWidth: false
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.widgets.visualizer.enable
+                onCheckedChanged: {
+                    Config.options.background.widgets.visualizer.enable = checked;
+                }
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            ConfigSelectionArray {
+                Layout.fillWidth: false
+                currentValue: Config.options.background.widgets.visualizer.placementStrategy
+                onSelected: newValue => {
+                    Config.options.background.widgets.visualizer.placementStrategy = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Draggable"),
+                        icon: "drag_pan",
+                        value: "free"
+                    },
+                    {
+                        displayName: Translation.tr("Least busy"),
+                        icon: "category",
+                        value: "leastBusy"
+                    },
+                    {
+                        displayName: Translation.tr("Most busy"),
+                        icon: "shapes",
+                        value: "mostBusy"
+                    },
+                ]
+            }
+        }
+
+        ConfigRow {
+            uniform: true
+            ConfigSelectionArray {
+                text: Translation.tr("Style")
+                currentValue: Config.options.background.widgets.visualizer.style
+                onSelected: newValue => {
+                    Config.options.background.widgets.visualizer.style = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Bars"),
+                        icon: "bar_chart",
+                        value: "bars"
+                    },
+                    {
+                        displayName: Translation.tr("Mirror"),
+                        icon: "flip",
+                        value: "mirror"
+                    },
+                    {
+                        displayName: Translation.tr("Aurora"),
+                        icon: "gradient",
+                        value: "aurora"
+                    },
+                    {
+                        displayName: Translation.tr("Ring"),
+                        icon: "data_usage",
+                        value: "ring"
+                    },
+                    {
+                        displayName: Translation.tr("Dots"),
+                        icon: "grain",
+                        value: "dots"
+                    },
+                ]
+            }
+            ConfigSelectionArray {
+                text: Translation.tr("Color")
+                currentValue: Config.options.background.widgets.visualizer.colorSource
+                onSelected: newValue => {
+                    Config.options.background.widgets.visualizer.colorSource = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Theme"),
+                        icon: "palette",
+                        value: "theme"
+                    },
+                    {
+                        displayName: Translation.tr("Album cover"),
+                        icon: "album",
+                        value: "cover"
+                    },
+                ]
+            }
+        }
+        StyledToolTip {
+            text: Translation.tr("Only the Bars style is implemented on Windows so far; the others fall back to it.")
+        }
+
+        ConfigSlider {
+            text: Translation.tr("Sensitivity")
+            buttonIcon: "tune"
+            usePercentTooltip: false
+            value: Config.options.background.widgets.visualizer.sensitivity * 100
+            from: 10
+            to: 300
+            stopIndicatorValues: [100]
+            onValueChanged: {
+                Config.options.background.widgets.visualizer.sensitivity = value / 100;
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "public"
+        title: Translation.tr("Widget: World clock")
+
+        ConfigRow {
+            Layout.fillWidth: true
+
+            ConfigSwitch {
+                Layout.fillWidth: false
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.widgets.worldClock.enable
+                onCheckedChanged: {
+                    Config.options.background.widgets.worldClock.enable = checked;
+                }
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            ConfigSelectionArray {
+                Layout.fillWidth: false
+                currentValue: Config.options.background.widgets.worldClock.placementStrategy
+                onSelected: newValue => {
+                    Config.options.background.widgets.worldClock.placementStrategy = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Draggable"),
+                        icon: "drag_pan",
+                        value: "free"
+                    },
+                    {
+                        displayName: Translation.tr("Least busy"),
+                        icon: "category",
+                        value: "leastBusy"
+                    },
+                    {
+                        displayName: Translation.tr("Most busy"),
+                        icon: "shapes",
+                        value: "mostBusy"
+                    },
+                ]
+            }
+        }
+
+        ConfigRow {
+            uniform: true
+            ConfigSelectionArray {
+                text: Translation.tr("Size")
+                currentValue: Config.options.background.widgets.worldClock.sizeMode
+                onSelected: newValue => {
+                    Config.options.background.widgets.worldClock.sizeMode = newValue;
+                }
+                options: [
+                    {
+                        displayName: "2×2",
+                        icon: "crop_square",
+                        value: "2x2"
+                    },
+                    {
+                        displayName: "4×1",
+                        icon: "view_column",
+                        value: "4x1"
+                    },
+                ]
+            }
+            ConfigSwitch {
+                buttonIcon: "swap_horiz"
+                text: Translation.tr("Stack vertically")
+                checked: Config.options.background.widgets.worldClock.vertical
+                onCheckedChanged: {
+                    Config.options.background.widgets.worldClock.vertical = checked;
+                }
+            }
+        }
+
+        ConfigSpinBox {
+            icon: "numbers"
+            text: Translation.tr("Clocks shown")
+            value: Config.options.background.widgets.worldClock.clockCount
+            from: 1
+            to: 4
+            stepSize: 1
+            onValueChanged: {
+                Config.options.background.widgets.worldClock.clockCount = value;
+            }
+        }
+        StyledToolTip {
+            text: Translation.tr("Pick the actual time zones from the widget's own settings flip (the gear icon on the widget).")
         }
     }
 }
