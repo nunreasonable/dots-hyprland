@@ -20,7 +20,7 @@ AbstractBackgroundWidget {
     implicitWidth: root.cardWidth
     implicitHeight: root.cardHeight * 2 + root.cardSpacing
 
-    property string mode: "list" // "list" | "edit"
+    property string mode: "list"
     property string editingText: ""
     onModeChanged: GlobalStates.desktopWidgetKeyboardFocus = (mode === "edit")
 
@@ -50,7 +50,6 @@ AbstractBackgroundWidget {
             anchors.fill: parent
             widget: root
 
-            // List
             ColumnLayout {
                 id: listPage
                 anchors {
@@ -197,7 +196,6 @@ AbstractBackgroundWidget {
                 }
             }
 
-            // Edit
             ColumnLayout {
                 id: editPage
                 anchors {

@@ -74,7 +74,6 @@ AbstractBackgroundWidget {
                 visible: root.imagePath !== ""
             }
 
-            // Placeholder + hover hint
             MaterialSymbol {
                 anchors.centerIn: parent
                 iconSize: contentItem.implicitWidth / 3

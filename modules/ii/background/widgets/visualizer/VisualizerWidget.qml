@@ -96,7 +96,6 @@ AbstractBackgroundWidget {
         const smoothed = new Array(n);
         for (let i = 0; i < n; i++) {
             const target = Math.max(0, Math.min(1, (result[i] / 1000) * root.sensitivity));
-            // Fast attack, slower release so bars don't look too jittery.
             smoothed[i] = target > prev[i] ? target : prev[i] * 0.82 + target * 0.18;
         }
         root.levels = smoothed;

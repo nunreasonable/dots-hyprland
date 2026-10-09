@@ -63,7 +63,6 @@ AbstractBackgroundWidget {
             shadowed: sizeMode !== "4x1" && Config.options.background.widgets.shadow
             blurred: Config.options.background.widgets.blurWidgets && sizeMode === "2x2"
 
-            // 2x2
             ColumnLayout {
                 id: mainColumn
                 anchors {
@@ -309,7 +308,6 @@ AbstractBackgroundWidget {
                 }
             }
 
-            // 4x1
             GridLayout {
                 anchors {
                     fill: parent

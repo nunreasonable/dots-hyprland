@@ -32,7 +32,7 @@ Singleton {
     property var stopwatchLaps: Persistent.states.timer.stopwatch.laps
 
     property bool countdownRunning: Persistent.states.timer.countdown.running
-    property int countdownDuration: Persistent.states.timer.countdown.duration // seconds, total
+    property int countdownDuration: Persistent.states.timer.countdown.duration
     property int countdownStart: Persistent.states.timer.countdown.start
     property int countdownSecondsLeft: countdownDuration
 
@@ -154,7 +154,6 @@ Singleton {
         Persistent.states.timer.stopwatch.laps.push(stopwatchTime);
     }
 
-    // Countdown
     function refreshCountdown() {
         if (!Persistent.states.timer.countdown.running)
             return;
@@ -180,7 +179,6 @@ Singleton {
         onTriggered: refreshCountdown()
     }
 
-    // Adds minutes to the countdown. Works whether paused or running.
     function addCountdownMinutes(minutes) {
         const addSeconds = minutes * 60;
         if (root.countdownRunning) {

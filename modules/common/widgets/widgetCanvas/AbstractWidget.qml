@@ -3,9 +3,6 @@ import Quickshell
 import qs.modules.common
 import qs
 
-/*
- * Widget to be placed on a WidgetCanvas
- */
 MouseArea {
     id: root
 

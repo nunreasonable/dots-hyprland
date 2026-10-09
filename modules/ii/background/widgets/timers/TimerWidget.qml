@@ -128,7 +128,6 @@ AbstractBackgroundWidget {
             }
         }
 
-        // Pomodoro
         TimerCard {
             icon: TimerService.pomodoroBreak ? "coffee" : "visibility"
             value: TimerService.formatSeconds(TimerService.pomodoroSecondsLeft)
@@ -141,7 +140,6 @@ AbstractBackgroundWidget {
             onReset: () => TimerService.resetPomodoro()
         }
 
-        // Stopwatch
         TimerCard {
             icon: "timer"
             value: TimerService.formatSeconds(TimerService.stopwatchTime / 100)
@@ -154,7 +152,6 @@ AbstractBackgroundWidget {
             onReset: () => TimerService.stopwatchReset()
         }
 
-        // Countdown
         TimerCard {
             icon: "hourglass_top"
             value: TimerService.formatSeconds(TimerService.countdownSecondsLeft)

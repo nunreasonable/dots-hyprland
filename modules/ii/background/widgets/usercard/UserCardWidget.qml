@@ -120,7 +120,6 @@ AbstractBackgroundWidget {
     readonly property string greetingText: greetingFor(DateTime.hour24)
     readonly property string todayString: Translation.tr("Today • ") + DateTime.clock.date.toLocaleDateString(Qt.locale(), "dddd d MMM")
 
-    // Uptime split into days / hours / minutes for the 2x3 stats row
     readonly property int uptimeDays: Math.floor(DateTime.uptimeSeconds / 86400)
     readonly property int uptimeHours: Math.floor((DateTime.uptimeSeconds % 86400) / 3600)
     readonly property int uptimeMinutes: Math.floor((DateTime.uptimeSeconds % 3600) / 60)
@@ -179,7 +178,6 @@ AbstractBackgroundWidget {
             }
         }
 
-        // 1x1
         Component {
             id: oneByOneContent
             SettingsPcWidgets.UserAvatar {
@@ -189,7 +187,6 @@ AbstractBackgroundWidget {
             }
         }
 
-        // 1x2
         Component {
             id: oneByTwoContent
             RowLayout {
@@ -244,7 +241,6 @@ AbstractBackgroundWidget {
             }
         }
 
-        // 2x2
         Component {
             id: twoByTwoContent
             ColumnLayout {
@@ -358,7 +354,6 @@ AbstractBackgroundWidget {
             }
         }
 
-        // 2x3
         Component {
             id: twoByThreeContent
             ColumnLayout {

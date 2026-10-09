@@ -6,10 +6,6 @@ import Quickshell
 import Quickshell.Io
 import QtQuick
 
-/**
- * Simple notes manager.
- * Each item is an object with "id", "content", "attachments" (array of file paths), "createdAt".
- */
 Singleton {
     id: root
     property var filePath: Directories.desktopNotesPath

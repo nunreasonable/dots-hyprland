@@ -8,12 +8,10 @@ Singleton {
     id: root
 
     readonly property var fallbackTimezones: [
-        // O
         "Pacific/Auckland", "Pacific/Fiji", "Pacific/Guam", "Pacific/Honolulu",
         "Pacific/Pago_Pago", "Pacific/Apia", "Pacific/Tahiti",
         "Australia/Sydney", "Australia/Melbourne", "Australia/Brisbane",
         "Australia/Adelaide", "Australia/Darwin", "Australia/Perth",
-        // A
         "Asia/Tokyo", "Asia/Seoul", "Asia/Shanghai", "Asia/Hong_Kong",
         "Asia/Taipei", "Asia/Singapore", "Asia/Kuala_Lumpur", "Asia/Manila",
         "Asia/Makassar", "Asia/Jakarta", "Asia/Bangkok", "Asia/Ho_Chi_Minh",
@@ -22,28 +20,23 @@ Singleton {
         "Asia/Muscat", "Asia/Tehran", "Asia/Baghdad", "Asia/Riyadh",
         "Asia/Kuwait", "Asia/Qatar", "Asia/Jerusalem", "Asia/Beirut",
         "Asia/Damascus", "Asia/Nicosia",
-        // UE
         "Europe/Moscow", "Europe/Istanbul", "Europe/Athens", "Europe/Bucharest",
         "Europe/Helsinki", "Europe/Kiev", "Europe/Minsk", "Europe/Warsaw",
         "Europe/Vienna", "Europe/Prague", "Europe/Budapest", "Europe/Berlin",
         "Europe/Paris", "Europe/Brussels", "Europe/Amsterdam", "Europe/Zurich",
         "Europe/Madrid", "Europe/Rome", "Europe/London", "Europe/Dublin",
         "Europe/Lisbon", "Atlantic/Reykjavik", "Atlantic/Azores",
-        // A
         "Africa/Cairo", "Africa/Johannesburg", "Africa/Nairobi", "Africa/Addis_Ababa",
         "Africa/Khartoum", "Africa/Lagos", "Africa/Kinshasa", "Africa/Algiers",
         "Africa/Casablanca", "Africa/Tunis", "Africa/Accra", "Africa/Dakar",
-        // SA
         "America/Sao_Paulo", "America/Rio_Branco", "America/Buenos_Aires",
         "America/Cordoba", "America/Santiago", "America/Asuncion", "America/Montevideo",
         "America/La_Paz", "America/Cuiaba", "America/Lima", "America/Bogota",
         "America/Guayaquil", "America/Caracas",
-        // CA
         "America/Panama", "America/Costa_Rica", "America/El_Salvador",
         "America/Guatemala", "America/Managua", "America/Tegucigalpa",
         "America/Havana", "America/Santo_Domingo", "America/Puerto_Rico",
         "America/Jamaica",
-        // NA
         "America/Mexico_City", "America/Monterrey", "America/Tijuana",
         "America/New_York", "America/Detroit", "America/Chicago",
         "America/Denver", "America/Phoenix", "America/Los_Angeles",
@@ -114,7 +107,6 @@ Singleton {
         return root.zoneAliases[tz] ?? tz;
     }
 
-    // Pure-JS UTC offset for a timezone, through a locale round-trip (no shell/zoneinfo lookup needed).
     function offsetMinutesFor(tz) {
         try {
             const eff = root.effectiveZone(tz);

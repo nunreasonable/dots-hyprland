@@ -7,9 +7,6 @@ import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.ii.background.widgets
 
-/*
- * Free text on the desktop. Double-click to edit, drag the corner handle to resize.
- */
 AbstractBackgroundWidget {
     id: root
     configEntryName: "customText"
@@ -62,7 +59,6 @@ AbstractBackgroundWidget {
         root.editing = false;
     }
 
-    // Resizing scales the font by how much the widget box is stretched
     property real resizeStartFontSize: -1
     property real resizeStartHeight: 0
 

@@ -150,7 +150,6 @@ AbstractBackgroundWidget {
             }
         }
 
-        // 1x1
         Component {
             id: oneByOneContent
             Item {
@@ -266,7 +265,6 @@ AbstractBackgroundWidget {
             }
         }
 
-        // 1x2
         Component {
             id: oneByTwoContent
             RowLayout {
@@ -411,14 +409,12 @@ AbstractBackgroundWidget {
             }
         }
 
-        // 2x2
         Component {
             id: twoByTwoContent
             ColumnLayout {
                 anchors.fill: parent
                 spacing: 0
 
-                // Art
                 Rectangle {
                     id: bigArt
                     Layout.fillWidth: true
@@ -462,7 +458,6 @@ AbstractBackgroundWidget {
                     }
                 }
 
-                // Artist / title
                 ColumnLayout {
                     Layout.fillWidth: true
                     Layout.leftMargin: 14
@@ -488,7 +483,6 @@ AbstractBackgroundWidget {
                     }
                 }
 
-                // Controls
                 RowLayout {
                     Layout.fillWidth: true
                     Layout.alignment: Qt.AlignHCenter
@@ -550,7 +544,6 @@ AbstractBackgroundWidget {
             }
         }
 
-        // 1x3
         Component {
             id: oneByThreeContent
             Item {
@@ -612,7 +605,6 @@ AbstractBackgroundWidget {
                     }
                     spacing: -10
 
-                    // Artist + Title
                     ColumnLayout {
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignVCenter
@@ -637,7 +629,6 @@ AbstractBackgroundWidget {
                         }
                     }
 
-                    // Controls
                     Rectangle {
                         id: controlsPill
                         Layout.alignment: Qt.AlignRight

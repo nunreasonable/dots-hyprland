@@ -104,6 +104,7 @@ Variants {
         WlrLayershell.layer: (GlobalStates.screenLocked && !scaleAnim.running) ? WlrLayer.Overlay : (Platform.isWindows ? WlrLayer.Background : WlrLayer.Bottom)
         // WlrLayershell.layer: WlrLayer.Bottom
         WlrLayershell.namespace: "quickshell:background"
+        WlrLayershell.keyboardFocus: GlobalStates.desktopWidgetKeyboardFocus ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
         anchors {
             top: true
             bottom: true
@@ -184,6 +185,7 @@ Variants {
                 exclusionMode: ExclusionMode.Ignore
                 WlrLayershell.layer: WlrLayer.Bottom
                 WlrLayershell.namespace: "quickshell:backgroundWidgets"
+                WlrLayershell.keyboardFocus: GlobalStates.desktopWidgetKeyboardFocus ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
                 anchors {
                     top: true
                     bottom: true

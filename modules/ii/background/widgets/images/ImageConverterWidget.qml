@@ -54,7 +54,7 @@ AbstractBackgroundWidget {
     ]
 
     property string selectedFormat: "webp"
-    property string dropStatus: "idle" // idle | hover | converting | done | error
+    property string dropStatus: "idle"
     property string statusMessage: ""
 
     readonly property var acceptedExtensions: ["png", "jpg", "jpeg", "webp", "avif", "bmp", "gif", "tiff", "tif"]
@@ -64,7 +64,6 @@ AbstractBackgroundWidget {
     property int queueDone: 0
     property var batchPaths: []
 
-    // On Windows ffmpeg/ImageMagick aren't bundled; probed once, used to show a clear error instead of hanging.
     property bool ffmpegAvailable: !Platform.isWindows
     property bool magickAvailable: !Platform.isWindows
 

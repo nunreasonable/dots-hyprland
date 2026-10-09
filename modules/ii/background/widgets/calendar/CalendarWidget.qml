@@ -163,7 +163,6 @@ AbstractBackgroundWidget {
             }
         }
 
-        // 1x1
         Component {
             id: oneByOneContent
             Rectangle {
@@ -220,7 +219,6 @@ AbstractBackgroundWidget {
             }
         }
 
-        // 1x2
         Component {
             id: oneByTwoContent
             ColumnLayout {
@@ -303,7 +301,6 @@ AbstractBackgroundWidget {
             }
         }
 
-        // 2x2
         Component {
             id: twoByTwoContent
             ColumnLayout {
@@ -414,7 +411,6 @@ AbstractBackgroundWidget {
             }
         }
 
-        // 2x3
         Component {
             id: twoByThreeContent
             RowLayout {

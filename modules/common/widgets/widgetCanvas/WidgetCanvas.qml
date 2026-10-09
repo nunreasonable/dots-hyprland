@@ -122,7 +122,8 @@ MouseArea {
     onPressed: mouse => {
         if (Config.options.background.widgetsLocked)
             return;
-        GlobalStates.desktopWidgetKeyboardFocus = true;
+        if (!Platform.isWindows)
+            GlobalStates.desktopWidgetKeyboardFocus = true;
         root.forceActiveFocus();
         root.selecting = true;
         root.selectionStartPoint = Qt.point(mouse.x, mouse.y);

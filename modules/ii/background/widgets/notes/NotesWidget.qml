@@ -16,7 +16,7 @@ AbstractBackgroundWidget {
     implicitWidth: 276
     implicitHeight: 252
 
-    property string mode: "list" // "list" | "edit"
+    property string mode: "list"
     property var pendingNoteId: null
     property string editingText: ""
     onModeChanged: GlobalStates.desktopWidgetKeyboardFocus = (mode === "edit")
@@ -58,7 +58,6 @@ AbstractBackgroundWidget {
             anchors.fill: parent
             widget: root
 
-            // List
             ColumnLayout {
                 id: listPage
                 anchors {
@@ -171,7 +170,6 @@ AbstractBackgroundWidget {
                 }
             }
 
-            // Edit
             ColumnLayout {
                 id: editPage
                 anchors {
