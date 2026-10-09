@@ -26,7 +26,7 @@ FloatingWindow {
     implicitWidth: 1100
     implicitHeight: 700
     minimumSize: Qt.size(900, 600)
-    color: Appearance.colors.colUiBackground
+    color: Appearance.m3colors.m3background
 
     onClosed: root.closeRequested()
     onVisibleChanged: {

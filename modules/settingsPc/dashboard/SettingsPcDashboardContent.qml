@@ -79,6 +79,7 @@ Item {
             id: headerBar
             Layout.fillWidth: true
             implicitHeight: 52
+            z: 2
 
             W.Toolbar {
                 id: navToolbar
@@ -217,7 +218,7 @@ Item {
             Rectangle {
                 id: searchResultsPanel
                 visible: root.searchOpen && searchInput.text.trim().length > 0
-                anchors.top: searchPill.bottom
+                anchors.top: parent.bottom
                 anchors.right: parent.right
                 anchors.topMargin: 6
                 width: 320
@@ -302,6 +303,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             active: root.currentPage === root.homePage
+            visible: active
             sourceComponent: Pages.QuickConfig {}
         }
 
@@ -309,6 +311,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             active: root.currentPage === root.wallpapersPage
+            visible: active
             sourceComponent: WP.WallpaperSelectorContent {
                 shown: root.currentPage === root.wallpapersPage
             }
@@ -318,6 +321,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             active: root.currentPage === root.presetsPage
+            visible: active
             sourceComponent: DashboardPresetsPage {}
         }
 
@@ -325,6 +329,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             active: root.currentPage === root.mediaPage
+            visible: active
             sourceComponent: DashboardMediaPage {}
         }
 
@@ -333,6 +338,7 @@ Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
             active: root.currentPage === root.settingsPage
+            visible: active
             sourceComponent: Pc.SettingsPcContent {
                 onCloseRequested: root.closeRequested()
             }

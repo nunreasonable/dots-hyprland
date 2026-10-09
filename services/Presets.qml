@@ -25,7 +25,33 @@ Singleton {
     ]
     readonly property var sensitiveNamePattern: /(api[-_]?key|token|secret|credential|password|useragent)/i
 
-    Component.onCompleted: presetsDirMarker.setText("")
+    property bool dirsReady: false
+
+    function ensureDirs() {
+        if (root.dirsReady)
+            return;
+        if (Platform.isWindows) {
+            if (!WindowsNative.fsUtils)
+                return;
+            WindowsNative.fsUtils.makePath(Directories.userPresetsPath);
+            WindowsNative.fsUtils.makePath(Directories.onlinePresetsPath);
+        } else {
+            presetsDirMarker.setText("");
+            onlineDirMarker.setText("");
+        }
+        root.dirsReady = true;
+        root.refresh();
+        root.refreshOnline();
+    }
+
+    Component.onCompleted: root.ensureDirs()
+
+    Connections {
+        target: WindowsNative
+        function onReadyChanged() {
+            root.ensureDirs();
+        }
+    }
 
     FileView {
         id: presetsDirMarker
@@ -33,18 +59,24 @@ Singleton {
         printErrors: false
     }
 
+    FileView {
+        id: onlineDirMarker
+        path: `${Directories.onlinePresetsPath}/.keep`
+        printErrors: false
+    }
+
     FolderListModel {
         id: presetsFolderModel
-        folder: Qt.resolvedUrl(Directories.userPresetsPath)
+        folder: FileUtils.folderUrl(Directories.userPresetsPath)
         showDirs: false
-        nameFilters: ["*.json"]
+        nameFilters: root.dirsReady ? ["*.json"] : ["*.not-ready"]
     }
 
     FolderListModel {
         id: onlinePresetsFolderModel
-        folder: Qt.resolvedUrl(Directories.onlinePresetsPath)
+        folder: FileUtils.folderUrl(Directories.onlinePresetsPath)
         showDirs: false
-        nameFilters: ["*.json"]
+        nameFilters: root.dirsReady ? ["*.json"] : ["*.not-ready"]
     }
 
     function refresh() {
@@ -160,6 +192,7 @@ Singleton {
     property string _pendingSaveDescription: ""
 
     function save(rawInput) {
+        root.ensureDirs();
         const raw = String(rawInput).trim();
         if (raw.length === 0)
             return;
@@ -231,10 +264,14 @@ Singleton {
     }
 
     function _deletePath(path, onDone) {
+        if (Platform.isWindows) {
+            WindowsNative.fsUtils?.removeFile(path);
+            if (onDone)
+                onDone();
+            return;
+        }
         deleteProc.onDone = onDone;
-        const escaped = path.replace(/'/g, "''");
-        deleteProc.command = ["powershell", "-NoProfile", "-WindowStyle", "Hidden", "-Command",
-            `Remove-Item -LiteralPath '${escaped}' -Force -ErrorAction SilentlyContinue`];
+        deleteProc.command = ["rm", "-f", "--", path];
         deleteProc.running = true;
     }
 
@@ -248,7 +285,9 @@ Singleton {
     }
 
     function openPresetsFolder() {
-        Qt.openUrlExternally(Directories.userPresetsPath);
+        if (Platform.isWindows)
+            WindowsNative.fsUtils?.makePath(Directories.userPresetsPath);
+        Qt.openUrlExternally(FileUtils.folderUrl(Directories.userPresetsPath));
     }
 
     function importJsonText(text, suggestedName) {
