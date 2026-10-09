@@ -3,6 +3,7 @@ import qs
 import qs.modules.common
 import QtQuick
 import Quickshell
+import Quickshell.Io
 
 Singleton {
     id: root
@@ -45,12 +46,10 @@ Singleton {
     ]
 
     readonly property var timezoneList: {
-        if (typeof Intl !== "undefined" && typeof Intl.supportedValuesOf === "function") {
-            try {
-                const zones = Intl.supportedValuesOf("timeZone");
-                if (zones && zones.length > 0)
-                    return zones;
-            } catch (e) {}
+        if (Platform.isWindows && WindowsNative.timeZones) {
+            const zones = WindowsNative.timeZones.ids();
+            if (zones.length > 0)
+                return zones;
         }
         return root.fallbackTimezones;
     }
@@ -107,19 +106,66 @@ Singleton {
         return root.zoneAliases[tz] ?? tz;
     }
 
+    property var offsets: ({})
+
     function offsetMinutesFor(tz) {
-        try {
-            const eff = root.effectiveZone(tz);
-            const utc = new Date(root.now.toLocaleString("en-US", {
-                timeZone: "UTC"
-            }));
-            const zoned = new Date(root.now.toLocaleString("en-US", {
-                timeZone: eff
-            }));
-            const minutes = Math.round((zoned.getTime() - utc.getTime()) / 60000);
-            return isNaN(minutes) ? null : minutes;
-        } catch (e) {
-            return null;
+        const value = root.offsets[tz];
+        return value === undefined ? null : value;
+    }
+
+    function refreshOffsets() {
+        if (!root.active)
+            return;
+        if (Platform.isWindows) {
+            if (!WindowsNative.timeZones)
+                return;
+            const next = {};
+            for (const tz of root.timezones) {
+                const minutes = WindowsNative.timeZones.offsetMinutes(root.effectiveZone(tz));
+                next[tz] = minutes === undefined ? null : minutes;
+            }
+            root.offsets = next;
+            return;
+        }
+        if (offsetProc.running)
+            return;
+        const pairs = root.timezones.map(tz => `${tz}:${root.effectiveZone(tz)}`).join(" ");
+        offsetProc.command = ["bash", "-c", `for pair in ${pairs}; do tz="\${pair%%:*}"; eff="\${pair##*:}"; if [ -f "/usr/share/zoneinfo/$eff" ]; then printf '%s %s\\n' "$tz" "$(TZ="$eff" date +%z)"; else printf '%s invalid\\n' "$tz"; fi; done`];
+        offsetProc.running = true;
+    }
+
+    onActiveChanged: root.refreshOffsets()
+    onTimezonesChanged: root.refreshOffsets()
+    Component.onCompleted: root.refreshOffsets()
+
+    Connections {
+        target: WindowsNative
+        function onReadyChanged() {
+            root.refreshOffsets();
+        }
+    }
+
+    Timer {
+        interval: 60000
+        running: root.active
+        repeat: true
+        onTriggered: root.refreshOffsets()
+    }
+
+    Process {
+        id: offsetProc
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const next = {};
+                for (const line of text.trim().split("\n")) {
+                    const parts = line.trim().split(" ");
+                    if (parts.length !== 2)
+                        continue;
+                    const match = parts[1].match(/^([+-])(\d\d)(\d\d)$/);
+                    next[parts[0]] = match ? (match[1] === "-" ? -1 : 1) * (parseInt(match[2], 10) * 60 + parseInt(match[3], 10)) : null;
+                }
+                root.offsets = next;
+            }
         }
     }
 

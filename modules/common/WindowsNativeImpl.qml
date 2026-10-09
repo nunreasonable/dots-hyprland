@@ -35,5 +35,6 @@ QtObject {
     readonly property QtObject blur: root.full ? QSWin.BackdropBlur : null
     readonly property QtObject systemMonitor: root.full ? QSWin.SystemMonitor : null
     readonly property QtObject fileIndex: root.full ? QSWin.FileIndex : null
+    readonly property QtObject timeZones: root.full ? QSWin.TimeZones : null
     readonly property QtObject accountAge: root.full || root.process === "settings" || root.process === "welcome" ? QSWin.AccountAge : null
 }
