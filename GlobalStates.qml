@@ -13,6 +13,10 @@ Singleton {
     property bool colorPickerOpen: false
     property string colorPickerAction: "copy"
     property bool crosshairOpen: false
+    property bool desktopMenuOpen: false
+    property var desktopMenuScreen: null
+    property real desktopMenuX: 0
+    property real desktopMenuY: 0
     property bool sidebarLeftOpen: false
     property bool sidebarRightOpen: false
     property bool mediaControlsOpen: false

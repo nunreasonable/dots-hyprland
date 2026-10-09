@@ -1054,5 +1054,7 @@
   "Maximum duration (ms)": "Duração máxima (ms)",
   "Bluetooth peripherals": "Periféricos Bluetooth",
   "Warns when a paired Bluetooth device's own battery is running low.": "Avisa quando a bateria de um dispositivo Bluetooth pareado está acabando.",
-  "Notify on low peripheral battery": "Notificar quando a bateria de um periférico estiver fraca"
+  "Notify on low peripheral battery": "Notificar quando a bateria de um periférico estiver fraca",
+  "Wallpaper & style": "Papel de parede e estilo",
+  "Live wallpaper...": "Papel de parede dinâmico..."
 }
