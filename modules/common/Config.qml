@@ -434,6 +434,7 @@ Singleton {
 
             property JsonObject notifications: JsonObject {
                 property int timeout: 7000
+                property string position: "top_right" // Allowed: top_left, top_center, top_right, bottom_left, bottom_center, bottom_right
                 property JsonObject forceMonitor: JsonObject {
                     property bool enable: false
                     property string name: ""

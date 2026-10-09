@@ -497,6 +497,62 @@ ContentPage {
         icon: "notifications"
         title: Translation.tr("Notifications")
 
+        ContentSubsection {
+            title: Translation.tr("Popup position")
+            ConfigRow {
+                uniform: true
+                ConfigSelectionArray {
+                    currentValue: Config.options.notifications.position
+                    onSelected: newValue => {
+                        Config.options.notifications.position = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: Translation.tr("Top left"),
+                            icon: "north_west",
+                            value: "top_left"
+                        },
+                        {
+                            displayName: Translation.tr("Top center"),
+                            icon: "north",
+                            value: "top_center"
+                        },
+                        {
+                            displayName: Translation.tr("Top right"),
+                            icon: "north_east",
+                            value: "top_right"
+                        }
+                    ]
+                }
+            }
+            ConfigRow {
+                uniform: true
+                ConfigSelectionArray {
+                    currentValue: Config.options.notifications.position
+                    onSelected: newValue => {
+                        Config.options.notifications.position = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: Translation.tr("Bottom left"),
+                            icon: "south_west",
+                            value: "bottom_left"
+                        },
+                        {
+                            displayName: Translation.tr("Bottom center"),
+                            icon: "south",
+                            value: "bottom_center"
+                        },
+                        {
+                            displayName: Translation.tr("Bottom right"),
+                            icon: "south_east",
+                            value: "bottom_right"
+                        }
+                    ]
+                }
+            }
+        }
+
         ConfigSpinBox {
             icon: "av_timer"
             text: Translation.tr("Timeout duration (if not defined by notification) (ms)")

@@ -1016,5 +1016,12 @@
   "Search...": "Buscar...",
   "Go": "Ir",
   "Use the Windows taskbar instead of ii's bar": "Usar a barra de tarefas do Windows no lugar da barra do ii",
-  "Hides ii's bar and brings back the normal Windows taskbar. Desktop widgets, sidebars, search and shortcuts stay as they are. Ctrl+Super+P switches it": "Esconde a barra do ii e traz de volta a barra de tarefas normal do Windows. Os widgets da área de trabalho, as barras laterais, a busca e os atalhos continuam iguais. Ctrl+Super+P alterna"
+  "Hides ii's bar and brings back the normal Windows taskbar. Desktop widgets, sidebars, search and shortcuts stay as they are. Ctrl+Super+P switches it": "Esconde a barra do ii e traz de volta a barra de tarefas normal do Windows. Os widgets da área de trabalho, as barras laterais, a busca e os atalhos continuam iguais. Ctrl+Super+P alterna",
+  "Popup position": "Posição dos pop-ups",
+  "Top left": "Superior esquerda",
+  "Top center": "Superior centro",
+  "Top right": "Superior direita",
+  "Bottom left": "Inferior esquerda",
+  "Bottom center": "Inferior centro",
+  "Bottom right": "Inferior direita"
 }
