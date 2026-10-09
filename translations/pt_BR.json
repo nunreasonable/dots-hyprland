@@ -1032,5 +1032,19 @@
   "Spicy Stuff needs a personal Microsoft account aged 18 or older.": "O Spicy Stuff precisa de uma conta Microsoft pessoal de 18 anos ou mais.",
   "Spicy Stuff needs a Microsoft account aged 18 or older. Windows says this account is not an adult account.": "O Spicy Stuff precisa de uma conta Microsoft de 18 anos ou mais. O Windows informa que esta conta não é de um adulto.",
   "Spicy Stuff needs a Microsoft account aged 18 or older. Windows couldn't confirm this account's age.": "O Spicy Stuff precisa de uma conta Microsoft de 18 anos ou mais. O Windows não conseguiu confirmar a idade desta conta.",
-  "Spicy Stuff needs a Microsoft account aged 18 or older. This version of Windows can't confirm an account's age; Windows 11 can.": "O Spicy Stuff precisa de uma conta Microsoft de 18 anos ou mais. Esta versão do Windows não consegue confirmar a idade de uma conta; o Windows 11 consegue."
+  "Spicy Stuff needs a Microsoft account aged 18 or older. This version of Windows can't confirm an account's age; Windows 11 can.": "O Spicy Stuff precisa de uma conta Microsoft de 18 anos ou mais. Esta versão do Windows não consegue confirmar a idade de uma conta; o Windows 11 consegue.",
+  "Position": "Posição",
+  "Corner radius": "Raio dos cantos",
+  "Background color": "Cor do fundo",
+  "Follow frame color": "Seguir a cor da moldura",
+  "Border width": "Largura da borda",
+  "Border color": "Cor da borda",
+  "Icons": "Ícones",
+  "Window previews": "Pré-visualizações de janelas",
+  "Icon size": "Tamanho dos ícones",
+  "Icon spacing": "Espaçamento dos ícones",
+  "Buttons & Media": "Botões e mídia",
+  "Media Player": "Player de mídia",
+  "Show Pin Button": "Mostrar botão de fixar",
+  "Show Apps Button": "Mostrar botão de apps"
 }

@@ -508,6 +508,81 @@ ContentPage {
             ContentSubsection {
                 title: Translation.tr("Appearance")
                 GroupedList {
+                    ConfigSelectionArray {
+                        text: Translation.tr("Style")
+                        icon: "dock_to_bottom"
+                        currentValue: Config.options.dock.style
+                        onSelected: newValue => { Config.options.dock.style = newValue }
+                        options: [
+                            { displayName: Translation.tr("Float"), icon: "call_to_action", value: "float" },
+                            { displayName: Translation.tr("Hug"), icon: "dock_to_bottom", value: "hug" }
+                        ]
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("Position")
+                        icon: "dock_to_bottom"
+                        currentValue: Config.options.dock.position
+                        onSelected: newValue => { Config.options.dock.position = newValue }
+                        options: [
+                            { displayName: Translation.tr("Left"), icon: "dock_to_left", value: "left" },
+                            { displayName: Translation.tr("Bottom"), icon: "dock_to_bottom", value: "bottom" },
+                            { displayName: Translation.tr("Right"), icon: "dock_to_right", value: "right" }
+                        ]
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "background_dot_small"
+                        text: Translation.tr("Background")
+                        checked: Config.options.dock.showBackground
+                        onCheckedChanged: { Config.options.dock.showBackground = checked }
+                    }
+                    ConfigSpinBox {
+                        icon: "rounded_corner"
+                        text: Translation.tr("Corner radius")
+                        value: Config.options.dock.radius
+                        from: 0
+                        to: 40
+                        stepSize: 1
+                        onValueChanged: { Config.options.dock.radius = value }
+                    }
+                    W.ColorSelectionArray {
+                        icon: "format_paint"
+                        text: Translation.tr("Background color")
+                        options: ["layer0", "layer1", "primaryContainer", "secondaryContainer", "tertiaryContainer", "primary", "secondary", "tertiary"]
+                        currentValue: Config.options.dock.backgroundColor
+                        onSelected: newValue => { Config.options.dock.backgroundColor = newValue }
+                    }
+                    ConfigSwitch {
+                        enabled: Config.options.dock.style === "hug"
+                        buttonIcon: "filter_frames"
+                        text: Translation.tr("Follow frame color")
+                        checked: Config.options.dock.followFrameColor
+                        onCheckedChanged: { Config.options.dock.followFrameColor = checked }
+                    }
+                    ConfigSwitch {
+                        enabled: Config.options.dock.style !== "hug"
+                        buttonIcon: "border_style"
+                        text: Translation.tr("Border")
+                        checked: Config.options.dock.showBorder
+                        onCheckedChanged: { Config.options.dock.showBorder = checked }
+                    }
+                    ConfigSpinBox {
+                        enabled: Config.options.dock.showBorder && Config.options.dock.style !== "hug"
+                        icon: "line_weight"
+                        text: Translation.tr("Border width")
+                        value: Config.options.dock.borderWidth
+                        from: 1
+                        to: 10
+                        stepSize: 1
+                        onValueChanged: { Config.options.dock.borderWidth = value }
+                    }
+                    W.ColorSelectionArray {
+                        enabled: Config.options.dock.showBorder && Config.options.dock.style !== "hug"
+                        icon: "format_paint"
+                        text: Translation.tr("Border color")
+                        options: ["layer0Border", "primary", "secondary", "tertiary", "primaryContainer", "secondaryContainer", "tertiaryContainer", "layer1"]
+                        currentValue: Config.options.dock.borderColor
+                        onSelected: newValue => { Config.options.dock.borderColor = newValue }
+                    }
                     ConfigSpinBox {
                         icon: "height"
                         text: Translation.tr("Height (px)")
@@ -545,6 +620,60 @@ ContentPage {
                         W.StyledToolTip {
                             text: Translation.tr("App IDs to hide from the dock, as regexes, comma-separated (e.g. explorer.exe, ^Shell_)")
                         }
+                    }
+                }
+            }
+
+            ContentSubsection {
+                title: Translation.tr("Icons")
+                GroupedList {
+                    ConfigSwitch {
+                        buttonIcon: "preview"
+                        text: Translation.tr("Window previews")
+                        checked: Config.options.dock.showPreviews
+                        onCheckedChanged: { Config.options.dock.showPreviews = checked }
+                    }
+                    ConfigSpinBox {
+                        icon: "photo_size_select_large"
+                        text: Translation.tr("Icon size")
+                        value: Config.options.dock.iconSize
+                        from: 20
+                        to: 48
+                        stepSize: 1
+                        onValueChanged: { Config.options.dock.iconSize = value }
+                    }
+                    ConfigSpinBox {
+                        icon: "space_bar"
+                        text: Translation.tr("Icon spacing")
+                        value: Config.options.dock.iconSpacing
+                        from: 0
+                        to: 12
+                        stepSize: 1
+                        onValueChanged: { Config.options.dock.iconSpacing = value }
+                    }
+                }
+            }
+
+            ContentSubsection {
+                title: Translation.tr("Buttons & Media")
+                GroupedList {
+                    ConfigSwitch {
+                        buttonIcon: "music_note"
+                        text: Translation.tr("Media Player")
+                        checked: Config.options.dock.showMedia
+                        onCheckedChanged: { Config.options.dock.showMedia = checked }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "keep"
+                        text: Translation.tr("Show Pin Button")
+                        checked: Config.options.dock.showPinButton
+                        onCheckedChanged: { Config.options.dock.showPinButton = checked }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "apps"
+                        text: Translation.tr("Show Apps Button")
+                        checked: Config.options.dock.showAppsButton
+                        onCheckedChanged: { Config.options.dock.showAppsButton = checked }
                     }
                 }
             }
