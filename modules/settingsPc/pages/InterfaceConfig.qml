@@ -203,6 +203,98 @@ ContentPage {
                         text: Translation.tr("When enabled keeps the content of the right sidebar loaded to reduce the delay when opening,\nat the cost of around 15MB of consistent RAM usage. Delay significance depends on your system's performance.\nUsing a custom kernel like linux-cachyos might help")
                     }
                 }
+                ConfigSwitch {
+                    buttonIcon: "wallpaper"
+                    text: Translation.tr("Show banner")
+                    checked: Config.options.sidebar.banner
+                    onCheckedChanged: {
+                        Config.options.sidebar.banner = checked;
+                    }
+                    W.StyledToolTip {
+                        text: Translation.tr("Shows a banner image at the top of the right sidebar.\nDrag an image onto it to set it, right-click to reset")
+                    }
+                }
+                ConfigSwitch {
+                    buttonIcon: "calendar_month"
+                    text: Translation.tr("Show bottom group")
+                    checked: Config.options.sidebar.bottomGroup
+                    onCheckedChanged: {
+                        Config.options.sidebar.bottomGroup = checked;
+                    }
+                    W.StyledToolTip {
+                        text: Translation.tr("Calendar, to-do list and timer at the bottom of the right sidebar")
+                    }
+                }
+            }
+
+            ContentSubsection {
+                title: Translation.tr("Media player")
+                GroupedList {
+                    ConfigSwitch {
+                        buttonIcon: "check"
+                        text: Translation.tr("Show in sidebar")
+                        checked: Config.options.sidebar.mediaPlayer
+                        onCheckedChanged: {
+                            Config.options.sidebar.mediaPlayer = checked;
+                        }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "play_circle"
+                        text: Translation.tr("Enable media card")
+                        enabled: Config.options.sidebar.mediaPlayer
+                        checked: Config.options.sidebar.media.enable
+                        onCheckedChanged: {
+                            Config.options.sidebar.media.enable = checked;
+                        }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "lyrics"
+                        text: Translation.tr("Show lyrics")
+                        enabled: Config.options.sidebar.mediaPlayer && Config.options.sidebar.media.enable
+                        checked: Config.options.sidebar.media.showLyrics
+                        onCheckedChanged: {
+                            Config.options.sidebar.media.showLyrics = checked;
+                        }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "palette"
+                        text: Translation.tr("Color from album art")
+                        enabled: Config.options.sidebar.mediaPlayer && Config.options.sidebar.media.enable
+                        checked: Config.options.sidebar.media.artColors
+                        onCheckedChanged: {
+                            Config.options.sidebar.media.artColors = checked;
+                        }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "blur_on"
+                        text: Translation.tr("Blurred art background")
+                        enabled: Config.options.sidebar.mediaPlayer && Config.options.sidebar.media.enable
+                        checked: Config.options.sidebar.media.blurredBackground
+                        onCheckedChanged: {
+                            Config.options.sidebar.media.blurredBackground = checked;
+                        }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "shapes"
+                        text: Translation.tr("Shaped art")
+                        enabled: Config.options.sidebar.mediaPlayer && Config.options.sidebar.media.enable
+                        checked: Config.options.sidebar.media.shapeArt
+                        onCheckedChanged: {
+                            Config.options.sidebar.media.shapeArt = checked;
+                        }
+                    }
+                    ConfigComboBox {
+                        Layout.fillWidth: true
+                        buttonIcon: "category"
+                        text: Translation.tr("Art shape")
+                        enabled: Config.options.sidebar.mediaPlayer && Config.options.sidebar.media.enable && Config.options.sidebar.media.shapeArt
+                        fieldWidth: 200
+                        fixedWidth: true
+                        model: GlobalStates.centeredShapeOptions.map(shape => ({ displayName: shape, value: shape }))
+                        currentValue: Config.options.sidebar.media.artShape
+                        onSelected: newValue => { Config.options.sidebar.media.artShape = newValue }
+                    }
+                }
             }
 
             ContentSubsection {
@@ -367,6 +459,26 @@ ContentPage {
                     value: Config.options.sidebar.cornerOpen.cornerRegionHeight
                     from: 1; to: 300; stepSize: 1
                     onValueChanged: { Config.options.sidebar.cornerOpen.cornerRegionHeight = value }
+                }
+                ConfigComboBox {
+                    Layout.fillWidth: true
+                    buttonIcon: "first_page"
+                    text: Translation.tr("Bottom-left corner")
+                    fieldWidth: 200
+                    fixedWidth: true
+                    model: GlobalStates.hotCornerOptions
+                    currentValue: Config.options.sidebar.cornerOpen.bottomLeftAction
+                    onSelected: newValue => { Config.options.sidebar.cornerOpen.bottomLeftAction = newValue }
+                }
+                ConfigComboBox {
+                    Layout.fillWidth: true
+                    buttonIcon: "last_page"
+                    text: Translation.tr("Bottom-right corner")
+                    fieldWidth: 200
+                    fixedWidth: true
+                    model: GlobalStates.hotCornerOptions
+                    currentValue: Config.options.sidebar.cornerOpen.bottomRightAction
+                    onSelected: newValue => { Config.options.sidebar.cornerOpen.bottomRightAction = newValue }
                 }
             }
         }
