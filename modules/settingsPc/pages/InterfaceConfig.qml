@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Layouts
 import qs.services
 import qs.modules.common
@@ -1407,6 +1408,336 @@ ContentPage {
                     checked: Config.options.wallpaperSelector.useSystemFileDialog
                     onCheckedChanged: {
                         Config.options.wallpaperSelector.useSystemFileDialog = checked;
+                    }
+                }
+
+                ConfigSwitch {
+                    buttonIcon: "home"
+                    text: Translation.tr('Show home directory in quick access')
+                    checked: Config.options.wallpaperSelector.showHomePath
+                    onCheckedChanged: {
+                        Config.options.wallpaperSelector.showHomePath = checked;
+                    }
+                }
+
+                ConfigSwitch {
+                    buttonIcon: "done"
+                    text: Translation.tr('Close after selection')
+                    checked: Config.options.wallpaperSelector.closeAfterSelection
+                    onCheckedChanged: {
+                        Config.options.wallpaperSelector.closeAfterSelection = checked;
+                    }
+                }
+
+                ConfigSwitch {
+                    buttonIcon: "blur_on"
+                    text: Translation.tr('Show blur background')
+                    checked: Config.options.wallpaperSelector.showBlurBackground
+                    onCheckedChanged: {
+                        Config.options.wallpaperSelector.showBlurBackground = checked;
+                    }
+                }
+
+                ConfigSwitch {
+                    buttonIcon: "search"
+                    text: Translation.tr('Always show search bar')
+                    checked: Config.options.wallpaperSelector.showSearchbar
+                    onCheckedChanged: {
+                        Config.options.wallpaperSelector.showSearchbar = checked;
+                    }
+                }
+
+                ConfigSpinBox {
+                    icon: "grid_on"
+                    text: Translation.tr("Columns in grid view")
+                    value: Config.options.wallpaperSelector.columns
+                    from: 3
+                    to: 10
+                    stepSize: 1
+                    onValueChanged: {
+                        Config.options.wallpaperSelector.columns = value;
+                    }
+                }
+
+                ConfigSpinBox {
+                    icon: "timer"
+                    text: Translation.tr("Wallpaper change interval (min)")
+                    value: Config.options.wallpaperSelector.changeInterval / 60000
+                    from: 0
+                    to: 1440
+                    stepSize: 5
+                    onValueChanged: {
+                        Config.options.wallpaperSelector.changeInterval = value * 60000;
+                    }
+                }
+
+                ConfigComboBox {
+                    text: Translation.tr("Sort wallpapers by")
+                    buttonIcon: "sort"
+                    currentValue: Config.options.wallpaperSelector.sortMode
+                    model: [
+                        { displayName: Translation.tr("Newest first"), value: "time" },
+                        { displayName: Translation.tr("Oldest first"), value: "time_rev" },
+                        { displayName: Translation.tr("Name A-Z"), value: "name" },
+                        { displayName: Translation.tr("Name Z-A"), value: "name_rev" },
+                        { displayName: Translation.tr("Largest first"), value: "size" },
+                        { displayName: Translation.tr("Smallest first"), value: "size_rev" },
+                    ]
+                    onSelected: newValue => {
+                        Config.options.wallpaperSelector.sortMode = newValue;
+                    }
+                }
+
+                ConfigTextArea {
+                    id: userPathField
+                    Layout.fillWidth: true
+                    buttonIcon: "folder"
+                    text: Translation.tr("Custom wallpaper folder")
+                    placeholderText: Translation.tr("e.g., C:/Users/you/Pictures")
+                    fieldWidth: 300
+                    value: Config.options.wallpaperSelector.userPath ?? ""
+                    onValueChanged: {
+                        Config.options.wallpaperSelector.userPath = userPathField.value;
+                    }
+                }
+
+                ConfigTextArea {
+                    id: liveWallpapersPathField
+                    visible: !Platform.isWindows
+                    Layout.fillWidth: true
+                    buttonIcon: "video_template"
+                    text: Translation.tr("Live wallpaper folder")
+                    description: Translation.tr("Not supported on Windows yet")
+                    placeholderText: Translation.tr("e.g., C:/Users/you/Videos/Wallpapers")
+                    fieldWidth: 300
+                    value: Config.options.wallpaperSelector.liveWallpapersPath ?? ""
+                    onValueChanged: {
+                        Config.options.wallpaperSelector.liveWallpapersPath = liveWallpapersPathField.value;
+                    }
+                }
+
+                ConfigTextArea {
+                    id: wppFolderField
+                    Layout.fillWidth: true
+                    buttonIcon: "folder_special"
+                    text: Translation.tr("Wpp folder")
+                    fieldWidth: 300
+                    value: Config.options.wallpaperSelector.wppFolder ?? ""
+                    onValueChanged: {
+                        Config.options.wallpaperSelector.wppFolder = wppFolderField.value;
+                    }
+                }
+
+                ConfigTextArea {
+                    id: wppSpicyFolderField
+                    Layout.fillWidth: true
+                    buttonIcon: "whatshot"
+                    text: Translation.tr("Wpp (Spicy) folder")
+                    description: Translation.tr("On Windows this folder is only reachable from an age-verified Microsoft account")
+                    fieldWidth: 300
+                    value: Config.options.wallpaperSelector.wppSpicyFolder ?? ""
+                    onValueChanged: {
+                        Config.options.wallpaperSelector.wppSpicyFolder = wppSpicyFolderField.value;
+                    }
+                }
+            }
+        }
+
+        ContentSection {
+            shape: W.MaterialShape.Shape.Puffy
+            icon: "travel_explore"
+            title: Translation.tr("Wallhaven")
+
+            GroupedList {
+                W.StyledText {
+                    Layout.fillWidth: true
+                    wrapMode: Text.Wrap
+                    color: Appearance.colors.colSubtext
+                    text: Translation.tr("Search filters can also be changed from the wallpaper selector's own Wallhaven tab.")
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    Layout.leftMargin: 8
+                    Layout.rightMargin: 8
+                    spacing: 10
+
+                    W.StyledText {
+                        text: Translation.tr("Wallhaven API key")
+                    }
+                    TextField {
+                        id: wallhavenApiKeyField
+                        Layout.fillWidth: true
+                        echoMode: TextInput.Password
+                        placeholderText: Translation.tr("Optional — needed for Spicy results")
+                        text: Config.options.wallpaperSelector.wallhavenApiKey ?? ""
+                        color: Appearance.colors.colOnLayer1
+                        background: Rectangle {
+                            color: Appearance.colors.colLayer1
+                            radius: Appearance.rounding.small
+                            border.width: 1
+                            border.color: wallhavenApiKeyField.activeFocus ? Appearance.colors.colPrimary : Appearance.colors.colLayer0Border
+                        }
+                        onEditingFinished: {
+                            Config.options.wallpaperSelector.wallhavenApiKey = text;
+                            WallhavenSearch.apiKey = text;
+                        }
+                    }
+                }
+
+                ConfigComboBox {
+                    text: Translation.tr("Default sort")
+                    buttonIcon: "sort"
+                    currentValue: Config.options.wallpaperSelector.wallhavenSorting
+                    model: [
+                        { displayName: Translation.tr("Relevance"), value: "relevance" },
+                        { displayName: Translation.tr("Date Added"), value: "date_added" },
+                        { displayName: Translation.tr("Top List"), value: "toplist" },
+                        { displayName: Translation.tr("Random"), value: "random" },
+                    ]
+                    onSelected: newValue => {
+                        Config.options.wallpaperSelector.wallhavenSorting = newValue;
+                        WallhavenSearch.sorting = newValue;
+                    }
+                }
+
+                ConfigSelectionArray {
+                    text: Translation.tr("Order")
+                    icon: "swap_vert"
+                    currentValue: Config.options.wallpaperSelector.wallhavenOrder
+                    options: [
+                        { "displayName": Translation.tr("Descending"), "icon": "arrow_downward", "value": "desc" },
+                        { "displayName": Translation.tr("Ascending"), "icon": "arrow_upward", "value": "asc" },
+                    ]
+                    onSelected: newValue => {
+                        Config.options.wallpaperSelector.wallhavenOrder = newValue;
+                        WallhavenSearch.order = newValue;
+                    }
+                }
+
+                ConfigSelectionArray {
+                    text: Translation.tr("Top list range")
+                    icon: "date_range"
+                    currentValue: Config.options.wallpaperSelector.wallhavenTopRange
+                    options: [
+                        { "displayName": Translation.tr("1 Day"), "icon": "today", "value": "1d" },
+                        { "displayName": Translation.tr("1 Week"), "icon": "view_week", "value": "1w" },
+                        { "displayName": Translation.tr("1 Month"), "icon": "calendar_month", "value": "1m" },
+                        { "displayName": Translation.tr("1 Year"), "icon": "event_repeat", "value": "1y" },
+                    ]
+                    onSelected: newValue => {
+                        Config.options.wallpaperSelector.wallhavenTopRange = newValue;
+                        WallhavenSearch.topRange = newValue;
+                    }
+                }
+
+                ConfigRow {
+                    uniform: true
+                    ConfigSwitch {
+                        buttonIcon: "category"
+                        text: Translation.tr('General')
+                        checked: Config.options.wallpaperSelector.wallhavenCategories.charAt(0) === "1"
+                        onCheckedChanged: {
+                            const c = Config.options.wallpaperSelector.wallhavenCategories;
+                            Config.options.wallpaperSelector.wallhavenCategories = (checked ? "1" : "0") + c.charAt(1) + c.charAt(2);
+                            WallhavenSearch.categories = Config.options.wallpaperSelector.wallhavenCategories;
+                        }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "animation"
+                        text: Translation.tr('Anime')
+                        checked: Config.options.wallpaperSelector.wallhavenCategories.charAt(1) === "1"
+                        onCheckedChanged: {
+                            const c = Config.options.wallpaperSelector.wallhavenCategories;
+                            Config.options.wallpaperSelector.wallhavenCategories = c.charAt(0) + (checked ? "1" : "0") + c.charAt(2);
+                            WallhavenSearch.categories = Config.options.wallpaperSelector.wallhavenCategories;
+                        }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "people"
+                        text: Translation.tr('People')
+                        checked: Config.options.wallpaperSelector.wallhavenCategories.charAt(2) === "1"
+                        onCheckedChanged: {
+                            const c = Config.options.wallpaperSelector.wallhavenCategories;
+                            Config.options.wallpaperSelector.wallhavenCategories = c.charAt(0) + c.charAt(1) + (checked ? "1" : "0");
+                            WallhavenSearch.categories = Config.options.wallpaperSelector.wallhavenCategories;
+                        }
+                    }
+                }
+
+                ConfigRow {
+                    uniform: true
+                    ConfigSwitch {
+                        buttonIcon: "wb_sunny"
+                        text: "SFW"
+                        checked: Config.options.wallpaperSelector.wallhavenPurity.charAt(0) === "1"
+                        onCheckedChanged: {
+                            const p = Config.options.wallpaperSelector.wallhavenPurity;
+                            Config.options.wallpaperSelector.wallhavenPurity = (checked ? "1" : "0") + p.charAt(1) + p.charAt(2);
+                            WallhavenSearch.purity = Config.options.wallpaperSelector.wallhavenPurity;
+                        }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "warning"
+                        text: Translation.tr('Sketchy')
+                        checked: Config.options.wallpaperSelector.wallhavenPurity.charAt(1) === "1"
+                        onCheckedChanged: {
+                            const p = Config.options.wallpaperSelector.wallhavenPurity;
+                            Config.options.wallpaperSelector.wallhavenPurity = p.charAt(0) + (checked ? "1" : "0") + p.charAt(2);
+                            WallhavenSearch.purity = Config.options.wallpaperSelector.wallhavenPurity;
+                        }
+                    }
+                    ConfigSwitch {
+                        visible: Config.options.wallpaperSelector.wallhavenApiKey.length > 0
+                        buttonIcon: "whatshot"
+                        text: Translation.tr('Spicy')
+                        checked: Config.options.wallpaperSelector.wallhavenPurity.charAt(2) === "1"
+                        onCheckedChanged: {
+                            const p = Config.options.wallpaperSelector.wallhavenPurity;
+                            Config.options.wallpaperSelector.wallhavenPurity = p.charAt(0) + p.charAt(1) + (checked ? "1" : "0");
+                            WallhavenSearch.purity = Config.options.wallpaperSelector.wallhavenPurity;
+                        }
+                    }
+                }
+
+                ConfigSelectionArray {
+                    text: Translation.tr("Aspect ratio")
+                    icon: "aspect_ratio"
+                    currentValue: Config.options.wallpaperSelector.wallhavenRatios
+                    options: [
+                        { "displayName": Translation.tr("Any"), "icon": "crop_free", "value": "" },
+                        { "displayName": "16x9", "icon": "crop_16_9", "value": "16x9" },
+                        { "displayName": "21x9", "icon": "panorama_wide_angle", "value": "21x9" },
+                        { "displayName": "9x16", "icon": "crop_portrait", "value": "9x16" },
+                        { "displayName": "1x1", "icon": "crop_square", "value": "1x1" },
+                    ]
+                    onSelected: newValue => {
+                        Config.options.wallpaperSelector.wallhavenRatios = newValue;
+                        WallhavenSearch.ratios = newValue;
+                    }
+                }
+
+                ConfigTextArea {
+                    Layout.fillWidth: true
+                    buttonIcon: "search"
+                    text: Translation.tr("Default search query")
+                    fieldWidth: 300
+                    value: Config.options.wallpaperSelector.wallhavenQuery ?? ""
+                    onValueChanged: {
+                        Config.options.wallpaperSelector.wallhavenQuery = value;
+                    }
+                }
+
+                ConfigTextArea {
+                    Layout.fillWidth: true
+                    buttonIcon: "palette"
+                    text: Translation.tr("Color filter")
+                    description: Translation.tr("Comma-separated hex, e.g. cc0000,0066cc")
+                    fieldWidth: 300
+                    value: Config.options.wallpaperSelector.wallhavenColors ?? ""
+                    onValueChanged: {
+                        Config.options.wallpaperSelector.wallhavenColors = value;
+                        WallhavenSearch.colors = value;
                     }
                 }
             }
