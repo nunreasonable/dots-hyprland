@@ -178,6 +178,7 @@ Singleton {
                         property string placementStrategy: "leastBusy" // "free", "leastBusy", "mostBusy"
                         property real x: 100
                         property real y: 100
+                        property real z: 0
                         property string style: "cookie"        // Options: "cookie", "digital"
                         property string styleLocked: "cookie"  // Options: "cookie", "digital"
                         property JsonObject cookie: JsonObject {
@@ -217,12 +218,14 @@ Singleton {
                         property string placementStrategy: "free" // "free", "leastBusy", "mostBusy"
                         property real x: 400
                         property real y: 100
+                        property real z: 0
                     }
                     property JsonObject resources: JsonObject {
                         property bool enable: false
                         property string placementStrategy: "free" // "free", "leastBusy", "mostBusy"
                         property real x: 220
                         property real y: 100
+                        property real z: 0
                     }
                     property JsonObject calendar: JsonObject {
                         property bool enable: false
