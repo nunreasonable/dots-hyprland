@@ -200,26 +200,28 @@ ContentPage {
         ContentSubsection {
             title: Translation.tr("Appearance")
 
-            ConfigSelectionArray {
-                text: Translation.tr("Style")
-                icon: "dock_to_bottom"
-                currentValue: Config.options.dock.style
-                onSelected: newValue => { Config.options.dock.style = newValue }
-                options: [
-                    { displayName: Translation.tr("Float"), icon: "call_to_action", value: "float" },
-                    { displayName: Translation.tr("Hug"), icon: "dock_to_bottom", value: "hug" }
-                ]
+            ContentSubsection {
+                title: Translation.tr("Style")
+                ConfigSelectionArray {
+                    currentValue: Config.options.dock.style
+                    onSelected: newValue => { Config.options.dock.style = newValue }
+                    options: [
+                        { displayName: Translation.tr("Float"), icon: "call_to_action", value: "float" },
+                        { displayName: Translation.tr("Hug"), icon: "dock_to_bottom", value: "hug" }
+                    ]
+                }
             }
-            ConfigSelectionArray {
-                text: Translation.tr("Position")
-                icon: "dock_to_bottom"
-                currentValue: Config.options.dock.position
-                onSelected: newValue => { Config.options.dock.position = newValue }
-                options: [
-                    { displayName: Translation.tr("Left"), icon: "dock_to_left", value: "left" },
-                    { displayName: Translation.tr("Bottom"), icon: "dock_to_bottom", value: "bottom" },
-                    { displayName: Translation.tr("Right"), icon: "dock_to_right", value: "right" }
-                ]
+            ContentSubsection {
+                title: Translation.tr("Position")
+                ConfigSelectionArray {
+                    currentValue: Config.options.dock.position
+                    onSelected: newValue => { Config.options.dock.position = newValue }
+                    options: [
+                        { displayName: Translation.tr("Left"), icon: "dock_to_left", value: "left" },
+                        { displayName: Translation.tr("Bottom"), icon: "dock_to_bottom", value: "bottom" },
+                        { displayName: Translation.tr("Right"), icon: "dock_to_right", value: "right" }
+                    ]
+                }
             }
             ConfigSwitch {
                 buttonIcon: "background_dot_small"
@@ -1678,20 +1680,21 @@ ContentPage {
             }
         }
 
-        ConfigSelectionArray {
-            text: Translation.tr("Sort wallpapers by")
-            icon: "sort"
-            currentValue: Config.options.wallpaperSelector.sortMode
-            options: [
-                { "displayName": Translation.tr("Newest first"), "icon": "schedule", "value": "time" },
-                { "displayName": Translation.tr("Oldest first"), "icon": "history", "value": "time_rev" },
-                { "displayName": Translation.tr("Name A-Z"), "icon": "sort_by_alpha", "value": "name" },
-                { "displayName": Translation.tr("Name Z-A"), "icon": "sort_by_alpha", "value": "name_rev" },
-                { "displayName": Translation.tr("Largest first"), "icon": "straighten", "value": "size" },
-                { "displayName": Translation.tr("Smallest first"), "icon": "straighten", "value": "size_rev" },
-            ]
-            onSelected: newValue => {
-                Config.options.wallpaperSelector.sortMode = newValue;
+        ContentSubsection {
+            title: Translation.tr("Sort wallpapers by")
+            ConfigSelectionArray {
+                currentValue: Config.options.wallpaperSelector.sortMode
+                options: [
+                    { "displayName": Translation.tr("Newest first"), "icon": "schedule", "value": "time" },
+                    { "displayName": Translation.tr("Oldest first"), "icon": "history", "value": "time_rev" },
+                    { "displayName": Translation.tr("Name A-Z"), "icon": "sort_by_alpha", "value": "name" },
+                    { "displayName": Translation.tr("Name Z-A"), "icon": "sort_by_alpha", "value": "name_rev" },
+                    { "displayName": Translation.tr("Largest first"), "icon": "straighten", "value": "size" },
+                    { "displayName": Translation.tr("Smallest first"), "icon": "straighten", "value": "size_rev" },
+                ]
+                onSelected: newValue => {
+                    Config.options.wallpaperSelector.sortMode = newValue;
+                }
             }
         }
 
@@ -1780,49 +1783,52 @@ ContentPage {
             }
         }
 
-        ConfigSelectionArray {
-            text: Translation.tr("Default sort")
-            icon: "sort"
-            currentValue: Config.options.wallpaperSelector.wallhavenSorting
-            options: [
-                { "displayName": Translation.tr("Relevance"), "icon": "search", "value": "relevance" },
-                { "displayName": Translation.tr("Date Added"), "icon": "schedule", "value": "date_added" },
-                { "displayName": Translation.tr("Top List"), "icon": "trending_up", "value": "toplist" },
-                { "displayName": Translation.tr("Random"), "icon": "casino", "value": "random" },
-            ]
-            onSelected: newValue => {
-                Config.options.wallpaperSelector.wallhavenSorting = newValue;
-                WallhavenSearch.sorting = newValue;
+        ContentSubsection {
+            title: Translation.tr("Default sort")
+            ConfigSelectionArray {
+                currentValue: Config.options.wallpaperSelector.wallhavenSorting
+                options: [
+                    { "displayName": Translation.tr("Relevance"), "icon": "search", "value": "relevance" },
+                    { "displayName": Translation.tr("Date Added"), "icon": "schedule", "value": "date_added" },
+                    { "displayName": Translation.tr("Top List"), "icon": "trending_up", "value": "toplist" },
+                    { "displayName": Translation.tr("Random"), "icon": "casino", "value": "random" },
+                ]
+                onSelected: newValue => {
+                    Config.options.wallpaperSelector.wallhavenSorting = newValue;
+                    WallhavenSearch.sorting = newValue;
+                }
             }
         }
 
-        ConfigSelectionArray {
-            text: Translation.tr("Order")
-            icon: "swap_vert"
-            currentValue: Config.options.wallpaperSelector.wallhavenOrder
-            options: [
-                { "displayName": Translation.tr("Descending"), "icon": "arrow_downward", "value": "desc" },
-                { "displayName": Translation.tr("Ascending"), "icon": "arrow_upward", "value": "asc" },
-            ]
-            onSelected: newValue => {
-                Config.options.wallpaperSelector.wallhavenOrder = newValue;
-                WallhavenSearch.order = newValue;
+        ContentSubsection {
+            title: Translation.tr("Order")
+            ConfigSelectionArray {
+                currentValue: Config.options.wallpaperSelector.wallhavenOrder
+                options: [
+                    { "displayName": Translation.tr("Descending"), "icon": "arrow_downward", "value": "desc" },
+                    { "displayName": Translation.tr("Ascending"), "icon": "arrow_upward", "value": "asc" },
+                ]
+                onSelected: newValue => {
+                    Config.options.wallpaperSelector.wallhavenOrder = newValue;
+                    WallhavenSearch.order = newValue;
+                }
             }
         }
 
-        ConfigSelectionArray {
-            text: Translation.tr("Top list range")
-            icon: "date_range"
-            currentValue: Config.options.wallpaperSelector.wallhavenTopRange
-            options: [
-                { "displayName": Translation.tr("1 Day"), "icon": "today", "value": "1d" },
-                { "displayName": Translation.tr("1 Week"), "icon": "view_week", "value": "1w" },
-                { "displayName": Translation.tr("1 Month"), "icon": "calendar_month", "value": "1m" },
-                { "displayName": Translation.tr("1 Year"), "icon": "event_repeat", "value": "1y" },
-            ]
-            onSelected: newValue => {
-                Config.options.wallpaperSelector.wallhavenTopRange = newValue;
-                WallhavenSearch.topRange = newValue;
+        ContentSubsection {
+            title: Translation.tr("Top list range")
+            ConfigSelectionArray {
+                currentValue: Config.options.wallpaperSelector.wallhavenTopRange
+                options: [
+                    { "displayName": Translation.tr("1 Day"), "icon": "today", "value": "1d" },
+                    { "displayName": Translation.tr("1 Week"), "icon": "view_week", "value": "1w" },
+                    { "displayName": Translation.tr("1 Month"), "icon": "calendar_month", "value": "1m" },
+                    { "displayName": Translation.tr("1 Year"), "icon": "event_repeat", "value": "1y" },
+                ]
+                onSelected: newValue => {
+                    Config.options.wallpaperSelector.wallhavenTopRange = newValue;
+                    WallhavenSearch.topRange = newValue;
+                }
             }
         }
 
@@ -1908,20 +1914,21 @@ ContentPage {
             text: SpicyStuff.restriction
         }
 
-        ConfigSelectionArray {
-            text: Translation.tr("Aspect ratio")
-            icon: "aspect_ratio"
-            currentValue: Config.options.wallpaperSelector.wallhavenRatios
-            options: [
-                { "displayName": Translation.tr("Any"), "icon": "crop_free", "value": "" },
-                { "displayName": "16x9", "icon": "crop_16_9", "value": "16x9" },
-                { "displayName": "21x9", "icon": "panorama_wide_angle", "value": "21x9" },
-                { "displayName": "9x16", "icon": "crop_portrait", "value": "9x16" },
-                { "displayName": "1x1", "icon": "crop_square", "value": "1x1" },
-            ]
-            onSelected: newValue => {
-                Config.options.wallpaperSelector.wallhavenRatios = newValue;
-                WallhavenSearch.ratios = newValue;
+        ContentSubsection {
+            title: Translation.tr("Aspect ratio")
+            ConfigSelectionArray {
+                currentValue: Config.options.wallpaperSelector.wallhavenRatios
+                options: [
+                    { "displayName": Translation.tr("Any"), "icon": "crop_free", "value": "" },
+                    { "displayName": "16x9", "icon": "crop_16_9", "value": "16x9" },
+                    { "displayName": "21x9", "icon": "panorama_wide_angle", "value": "21x9" },
+                    { "displayName": "9x16", "icon": "crop_portrait", "value": "9x16" },
+                    { "displayName": "1x1", "icon": "crop_square", "value": "1x1" },
+                ]
+                onSelected: newValue => {
+                    Config.options.wallpaperSelector.wallhavenRatios = newValue;
+                    WallhavenSearch.ratios = newValue;
+                }
             }
         }
 

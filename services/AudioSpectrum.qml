@@ -15,7 +15,7 @@ Singleton {
     readonly property bool playing: MprisController.activePlayer?.isPlaying ?? false
     readonly property bool barShown: GlobalStates.barOpen && !GlobalStates.screenLocked && !(Platform.isWindows && Config.options.windowsPort.nativeTaskbar)
     readonly property bool barVisualizer: !BarLayouts.classic && (BarLayouts.leftLayout.includes("visualizer") || BarLayouts.middleLayout.includes("visualizer") || BarLayouts.rightLayout.includes("visualizer"))
-    readonly property bool islandVisualizer: BarLayouts.middleLayout.includes("dynamicIsland") && (Config.options.bar.dynamicIsland.visualizerStyle === "wave" || (Config.options.bar.dynamicIsland.visualizerStyle === "dots" && !Config.options.bar.dynamicIsland.showMediaControls))
+    readonly property bool islandVisualizer: !Config.options.bar.vertical && BarLayouts.middleLayout.includes("dynamicIsland") && (Config.options.bar.dynamicIsland.visualizerStyle === "wave" || (Config.options.bar.dynamicIsland.visualizerStyle === "dots" && !Config.options.bar.dynamicIsland.showMediaControls))
     readonly property bool desktopVisualizer: Config.options.background.widgets.visualizer.enable
     readonly property bool wanted: GlobalStates.mediaControlsOpen || root.desktopVisualizer || (root.barShown && root.playing && (root.barVisualizer || root.islandVisualizer))
 

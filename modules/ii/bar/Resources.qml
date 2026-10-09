@@ -21,20 +21,26 @@ MouseArea {
     implicitHeight: root.vertical ? columnLayout.implicitHeight : Appearance.sizes.barHeight
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
 
-    onShowCpuTempChanged: ResourceUsage.cpuTempConsumers += root.showCpuTemp ? 1 : -1
-    onShowDiskChanged: ResourceUsage.diskConsumers += root.showDisk ? 1 : -1
-    Component.onCompleted: {
-        if (root.showCpuTemp)
-            ResourceUsage.cpuTempConsumers++;
-        if (root.showDisk)
-            ResourceUsage.diskConsumers++;
+    property bool cpuTempRegistered: false
+    property bool diskRegistered: false
+
+    function syncConsumers(alive) {
+        const wantTemp = alive && root.showCpuTemp;
+        if (wantTemp !== root.cpuTempRegistered) {
+            ResourceUsage.cpuTempConsumers += wantTemp ? 1 : -1;
+            root.cpuTempRegistered = wantTemp;
+        }
+        const wantDisk = alive && root.showDisk;
+        if (wantDisk !== root.diskRegistered) {
+            ResourceUsage.diskConsumers += wantDisk ? 1 : -1;
+            root.diskRegistered = wantDisk;
+        }
     }
-    Component.onDestruction: {
-        if (root.showCpuTemp)
-            ResourceUsage.cpuTempConsumers--;
-        if (root.showDisk)
-            ResourceUsage.diskConsumers--;
-    }
+
+    onShowCpuTempChanged: root.syncConsumers(true)
+    onShowDiskChanged: root.syncConsumers(true)
+    Component.onCompleted: root.syncConsumers(true)
+    Component.onDestruction: root.syncConsumers(false)
 
     function iconFor(key) {
         switch (key) {

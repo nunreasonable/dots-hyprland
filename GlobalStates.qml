@@ -48,9 +48,8 @@ Singleton {
     property bool diSessionOpen: false
     property string osdIndicatorType: "volume"
     property var frameHover: ({})
-    readonly property bool dynamicIslandEnabled: Config.options.bar.layouts.leftLayout.includes("dynamicIsland")
-        || Config.options.bar.layouts.middleLayout.includes("dynamicIsland")
-        || Config.options.bar.layouts.rightLayout.includes("dynamicIsland")
+    readonly property bool dynamicIslandEnabled: !Config.options.bar.vertical
+        && Config.options.bar.layouts.middleLayout.includes("dynamicIsland")
     readonly property bool dynamicIslandActive: root.dynamicIslandEnabled && root.barOpen && !root.screenLocked
         && !(Platform.isWindows && Config.options.windowsPort.nativeTaskbar)
 

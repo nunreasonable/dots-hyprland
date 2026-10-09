@@ -269,7 +269,7 @@ AbstractBackgroundWidget {
                     anchors.verticalCenterOffset: -14
                     visible: root.dropStatus === "converting"
                     loading: root.dropStatus === "converting"
-                    colBg: Appearance.colors.colPrimary
+                    color: Appearance.colors.colPrimary
                     colShape: Appearance.colors.colOnPrimary
                     implicitSize: 48
                 }

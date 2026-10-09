@@ -891,34 +891,36 @@ ContentPage {
             }
         }
 
-        ConfigSelectionArray {
-            text: Translation.tr("Size")
-            currentValue: Config.options.background.widgets.calendar.sizeMode
-            onSelected: newValue => {
-                Config.options.background.widgets.calendar.sizeMode = newValue;
+        ContentSubsection {
+            title: Translation.tr("Size")
+            ConfigSelectionArray {
+                currentValue: Config.options.background.widgets.calendar.sizeMode
+                onSelected: newValue => {
+                    Config.options.background.widgets.calendar.sizeMode = newValue;
+                }
+                options: [
+                    {
+                        displayName: "1×1",
+                        icon: "crop_square",
+                        value: "1x1"
+                    },
+                    {
+                        displayName: "1×2",
+                        icon: "crop_landscape",
+                        value: "1x2"
+                    },
+                    {
+                        displayName: "2×2",
+                        icon: "crop_square",
+                        value: "2x2"
+                    },
+                    {
+                        displayName: "2×3",
+                        icon: "crop_portrait",
+                        value: "2x3"
+                    },
+                ]
             }
-            options: [
-                {
-                    displayName: "1×1",
-                    icon: "crop_square",
-                    value: "1x1"
-                },
-                {
-                    displayName: "1×2",
-                    icon: "crop_landscape",
-                    value: "1x2"
-                },
-                {
-                    displayName: "2×2",
-                    icon: "crop_square",
-                    value: "2x2"
-                },
-                {
-                    displayName: "2×3",
-                    icon: "crop_portrait",
-                    value: "2x3"
-                },
-            ]
         }
     }
 
@@ -1092,44 +1094,46 @@ ContentPage {
             }
         }
 
-        ConfigSelectionArray {
-            text: Translation.tr("Shape")
-            currentValue: Config.options.background.widgets.customImage.shape
-            onSelected: newValue => {
-                Config.options.background.widgets.customImage.shape = newValue;
+        ContentSubsection {
+            title: Translation.tr("Shape")
+            ConfigSelectionArray {
+                currentValue: Config.options.background.widgets.customImage.shape
+                onSelected: newValue => {
+                    Config.options.background.widgets.customImage.shape = newValue;
+                }
+                options: [
+                    {
+                        displayName: "",
+                        icon: "circle",
+                        value: "Circle"
+                    },
+                    {
+                        displayName: "",
+                        icon: "square",
+                        value: "Square"
+                    },
+                    {
+                        displayName: "",
+                        icon: "cookie",
+                        value: "Cookie4Sided"
+                    },
+                    {
+                        displayName: "",
+                        icon: "cookie",
+                        value: "Cookie7Sided"
+                    },
+                    {
+                        displayName: "",
+                        icon: "bubble_chart",
+                        value: "Oval"
+                    },
+                    {
+                        displayName: "",
+                        icon: "favorite",
+                        value: "Heart"
+                    },
+                ]
             }
-            options: [
-                {
-                    displayName: "",
-                    icon: "circle",
-                    value: "Circle"
-                },
-                {
-                    displayName: "",
-                    icon: "square",
-                    value: "Square"
-                },
-                {
-                    displayName: "",
-                    icon: "cookie",
-                    value: "Cookie4Sided"
-                },
-                {
-                    displayName: "",
-                    icon: "cookie",
-                    value: "Cookie7Sided"
-                },
-                {
-                    displayName: "",
-                    icon: "bubble_chart",
-                    value: "Oval"
-                },
-                {
-                    displayName: "",
-                    icon: "favorite",
-                    value: "Heart"
-                },
-            ]
         }
 
         ConfigSlider {
@@ -1201,34 +1205,36 @@ ContentPage {
             }
         }
 
-        ConfigSelectionArray {
-            text: Translation.tr("Size")
-            currentValue: Config.options.background.widgets.imageCard.sizeMode
-            onSelected: newValue => {
-                Config.options.background.widgets.imageCard.sizeMode = newValue;
+        ContentSubsection {
+            title: Translation.tr("Size")
+            ConfigSelectionArray {
+                currentValue: Config.options.background.widgets.imageCard.sizeMode
+                onSelected: newValue => {
+                    Config.options.background.widgets.imageCard.sizeMode = newValue;
+                }
+                options: [
+                    {
+                        displayName: "1×1",
+                        icon: "crop_square",
+                        value: "1x1"
+                    },
+                    {
+                        displayName: "1×2",
+                        icon: "crop_landscape",
+                        value: "1x2"
+                    },
+                    {
+                        displayName: "2×2",
+                        icon: "crop_square",
+                        value: "2x2"
+                    },
+                    {
+                        displayName: "2×3",
+                        icon: "crop_portrait",
+                        value: "2x3"
+                    },
+                ]
             }
-            options: [
-                {
-                    displayName: "1×1",
-                    icon: "crop_square",
-                    value: "1x1"
-                },
-                {
-                    displayName: "1×2",
-                    icon: "crop_landscape",
-                    value: "1x2"
-                },
-                {
-                    displayName: "2×2",
-                    icon: "crop_square",
-                    value: "2x2"
-                },
-                {
-                    displayName: "2×3",
-                    icon: "crop_portrait",
-                    value: "2x3"
-                },
-            ]
         }
     }
 
@@ -1421,34 +1427,36 @@ ContentPage {
             }
         }
 
-        ConfigSelectionArray {
-            text: Translation.tr("Size")
-            currentValue: Config.options.background.widgets.media.sizeMode
-            onSelected: newValue => {
-                Config.options.background.widgets.media.sizeMode = newValue;
+        ContentSubsection {
+            title: Translation.tr("Size")
+            ConfigSelectionArray {
+                currentValue: Config.options.background.widgets.media.sizeMode
+                onSelected: newValue => {
+                    Config.options.background.widgets.media.sizeMode = newValue;
+                }
+                options: [
+                    {
+                        displayName: "1×1",
+                        icon: "crop_square",
+                        value: "1x1"
+                    },
+                    {
+                        displayName: "1×2",
+                        icon: "crop_landscape",
+                        value: "1x2"
+                    },
+                    {
+                        displayName: "2×2",
+                        icon: "crop_square",
+                        value: "2x2"
+                    },
+                    {
+                        displayName: "1×3",
+                        icon: "crop_landscape",
+                        value: "1x3"
+                    },
+                ]
             }
-            options: [
-                {
-                    displayName: "1×1",
-                    icon: "crop_square",
-                    value: "1x1"
-                },
-                {
-                    displayName: "1×2",
-                    icon: "crop_landscape",
-                    value: "1x2"
-                },
-                {
-                    displayName: "2×2",
-                    icon: "crop_square",
-                    value: "2x2"
-                },
-                {
-                    displayName: "1×3",
-                    icon: "crop_landscape",
-                    value: "1x3"
-                },
-            ]
         }
     }
 
@@ -1644,34 +1652,36 @@ ContentPage {
             }
         }
 
-        ConfigSelectionArray {
-            text: Translation.tr("Size")
-            currentValue: Config.options.background.widgets.userCard.sizeMode
-            onSelected: newValue => {
-                Config.options.background.widgets.userCard.sizeMode = newValue;
+        ContentSubsection {
+            title: Translation.tr("Size")
+            ConfigSelectionArray {
+                currentValue: Config.options.background.widgets.userCard.sizeMode
+                onSelected: newValue => {
+                    Config.options.background.widgets.userCard.sizeMode = newValue;
+                }
+                options: [
+                    {
+                        displayName: "1×1",
+                        icon: "crop_square",
+                        value: "1x1"
+                    },
+                    {
+                        displayName: "1×2",
+                        icon: "crop_landscape",
+                        value: "1x2"
+                    },
+                    {
+                        displayName: "2×2",
+                        icon: "crop_square",
+                        value: "2x2"
+                    },
+                    {
+                        displayName: "2×3",
+                        icon: "crop_portrait",
+                        value: "2x3"
+                    },
+                ]
             }
-            options: [
-                {
-                    displayName: "1×1",
-                    icon: "crop_square",
-                    value: "1x1"
-                },
-                {
-                    displayName: "1×2",
-                    icon: "crop_landscape",
-                    value: "1x2"
-                },
-                {
-                    displayName: "2×2",
-                    icon: "crop_square",
-                    value: "2x2"
-                },
-                {
-                    displayName: "2×3",
-                    icon: "crop_portrait",
-                    value: "2x3"
-                },
-            ]
         }
     }
 
@@ -1722,58 +1732,62 @@ ContentPage {
 
         ConfigRow {
             uniform: true
-            ConfigSelectionArray {
-                text: Translation.tr("Style")
-                currentValue: Config.options.background.widgets.visualizer.style
-                onSelected: newValue => {
-                    Config.options.background.widgets.visualizer.style = newValue;
+            ContentSubsection {
+                title: Translation.tr("Style")
+                ConfigSelectionArray {
+                    currentValue: Config.options.background.widgets.visualizer.style
+                    onSelected: newValue => {
+                        Config.options.background.widgets.visualizer.style = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: Translation.tr("Bars"),
+                            icon: "bar_chart",
+                            value: "bars"
+                        },
+                        {
+                            displayName: Translation.tr("Mirror"),
+                            icon: "flip",
+                            value: "mirror"
+                        },
+                        {
+                            displayName: Translation.tr("Aurora"),
+                            icon: "gradient",
+                            value: "aurora"
+                        },
+                        {
+                            displayName: Translation.tr("Ring"),
+                            icon: "data_usage",
+                            value: "ring"
+                        },
+                        {
+                            displayName: Translation.tr("Dots"),
+                            icon: "grain",
+                            value: "dots"
+                        },
+                    ]
                 }
-                options: [
-                    {
-                        displayName: Translation.tr("Bars"),
-                        icon: "bar_chart",
-                        value: "bars"
-                    },
-                    {
-                        displayName: Translation.tr("Mirror"),
-                        icon: "flip",
-                        value: "mirror"
-                    },
-                    {
-                        displayName: Translation.tr("Aurora"),
-                        icon: "gradient",
-                        value: "aurora"
-                    },
-                    {
-                        displayName: Translation.tr("Ring"),
-                        icon: "data_usage",
-                        value: "ring"
-                    },
-                    {
-                        displayName: Translation.tr("Dots"),
-                        icon: "grain",
-                        value: "dots"
-                    },
-                ]
             }
-            ConfigSelectionArray {
-                text: Translation.tr("Color")
-                currentValue: Config.options.background.widgets.visualizer.colorSource
-                onSelected: newValue => {
-                    Config.options.background.widgets.visualizer.colorSource = newValue;
+            ContentSubsection {
+                title: Translation.tr("Color")
+                ConfigSelectionArray {
+                    currentValue: Config.options.background.widgets.visualizer.colorSource
+                    onSelected: newValue => {
+                        Config.options.background.widgets.visualizer.colorSource = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: Translation.tr("Theme"),
+                            icon: "palette",
+                            value: "theme"
+                        },
+                        {
+                            displayName: Translation.tr("Album cover"),
+                            icon: "album",
+                            value: "cover"
+                        },
+                    ]
                 }
-                options: [
-                    {
-                        displayName: Translation.tr("Theme"),
-                        icon: "palette",
-                        value: "theme"
-                    },
-                    {
-                        displayName: Translation.tr("Album cover"),
-                        icon: "album",
-                        value: "cover"
-                    },
-                ]
             }
         }
         StyledToolTip {
@@ -1841,24 +1855,26 @@ ContentPage {
 
         ConfigRow {
             uniform: true
-            ConfigSelectionArray {
-                text: Translation.tr("Size")
-                currentValue: Config.options.background.widgets.worldClock.sizeMode
-                onSelected: newValue => {
-                    Config.options.background.widgets.worldClock.sizeMode = newValue;
+            ContentSubsection {
+                title: Translation.tr("Size")
+                ConfigSelectionArray {
+                    currentValue: Config.options.background.widgets.worldClock.sizeMode
+                    onSelected: newValue => {
+                        Config.options.background.widgets.worldClock.sizeMode = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: "2×2",
+                            icon: "crop_square",
+                            value: "2x2"
+                        },
+                        {
+                            displayName: "4×1",
+                            icon: "view_column",
+                            value: "4x1"
+                        },
+                    ]
                 }
-                options: [
-                    {
-                        displayName: "2×2",
-                        icon: "crop_square",
-                        value: "2x2"
-                    },
-                    {
-                        displayName: "4×1",
-                        icon: "view_column",
-                        value: "4x1"
-                    },
-                ]
             }
             ConfigSwitch {
                 buttonIcon: "swap_horiz"

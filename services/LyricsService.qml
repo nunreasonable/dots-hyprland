@@ -215,12 +215,7 @@ Singleton {
     Timer {
         id: timeoutTimer
         interval: 15000
-        onTriggered: {
-            const token = root.requestToken;
-            root.request?.abort();
-            root.request = null;
-            root.fetchNext(token, root.activePlayer?.trackTitle ?? "", root.activePlayer?.trackArtist ?? "");
-        }
+        onTriggered: root.request?.abort()
     }
 
     Timer {

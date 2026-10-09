@@ -89,7 +89,7 @@ StyledPopup {
                     value: `${Math.round(ResourceUsage.cpuUsage * 100)}%`
                 }
                 StyledPopupValueRow {
-                    visible: Config.options.bar.resources.alwaysShowCpuTemp && ResourceUsage.cpuTempAvailable
+                    visible: Config.options.bar.resources.alwaysShowCpuTemp && ResourceUsage.cpuTempAvailable && ResourceUsage.cpuTempConsumers > 0
                     icon: "thermostat"
                     label: Translation.tr("Temperature:")
                     value: `${Math.round(ResourceUsage.cpuTemp)}°C`
@@ -98,7 +98,7 @@ StyledPopup {
         }
 
         Column {
-            visible: Config.options.bar.resources.alwaysShowDisk
+            visible: Config.options.bar.resources.alwaysShowDisk && ResourceUsage.diskConsumers > 0
             anchors.top: parent.top
             spacing: 8
 
