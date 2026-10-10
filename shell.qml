@@ -39,6 +39,7 @@ ShellRoot {
         PeripheralBattery.load()
         if (Platform.isWindows) {
             WindowsTerminalTheme.load()
+            WindowsPins.load()
             SettingsApp.load()
         }
     }

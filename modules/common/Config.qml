@@ -541,7 +541,7 @@ Singleton {
                 property bool pinnedOnStartup: false
                 property bool hoverToReveal: true // When false, only reveals on empty workspace
                 property list<string> pinnedApps: [ // IDs of pinned entries
-                    "org.kde.dolphin", "kitty",]
+                    "explorer", "Microsoft.WindowsTerminal_8wekyb3d8bbwe!App",]
                 property list<string> ignoredAppRegexes: []
                 property bool showBackground: true
                 property string style: "float"
@@ -589,7 +589,7 @@ Singleton {
             }
 
             property JsonObject launcher: JsonObject {
-                property list<string> pinnedApps: [ "org.kde.dolphin", "kitty", "cmake-gui"]
+                property list<string> pinnedApps: [ "microsoft.windows.explorer", "microsoft.windowsterminal_8wekyb3d8bbwe!app"]
             }
 
             property JsonObject light: JsonObject {
@@ -628,6 +628,7 @@ Singleton {
             }
 
             property JsonObject windowsPort: JsonObject {
+                property int pinsVersion: 0
                 property bool taskbarHoverOnly: true
                 property bool nativeTaskbar: false
                 property bool backgroundBehindIcons: true
