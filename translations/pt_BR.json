@@ -1476,5 +1476,7 @@
   "Importing VPN config files isn't supported on Windows. Add the connection in Settings > Network > VPN instead.": "Importar arquivos de configuração de VPN não é suportado no Windows. Adicione a conexão em Configurações > Rede > VPN.",
   "Failed to connect.": "Falha ao conectar.",
   "VPN action failed.": "A ação da VPN falhou.",
-  "Wallpapers here stay blurred and can't be applied unless Spicy Stuff is available on this account": "Os papéis de parede daqui ficam borrados e não podem ser aplicados a menos que o Spicy Stuff esteja disponível nesta conta"
+  "Wallpapers here stay blurred and can't be applied unless Spicy Stuff is available on this account": "Os papéis de parede daqui ficam borrados e não podem ser aplicados a menos que o Spicy Stuff esteja disponível nesta conta",
+  "Keep open when clicking outside": "Manter aberto ao clicar fora",
+  "The end4-pC settings card then closes only with its close button or Esc": "O cartão de configurações do end4-pC passa a fechar só pelo botão de fechar ou pelo Esc"
 }

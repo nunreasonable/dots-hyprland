@@ -84,6 +84,17 @@ ContentPage {
                 Config.options.settings.borderColor = newValue;
             }
         }
+        ConfigSwitch {
+            buttonIcon: "keep"
+            text: Translation.tr("Keep open when clicking outside")
+            checked: Config.options.settings.keepOpen
+            onCheckedChanged: {
+                Config.options.settings.keepOpen = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("The end4-pC settings card then closes only with its close button or Esc")
+            }
+        }
         RippleButtonWithIcon {
             Layout.fillWidth: true
             materialIcon: "expand_all"

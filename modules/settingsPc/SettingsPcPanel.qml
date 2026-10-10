@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Wayland
 import qs.services
 import qs.modules.common
@@ -11,6 +12,7 @@ PanelWindow {
     readonly property bool shown: settingsContent.pageShown || panelWindow.forceShown
     readonly property bool isMinimal: Config.options.settings.style === "minimal"
     readonly property real sizeScale: panelWindow.isMinimal ? 0.75 : 1.0
+    readonly property bool keepOpen: Config.options.settings.keepOpen
 
     signal closeRequested
 
@@ -18,6 +20,14 @@ PanelWindow {
         if (!panelWindow.visible)
             return;
         settingsContent.focusContent();
+        panelWindow.takeFocus();
+    }
+
+    function takeFocus() {
+        if (!Platform.isWindows || !panelWindow.keepOpen || !panelWindow.visible)
+            return;
+        focusGrab.active = false;
+        focusGrab.active = true;
     }
 
     function goToTarget(target) {
@@ -32,7 +42,7 @@ PanelWindow {
     exclusiveZone: 0
     WlrLayershell.namespace: "quickshell:settings"
     WlrLayershell.layer: WlrLayer.Overlay
-    WlrLayershell.keyboardFocus: panelWindow.visible ? (Platform.isWindows ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand) : WlrKeyboardFocus.None
+    WlrLayershell.keyboardFocus: panelWindow.visible ? ((Platform.isWindows && !panelWindow.keepOpen) ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand) : WlrKeyboardFocus.None
     color: "transparent"
 
     anchors {
@@ -49,14 +59,26 @@ PanelWindow {
     onVisibleChanged: {
         if (panelWindow.visible) {
             Qt.callLater(() => {
-                if (panelWindow.visible)
+                if (panelWindow.visible && !panelWindow.keepOpen)
                     GlobalFocusGrab.addDismissable(panelWindow);
             });
             settingsWindow.userMoved = false;
-            Qt.callLater(() => settingsContent.focusContent());
+            Qt.callLater(() => {
+                settingsContent.focusContent();
+                panelWindow.takeFocus();
+            });
         } else {
             GlobalFocusGrab.removeDismissable(panelWindow);
         }
+    }
+
+    onKeepOpenChanged: {
+        if (!panelWindow.visible)
+            return;
+        if (panelWindow.keepOpen)
+            GlobalFocusGrab.removeDismissable(panelWindow);
+        else
+            GlobalFocusGrab.addDismissable(panelWindow);
     }
 
     Component.onDestruction: GlobalFocusGrab.removeDismissable(panelWindow)
@@ -64,8 +86,17 @@ PanelWindow {
     Connections {
         target: GlobalFocusGrab
         function onDismissed() {
-            if (panelWindow.visible)
+            if (panelWindow.visible && !panelWindow.keepOpen)
                 panelWindow.hide();
+        }
+    }
+
+    HyprlandFocusGrab {
+        id: focusGrab
+        windows: [panelWindow]
+        onActiveChanged: {
+            if (focusGrab.active)
+                Qt.callLater(() => focusGrab.active = false);
         }
     }
 

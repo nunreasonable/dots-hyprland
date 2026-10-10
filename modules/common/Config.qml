@@ -183,6 +183,7 @@ Singleton {
                 property real animationSpeed: 1
                 property string borderColor: "layer0Border"
                 property list<string> collapsedSections: []
+                property bool keepOpen: false
             }
 
             property JsonObject background: JsonObject {
