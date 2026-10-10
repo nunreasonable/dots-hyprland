@@ -22,8 +22,8 @@ Item {
         }
     }
 
-    onRunningChanged: {
-        if (!running || !Platform.isWindows) return;
+    function captureWindows() {
+        if (!root.running) return;
         const ok = (WindowsNative.ready && WindowsNative.screenshot)
             ? WindowsNative.screenshot.captureScreen(root.screen.name, root.screenshotPath)
             : false;
@@ -32,5 +32,10 @@ Item {
             root.running = false;
             root.exited(ok ? 0 : 1, 0);
         });
+    }
+
+    onRunningChanged: {
+        if (!running || !Platform.isWindows) return;
+        Qt.callLater(root.captureWindows);
     }
 }
