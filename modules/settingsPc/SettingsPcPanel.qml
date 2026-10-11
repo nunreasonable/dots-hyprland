@@ -5,6 +5,7 @@ import Quickshell.Wayland
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions as CF
+import qs.modules.common.widgets as W
 
 PanelWindow {
     id: panelWindow
@@ -180,6 +181,29 @@ PanelWindow {
             id: settingsContent
             anchors.fill: parent
             onCloseRequested: panelWindow.hide()
+        }
+
+        W.RippleButton {
+            anchors.top: parent.top
+            anchors.right: parent.right
+            anchors.topMargin: 12
+            anchors.rightMargin: 12
+            z: 3
+            implicitWidth: 36
+            implicitHeight: 36
+            buttonRadius: 18
+            colBackground: "transparent"
+            colBackgroundHover: Appearance.colors.colLayer0Hover
+            onClicked: panelWindow.hide()
+            contentItem: W.MaterialSymbol {
+                anchors.centerIn: parent
+                text: "close"
+                iconSize: Appearance.font.pixelSize.larger
+                color: Appearance.colors.colOnLayer0
+            }
+            W.StyledToolTip {
+                text: Translation.tr("Close")
+            }
         }
     }
 }
