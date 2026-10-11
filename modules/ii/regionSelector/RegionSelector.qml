@@ -15,19 +15,32 @@ Scope {
 
     property var action: RegionSelection.SnipAction.Copy
     property var selectionMode: RegionSelection.SelectionMode.RectCorners
+    property string recordingScreen: ""
+
+    Connections {
+        target: GlobalStates
+        function onRegionSelectorOpenChanged() {
+            if (!GlobalStates.regionSelectorOpen)
+                root.recordingScreen = "";
+        }
+    }
     
     Variants {
         model: Quickshell.screens
         delegate: Loader {
             id: regionSelectorLoader
             required property var modelData
-            active: GlobalStates.regionSelectorOpen
+            active: GlobalStates.regionSelectorOpen && (root.recordingScreen === "" || root.recordingScreen === regionSelectorLoader.modelData.name)
 
             sourceComponent: RegionSelection {
                 screen: regionSelectorLoader.modelData
                 onDismiss: root.dismiss()
                 action: root.action
                 selectionMode: root.selectionMode
+                onPhaseChanged: {
+                    if (phase === RegionSelection.Phase.Post)
+                        root.recordingScreen = regionSelectorLoader.modelData.name;
+                }
             }
         }
     }
