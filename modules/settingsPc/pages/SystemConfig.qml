@@ -133,18 +133,33 @@ ContentPage {
                         onSelected: newValue => displayConfig.setRefreshRate(displaysSection.current, newValue)
                     }
 
-                    ConfigSelectionArray {
-                        text: Translation.tr("Display orientation")
-                        icon: "mobile_rotate"
+                    ColumnLayout {
+                        spacing: 6
                         enabled: !displaysSection.busy
-                        currentValue: displaysSection.current?.rotation ?? 0
-                        onSelected: newValue => displayConfig.setRotation(displaysSection.current, newValue)
-                        options: [
-                            { displayName: Translation.tr("Landscape"), icon: "screen_rotation_alt", value: 0 },
-                            { displayName: Translation.tr("Portrait"), icon: "rotate_90_degrees_cw", value: 1 },
-                            { displayName: Translation.tr("Landscape (flipped)"), icon: "screen_rotation", value: 2 },
-                            { displayName: Translation.tr("Portrait (flipped)"), icon: "rotate_90_degrees_ccw", value: 3 }
-                        ]
+                        RowLayout {
+                            spacing: 10
+                            Layout.leftMargin: 8
+                            W.MaterialSymbol {
+                                text: "mobile_rotate"
+                                iconSize: Appearance.font.pixelSize.larger
+                                color: Appearance.colors.colOnSecondaryContainer
+                            }
+                            W.StyledText {
+                                text: Translation.tr("Display orientation")
+                                color: Appearance.colors.colOnSecondaryContainer
+                            }
+                        }
+                        ConfigSelectionArray {
+                            Layout.fillWidth: true
+                            currentValue: displaysSection.current?.rotation ?? 0
+                            onSelected: newValue => displayConfig.setRotation(displaysSection.current, newValue)
+                            options: [
+                                { displayName: Translation.tr("Landscape"), icon: "screen_rotation_alt", value: 0 },
+                                { displayName: Translation.tr("Portrait"), icon: "rotate_90_degrees_cw", value: 1 },
+                                { displayName: Translation.tr("Landscape (flipped)"), icon: "screen_rotation", value: 2 },
+                                { displayName: Translation.tr("Portrait (flipped)"), icon: "rotate_90_degrees_ccw", value: 3 }
+                            ]
+                        }
                     }
                 }
 
@@ -341,20 +356,35 @@ ContentPage {
                                 Config.options.windowsPort.tiling.master.newOnTop = checked;
                         }
                     }
-                    ConfigSelectionArray {
-                        text: Translation.tr("Master position")
-                        icon: "screen_rotation"
-                        currentValue: Config.options.windowsPort.tiling.master.orientation
-                        onSelected: newValue => {
-                            Config.options.windowsPort.tiling.master.orientation = newValue;
+                    ColumnLayout {
+                        spacing: 6
+                        RowLayout {
+                            spacing: 10
+                            Layout.leftMargin: 8
+                            W.MaterialSymbol {
+                                text: "screen_rotation"
+                                iconSize: Appearance.font.pixelSize.larger
+                                color: Appearance.colors.colOnSecondaryContainer
+                            }
+                            W.StyledText {
+                                text: Translation.tr("Master position")
+                                color: Appearance.colors.colOnSecondaryContainer
+                            }
                         }
-                        options: [
-                            { displayName: Translation.tr("Left"), icon: "align_horizontal_left", value: "left" },
-                            { displayName: Translation.tr("Right"), icon: "align_horizontal_right", value: "right" },
-                            { displayName: Translation.tr("Top"), icon: "align_vertical_top", value: "top" },
-                            { displayName: Translation.tr("Bottom"), icon: "align_vertical_bottom", value: "bottom" },
-                            { displayName: Translation.tr("Center"), icon: "align_horizontal_center", value: "center" }
-                        ]
+                        ConfigSelectionArray {
+                            Layout.fillWidth: true
+                            currentValue: Config.options.windowsPort.tiling.master.orientation
+                            onSelected: newValue => {
+                                Config.options.windowsPort.tiling.master.orientation = newValue;
+                            }
+                            options: [
+                                { displayName: Translation.tr("Left"), icon: "align_horizontal_left", value: "left" },
+                                { displayName: Translation.tr("Right"), icon: "align_horizontal_right", value: "right" },
+                                { displayName: Translation.tr("Top"), icon: "align_vertical_top", value: "top" },
+                                { displayName: Translation.tr("Bottom"), icon: "align_vertical_bottom", value: "bottom" },
+                                { displayName: Translation.tr("Center"), icon: "align_horizontal_center", value: "center" }
+                            ]
+                        }
                     }
                     ConfigSpinBox {
                         icon: "aspect_ratio"
@@ -389,19 +419,34 @@ ContentPage {
                             { displayName: Translation.tr("None"), icon: "block", value: "none" }
                         ]
                     }
-                    ConfigSelectionArray {
-                        text: Translation.tr("Window corners")
-                        icon: "rounded_corner"
-                        currentValue: Config.options.windowsPort.decoration.corners
-                        onSelected: newValue => {
-                            Config.options.windowsPort.decoration.corners = newValue;
+                    ColumnLayout {
+                        spacing: 6
+                        RowLayout {
+                            spacing: 10
+                            Layout.leftMargin: 8
+                            W.MaterialSymbol {
+                                text: "rounded_corner"
+                                iconSize: Appearance.font.pixelSize.larger
+                                color: Appearance.colors.colOnSecondaryContainer
+                            }
+                            W.StyledText {
+                                text: Translation.tr("Window corners")
+                                color: Appearance.colors.colOnSecondaryContainer
+                            }
                         }
-                        options: [
-                            { displayName: Translation.tr("Default"), icon: "settings_backup_restore", value: "default" },
-                            { displayName: Translation.tr("Rounded"), icon: "rounded_corner", value: "round" },
-                            { displayName: Translation.tr("Slightly rounded"), icon: "crop_square", value: "roundSmall" },
-                            { displayName: Translation.tr("Square"), icon: "square", value: "square" }
-                        ]
+                        ConfigSelectionArray {
+                            Layout.fillWidth: true
+                            currentValue: Config.options.windowsPort.decoration.corners
+                            onSelected: newValue => {
+                                Config.options.windowsPort.decoration.corners = newValue;
+                            }
+                            options: [
+                                { displayName: Translation.tr("Default"), icon: "settings_backup_restore", value: "default" },
+                                { displayName: Translation.tr("Rounded"), icon: "rounded_corner", value: "round" },
+                                { displayName: Translation.tr("Slightly rounded"), icon: "crop_square", value: "roundSmall" },
+                                { displayName: Translation.tr("Square"), icon: "square", value: "square" }
+                            ]
+                        }
                     }
                 }
             }
