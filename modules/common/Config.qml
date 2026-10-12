@@ -735,7 +735,7 @@ Singleton {
                     property int prevTilingGapsOut: 5
                 }
                 property JsonObject idle: JsonObject {
-                    property int lock: 300
+                    property int lock: 0
                 }
             }
 

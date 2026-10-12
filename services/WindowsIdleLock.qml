@@ -14,9 +14,10 @@ Singleton {
     readonly property bool active: Platform.isWindows && WindowsNative.ready
         && root.lockSeconds > 0 && !root.paused
 
-    property bool _armed: true
+    property bool _armed: false
 
-    onPausedChanged: root._armed = true
+    onPausedChanged: root._armed = false
+    onActiveChanged: root._armed = false
 
     Timer {
         interval: 5000
