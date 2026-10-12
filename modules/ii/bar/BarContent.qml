@@ -263,7 +263,7 @@ Item { // Bar content region
 
                 ClockWidget {
                     classic: true
-                    showDate: (Config.options.bar.verbose && root.useShortenedForm < 2)
+                    showDate: (Config.options.time.showDate && Config.options.bar.verbose && root.useShortenedForm < 2)
                     Layout.alignment: Qt.AlignVCenter
                     Layout.fillWidth: true
                 }

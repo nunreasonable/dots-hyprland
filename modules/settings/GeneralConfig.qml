@@ -666,6 +666,18 @@ ContentPage {
             }
         }
 
+        ConfigSwitch {
+            buttonIcon: "date_range"
+            text: Translation.tr("Show date")
+            checked: Config.options.time.showDate
+            onCheckedChanged: {
+                Config.options.time.showDate = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Shows the date next to the time in the bar clock")
+            }
+        }
+
         ContentSubsection {
             title: Translation.tr("Format")
             tooltip: ""

@@ -1,24 +1,27 @@
 import qs.modules.common
+import qs.modules.common.widgets
 import qs.services
 import QtQuick
 import QtQuick.Layouts
 
-MouseArea {
+BarWidgetSwitcherArea {
     id: root
     property color contentColor: Appearance.colors.colOnSecondaryContainer
     property bool contentColorOverridden: false
     property bool borderless: Config.options.bar.borderless
     property bool alwaysShowAllResources: false
     property bool classic: false
-    property bool vertical: false
     readonly property bool showCpuTemp: Config.options.bar.resources.alwaysShowCpuTemp && ResourceUsage.cpuTempAvailable
     readonly property bool showDisk: Config.options.bar.resources.alwaysShowDisk
     readonly property var optional: (root.showCpuTemp ? ["temp"] : []).concat(root.showDisk ? ["disk"] : [])
     readonly property var order: root.classic ? ["ram", "swap", "cpu"].concat(root.optional) : ["ram", "cpu"].concat(root.optional, ["swap"])
     readonly property real horizontalPadding: root.classic ? 4 : 6
 
-    implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth : rowLayout.implicitWidth + root.horizontalPadding * 2
-    implicitHeight: root.vertical ? columnLayout.implicitHeight : Appearance.sizes.barHeight
+    horizontalExtraPadding: root.horizontalPadding * 2
+    rowDefault: rowContent
+    rowMaterial: rowContent
+    colDefault: columnContent
+    colMaterial: columnContent
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
 
     property bool cpuTempRegistered: false
@@ -119,53 +122,48 @@ MouseArea {
         }
     }
 
-    RowLayout {
-        id: rowLayout
-        visible: !root.vertical
-        spacing: 0
-        anchors {
-            fill: root.classic ? parent : undefined
-            centerIn: root.classic ? undefined : parent
-            leftMargin: root.classic ? root.horizontalPadding : 0
-            rightMargin: root.classic ? root.horizontalPadding : 0
-        }
+    Component {
+        id: rowContent
+        RowLayout {
+            spacing: 0
 
-        Repeater {
-            model: root.vertical ? [] : root.order
-            delegate: Resource {
-                required property string modelData
-                required property int index
-                contentColor: root.contentColor
-                contentColorOverridden: root.contentColorOverridden
-                iconName: root.iconFor(modelData)
-                label: root.labelFor(modelData)
-                percentage: root.percentageFor(modelData)
-                warningThreshold: root.thresholdFor(modelData)
-                shown: root.shownFor(modelData)
-                Layout.leftMargin: (index > 0 && shown) ? 6 : 0
+            Repeater {
+                model: root.order
+                delegate: Resource {
+                    required property string modelData
+                    required property int index
+                    contentColor: root.contentColor
+                    contentColorOverridden: root.contentColorOverridden
+                    iconName: root.iconFor(modelData)
+                    label: root.labelFor(modelData)
+                    percentage: root.percentageFor(modelData)
+                    warningThreshold: root.thresholdFor(modelData)
+                    shown: root.shownFor(modelData)
+                    Layout.leftMargin: (index > 0 && shown) ? 6 : 0
+                }
             }
         }
     }
 
-    ColumnLayout {
-        id: columnLayout
-        visible: root.vertical
-        anchors.centerIn: parent
-        spacing: 7
+    Component {
+        id: columnContent
+        ColumnLayout {
+            spacing: 7
 
-        Repeater {
-            model: root.vertical ? root.order : []
-            delegate: Resource {
-                required property string modelData
-                Layout.alignment: Qt.AlignHCenter
-                vertical: true
-                contentColor: root.contentColor
-                contentColorOverridden: root.contentColorOverridden
-                iconName: root.iconFor(modelData)
-                label: root.labelFor(modelData)
-                percentage: root.percentageFor(modelData)
-                warningThreshold: root.thresholdFor(modelData)
-                shown: root.shownFor(modelData)
+            Repeater {
+                model: root.order
+                delegate: Resource {
+                    required property string modelData
+                    Layout.alignment: Qt.AlignHCenter
+                    vertical: true
+                    contentColor: root.contentColor
+                    contentColorOverridden: root.contentColorOverridden
+                    iconName: root.iconFor(modelData)
+                    label: root.labelFor(modelData)
+                    percentage: root.percentageFor(modelData)
+                    warningThreshold: root.thresholdFor(modelData)
+                    shown: root.shownFor(modelData)
+                }
             }
         }
     }
