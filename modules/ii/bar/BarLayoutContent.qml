@@ -36,9 +36,9 @@ Item {
     readonly property real fitScale: (Platform.isWindows && root.fitNeeded > 0 && contentContainer.width > 0) ? Math.max(0.5, Math.min(1, contentContainer.width / root.fitNeeded)) : 1
 
     readonly property bool pillMask: root.useTabWrapper && !Config.options.bar.autoHide.enable
-    readonly property rect leftMaskRect: root.wrapperRect(leftSection, leftWrapper, -1)
+    readonly property rect leftMaskRect: root.wrapperRect(leftSection, leftWrapper.item, -1)
     readonly property rect centerMaskRect: root.centerRect()
-    readonly property rect rightMaskRect: root.wrapperRect(rightSection, rightWrapper, 1)
+    readonly property rect rightMaskRect: root.wrapperRect(rightSection, rightWrapper.item, 1)
 
     function filterTray(layout) {
         if (root.trayHasItems)
@@ -82,7 +82,7 @@ Item {
     }
 
     function wrapperRect(section, wrapper, edge) {
-        if (!root.useTabWrapper || !wrapper.shown)
+        if (!root.useTabWrapper || !wrapper || !wrapper.shown)
             return Qt.rect(0, 0, 0, 0);
         const s = root.fitScale;
         const ox = edge === -1 ? 0 : edge === 1 ? section.width : section.width / 2;
@@ -92,7 +92,7 @@ Item {
     }
 
     function centerRect() {
-        const r = root.wrapperRect(absoluteCenter, centerWrapper, 0);
+        const r = root.wrapperRect(absoluteCenter, centerWrapper.item, 0);
         if (r.width <= 0)
             return r;
         const s = root.fitScale;
@@ -141,8 +141,8 @@ Item {
 
     component WrapperSection: Item {
         id: section
-        required property var sectionLayout
-        required property int edge
+        property var sectionLayout: []
+        property int edge: 0
         readonly property bool shown: section.sectionLayout.length > 0
         readonly property real reach: root.hasTabs ? root.tabRadius : 0
         readonly property real tabCorners: root.hasTabs ? (section.edge === 0 ? 2 : 1) : 0
@@ -292,13 +292,15 @@ Item {
                 }
             }
 
-            WrapperSection {
+            Loader {
                 id: leftWrapper
-                visible: root.useTabWrapper
+                active: root.useTabWrapper
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
-                edge: -1
-                sectionLayout: root.useTabWrapper ? root.effectiveLeftLayout : []
+                sourceComponent: WrapperSection {
+                    edge: -1
+                    sectionLayout: root.effectiveLeftLayout
+                }
             }
         }
 
@@ -350,13 +352,15 @@ Item {
                 }
             }
 
-            WrapperSection {
+            Loader {
                 id: centerWrapper
-                visible: root.useTabWrapper
+                active: root.useTabWrapper
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
-                edge: 0
-                sectionLayout: root.useTabWrapper ? root.effectiveMiddleLayout : []
+                sourceComponent: WrapperSection {
+                    edge: 0
+                    sectionLayout: root.effectiveMiddleLayout
+                }
             }
         }
 
@@ -390,13 +394,15 @@ Item {
                 }
             }
 
-            WrapperSection {
+            Loader {
                 id: rightWrapper
-                visible: root.useTabWrapper
+                active: root.useTabWrapper
                 anchors.top: parent.top
                 anchors.bottom: parent.bottom
-                edge: 1
-                sectionLayout: root.useTabWrapper ? root.effectiveRightLayout : []
+                sourceComponent: WrapperSection {
+                    edge: 1
+                    sectionLayout: root.effectiveRightLayout
+                }
             }
         }
     }
