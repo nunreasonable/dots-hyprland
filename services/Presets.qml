@@ -46,9 +46,6 @@ Singleton {
     readonly property string curlBin: Platform.isWindows ? "curl.exe" : "curl"
     readonly property string tarBin: "tar.exe"
 
-    // GitHub community gallery. Device-flow client id for a dedicated OAuth App
-    // (Device Flow enabled, no secret) must be filled in before Upload/Remove-from-gallery
-    // can work; left empty this feature fails with a clear message instead of guessing one.
     readonly property string githubRepo: "pctrade/end4-pCpresets"
     readonly property string githubClientId: ""
     readonly property string githubOAuthScope: "public_repo"
@@ -526,8 +523,6 @@ Singleton {
         return true;
     }
 
-    // --- Rename (My presets only) ---
-
     property string _renameOldName: ""
     property string _renameNewName: ""
 
@@ -567,8 +562,6 @@ Singleton {
         }
         onLoadFailed: error => root.renamed(root._renameOldName, "")
     }
-
-    // --- Export ZIP / shared staging (used by exportZip and publish) ---
 
     property string _stageDir: ""
     property var _stageParsed: null
@@ -790,8 +783,6 @@ Singleton {
         }, message => root.exported(name, false, message));
     }
 
-    // --- Import ZIP (goes into the Imported bucket, like end4-pC) ---
-
     property string _importStagingDir: ""
     property string _importJsonEntry: ""
     property string _importBaseDir: ""
@@ -975,8 +966,6 @@ Singleton {
         root.imported(name);
     }
 
-    // --- Install a downloaded/imported preset into My presets ---
-
     property var _installParsed: null
     property string _installName: ""
     property string _installSource: ""
@@ -1108,8 +1097,6 @@ Singleton {
         root.refresh();
         root.installed(finalName, true, "");
     }
-
-    // --- GitHub sign-in (device flow) and the community gallery ---
 
     readonly property string sharedFilePath: Directories.sharedPresetsPath
 
@@ -1439,8 +1426,6 @@ Singleton {
         onTriggered: root._branchWaitForkReady(branchForkWaitTimer.onReadyCb, branchForkWaitTimer.onErrorCb)
     }
 
-    // --- Publish (Upload) ---
-
     property bool uploadGuideOpen: false
     property string uploadGuideName: ""
     property string _pubPreviewPath: ""
@@ -1545,8 +1530,6 @@ Singleton {
             }
         });
     }
-
-    // --- Unshare (remove from gallery) ---
 
     property string _unshareName: ""
     property string _unshareRepo: ""
