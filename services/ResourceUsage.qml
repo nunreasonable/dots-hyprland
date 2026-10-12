@@ -38,6 +38,19 @@ Singleton {
     property real diskUsedPercentage: diskTotal > 0 ? diskUsed / diskTotal : 0
     property string maxAvailableDiskString: kbToGbString(diskTotal)
 
+    property int networkConsumers: 0
+    property real networkDownloadBytesPerSecond: Platform.isWindows && WindowsNative.stats ? Math.max(0, WindowsNative.stats.networkDownloadBytesPerSec) : 0
+    property real networkUploadBytesPerSecond: Platform.isWindows && WindowsNative.stats ? Math.max(0, WindowsNative.stats.networkUploadBytesPerSec) : 0
+    property real networkDownloadedBytes: Platform.isWindows && WindowsNative.stats ? WindowsNative.stats.networkDownloadedBytes : 0
+    property real networkUploadedBytes: Platform.isWindows && WindowsNative.stats ? WindowsNative.stats.networkUploadedBytes : 0
+
+    Binding {
+        when: Platform.isWindows && WindowsNative.ready
+        target: WindowsNative.stats
+        property: "networkEnabled"
+        value: root.networkConsumers > 0
+    }
+
     readonly property int historyLength: Config?.options.resources.historyLength ?? 60
     property list<real> cpuUsageHistory: []
     property list<real> memoryUsageHistory: []

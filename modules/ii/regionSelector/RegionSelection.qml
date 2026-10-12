@@ -118,7 +118,7 @@ PanelWindow {
     property bool isCircleSelection: (root.selectionMode === RegionSelection.SelectionMode.Circle)
     property bool enableWindowRegions: Config.options.regionSelector.targetRegions.windows && !isCircleSelection
     property bool enableLayerRegions: Config.options.regionSelector.targetRegions.layers && !isCircleSelection
-    property bool enableContentRegions: !Platform.isWindows && Config.options.regionSelector.targetRegions.content
+    property bool enableContentRegions: Config.options.regionSelector.targetRegions.content
 
     // Target
     property real targetedRegionX: -1
@@ -192,7 +192,21 @@ PanelWindow {
         screenshotDir: root.screenshotDir
         screenshotPath: root.screenshotPath
         onExited: (exitCode, exitStatus) => {
-            if (root.enableContentRegions) imageDetectionProcess.running = true;
+            if (root.enableContentRegions) {
+                if (Platform.isWindows) {
+                    if (WindowsNative.imageTools) {
+                        root._contentRegionsRequestId = WindowsNative.imageTools.requestFindContentRegions(
+                            root.screenshotPath,
+                            200,
+                            100,
+                            Math.round(root.screen.width * root.falsePositivePreventionRatio),
+                            Math.round(root.screen.height * root.falsePositivePreventionRatio)
+                        );
+                    }
+                } else {
+                    imageDetectionProcess.running = true;
+                }
+            }
             root.preparationDone = !checkRecordingProc.running;
         }
     }
@@ -237,10 +251,10 @@ PanelWindow {
 
     Process {
         id: imageDetectionProcess
-        command: ["bash", "-c", `${Directories.scriptPath}/images/find-regions-venv.sh ` 
-            + `--hyprctl ` 
-            + `--image '${StringUtils.shellSingleQuoteEscape(root.screenshotPath)}' ` 
-            + `--max-width ${Math.round(root.screen.width * root.falsePositivePreventionRatio)} ` 
+        command: ["bash", "-c", `${Directories.scriptPath}/images/find-regions-venv.sh `
+            + `--hyprctl `
+            + `--image '${StringUtils.shellSingleQuoteEscape(root.screenshotPath)}' `
+            + `--max-width ${Math.round(root.screen.width * root.falsePositivePreventionRatio)} `
             + `--max-height ${Math.round(root.screen.height * root.falsePositivePreventionRatio)} `]
         stdout: StdioCollector {
             id: imageDimensionCollector
@@ -250,6 +264,15 @@ PanelWindow {
                     root.windowRegions
                 );
             }
+        }
+    }
+
+    property int _contentRegionsRequestId: -1
+    Connections {
+        target: Platform.isWindows ? WindowsNative.imageTools : null
+        function onFindContentRegionsReady(requestId, regions) {
+            if (requestId !== root._contentRegionsRequestId) return;
+            imageRegions = RegionFunctions.filterImageRegions(regions, root.windowRegions);
         }
     }
 
