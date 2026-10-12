@@ -76,6 +76,7 @@ Item {
         property var appTopLevel: root.lastHoveredButton?.appToplevel
 
         property bool shouldShow: Config.options.dock.showPreviews
+            && !(root.contextMenu?.isOpen ?? false)
             && (popupMouseArea.containsMouse || root.buttonHovered)
             && appTopLevel && appTopLevel.toplevels && appTopLevel.toplevels.length > 0
 
