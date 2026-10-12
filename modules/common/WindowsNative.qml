@@ -15,6 +15,7 @@ Singleton {
     readonly property QtObject stats: _impl ? _impl.stats : null
     readonly property QtObject brightness: _impl ? _impl.brightness : null
     readonly property QtObject keyboard: _impl ? _impl.keyboard : null
+    readonly property QtObject inputSettings: _impl ? _impl.inputSettings : null
     readonly property QtObject clipboard: _impl ? _impl.clipboard : null
     readonly property QtObject credentials: _impl ? _impl.credentials : null
     readonly property QtObject input: _impl ? _impl.input : null

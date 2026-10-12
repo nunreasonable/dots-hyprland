@@ -11,7 +11,8 @@ QtObject {
     readonly property QtObject session: QSWin.Session
     readonly property QtObject stats: root.full ? QSWin.SystemStats : null
     readonly property QtObject brightness: root.full ? QSWin.Brightness : null
-    readonly property QtObject keyboard: root.full ? QSWin.Keyboard : null
+    readonly property QtObject keyboard: (root.full || root.process === "settings") ? QSWin.Keyboard : null
+    readonly property QtObject inputSettings: (root.full || root.process === "settings") ? QSWin.InputSettings : null
     readonly property QtObject clipboard: root.full ? QSWin.Clipboard : null
     readonly property QtObject credentials: root.full ? QSWin.Credentials : null
     readonly property QtObject input: root.full ? QSWin.Input : null
