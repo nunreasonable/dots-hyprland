@@ -189,7 +189,12 @@ Singleton {
 
             property JsonObject background: JsonObject {
                 property bool widgetsLocked: false
+                property string lockWall: ""
                 property bool showGrid: true
+                property bool showBlur: false
+                property real blurRadius: 32
+                property string splitRatio: "100" // 25 50 100
+                property string splitSide: "left"
                 property bool showSnapLines: true
                 property JsonObject widgets: JsonObject {
                     property bool blurWidgets: false
@@ -372,7 +377,16 @@ Singleton {
                         property int clockCount: 4
                     }
                 }
+                property list<string> screenList: []
                 property string wallpaperPath: ""
+                property bool centeredWallpaper: false
+                property string centeredWallpaperShape: "Cookie7Sided"
+                property int centeredWallpaperSize: 400
+                property string centeredWallpaperColor: "primaryContainer"
+                property bool centeredWallpaperOnlyWhenLocked: false
+                property string centeredWallpaperImage: ""
+                property string wallpaperAnimation: "magic"
+                property bool enableWallpaperPreview: false
                 property string thumbnailPath: ""
                 property bool pauseVideoWhenCovered: true
                 property bool hideWhenFullscreen: true

@@ -41,6 +41,7 @@ Singleton {
     property bool spotlightOpen: false
     property string spotlightMode: ""
     property bool wallpaperSelectorOpen: false
+    property string wallpaperSelectorTarget: "wallpaper"
     property bool workspaceShowNumbers: false
     property bool barStyleEditorOpen: false
     property bool barCenterOnly: false
@@ -89,6 +90,7 @@ Singleton {
         "Ghostish", "Clover4Leaf", "Clover8Leaf", "Burst", "SoftBurst", "Flower",
         "Puffy", "PuffyDiamond", "PixelCircle", "Bun", "Heart"
     ]
+    signal centeredWallpaperThumpRequested()
     property bool bluetoothDialogRequested: false
 
     readonly property var hotCornerOptions: [
@@ -115,6 +117,21 @@ Singleton {
         if (GlobalStates.sidebarRightOpen) {
             Notifications.timeoutAll();
             Notifications.markAllRead();
+        }
+    }
+
+    IpcHandler {
+        target: "background"
+        function toggleCenteredWallpaper(): void {
+            Config.options.background.centeredWallpaper = !Config.options.background.centeredWallpaper;
+        }
+    }
+
+    GlobalShortcut {
+        name: "centeredWallpaperToggle"
+        description: "Toggles centered wallpaper"
+        onPressed: {
+            Config.options.background.centeredWallpaper = !Config.options.background.centeredWallpaper;
         }
     }
 
