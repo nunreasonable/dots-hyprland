@@ -135,6 +135,18 @@ ContentPage {
                         onValueChanged: displayNameDebounceTimer.restart()
                     }
 
+                    ConfigSwitch {
+                        buttonIcon: "visibility_off"
+                        text: Translation.tr("Hide computer name")
+                        checked: Config.options.profile.hideHostname
+                        onCheckedChanged: {
+                            Config.options.profile.hideHostname = checked;
+                        }
+                        W.StyledToolTip {
+                            text: Translation.tr("Keeps the computer name out of the sidebar and the cheatsheet, for screenshots and recordings")
+                        }
+                    }
+
                     ConfigSelectionArray {
                         text: Translation.tr("Description text")
                         icon: "subtitles"

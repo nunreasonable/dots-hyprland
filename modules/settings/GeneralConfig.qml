@@ -94,6 +94,18 @@ ContentPage {
             }
         }
 
+        ConfigSwitch {
+            buttonIcon: "visibility_off"
+            text: Translation.tr("Hide computer name")
+            checked: Config.options.profile.hideHostname
+            onCheckedChanged: {
+                Config.options.profile.hideHostname = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Keeps the computer name out of the sidebar and the cheatsheet, for screenshots and recordings")
+            }
+        }
+
         ContentSubsection {
             title: Translation.tr("Description text")
             ConfigSelectionArray {

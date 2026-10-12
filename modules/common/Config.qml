@@ -170,6 +170,7 @@ Singleton {
 
             property JsonObject profile: JsonObject {
                 property string displayName: ""
+                property bool hideHostname: false
                 property string descriptionText: "::distro::"
                 property string avatarPath: ""
                 property string avatarPicture: ""

@@ -95,6 +95,7 @@ Item {
                         spacing: 8
 
                         CheatsheetSystemHeaderChip {
+                            visible: !Config.options.profile.hideHostname
                             icon: "computer"
                             text: Fmt.dash(root.monitor?.hostName)
                         }
