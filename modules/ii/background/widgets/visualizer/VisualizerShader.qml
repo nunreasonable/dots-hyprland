@@ -12,7 +12,6 @@ ShaderEffect {
     property color color1
     property color color2
     property color color3
-    // Ring only: texture provider for the cover, and whether it holds one
     property Item cover: null
     property real hasCover: 0
 

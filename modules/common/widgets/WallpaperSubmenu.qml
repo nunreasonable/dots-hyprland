@@ -22,7 +22,6 @@ Item {
         width: root.width
         spacing: 8
 
-        // Scheme
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: schemeGrid.implicitHeight + 20
@@ -116,7 +115,6 @@ Item {
             }
         }
 
-        // Centered wallpaper
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: centeredCol.implicitHeight + 16
@@ -184,7 +182,6 @@ Item {
             }
         }
 
-        // Transitions
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: transCol.implicitHeight + 16

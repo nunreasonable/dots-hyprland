@@ -153,7 +153,7 @@ Scope {
 
             property Component openSubmenuComponent: null
             property real submenuAnchorY: 0
-            readonly property real submenuWidth: 260
+            readonly property real submenuWidth: 300
 
             Timer {
                 id: submenuCloseTimer

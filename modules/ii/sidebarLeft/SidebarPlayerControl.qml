@@ -131,7 +131,6 @@ Item {
             anchors.margins: parent.height * 0.04
             spacing: 0
 
-            // ── Album art ──
             Item {
                 id: artBackground
                 Layout.alignment: Qt.AlignHCenter
@@ -205,7 +204,6 @@ Item {
                 }
             }
 
-            // ── Title & Artist ──
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.topMargin: 20
@@ -265,7 +263,6 @@ Item {
                 }
             }
 
-            // ── Lyrics ──
             Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
@@ -301,7 +298,6 @@ Item {
                 }
             }
 
-            // ── Controls ──
             ColumnLayout {
                 Layout.fillWidth: true
                 Layout.topMargin: 20
@@ -448,7 +444,6 @@ Item {
                 }
             }
 
-            // ── Lyrics toggle Volume & settings  ──
             RowLayout {
                 Layout.fillWidth: true
                 Layout.topMargin: 20
@@ -650,7 +645,6 @@ Item {
                 }
             }
 
-            // ── Player selector ──
             StyledComboBox {
                 id: playerSelector
                 visible: Mpris.players.values.length > 1

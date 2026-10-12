@@ -111,7 +111,6 @@ MouseArea {
         RowLayout {
             spacing: 4
 
-            // Default
             MaterialSymbol {
                 visible: !root.isMaterial
                 Layout.alignment: Qt.AlignVCenter
@@ -122,7 +121,6 @@ MouseArea {
                     : root.contentColor
             }
 
-            // Material
             Rectangle {
                 visible: root.isMaterial
                 width: 24
