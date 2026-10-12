@@ -175,8 +175,6 @@ Scope {
                 }
             }
 
-            Keys.onEscapePressed: GlobalStates.desktopMenuOpen = false
-
             MouseArea {
                 anchors.fill: parent
                 acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -196,6 +194,8 @@ Scope {
                 color: Appearance.colors.colLayer0
                 border.width: 1
                 border.color: Appearance.colors.colLayer0Border
+                focus: true
+                Keys.onEscapePressed: GlobalStates.desktopMenuOpen = false
 
                 MouseArea {
                     anchors.fill: parent
