@@ -17,6 +17,7 @@ Item {
     property real maxWindowPreviewWidth: 300
     property real windowControlsHeight: 30
     property real buttonPadding: 5
+    property var contextMenu: null
 
     property Item lastHoveredButton: null
     property bool buttonHovered: false
@@ -63,6 +64,7 @@ Item {
             required property var modelData
             appToplevel: modelData
             appListRoot: root
+            contextMenu: root.contextMenu
 
             innerInset: Appearance.sizes.hyprlandGapsOut + root.buttonPadding
             outerInset: Appearance.sizes.hyprlandGapsOut + root.buttonPadding
