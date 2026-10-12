@@ -294,7 +294,7 @@ MouseArea {
         focus: true
         border.width: 1
         border.color: Appearance.colors.colLayer0Border
-        color: Appearance.colors.colLayer0
+        color: Appearance.colors.colUiBackground
         radius: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
 
         property int calculatedRows: Math.ceil(grid.count / grid.columns)

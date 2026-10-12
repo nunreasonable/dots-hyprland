@@ -111,7 +111,7 @@ PanelWindow {
         id: settingsWindow
         width: Math.min(parent.width - 80, 980 * panelWindow.sizeScale)
         height: Math.min(parent.height - 80, 665 * panelWindow.sizeScale)
-        color: Appearance.colors.colLayer0
+        color: Appearance.colors.colUiBackground
         border.width: Config.options.settings.borderSize
         border.color: CF.ColorUtils.transparentize(Appearance.getColorFromName(Config.options.settings.borderColor), 0.8)
         radius: !panelWindow.isMinimal ? Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 5 : Appearance.rounding.screenRounding + 5

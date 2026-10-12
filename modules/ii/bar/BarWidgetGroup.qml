@@ -152,7 +152,7 @@ Item {
             leftMargin: root.vertical ? 4 : 0
             rightMargin: root.vertical ? 4 : 0
         }
-        color: root.morphEdge !== "" ? Appearance.m3colors.m3surfaceContainer : !root.paintBackground ? "transparent" : root.resolveColorName(root.style.color) !== undefined ? root.resolveColorName(root.style.color) : (root.isMaterial && !root.paintMaterialPill) ? "transparent" : (root.isMaterial && root.paintMaterialPill) ? root.bgColor : Config.options.bar.borderless ? "transparent" : root.resolvedGroupColor
+        color: root.morphEdge !== "" ? Appearance.colors.colUiPopupBackground : !root.paintBackground ? "transparent" : root.resolveColorName(root.style.color) !== undefined ? root.resolveColorName(root.style.color) : (root.isMaterial && !root.paintMaterialPill) ? "transparent" : (root.isMaterial && root.paintMaterialPill) ? root.bgColor : Config.options.bar.borderless ? "transparent" : root.resolvedGroupColor
 
         border.width: root.morphEdge !== "" ? 0 : (root.style.borderWidth ?? 0)
         border.color: root.resolveColorName(root.style.borderColor) ?? Appearance.colors.colLayer0Border
