@@ -49,6 +49,7 @@ Singleton {
 
     function writeCurrentCurve() {
         if (!Platform.isWindows || !WindowsNative.equalizer) return;
+        root.ensureHooked();
         const text = root.buildApoConfig(adapter.bands, adapter.preamp, adapter.bypassed);
         WindowsNative.equalizer.writeCurve(text);
     }
@@ -263,8 +264,6 @@ Singleton {
             try { root.trackGenreCache = JSON.parse(adapter.trackGenreCacheJson || "{}"); } catch (e) { root.trackGenreCache = {}; }
             if (Platform.isWindows && WindowsNative.equalizer) {
                 WindowsNative.equalizer.setDefaultDeviceId(Audio.sink?.name ?? "");
-                root.ensureHooked();
-                root.writeCurrentCurve();
             }
         }
         onLoadFailed: error => {
