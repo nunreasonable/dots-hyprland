@@ -32,6 +32,16 @@ Item { // Player instance
     readonly property bool artIsLocal: Platform.isWindows && String(root.artUrl ?? "").startsWith("file:")
     property string displayedArtFilePath: root.artIsLocal ? root.artUrl : (root.downloaded ? (Platform.isWindows ? `file:///${artFilePath}` : Qt.resolvedUrl(artFilePath)) : "")
 
+    readonly property var volumeNode: Platform.isWindows ? Audio.appNodeForMprisPlayer(root.player) : null
+    readonly property bool volumeControllable: Platform.isWindows ? (root.volumeNode !== null) : true
+    readonly property real volumeValue: root.volumeNode ? (root.volumeNode.audio.volume ?? 0) : (root.player?.volume ?? 0)
+    function setPlayerVolume(value) {
+        if (root.volumeNode)
+            root.volumeNode.audio.volume = value;
+        else if (root.player)
+            root.player.volume = value;
+    }
+
     component TrackChangeButton: RippleButton {
         implicitWidth: 24
         implicitHeight: 24
@@ -210,6 +220,44 @@ Item { // Player instance
 
                     width: size
                     height: size
+                }
+
+                HoverHandler {
+                    id: artHover
+                    enabled: root.volumeControllable
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    color: "black"
+                    opacity: artHover.hovered && root.volumeControllable ? 0.6 : 0.0
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Appearance.animationCurves.expressiveFastSpatialDuration
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Appearance.animationCurves.standard
+                        }
+                    }
+                }
+
+                MaterialDial {
+                    anchors.fill: parent
+                    anchors.margins: 8
+                    enabled: root.volumeControllable
+                    value: root.volumeValue
+                    waveAmplitude: 3.2 * root.volumeValue
+                    opacity: artHover.hovered && root.volumeControllable ? 1.0 : 0.0
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Appearance.animationCurves.expressiveFastSpatialDuration
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Appearance.animationCurves.standard
+                        }
+                    }
+
+                    onMoved: root.setPlayerVolume(value)
                 }
             }
 
