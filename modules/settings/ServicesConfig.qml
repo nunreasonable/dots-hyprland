@@ -338,14 +338,14 @@ ContentPage {
         icon: "screen_record"
         title: Translation.tr("Screen recording")
 
-        property string microphoneBlocked: ""
+        property int accessCheck: 0
         readonly property bool windowActive: Window.active
-        function refreshMicrophoneAccess() {
+        readonly property string microphoneBlocked: {
+            screenRecordSection.accessCheck;
             const recorder = Platform.isWindows && WindowsNative.ready ? WindowsNative.screenRecorder : null;
-            screenRecordSection.microphoneBlocked = recorder ? recorder.microphoneBlockedReason() : "";
+            return recorder ? recorder.microphoneBlockedReason() : "";
         }
-        onWindowActiveChanged: if (windowActive) refreshMicrophoneAccess()
-        Component.onCompleted: refreshMicrophoneAccess()
+        onWindowActiveChanged: if (windowActive) accessCheck++
 
         ConfigRow {
             uniform: true
@@ -366,7 +366,7 @@ ContentPage {
                 checked: Config.options.screenRecord.microphone
                 onCheckedChanged: {
                     Config.options.screenRecord.microphone = checked;
-                    screenRecordSection.refreshMicrophoneAccess();
+                    screenRecordSection.accessCheck++;
                 }
                 StyledToolTip {
                     text: Translation.tr("Adds the default microphone, mixed with the system audio")
