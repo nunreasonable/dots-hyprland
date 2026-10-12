@@ -1833,5 +1833,22 @@
   "Delay after launch (seconds)": "Atraso após abrir (segundos)",
   "Add app": "Adicionar app",
   "e.g. firefox": "ex.: firefox",
-  "e.g. firefox.exe": "ex.: firefox.exe"
+  "e.g. firefox.exe": "ex.: firefox.exe",
+  "Text copied": "Texto copiado",
+  "(no text found)": "(nenhum texto encontrado)",
+  "Text recognition failed": "Falha no reconhecimento de texto",
+  "Starting recording": "Iniciando a gravação",
+  "Recording Stopped": "Gravação encerrada",
+  "Recording failed": "Falha na gravação",
+  "Recording without sound": "Gravando sem som",
+  "Recording region…": "Gravando região…",
+  "Built-in recording is unavailable: %1.": "A gravação nativa não está disponível: %1.",
+  "Recording can use ffmpeg instead (the shell may need a restart to find it after installing).": "A gravação pode usar o ffmpeg no lugar (talvez seja preciso reiniciar o shell para ele ser encontrado depois de instalar).",
+  "Recording needs ffmpeg": "A gravação precisa do ffmpeg",
+  "Install with winget": "Instalar com o winget",
+  "No loopback device found. Enable \"Stereo Mix\" in Windows sound settings (Recording devices) or install a virtual audio cable.": "Nenhum dispositivo de loopback encontrado. Ative o \"Mixagem estéreo\" nas configurações de som do Windows (Dispositivos de gravação) ou instale um cabo de áudio virtual.",
+  "Update \"%1\"": "Atualizar \"%1\"",
+  "Local vLLM model | %1": "Modelo vLLM local | %1",
+  "Failed to download preset assets": "Falha ao baixar os arquivos do preset",
+  "Failed to finalize preset": "Falha ao finalizar o preset"
 }
