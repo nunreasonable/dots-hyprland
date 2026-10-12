@@ -1483,5 +1483,22 @@
   "Videos for Live Wallpaper in the desktop menu": "Vídeos do Papel de parede animado no menu da área de trabalho",
   "Pause the live wallpaper when a window covers the desktop": "Pausar o papel de parede animado quando uma janela cobre a área de trabalho",
   "Hide computer name": "Esconder o nome do computador",
-  "Keeps the computer name out of the sidebar and the cheatsheet, for screenshots and recordings": "Tira o nome do computador da barra lateral e da tela de Atalhos, para capturas de tela e gravações"
+  "Keeps the computer name out of the sidebar and the cheatsheet, for screenshots and recordings": "Tira o nome do computador da barra lateral e da tela de Atalhos, para capturas de tela e gravações",
+  "Checking for updates...": "Verificando atualizações...",
+  "System up to date": "Sistema atualizado",
+  "Update cancelled — %1 updates still pending": "Atualização cancelada — %1 atualizações pendentes",
+  "Open avatar folder": "Abrir pasta do avatar",
+  "Choose your avatar": "Escolha seu avatar",
+  "No images found in your avatar folder": "Nenhuma imagem encontrada na pasta do avatar",
+  "Pick an avatar folder in Settings > Profile to see your avatars here": "Escolha uma pasta de avatar em Configurações > Perfil para ver seus avatares aqui",
+  "Enable media tab in left sidebar": "Ativar a aba de mídia na barra lateral esquerda",
+  "Adds a Media tab next to Intelligence, Translator and Anime in the left sidebar": "Adiciona uma aba de Mídia junto com Inteligência, Tradutor e Anime na barra lateral esquerda",
+  "Enable media tab": "Ativar a aba de mídia",
+  "Shape Art": "Capa com forma",
+  "Art Colors": "Cores da capa",
+  "Blurred Art": "Capa borrada",
+  "Pick an icon": "Escolha um ícone",
+  "Reset to the distro icon": "Voltar ao ícone da distro",
+  "Colorize": "Colorir",
+  "Updates": "Atualizações"
 }
