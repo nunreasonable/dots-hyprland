@@ -52,6 +52,11 @@ Item {
         NumberAnimation { duration: 220 }
     }
 
+    Rectangle {
+        anchors.fill: parent
+        color: Appearance.colors.colLayer0
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 6
