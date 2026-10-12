@@ -339,7 +339,9 @@ PanelWindow {
                 root.regionHeight * root.monitorScale, //
                 root.screenshotPath, //
                 screenshotAction, //
-                screenshotDir
+                screenshotDir, //
+                Config.options.screenRecord.systemAudio, //
+                Config.options.screenRecord.microphone
             )
             Quickshell.execDetached(command);
         }
