@@ -54,9 +54,15 @@ Singleton {
     readonly property bool classic: root.sameList(Config.options.bar.layouts.leftLayout, root.classicLeft)
         && root.sameList(Config.options.bar.layouts.middleLayout, root.classicMiddle)
         && root.sameList(Config.options.bar.layouts.rightLayout, root.classicRight)
+    readonly property bool classicContent: root.classic && Config.options.bar.cornerStyle < 3
+
+    readonly property real edgeGap: Config.options.bar.cornerStyle === 3 ? Appearance.sizes.hyprlandGapsOut : 0
+    readonly property real styleZone: (Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut : 0) + root.edgeGap
+        + ((!Config.options.bar.vertical && (Config.options.bar.cornerStyle === 4 || Config.options.bar.cornerStyle === 5 || Config.options.bar.cornerStyle === 6)) ? 4 : 0)
 
     readonly property bool trayHasItems: SystemTray.items.values.length > 0
-    readonly property bool centerOnly: !root.classic && root.withoutEmptyTray(root.leftLayout).length === 0 && root.withoutEmptyTray(root.rightLayout).length === 0
+    readonly property bool tabWrapperStyle: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4 || Config.options.bar.cornerStyle === 6
+    readonly property bool centerOnly: !root.classic && !(Config.options.bar.vertical && root.tabWrapperStyle) && root.withoutEmptyTray(root.leftLayout).length === 0 && root.withoutEmptyTray(root.rightLayout).length === 0
 
     function withoutEmptyTray(layout) {
         return root.trayHasItems ? layout : layout.filter(name => name !== "sysTray");
@@ -68,7 +74,7 @@ Singleton {
         if (root.centerOnly && Config.options.bar.showFrame && Config.options.bar.centerOnlyReserveFrame)
             return Config.options.bar.frameThickness;
         const thickness = Config.options.bar.vertical ? Appearance.sizes.baseVerticalBarWidth : Appearance.sizes.baseBarHeight;
-        const base = Config.options.bar.autoHide.enable ? 0 : thickness + (Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut : 0);
+        const base = Config.options.bar.autoHide.enable ? 0 : thickness + root.styleZone;
         return base + root.windowsFrameInset;
     }
 
