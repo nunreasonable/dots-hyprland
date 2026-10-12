@@ -477,8 +477,12 @@ ContentPage {
                                 popupTitle: Translation.tr("Bar style")
                                 options: [
                                     { displayName: Translation.tr("Hug"), icon: "line_curve", value: 0 },
+                                    { displayName: Translation.tr("Split Hug"), icon: "splitscreen", value: 6 },
                                     { displayName: Translation.tr("Float"), icon: "page_header", value: 1 },
-                                    { displayName: Translation.tr("Rect"), icon: "toolbar", value: 2 }
+                                    { displayName: Translation.tr("Rect"), icon: "toolbar", value: 2 },
+                                    { displayName: Translation.tr("M3"), icon: "interests", value: 3 },
+                                    { displayName: Translation.tr("M3 Hug"), icon: "category", value: 4 },
+                                    { displayName: Translation.tr("Panel"), icon: "call_to_action", value: 5 }
                                 ]
                                 isCurrentValue: value => Config.options.bar.cornerStyle === value
                                 pickValue: value => {

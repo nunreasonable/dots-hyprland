@@ -243,12 +243,17 @@ ContentPage {
                 ConfigSelectionArray {
                     text: Translation.tr("Corner style")
                     icon: "style"
+                    textOnlyWhenActive: true
                     currentValue: Config.options.bar.cornerStyle
                     onSelected: newValue => { Config.options.bar.cornerStyle = newValue; }
                     options: [
-                        { displayName: Translation.tr("Hug"),   icon: "line_curve",  value: 0 },
-                        { displayName: Translation.tr("Float"), icon: "page_header", value: 1 },
-                        { displayName: Translation.tr("Rect"),  icon: "toolbar",     value: 2 }
+                        { displayName: Translation.tr("Hug"),       icon: "line_curve",     value: 0 },
+                        { displayName: Translation.tr("Split Hug"), icon: "splitscreen",    value: 6 },
+                        { displayName: Translation.tr("Float"),     icon: "page_header",    value: 1 },
+                        { displayName: Translation.tr("Rect"),      icon: "toolbar",        value: 2 },
+                        { displayName: Translation.tr("M3"),        icon: "interests",      value: 3 },
+                        { displayName: Translation.tr("M3 Hug"),    icon: "category",       value: 4 },
+                        { displayName: Translation.tr("Panel"),     icon: "call_to_action", value: 5 }
                     ]
                 }
                 ConfigSelectionArray {
@@ -266,6 +271,7 @@ ContentPage {
                     ConfigSwitch {
                         buttonIcon: "format_paint"
                         text: Translation.tr("Show background")
+                        enabled: Config.options.bar.cornerStyle !== 3 && Config.options.bar.cornerStyle !== 4 && Config.options.bar.cornerStyle !== 6
                         checked: Config.options.bar.showBackground
                         onCheckedChanged: { Config.options.bar.showBackground = checked; }
                     }
