@@ -40,6 +40,16 @@ Item {
     readonly property bool blurredBackground: Config.options.sidebar.media.blurredBackground
     readonly property bool showLyrics: Config.options.sidebar.media.showLyrics
 
+    readonly property var volumeNode: Platform.isWindows ? Audio.appNodeForMprisPlayer(root.player) : null
+    readonly property bool volumeControllable: Platform.isWindows ? (root.volumeNode !== null) : true
+    readonly property real volumeValue: root.volumeNode ? (root.volumeNode.audio.volume ?? 0) : (root.player?.volume ?? 0)
+    function setPlayerVolume(value) {
+        if (root.volumeNode)
+            root.volumeNode.audio.volume = value;
+        else if (root.player)
+            root.player.volume = value;
+    }
+
     implicitWidth: 200
     implicitHeight: background.implicitHeight
 
@@ -207,6 +217,44 @@ Item {
                     text: "music_note"
                     color: Appearance.colors.colPrimary
                     iconSize: Appearance.font.pixelSize.hugeass + 50
+                }
+
+                HoverHandler {
+                    id: artHover
+                    enabled: root.volumeControllable
+                }
+
+                Rectangle {
+                    anchors.fill: parent
+                    color: "black"
+                    opacity: artHover.hovered && root.volumeControllable ? 0.6 : 0.0
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Appearance.animationCurves.expressiveFastSpatialDuration
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Appearance.animationCurves.standard
+                        }
+                    }
+                }
+
+                MaterialDial {
+                    anchors.fill: parent
+                    anchors.margins: 10
+                    enabled: root.volumeControllable
+                    value: root.volumeValue
+                    waveAmplitude: 3.2 * root.volumeValue
+                    opacity: artHover.hovered && root.volumeControllable ? 1.0 : 0.0
+
+                    Behavior on opacity {
+                        NumberAnimation {
+                            duration: Appearance.animationCurves.expressiveFastSpatialDuration
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Appearance.animationCurves.standard
+                        }
+                    }
+
+                    onMoved: root.setPlayerVolume(value)
                 }
             }
 

@@ -26,6 +26,20 @@ Singleton {
         return (node.properties["application.name"] || node.description || node.name)
     }
 
+    function appNodeForMprisPlayer(player) {
+        if (!player) return null;
+        const strip = s => String(s ?? "").toLowerCase().replace(/\.exe$/, "");
+        const identity = strip(player.identity);
+        const desktopEntry = strip(player.desktopEntry);
+        if (identity.length === 0 && desktopEntry.length === 0) return null;
+        return root.outputAppNodes.find(node => {
+            const binary = strip(node.properties["application.process.binary"]);
+            const name = strip(node.properties["node.name"] || node.name);
+            return (identity.length > 0 && (identity === binary || identity === name))
+                || (desktopEntry.length > 0 && (desktopEntry === binary || desktopEntry === name));
+        }) ?? null;
+    }
+
     // Lists
     function correctType(node, isSink) {
         return (node.isSink === isSink) && node.audio
