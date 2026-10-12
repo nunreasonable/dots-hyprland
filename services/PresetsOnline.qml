@@ -303,7 +303,6 @@ Singleton {
         root.downloadingName = "";
     }
 
-    // ─── Reference rewriting, used on Windows in place of jq ───
     function _applyShareFilter(obj) {
         const out = {};
         for (const key of root.shareAllowedRoots) {
@@ -557,7 +556,6 @@ Singleton {
         }
     }
 
-    // ─── Windows download pipeline (no bash/jq) ───
     property string _winStagingText: ""
     property string _winEntryName: ""
     property var _winAssetQueue: []

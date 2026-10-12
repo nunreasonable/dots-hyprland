@@ -194,6 +194,67 @@ Singleton {
     }
 
     FileView {
+        id: wallpaperSniffFile
+        property string targetPath: ""
+        path: targetPath
+        blockAllReads: true
+        printErrors: false
+    }
+
+    FileView {
+        id: wallpaperCopyFile
+        property string targetPath: ""
+        path: targetPath
+        blockWrites: true
+        printErrors: false
+    }
+
+    function _sniffImageFormat(bytes) {
+        if (bytes.length >= 8 && bytes[0] === 0x89 && bytes[1] === 0x50 && bytes[2] === 0x4E && bytes[3] === 0x47
+                && bytes[4] === 0x0D && bytes[5] === 0x0A && bytes[6] === 0x1A && bytes[7] === 0x0A)
+            return "png";
+        if (bytes.length >= 3 && bytes[0] === 0xFF && bytes[1] === 0xD8 && bytes[2] === 0xFF)
+            return "jpg";
+        if (bytes.length >= 12 && bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46
+                && bytes[8] === 0x57 && bytes[9] === 0x45 && bytes[10] === 0x42 && bytes[11] === 0x50)
+            return "webp";
+        return "";
+    }
+
+    function _copyWallpaperForPreset(sourcePath, presetName) {
+        const clean = FileUtils.trimFileProtocol(String(sourcePath ?? ""));
+        if (clean === "" || /^https?:\/\//i.test(clean) || Wallpapers.isVideoPath(clean))
+            return sourcePath ?? "";
+
+        let buffer;
+        try {
+            wallpaperSniffFile.targetPath = clean;
+            buffer = wallpaperSniffFile.data();
+        } catch (e) {
+            return sourcePath;
+        }
+        const bytes = new Uint8Array(buffer);
+        if (bytes.length === 0)
+            return sourcePath;
+
+        const format = root._sniffImageFormat(bytes);
+        const base = clean.split("/").pop();
+        const dotIndex = base.lastIndexOf(".");
+        const stem = dotIndex > 0 ? base.slice(0, dotIndex) : base;
+        const currentExt = (dotIndex > 0 ? base.slice(dotIndex + 1) : "").toLowerCase().replace(/^jpeg$/, "jpg");
+        const destName = (format !== "" && format !== currentExt) ? `${stem}.${format}` : base;
+        const destPath = `${Directories.userPresetsPath}/assets/${presetName}/${destName}`;
+
+        try {
+            wallpaperCopyFile.targetPath = destPath;
+            wallpaperCopyFile.setData(buffer);
+        } catch (e) {
+            return sourcePath;
+        }
+        return destPath;
+    }
+
+    FileView {
         id: presetReadFile
         property string targetPath: ""
         path: targetPath
@@ -241,7 +302,9 @@ Singleton {
             return;
         }
         const filtered = root.filterForSave(parsed, "");
-        filtered._presetMeta = { preview: String(parsed?.background?.wallpaperPath ?? "") };
+        const livePreview = String(parsed?.background?.wallpaperPath ?? "");
+        const preview = livePreview !== "" ? root._copyWallpaperForPreset(livePreview, root._pendingSaveName) : "";
+        filtered._presetMeta = { preview: preview };
         if (root._pendingSaveDescription !== "")
             filtered._presetMeta.description = root._pendingSaveDescription;
         presetWriteFile.targetPath = `${Directories.userPresetsPath}/${root._pendingSaveName}.json`;

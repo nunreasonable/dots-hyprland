@@ -9,15 +9,15 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    property string provider:   "unsplash" // "unsplash" | "pexels" | "blapples" | "naive"
-    property string resolution: "1080p"    // "1080p" | "2K" | "4K"
-    property string query:      ""         // empty keyword = random
-    property string colorGroup: ""         // naive/blapples: "" = all | "red"|"orange"|"yellow"|"green"|"blue"|"purple"
-    property string category:   "general"  // unsplash: "nature"|"city"|...
-    property bool   loading:    false
-    property bool   appending:  false
-    property int    page:       1
-    property var    results:    []         // list [ {thumb, full, id, provider} ]
+    property string provider: "unsplash"
+    property string resolution: "1080p"
+    property string query: ""
+    property string colorGroup: ""
+    property string category: "general"
+    property bool loading: false
+    property bool appending: false
+    property int page: 1
+    property var results: []
     property int totalPages: 0
 
     property var _naiveFullResults: []
@@ -292,7 +292,6 @@ Singleton {
         };
     }
 
-    // ─── Process: Linux streaming (python3) ───
     Process {
         id: streamProc
         property string provider: ""
@@ -324,7 +323,6 @@ Singleton {
         }
     }
 
-    // ─── Process: Windows (no python3) — fetch the whole index at once, filter/map in JS ───
     Process {
         id: fullFetchProc
         property string provider: ""

@@ -111,7 +111,6 @@ Item {
         }
     }
 
-    // Missing key
     Item {
         anchors.fill: parent
         visible: root.missingKey
@@ -160,7 +159,6 @@ Item {
         }
     }
 
-    // Loading
     StyledIndeterminateProgressBar {
         visible: OnlineWallpapers.loading
         anchors {
@@ -172,7 +170,6 @@ Item {
         }
     }
 
-    // Grid online
     Item {
         id: gridContainer
         anchors.fill: parent
@@ -353,7 +350,6 @@ Item {
             }
         }
 
-        // Empty state
         ColumnLayout {
             anchors.centerIn: parent
             visible: wallpaperModel.count === 0 && !OnlineWallpapers.loading
