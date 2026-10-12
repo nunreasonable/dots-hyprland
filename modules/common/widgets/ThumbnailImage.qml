@@ -32,12 +32,15 @@ StyledImage {
 
     Connections {
         target: Platform.isWindows ? WindowsNative : null
-        function onReadyChanged() { if (WindowsNative.ready) root.sourceSizeChanged() }
+        function onReadyChanged() { if (WindowsNative.ready) root.requestThumbnail() }
     }
-    onSourceSizeChanged: {
+    onSourceSizeChanged: root.requestThumbnail()
+    onThumbnailPathChanged: if (Platform.isWindows) root.requestThumbnail()
+
+    function requestThumbnail() {
         if (!root.generateThumbnail) return;
         if (Platform.isWindows) {
-            if (!WindowsNative.thumbnailer) return;
+            if (!WindowsNative.thumbnailer || root.width <= 0 || root.height <= 0) return;
             const maxSize = Images.thumbnailSizes[root.thumbnailSizeName];
             WindowsNative.thumbnailer.generate(
                 FileUtils.trimFileProtocol(root.sourcePath),
