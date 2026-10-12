@@ -37,7 +37,7 @@ ToolTip {
     onAboutToShow: {
         if (root.styledContentItem)
             return;
-        root.styledContentItem = root.styledContentComponent.createObject(root.parent);
+        root.styledContentItem = root.styledContentComponent.createObject(root);
         root.contentItem = root.styledContentItem;
     }
 }
