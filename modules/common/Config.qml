@@ -733,6 +733,9 @@ Singleton {
                     property int prevTilingGapsIn: 4
                     property int prevTilingGapsOut: 5
                 }
+                property JsonObject selfUpdate: JsonObject {
+                    property bool notify: true
+                }
             }
 
             property JsonObject networking: JsonObject {

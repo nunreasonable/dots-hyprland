@@ -94,6 +94,11 @@ Singleton {
     property string windowsTerminalFragmentDir: `${(Quickshell.env("LOCALAPPDATA") || "").replace(/\\/g, "/")}/Microsoft/Windows Terminal/Fragments/illogical-impulse`
     property string windowsTerminalFragmentPath: `${Directories.windowsTerminalFragmentDir}/illogical-impulse.json`
     property string windowsTerminalSettingsJsonPath: `${(Quickshell.env("LOCALAPPDATA") || "").replace(/\\/g, "/")}/Packages/Microsoft.WindowsTerminal_8wekyb3d8bbwe/LocalState/settings.json`
+    property string installDir: `${(Quickshell.env("LOCALAPPDATA") || "").replace(/\\/g, "/")}/ii-windows`
+    property string installManifestPath: `${Directories.installDir}/install-manifest.json`
+    property string installVersionPath: `${Directories.installDir}/VERSION`
+    property string selfUpdateCachePath: FileUtils.trimFileProtocol(`${Directories.state}/self_update.json`)
+    property string selfUpdateDownloadDir: `${Directories.tempRoot}/self-update`
     property string defaultAiPrompts: Quickshell.shellPath("defaults/ai/prompts")
     property string userAiPrompts: FileUtils.trimFileProtocol(`${Directories.shellConfig}/ai/prompts`)
     property string userActions: FileUtils.trimFileProtocol(`${Directories.shellConfig}/actions`)
