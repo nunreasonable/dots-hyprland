@@ -1143,7 +1143,7 @@
   "Purple": "Roxo",
   "Brown": "Marrom",
   "Grayscale": "Escala de cinza",
-  "Switching the style resets the bar layout and buttons, workspace numbers, quick sliders and settings layout to that style's defaults": "Trocar o estilo redefine o layout e os botões da barra, os números das áreas de trabalho, os controles rápidos e o layout das configurações para o padrão desse estilo",
+  "Switching the style resets the bar buttons, workspace numbers, quick sliders and settings layout to that style's defaults. A bar layout you changed is kept and comes back with its style": "Trocar o estilo redefine os botões da barra, os números das áreas de trabalho, os controles rápidos e o layout das configurações para o padrão desse estilo. Um layout da barra que você mudou fica guardado e volta junto com o estilo",
   "Active Window": "Janela ativa",
   "Add the Dynamic Island to the center of the bar layout to use it.": "Adicione a Ilha Dinâmica ao centro do layout da barra para usá-la.",
   "AI Usage": "Uso de IA",
