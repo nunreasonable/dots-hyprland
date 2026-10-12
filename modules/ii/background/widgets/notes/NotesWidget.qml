@@ -19,7 +19,14 @@ AbstractBackgroundWidget {
     property string mode: "list"
     property var pendingNoteId: null
     property string editingText: ""
-    onModeChanged: GlobalStates.desktopWidgetKeyboardFocus = (mode === "edit")
+    onModeChanged: {
+        GlobalStates.desktopWidgetKeyboardFocus = (mode === "edit");
+        if (mode === "edit")
+            Qt.callLater(() => {
+                editTextArea.cursorPosition = editTextArea.length;
+                editTextArea.forceActiveFocus();
+            });
+    }
     Component.onDestruction: {
         if (root.mode === "edit")
             GlobalStates.desktopWidgetKeyboardFocus = false;
