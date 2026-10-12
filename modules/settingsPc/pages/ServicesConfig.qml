@@ -348,6 +348,66 @@ ContentPage {
         }
 
         ContentSection {
+            id: screenRecordSection
+            icon: "screen_record"
+            shape: W.MaterialShape.Shape.SoftBurst
+            title: Translation.tr("Screen recording")
+
+            property int accessCheck: 0
+            readonly property bool windowActive: Window.active
+            readonly property string microphoneBlocked: {
+                screenRecordSection.accessCheck;
+                const recorder = Platform.isWindows && WindowsNative.ready ? WindowsNative.screenRecorder : null;
+                return recorder ? recorder.microphoneBlockedReason() : "";
+            }
+            onWindowActiveChanged: if (windowActive) accessCheck++
+
+            GroupedList {
+                ConfigSwitch {
+                    buttonIcon: "volume_up"
+                    text: Translation.tr("Record system audio")
+                    checked: Config.options.screenRecord.systemAudio
+                    onCheckedChanged: {
+                        Config.options.screenRecord.systemAudio = checked;
+                    }
+                    W.StyledToolTip {
+                        text: Translation.tr("Adds what your speakers or headphones play")
+                    }
+                }
+                ConfigSwitch {
+                    buttonIcon: "mic"
+                    text: Translation.tr("Record microphone")
+                    checked: Config.options.screenRecord.microphone
+                    onCheckedChanged: {
+                        Config.options.screenRecord.microphone = checked;
+                        screenRecordSection.accessCheck++;
+                    }
+                    W.StyledToolTip {
+                        text: Translation.tr("Adds the default microphone, mixed with the system audio")
+                    }
+                }
+            }
+
+            W.NoticeBox {
+                Layout.fillWidth: true
+                visible: Platform.isWindows && Config.options.screenRecord.microphone && screenRecordSection.microphoneBlocked !== ""
+                materialIcon: "mic_off"
+                text: Translation.tr("Windows' privacy settings are blocking the microphone for desktop apps, so recordings won't include it.")
+
+                Item {
+                    Layout.fillWidth: true
+                }
+                W.RippleButtonWithIcon {
+                    Layout.fillWidth: false
+                    buttonRadius: Appearance.rounding.small
+                    materialIcon: "open_in_new"
+                    mainText: Translation.tr("Open privacy settings")
+                    onClicked: Qt.openUrlExternally("ms-settings:privacy-microphone")
+                }
+            }
+        }
+
+        ContentSection {
             icon: "search"
             shape: W.MaterialShape.Shape.Cookie6Sided
             title: Translation.tr("Search")

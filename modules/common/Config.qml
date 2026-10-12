@@ -933,6 +933,8 @@ Singleton {
 
             property JsonObject screenRecord: JsonObject {
                 property string savePath: Directories.videos.replace(/^file:\/\/(\/(?=[A-Za-z]:))?/, "") // strip "file://"
+                property bool systemAudio: false
+                property bool microphone: false
             }
 
             property JsonObject screenSnip: JsonObject {

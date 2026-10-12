@@ -4,6 +4,7 @@ param(
     [int]$Width,
     [int]$Height,
     [switch]$Sound,
+    [switch]$Mic,
     [string]$SaveDir = "",
     [switch]$Stop,
     [Parameter(Mandatory = $true)][string]$PidFile
@@ -51,18 +52,49 @@ $ffmpegArgs = @(
     "-i", "desktop"
 )
 
-if ($Sound) {
+$audioInputs = @()
+if ($Sound -or $Mic) {
     $list = (& ffmpeg -hide_banner -list_devices true -f dshow -i dummy 2>&1 | Out-String)
-    $loopback = [regex]::Matches($list, '"([^"]+)" \(audio\)') |
-        ForEach-Object { $_.Groups[1].Value } |
-        Where-Object { $_ -match 'Stereo ?Mix|Mixagem est|Mezcla est|Mixage st|What U Hear|Wave Out|Loopback|CABLE Output|virtual-audio-capturer' } |
-        Select-Object -First 1
+    $audioDevices = @([regex]::Matches($list, '"([^"]+)" \(audio\)') | ForEach-Object { $_.Groups[1].Value })
+    $loopbackPattern = 'Stereo ?Mix|Mixagem est|Mezcla est|Mixage st|What U Hear|Wave Out|Loopback|CABLE Output|virtual-audio-capturer'
+}
 
+if ($Sound) {
+    $loopback = $audioDevices | Where-Object { $_ -match $loopbackPattern } | Select-Object -First 1
     if ($loopback) {
-        $ffmpegArgs += @("-f", "dshow", "-i", "audio=$loopback", "-c:a", "aac")
+        $audioInputs += $loopback
     } else {
         "nosound"
     }
+}
+
+if ($Mic) {
+    $consent = 'Software\Microsoft\Windows\CurrentVersion\CapabilityAccessManager\ConsentStore\microphone'
+    $consentValues = @(
+        (Get-ItemProperty -Path "HKLM:\$consent" -Name Value -ErrorAction SilentlyContinue).Value,
+        (Get-ItemProperty -Path "HKCU:\$consent" -Name Value -ErrorAction SilentlyContinue).Value,
+        (Get-ItemProperty -Path "HKCU:\$consent\NonPackaged" -Name Value -ErrorAction SilentlyContinue).Value
+    )
+    if ($consentValues -contains 'Deny') {
+        "micblocked"
+    } else {
+        $microphone = $audioDevices | Where-Object { $_ -notmatch $loopbackPattern } | Select-Object -First 1
+        if ($microphone) {
+            $audioInputs += $microphone
+        } else {
+            "nomic"
+        }
+    }
+}
+
+foreach ($device in $audioInputs) {
+    $ffmpegArgs += @("-f", "dshow", "-i", "audio=$device")
+}
+if ($audioInputs.Count -eq 2) {
+    $ffmpegArgs += @("-filter_complex", "[1:a][2:a]amix=inputs=2:duration=longest:normalize=0,alimiter=limit=0.95[a]", "-map", "0:v", "-map", "[a]")
+}
+if ($audioInputs.Count -gt 0) {
+    $ffmpegArgs += @("-c:a", "aac")
 }
 
 $ffmpegArgs += @("-c:v", "libx264", "-preset", "veryfast", "-pix_fmt", "yuv420p", "-y", $outFile)

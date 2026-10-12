@@ -1807,5 +1807,21 @@
   "Couldn't download the update.": "Não foi possível baixar a atualização.",
   "The downloaded file doesn't match the size GitHub reported.": "O arquivo baixado não corresponde ao tamanho informado pelo GitHub.",
   "ii-windows update available": "Atualização do ii-windows disponível",
-  "%1 \"%2\" is ready to install.": "%1 \"%2\" está pronta para instalar."
+  "%1 \"%2\" is ready to install.": "%1 \"%2\" está pronta para instalar.",
+  "Recording without system audio": "Gravando sem o áudio do sistema",
+  "Recording without microphone": "Gravando sem o microfone",
+  "Microphone blocked": "Microfone bloqueado",
+  "Windows' privacy settings are blocking the microphone, so this recording goes on without it. Turn on microphone access and \"Let desktop apps access your microphone\".": "As configurações de privacidade do Windows estão bloqueando o microfone, então esta gravação continua sem ele. Ative o acesso ao microfone e \"Permitir que aplicativos da área de trabalho acessem seu microfone\".",
+  "Open privacy settings": "Abrir configurações de privacidade",
+  "No microphone found": "Nenhum microfone encontrado",
+  "System audio: on": "Áudio do sistema: ligado",
+  "System audio: off": "Áudio do sistema: desligado",
+  "Microphone: on": "Microfone: ligado",
+  "Microphone: off": "Microfone: desligado",
+  "Screen recording": "Gravação de tela",
+  "Record system audio": "Gravar o áudio do sistema",
+  "Adds what your speakers or headphones play": "Inclui o que toca nos alto-falantes ou fones",
+  "Record microphone": "Gravar o microfone",
+  "Adds the default microphone, mixed with the system audio": "Inclui o microfone padrão, mixado com o áudio do sistema",
+  "Windows' privacy settings are blocking the microphone for desktop apps, so recordings won't include it.": "As configurações de privacidade do Windows estão bloqueando o microfone para aplicativos da área de trabalho, então as gravações não vão incluí-lo."
 }

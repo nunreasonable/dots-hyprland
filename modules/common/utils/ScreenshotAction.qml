@@ -104,10 +104,12 @@ Singleton {
                 break;
             }
             case ScreenshotAction.Action.Record:
-                root.startWindowsRecording(rx + monitorOffsetX, ry + monitorOffsetY, rw, rh, false);
+                root.startWindowsRecording(rx + monitorOffsetX, ry + monitorOffsetY, rw, rh,
+                    Config.options.screenRecord.systemAudio, Config.options.screenRecord.microphone);
                 break;
             case ScreenshotAction.Action.RecordWithSound:
-                root.startWindowsRecording(rx + monitorOffsetX, ry + monitorOffsetY, rw, rh, true);
+                root.startWindowsRecording(rx + monitorOffsetX, ry + monitorOffsetY, rw, rh,
+                    true, Config.options.screenRecord.microphone);
                 break;
             default:
                 console.warn("[Region Selector] Unknown snip action, skipping snip.");
@@ -117,6 +119,7 @@ Singleton {
     readonly property QtObject windowsRecorder: (Platform.isWindows && WindowsNative.ready) ? WindowsNative.screenRecorder : null
     readonly property bool windowsNativeRecorder: root.windowsRecorder?.available ?? false
     readonly property bool windowsNativeRecording: root.windowsNativeRecorder && root.windowsRecorder.recording
+    property bool _recordingMicrophone: false
 
     Connections {
         target: root.windowsNativeRecorder ? root.windowsRecorder : null
@@ -130,14 +133,31 @@ Singleton {
             Notifications.sendDesktop(Translation.tr("Recording failed"), reason);
         }
         function onSoundUnavailable(reason) {
-            Notifications.sendDesktop(Translation.tr("Recording without sound"), reason);
+            Notifications.sendDesktop(root._recordingMicrophone
+                ? Translation.tr("Recording without system audio")
+                : Translation.tr("Recording without sound"), reason);
+        }
+        function onMicrophoneUnavailable(reason, blocked) {
+            if (blocked) root.notifyMicrophoneBlocked();
+            else Notifications.sendDesktop(Translation.tr("Recording without microphone"), reason);
         }
     }
 
-    function startWindowsRecording(x, y, width, height, sound) {
+    property int _microphoneNoticeId: -1
+    function notifyMicrophoneBlocked() {
+        root._microphoneNoticeId = Notifications.sendDesktop(Translation.tr("Microphone blocked"),
+            Translation.tr("Windows' privacy settings are blocking the microphone, so this recording goes on without it. Turn on microphone access and \"Let desktop apps access your microphone\"."),
+            ["-A", `privacy=${Translation.tr("Open privacy settings")}`]) ?? -1;
+    }
+    function openMicrophonePrivacySettings() {
+        Qt.openUrlExternally("ms-settings:privacy-microphone");
+    }
+
+    function startWindowsRecording(x, y, width, height, sound, microphone = false) {
         const saveDir = Config.options.screenRecord.savePath;
+        root._recordingMicrophone = microphone;
         if (root.windowsNativeRecorder) {
-            root.windowsRecorder.start(Math.round(x), Math.round(y), Math.round(width), Math.round(height), sound, saveDir);
+            root.windowsRecorder.start(Math.round(x), Math.round(y), Math.round(width), Math.round(height), sound, saveDir, microphone);
             return;
         }
 
@@ -151,6 +171,7 @@ Singleton {
         ];
         if (saveDir) args.push("-SaveDir", saveDir);
         if (sound) args.push("-Sound");
+        if (microphone) args.push("-Mic");
         windowsRecordProc.command = args;
         windowsRecordProc.running = true;
         Notifications.sendDesktop(Translation.tr("Starting recording"), Translation.tr("Recording region…"));
@@ -166,15 +187,16 @@ Singleton {
         windowsRecordProc.running = true;
     }
 
-    function toggleWindowsScreenRecording(monitor, sound) {
+    function toggleWindowsScreenRecording(monitor, sound, microphone = false) {
         if (!monitor) return;
         if (root.windowsNativeRecorder) {
             if (root.windowsNativeRecording) root.windowsRecorder.stop();
-            else root.startWindowsRecording(monitor.x, monitor.y, monitor.width, monitor.height, sound);
+            else root.startWindowsRecording(monitor.x, monitor.y, monitor.width, monitor.height, sound, microphone);
             return;
         }
         windowsScreenToggleProc.monitor = monitor;
         windowsScreenToggleProc.sound = sound;
+        windowsScreenToggleProc.microphone = microphone;
         windowsScreenToggleProc.running = true;
     }
 
@@ -182,11 +204,12 @@ Singleton {
         id: windowsScreenToggleProc
         property var monitor: null
         property bool sound: false
+        property bool microphone: false
         command: root.windowsRecordingStatusCommand()
         onExited: (exitCode, exitStatus) => {
             const m = windowsScreenToggleProc.monitor;
             if (exitCode === 0) root.stopWindowsRecording();
-            else if (exitCode === 2) root.startWindowsRecording(m.x, m.y, m.width, m.height, windowsScreenToggleProc.sound);
+            else if (exitCode === 2) root.startWindowsRecording(m.x, m.y, m.width, m.height, windowsScreenToggleProc.sound, windowsScreenToggleProc.microphone);
             else root.offerFfmpegInstall();
         }
     }
@@ -202,6 +225,11 @@ Singleton {
     Connections {
         target: Platform.isWindows ? Notifications : null
         function onDesktopActionInvoked(id, action) {
+            if (id === root._microphoneNoticeId && action === "privacy") {
+                root._microphoneNoticeId = -1;
+                root.openMicrophonePrivacySettings();
+                return;
+            }
             if (id !== root._ffmpegNoticeId || action !== "install") return;
             root._ffmpegNoticeId = -1;
             Quickshell.execDetached(["powershell", "-NoProfile", "-Command",
@@ -216,8 +244,14 @@ Singleton {
         stdout: SplitParser {
             onRead: line => {
                 if (line === "nosound") {
-                    Notifications.sendDesktop(Translation.tr("Recording without sound"),
+                    Notifications.sendDesktop(root._recordingMicrophone
+                        ? Translation.tr("Recording without system audio")
+                        : Translation.tr("Recording without sound"),
                         Translation.tr("No loopback device found. Enable \"Stereo Mix\" in Windows sound settings (Recording devices) or install a virtual audio cable."));
+                } else if (line === "micblocked") {
+                    root.notifyMicrophoneBlocked();
+                } else if (line === "nomic") {
+                    Notifications.sendDesktop(Translation.tr("Recording without microphone"), Translation.tr("No microphone found"));
                 } else if (line.startsWith("saved ")) {
                     Notifications.sendDesktop(Translation.tr("Recording Stopped"), line.slice(6));
                 }
@@ -235,7 +269,7 @@ Singleton {
         return ["powershell", "-NoProfile", "-Command", script];
     }
 
-    function getCommand(x, y, width, height, screenshotPath, action, saveDir = "") {
+    function getCommand(x, y, width, height, screenshotPath, action, saveDir = "", systemAudio = false, microphone = false) {
         // Set command for action
         const rx = Math.round(x);
         const ry = Math.round(y);
@@ -250,6 +284,7 @@ Singleton {
         const uploadAndGetUrl = (filePath) => {
             return `curl -sF files[]=@'${StringUtils.shellSingleQuoteEscape(filePath)}' ${root.fileUploadApiEndpoint} | jq -r '.files[0].url'`
         }
+        const audioFlags = (systemAudio ? " --sound" : "") + (microphone ? " --mic" : "")
         const annotationCommand = `${Config.options.regionSelector.annotation.useSatty ? "satty" : "swappy"} -f -`;
         switch (action) {
             case ScreenshotAction.Action.Copy:
@@ -278,10 +313,10 @@ Singleton {
                 return ["bash", "-c", `${cropInPlace} && tesseract '${StringUtils.shellSingleQuoteEscape(screenshotPath)}' stdout -l $(tesseract --list-langs | awk 'NR>1{print $1}' | tr '\\n' '+' | sed 's/\\+$/\\n/') | wl-copy && ${cleanup}`]
                 break;
             case ScreenshotAction.Action.Record:
-                return ["bash", "-c", `${Directories.recordScriptPath} --region '${slurpRegion}'`]
+                return ["bash", "-c", `${Directories.recordScriptPath} --region '${slurpRegion}'${audioFlags}`]
                 break;
             case ScreenshotAction.Action.RecordWithSound:
-                return ["bash", "-c", `${Directories.recordScriptPath} --region '${slurpRegion}' --sound`]
+                return ["bash", "-c", `${Directories.recordScriptPath} --region '${slurpRegion}' --sound${microphone ? " --mic" : ""}`]
                 break;
             default:
                 console.warn("[Region Selector] Unknown snip action, skipping snip.");

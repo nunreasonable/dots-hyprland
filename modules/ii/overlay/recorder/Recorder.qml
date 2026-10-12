@@ -61,7 +61,7 @@ StyledOverlayWidget {
                     onClicked: {
                         GlobalStates.overlayOpen = false;
                         if (Platform.isWindows) {
-                            ScreenshotAction.toggleWindowsScreenRecording(Hyprland.focusedMonitor, true);
+                            ScreenshotAction.toggleWindowsScreenRecording(Hyprland.focusedMonitor, true, Config.options.screenRecord.microphone);
                         } else {
                             Quickshell.execDetached([Directories.recordScriptPath, "--fullscreen", "--sound"]);
                         }

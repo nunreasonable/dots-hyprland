@@ -23,6 +23,8 @@ Toolbar {
     // Signals
     signal dismiss()
 
+    readonly property bool recording: root.action === RegionSelection.SnipAction.Record || root.action === RegionSelection.SnipAction.RecordWithSound
+
     ToolbarTabBar {
         id: tabBar
         tabButtonList: [
@@ -32,6 +34,34 @@ Toolbar {
         currentIndex: root.selectionMode === RegionSelection.SelectionMode.RectCorners ? 0 : 1
         onCurrentIndexChanged: {
             root.selectionMode = currentIndex === 0 ? RegionSelection.SelectionMode.RectCorners : RegionSelection.SelectionMode.Circle;
+        }
+    }
+
+    Rectangle {
+        visible: root.recording
+        Layout.alignment: Qt.AlignVCenter
+        implicitWidth: 1
+        implicitHeight: 24
+        color: Appearance.colors.colOutlineVariant
+    }
+
+    IconToolbarButton {
+        visible: root.recording
+        text: Config.options.screenRecord.systemAudio ? "volume_up" : "volume_off"
+        toggled: Config.options.screenRecord.systemAudio
+        onClicked: Config.options.screenRecord.systemAudio = !Config.options.screenRecord.systemAudio
+        StyledToolTip {
+            text: Config.options.screenRecord.systemAudio ? Translation.tr("System audio: on") : Translation.tr("System audio: off")
+        }
+    }
+
+    IconToolbarButton {
+        visible: root.recording
+        text: Config.options.screenRecord.microphone ? "mic" : "mic_off"
+        toggled: Config.options.screenRecord.microphone
+        onClicked: Config.options.screenRecord.microphone = !Config.options.screenRecord.microphone
+        StyledToolTip {
+            text: Config.options.screenRecord.microphone ? Translation.tr("Microphone: on") : Translation.tr("Microphone: off")
         }
     }
 }
