@@ -21,6 +21,15 @@ AbstractBackgroundWidget {
     implicitWidth: row.implicitWidth
     implicitHeight: row.implicitHeight
 
+    onClicked: mouse => {
+        if (mouse.button !== Qt.LeftButton || (mouse.modifiers & Qt.ControlModifier))
+            return;
+        const point = root.mapToItem(row, mouse.x, mouse.y);
+        const card = row.childAt(point.x, point.y);
+        if (card && card.onToggle)
+            card.onToggle();
+    }
+
     component TimerCard: WidgetCard {
         id: timerCard
         property string icon: ""
