@@ -120,9 +120,11 @@ NestableObject {
     function refreshRateOptions(monitor) {
         if (!monitor)
             return [];
-        const rates = root.ratesFor(monitor, monitor.resolutionWidth, monitor.resolutionHeight).slice();
+        const rates = root.ratesFor(monitor, monitor.resolutionWidth, monitor.resolutionHeight).filter(rate => rate > 1);
         if (monitor.refreshRate > 1 && !rates.includes(monitor.refreshRate))
             rates.unshift(monitor.refreshRate);
+        if (monitor.refreshRate <= 1)
+            return [{ displayName: Translation.tr("Default"), value: monitor.refreshRate }].concat(rates.map(rate => ({ displayName: `${rate} Hz`, value: rate })));
         return rates.map(rate => ({
             displayName: (rate === monitor.refreshRate && Math.abs(monitor.refreshRateExact - rate) >= 0.01) ? `${monitor.refreshRateExact.toFixed(2)} Hz` : `${rate} Hz`,
             value: rate
