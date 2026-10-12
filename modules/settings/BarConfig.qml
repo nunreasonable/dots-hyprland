@@ -108,6 +108,12 @@ ContentPage {
                 title: Translation.tr("Bar position")
                 Layout.fillWidth: true
 
+                BarPositionPreview {
+                    Layout.alignment: Qt.AlignHCenter
+                    vertical: Config.options.bar.vertical
+                    atBottom: Config.options.bar.bottom
+                }
+
                 ConfigSelectionArray {
                     currentValue: (Config.options.bar.bottom ? 1 : 0) | (Config.options.bar.vertical ? 2 : 0)
                     onSelected: newValue => {
