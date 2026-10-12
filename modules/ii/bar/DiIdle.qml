@@ -16,11 +16,11 @@ Item {
 
     Rectangle {
         id: avatarRect
-        width: diIdleRoot.di.pillHeight - 8
-        height: diIdleRoot.di.pillHeight - 8
+        width: diIdleRoot.di.isMaterial ? diIdleRoot.di.pillHeight : diIdleRoot.di.pillHeight - 8
+        height: diIdleRoot.di.isMaterial ? diIdleRoot.di.pillHeight : diIdleRoot.di.pillHeight - 8
         anchors {
             left: parent.left
-            leftMargin: 4
+            leftMargin: diIdleRoot.di.isMaterial ? 0 : 4
             verticalCenter: parent.verticalCenter
         }
         radius: width / 2
@@ -135,7 +135,7 @@ Item {
                 id: clockComponent
                 StyledText {
                     text: DateTime.time
-                    font.pixelSize: Appearance.font.pixelSize.small
+                    font.pixelSize: diIdleRoot.di.isMaterial ? Appearance.font.pixelSize.normal : Appearance.font.pixelSize.small
                     font.features: {
                         "tnum": 1
                     }
@@ -157,7 +157,7 @@ Item {
                     }
 
                     StyledText {
-                        font.pixelSize: Appearance.font.pixelSize.small
+                        font.pixelSize: diIdleRoot.di.isMaterial ? Appearance.font.pixelSize.normal : Appearance.font.pixelSize.small
                         font.features: {
                             "tnum": 1
                         }
@@ -169,7 +169,7 @@ Item {
             }
         }
 
-        readonly property real computedIdleWidth: avatarRect.width + 4 + 10 + rightSideRow.implicitWidth + 10
+        readonly property real computedIdleWidth: avatarRect.width + (diIdleRoot.di.isMaterial ? 0 : 4) + 10 + rightSideRow.implicitWidth + 10
 
         onComputedIdleWidthChanged: diIdleRoot.di.idleTextContentWidth = rightSideRow.computedIdleWidth
         Component.onCompleted: diIdleRoot.di.idleTextContentWidth = rightSideRow.computedIdleWidth

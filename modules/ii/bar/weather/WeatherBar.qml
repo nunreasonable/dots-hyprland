@@ -14,7 +14,8 @@ MouseArea {
     signal styleEditorRequested
     property bool vertical: false
     property bool hovered: false
-    implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth : rowLayout.implicitWidth + 10 * 2
+    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth : rowLayout.implicitWidth + (root.isMaterial ? 4 : 10 * 2)
     implicitHeight: root.vertical ? columnLayout.implicitHeight : Appearance.sizes.barHeight
 
     acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -36,8 +37,10 @@ MouseArea {
         id: rowLayout
         visible: !root.vertical
         anchors.centerIn: parent
+        spacing: root.isMaterial ? 6 : 5
 
         MaterialSymbol {
+            visible: !root.isMaterial
             fill: 0
             text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
             iconSize: Appearance.font.pixelSize.large
@@ -46,11 +49,28 @@ MouseArea {
         }
 
         StyledText {
-            visible: true
             font.pixelSize: Appearance.font.pixelSize.small
-            color: root.contentColor
+            color: root.isMaterial ? Appearance.colors.colOnLayer0 : root.contentColor
             text: Weather.data?.temp ?? "--°"
             Layout.alignment: Qt.AlignVCenter
+            leftPadding: root.isMaterial ? 5 : 0
+        }
+
+        Rectangle {
+            visible: root.isMaterial
+            implicitWidth: 25
+            implicitHeight: 25
+            radius: Appearance.rounding.full
+            color: Appearance.colors.colPrimary
+            Layout.alignment: Qt.AlignVCenter
+
+            MaterialSymbol {
+                anchors.centerIn: parent
+                fill: 0
+                text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
+                iconSize: Appearance.font.pixelSize.normal
+                color: Appearance.colors.colOnPrimary
+            }
         }
     }
 
@@ -58,9 +78,10 @@ MouseArea {
         id: columnLayout
         visible: root.vertical
         anchors.centerIn: parent
-        spacing: 0
+        spacing: root.isMaterial ? 2 : 0
 
         MaterialSymbol {
+            visible: !root.isMaterial
             fill: 0
             text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
             iconSize: Appearance.font.pixelSize.large
@@ -70,9 +91,27 @@ MouseArea {
 
         StyledText {
             font.pixelSize: Appearance.font.pixelSize.small
-            color: root.contentColor
+            color: root.isMaterial ? Appearance.colors.colPrimary : root.contentColor
             text: (Weather.data?.temp ?? "--°").replace(/[CF]$/, "")
             Layout.alignment: Qt.AlignHCenter
+            Layout.topMargin: root.isMaterial ? 3 : 0
+        }
+
+        Rectangle {
+            visible: root.isMaterial
+            implicitWidth: 25
+            implicitHeight: 25
+            radius: Appearance.rounding.full
+            color: Appearance.colors.colPrimary
+            Layout.alignment: Qt.AlignHCenter
+
+            MaterialSymbol {
+                anchors.centerIn: parent
+                fill: 0
+                text: Icons.getWeatherIcon(Weather.data.wCode) ?? "cloud"
+                iconSize: Appearance.font.pixelSize.normal
+                color: Appearance.colors.colOnPrimary
+            }
         }
     }
 

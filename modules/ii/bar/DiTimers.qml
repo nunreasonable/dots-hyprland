@@ -9,7 +9,7 @@ RowLayout {
     required property Item di
     anchors {
         fill: parent
-        leftMargin: 8
+        leftMargin: diTimersRoot.di.isMaterial ? 4 : 8
         rightMargin: 10
     }
     spacing: 6
@@ -23,7 +23,7 @@ RowLayout {
             anchors.fill: parent
             text: diTimersRoot.di.timerRunning() ? "pause" : "play_arrow"
             fill: 1
-            iconSize: 16
+            iconSize: diTimersRoot.di.isMaterial ? 24 : 16
             color: Appearance.colors.colOnLayer0
         }
 
@@ -43,7 +43,7 @@ RowLayout {
             anchors.fill: parent
             text: "stop_circle"
             fill: 1
-            iconSize: 16
+            iconSize: diTimersRoot.di.isMaterial ? 24 : 16
             color: Appearance.colors.colOnLayer0
         }
 

@@ -14,6 +14,7 @@ Item {
     property bool contentColorOverridden: false
     property bool vertical: Config.options.bar.vertical
     property bool mirrored: false
+    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property bool isPlaying: activePlayer?.isPlaying ?? false
     readonly property list<real> points: AudioSpectrum.points
@@ -28,8 +29,8 @@ Item {
         active: root.onScreen
     }
 
-    implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : barCount * (dotSize + dotSpacing)
-    implicitHeight: vertical ? barCount * (dotSize + dotSpacing) : Appearance.sizes.barHeight
+    implicitWidth: vertical ? Appearance.sizes.verticalBarWidth : (isMaterial ? barsRow.implicitWidth + 16 : barCount * (dotSize + dotSpacing))
+    implicitHeight: vertical ? (isMaterial ? barsColumn.implicitHeight + 16 : barCount * (dotSize + dotSpacing)) : Appearance.sizes.barHeight
 
     function pointValue(index) {
         if (!root.isPlaying || root.points.length === 0)
@@ -45,6 +46,7 @@ Item {
     }
 
     Row {
+        id: barsRow
         visible: !root.vertical
         anchors.centerIn: parent
         spacing: root.dotSpacing
@@ -75,6 +77,7 @@ Item {
     }
 
     Column {
+        id: barsColumn
         visible: root.vertical
         anchors.centerIn: parent
         spacing: root.dotSpacing

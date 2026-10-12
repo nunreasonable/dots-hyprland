@@ -17,11 +17,11 @@ Item {
 
     Item {
         id: iconSlot
-        width: 24
-        height: 24
+        width: diNotifsRoot.di.isMaterial ? 28 : 24
+        height: diNotifsRoot.di.isMaterial ? 28 : 24
         anchors {
             left: parent.left
-            leftMargin: 4
+            leftMargin: diNotifsRoot.di.isMaterial ? 0 : 4
             verticalCenter: parent.verticalCenter
         }
 
@@ -39,7 +39,7 @@ Item {
             color: Appearance.colors.colPrimary
             colSymbol: Appearance.colors.colOnPrimary
             text: "notifications"
-            iconSize: 14
+            iconSize: diNotifsRoot.di.isMaterial ? 20 : 14
             fill: 1
             padding: 4
         }
@@ -48,12 +48,12 @@ Item {
     ColumnLayout {
         anchors {
             left: iconSlot.right
-            leftMargin: 6
+            leftMargin: diNotifsRoot.di.isMaterial ? 10 : 6
             verticalCenter: parent.verticalCenter
             right: nowLabel.left
             rightMargin: 8
         }
-        spacing: -4
+        spacing: diNotifsRoot.di.isMaterial ? -2 : -4
 
         StyledText {
             Layout.fillWidth: true

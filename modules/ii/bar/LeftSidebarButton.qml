@@ -12,6 +12,7 @@ RippleButton {
     property color contentColor: Appearance.colors.colOnLayer0
     property bool contentColorOverridden: false
     property bool vertical: Config.options.bar.vertical
+    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
     readonly property bool customIcon: Config.options.custom.distroIcon !== ""
     readonly property string customFolder: {
         if (!root.customIcon)
@@ -36,7 +37,8 @@ RippleButton {
     implicitWidth: distroIcon.width + buttonPadding * 2
     implicitHeight: distroIcon.height + buttonPadding * 2
     buttonRadius: Appearance.rounding.full
-    colBackgroundHover: Appearance.colors.colLayer1Hover
+    colBackground: root.isMaterial ? Appearance.colors.colPrimaryContainer : ColorUtils.transparentize(Appearance.colors.colLayer1Hover, 1)
+    colBackgroundHover: root.isMaterial ? Appearance.colors.colPrimaryContainerHover : Appearance.colors.colLayer1Hover
     colRipple: Appearance.colors.colLayer1Active
     colBackgroundToggled: Appearance.colors.colSecondaryContainer
     colBackgroundToggledHover: Appearance.colors.colSecondaryContainerHover
@@ -77,8 +79,8 @@ RippleButton {
     CustomIcon {
         id: distroIcon
         anchors.centerIn: parent
-        width: 19.5
-        height: 19.5
+        width: root.isMaterial ? (root.vertical ? 24 : 22) : 19.5
+        height: root.isMaterial ? (root.vertical ? 24 : 22) : 19.5
         source: root.iconSource
         customFolder: root.customFolder
         colorize: Config.options.custom.colorizeIcon

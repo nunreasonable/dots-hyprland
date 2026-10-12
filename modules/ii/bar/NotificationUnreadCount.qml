@@ -1,4 +1,5 @@
 import QtQuick
+import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
@@ -10,6 +11,8 @@ MaterialSymbol {
     iconSize: Appearance.font.pixelSize.larger
     property color contentColor: Appearance.colors.colOnLayer1
     property bool contentColorOverridden: false
+    readonly property bool isDi: GlobalStates.dynamicIslandEnabled && Config.options.bar.dynamicIsland.rightWidget === "systemIcons"
+    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
     color: root.contentColor
 
     Rectangle {
@@ -22,7 +25,7 @@ MaterialSymbol {
             topMargin: root.showUnreadCount ? 0 : 3
         }
         radius: Appearance.rounding.full
-        color: Appearance.colors.colOnLayer0
+        color: root.isDi ? Appearance.colors.colOnLayer1 : (root.isMaterial ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer0)
         z: 1
 
         implicitHeight: root.showUnreadCount ? Math.max(notificationCounterText.implicitWidth, notificationCounterText.implicitHeight) : 8
@@ -33,7 +36,7 @@ MaterialSymbol {
             visible: root.showUnreadCount
             anchors.centerIn: parent
             font.pixelSize: Appearance.font.pixelSize.smallest
-            color: Appearance.colors.colLayer0
+            color: root.isDi ? Appearance.colors.colOnPrimary : (root.isMaterial ? Appearance.colors.colPrimary : Appearance.colors.colLayer0)
             text: Notifications.unread
         }
     }

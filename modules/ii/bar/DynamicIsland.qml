@@ -13,7 +13,7 @@ Item {
     id: root
     property bool mirrored: false
     property bool vertical: Config.options.bar.vertical
-    readonly property bool isMaterial: false
+    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
 
     readonly property real pillHeight: 32
     readonly property real idleCollapsedWidth: 144
@@ -357,7 +357,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: root.displayedProvider?.width ?? root.idleWidth
         height: root.pillHeight
-        color: (GlobalStates.barCenterOnly && Config.options.bar.cornerStyle === 0) ? "transparent" : Config.options.bar.followFrameColor ? Appearance.getColorFromName(Config.options.bar.frameColor) : Appearance.colors.colLayer0
+        color: root.isMaterial || (GlobalStates.barCenterOnly && Config.options.bar.cornerStyle === 0) ? "transparent" : Config.options.bar.followFrameColor ? Appearance.getColorFromName(Config.options.bar.frameColor) : Appearance.colors.colLayer0
         radius: height / 2
         clip: true
         visible: !root.vertical
@@ -449,7 +449,7 @@ Item {
             RowLayout {
                 anchors {
                     fill: parent
-                    leftMargin: 8
+                    leftMargin: root.isMaterial ? 4 : 8
                     rightMargin: 10
                 }
                 spacing: 6
@@ -463,7 +463,7 @@ Item {
                         anchors.fill: parent
                         text: "stop_circle"
                         fill: 1
-                        iconSize: 16
+                        iconSize: root.isMaterial ? 26 : 16
                         color: Appearance.colors.colError
                     }
 
@@ -554,8 +554,8 @@ Item {
                 MaterialShapeWrappedMaterialSymbol {
                     anchors.fill: parent
                     wrappedShape: MaterialShape.Shape.Cookie7Sided
-                    color: Appearance.colors.colLayer0
-                    colSymbol: Appearance.colors.colOnLayer0
+                    color: root.isMaterial ? Appearance.colors.colPrimary : Appearance.colors.colLayer0
+                    colSymbol: root.isMaterial ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer0
                     text: root.iconForProviderId(badgeItem.modelData.id)
                     iconSize: 16
                     fill: 1

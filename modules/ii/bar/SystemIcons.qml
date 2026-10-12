@@ -12,9 +12,11 @@ Item {
     property color contentColor: Appearance.colors.colOnLayer1
     property bool contentColorOverridden: false
     property bool vertical: Config.options.bar.vertical
-    readonly property color iconColor: root.contentColorOverridden ? root.contentColor : Appearance.colors.colOnLayer1
+    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    property bool isDi: GlobalStates.dynamicIslandEnabled && Config.options.bar.dynamicIsland.rightWidget === "systemIcons"
+    readonly property color iconColor: root.contentColorOverridden ? root.contentColor : (root.isDi ? Appearance.colors.colOnLayer1 : (root.isMaterial ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1))
 
-    implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth - 14 : flow.implicitWidth + 4
+    implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth - 14 : flow.implicitWidth + (root.isMaterial ? 12 : 4)
     implicitHeight: root.vertical ? flow.implicitHeight + 4 : Appearance.sizes.baseBarHeight - 8
 
     MouseArea {
@@ -26,7 +28,7 @@ Item {
         id: flow
         anchors.centerIn: parent
         flow: root.vertical ? Flow.TopToBottom : Flow.LeftToRight
-        spacing: root.vertical ? 6 : 10
+        spacing: root.isMaterial ? 2 : root.vertical ? 6 : 10
 
         Item {
             id: volumeItem
