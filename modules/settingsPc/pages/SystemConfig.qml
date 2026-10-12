@@ -785,17 +785,6 @@ ContentPage {
                         }
                     }
                     ConfigSpinBox {
-                        icon: "battery_full"
-                        visible: WindowsNative.idlePower?.hasBattery ?? false
-                        text: Translation.tr("Turn off screen after (minutes), on battery")
-                        value: WindowsNative.idlePower?.screenOffDcMinutes ?? 0
-                        from: 0; to: 999; stepSize: 1
-                        onValueChanged: {
-                            if (WindowsNative.idlePower && value !== WindowsNative.idlePower.screenOffDcMinutes)
-                                WindowsNative.idlePower.screenOffDcMinutes = value;
-                        }
-                    }
-                    ConfigSpinBox {
                         icon: "bedtime"
                         text: Translation.tr("Sleep after (minutes), plugged in")
                         value: WindowsNative.idlePower?.sleepAcMinutes ?? 0
@@ -805,9 +794,22 @@ ContentPage {
                                 WindowsNative.idlePower.sleepAcMinutes = value;
                         }
                     }
+                }
+                GroupedList {
+                    Layout.topMargin: 6
+                    visible: WindowsNative.idlePower?.hasBattery ?? false
                     ConfigSpinBox {
                         icon: "battery_full"
-                        visible: WindowsNative.idlePower?.hasBattery ?? false
+                        text: Translation.tr("Turn off screen after (minutes), on battery")
+                        value: WindowsNative.idlePower?.screenOffDcMinutes ?? 0
+                        from: 0; to: 999; stepSize: 1
+                        onValueChanged: {
+                            if (WindowsNative.idlePower && value !== WindowsNative.idlePower.screenOffDcMinutes)
+                                WindowsNative.idlePower.screenOffDcMinutes = value;
+                        }
+                    }
+                    ConfigSpinBox {
+                        icon: "battery_full"
                         text: Translation.tr("Sleep after (minutes), on battery")
                         value: WindowsNative.idlePower?.sleepDcMinutes ?? 0
                         from: 0; to: 999; stepSize: 1
