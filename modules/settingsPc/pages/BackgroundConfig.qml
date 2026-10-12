@@ -284,15 +284,22 @@ ContentPage {
                             Config.options.background.centeredWallpaper = checked;
                         }
                     }
-                    ConfigSwitch {
-                        visible: !Platform.isWindows
-                        Layout.fillWidth: true
-                        buttonIcon: "lock"
-                        text: Translation.tr("Show only when locked")
-                        enabled: Config.options.background.centeredWallpaper
-                        checked: Config.options.background.centeredWallpaperOnlyWhenLocked
-                        onCheckedChanged: {
-                            Config.options.background.centeredWallpaperOnlyWhenLocked = checked;
+                }
+
+                Loader {
+                    Layout.fillWidth: true
+                    active: !Platform.isWindows
+                    visible: active
+                    sourceComponent: GroupedList {
+                        ConfigSwitch {
+                            Layout.fillWidth: true
+                            buttonIcon: "lock"
+                            text: Translation.tr("Show only when locked")
+                            enabled: Config.options.background.centeredWallpaper
+                            checked: Config.options.background.centeredWallpaperOnlyWhenLocked
+                            onCheckedChanged: {
+                                Config.options.background.centeredWallpaperOnlyWhenLocked = checked;
+                            }
                         }
                     }
                 }
