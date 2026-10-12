@@ -34,12 +34,66 @@ Singleton {
     readonly property bool thumbnailGenerationRunning: thumbgenProc.running || _windowsThumbnailTotal > 0
     property real thumbnailGenerationProgress: 0
     readonly property string sortMode: Config.options?.wallpaperSelector.sortMode || "time"
+    property string previewPath: ""
+    property string confirmedPath: ""
 
     signal changed()
     signal thumbnailGenerated(directory: string)
     signal thumbnailGeneratedFile(filePath: string)
 
     function load () {} // For forcing initialization
+
+    function startPreview(path) {
+        if (!path || path.length === 0) return;
+        if (Platform.isWindows && root.isVideoPath(path)) return;
+        if (!SpicyStuff.allowed && root.isInSpicyFolder(path)) return;
+        root.previewPath = path;
+    }
+
+    function stopPreview() {
+        root.previewPath = "";
+    }
+
+    Connections {
+        target: Config.options.background
+        function onWallpaperPathChanged() {
+            root.confirmedPath = "";
+        }
+    }
+
+    function openSelectorFor(target) {
+        if (Platform.isWindows) {
+            GlobalStates.wallpaperSelectorTarget = target;
+            GlobalStates.wallpaperSelectorOpen = true;
+            return;
+        }
+        Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "wallpaperSelector", "openFor", target]);
+    }
+
+    property var _pendingLockFrame: null
+
+    function setLockWallpaper(path) {
+        const clean = path ? FileUtils.trimFileProtocol(path.toString()) : "";
+        if (clean.length > 0 && !SpicyStuff.allowed && root.isInSpicyFolder(clean)) {
+            console.warn("[Wallpapers] Not using a lock screen wallpaper from the Spicy Stuff folder:", SpicyStuff.restriction);
+            return;
+        }
+        Config.options.background.lockWall = clean;
+        if (Platform.isWindows) root._applyWindowsLockScreen(clean.length > 0 ? clean : root.stillPath);
+    }
+
+    function _applyWindowsLockScreen(path) {
+        const wn = WindowsNative.wallpaper;
+        if (!wn || typeof wn.setLockScreenImage !== "function" || !path || path.length === 0) return;
+        if (!root.isVideoPath(path)) {
+            wn.setLockScreenImage(path);
+            return;
+        }
+        if (!WindowsNative.thumbnailer) return;
+        const frame = root._videoFramePath(path);
+        root._pendingLockFrame = frame;
+        WindowsNative.thumbnailer.generate(path, frame, 1920);
+    }
 
     function adoptSystemWallpaper() {
         const wn = WindowsNative.wallpaper;
@@ -98,6 +152,13 @@ Singleton {
         return root.videoExtensions.some(ext => lower.endsWith(`.${ext}`));
     }
 
+    function stillFor(path) {
+        if (!path || !root.isVideoPath(path)) return path ?? "";
+        if (root.normalizedPath(path) === root.normalizedPath(Config.options.background.wallpaperPath) && Config.options.background.thumbnailPath)
+            return Config.options.background.thumbnailPath;
+        return root._videoFramePath(path);
+    }
+
     function openFallbackPicker(darkMode = Appearance.m3colors.darkmode, folder = "") {
         if (Platform.isWindows) {
             if (folder && folder.length > 0) root.setDirectory(folder);
@@ -143,6 +204,7 @@ Singleton {
             Config.options.appearance.palette.accentColor = "";
             root._retheme(path, darkMode);
         } else {
+            root.confirmedPath = path;
             Quickshell.execDetached([Directories.wallpaperSwitchScriptPath, "--mode", darkMode ? "dark" : "light", "--image", path]);
         }
         root.changed()
@@ -547,6 +609,12 @@ Singleton {
     Connections {
         target: WindowsNative.thumbnailer
         function onFinished(sourcePath, outputPath, ok) {
+            if (root._pendingLockFrame && outputPath === root._pendingLockFrame) {
+                root._pendingLockFrame = null;
+                if (ok) WindowsNative.wallpaper?.setLockScreenImage(outputPath);
+                else console.warn("[Wallpapers] Could not read a frame of the lock screen video");
+                if (!root._pendingVideo || outputPath !== root._pendingVideo.frame) return;
+            }
             const video = root._pendingVideo;
             if (video && outputPath === video.frame) {
                 root._pendingVideo = null;

@@ -1,11 +1,32 @@
 import QtQuick
 import QtQuick.Layouts
+import Qt5Compat.GraphicalEffects
+import Quickshell
+import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
 
 ContentPage {
     forceWidth: true
+
+    readonly property var transitionOptions: [
+        { displayName: Translation.tr("None"), value: "" },
+        { displayName: Translation.tr("Circle"), value: "circleSelect" },
+        { displayName: Translation.tr("Circle Pit"), value: "circlePit" },
+        { displayName: Translation.tr("Magic"), value: "magic" },
+        { displayName: Translation.tr("Doom"), value: "Doom" },
+        { displayName: Translation.tr("Peel"), value: "Peel" },
+        { displayName: Translation.tr("Fade"), value: "transition" },
+        { displayName: Translation.tr("Pixelate"), value: "pixelate" },
+        { displayName: Translation.tr("Stripes"), value: "stripes" },
+        { displayName: Translation.tr("CRT"), value: "crt" },
+        { displayName: Translation.tr("Dissolve"), value: "dissolve" },
+        { displayName: Translation.tr("Glitch"), value: "glitch" },
+        { displayName: Translation.tr("Ripple"), value: "ripple" },
+        { displayName: Translation.tr("Shatter"), value: "shatter" },
+        { displayName: Translation.tr("Random"), value: "random" },
+    ]
 
     ContentSection {
         icon: "tune"
@@ -95,8 +116,295 @@ ContentPage {
     }
 
     ContentSection {
+        icon: "panorama"
+        title: Translation.tr("Wallpaper")
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 8
+
+            Repeater {
+                model: [
+                    {
+                        target: "wallpaper",
+                        icon: "desktop_windows",
+                        label: Translation.tr("Desktop"),
+                        path: Wallpapers.stillFor(Config.options.background.wallpaperPath)
+                    },
+                    {
+                        target: "lockWall",
+                        icon: "lock",
+                        label: Translation.tr("Lock screen"),
+                        path: Wallpapers.stillFor(Config.options.background.lockWall !== "" ? Config.options.background.lockWall : Config.options.background.wallpaperPath)
+                    }
+                ]
+                delegate: ColumnLayout {
+                    id: wallCard
+                    required property var modelData
+                    Layout.fillWidth: true
+                    Layout.preferredWidth: 1
+                    spacing: 6
+
+                    Rectangle {
+                        id: wallCardBox
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Math.round(width * 9 / 16)
+                        radius: Appearance.rounding.normal
+                        color: Appearance.colors.colLayer2
+
+                        StyledImage {
+                            anchors.fill: parent
+                            fillMode: Image.PreserveAspectCrop
+                            source: wallCard.modelData.path
+                            cache: false
+                            layer.enabled: true
+                            layer.effect: OpacityMask {
+                                maskSource: Rectangle {
+                                    width: wallCardBox.width
+                                    height: wallCardBox.height
+                                    radius: wallCardBox.radius
+                                }
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: Wallpapers.openSelectorFor(wallCard.modelData.target)
+                        }
+                    }
+
+                    RowLayout {
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: 8
+                        MaterialSymbol {
+                            text: wallCard.modelData.icon
+                            iconSize: Appearance.font.pixelSize.larger
+                            color: Appearance.colors.colPrimary
+                        }
+                        StyledText {
+                            text: wallCard.modelData.label
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            font.weight: Font.Medium
+                            color: Appearance.colors.colOnLayer1
+                        }
+                    }
+                }
+            }
+        }
+
+        NoticeBox {
+            Layout.fillWidth: true
+            visible: Platform.isWindows && Config.options.windowsPort.backgroundBehindIcons && !Config.options.windowsPort.ownWallpaper
+            materialIcon: "info"
+            text: Translation.tr("Windows is drawing the wallpaper, so transitions, blur and the centered wallpaper don't show. Turn on \"Draw ii's own wallpaper\" under Windows desktop to use them.")
+        }
+
+        ConfigRow {
+            uniform: true
+            ConfigSwitch {
+                id: syncWallpaperSwitch
+                buttonIcon: "sync"
+                text: Translation.tr("Use same wallpaper for both")
+                checked: Config.options.background.lockWall === ""
+                onClicked: {
+                    if (Config.options.background.lockWall !== "")
+                        Wallpapers.setLockWallpaper("");
+                    else
+                        Wallpapers.openSelectorFor("lockWall");
+                    Qt.callLater(() => {
+                        syncWallpaperSwitch.checked = Qt.binding(() => Config.options.background.lockWall === "");
+                    });
+                }
+                StyledToolTip {
+                    text: Platform.isWindows
+                        ? Translation.tr("Off: pick a different picture for the lock screen. Windows shows it on its own lock screen.")
+                        : Translation.tr("Off: pick a different picture for the lock screen")
+                }
+            }
+            ConfigSwitch {
+                buttonIcon: "preview"
+                text: Translation.tr("Preview wallpaper")
+                checked: Config.options.background.enableWallpaperPreview
+                onCheckedChanged: {
+                    Config.options.background.enableWallpaperPreview = checked;
+                }
+                StyledToolTip {
+                    text: Translation.tr("Shows the wallpaper under the pointer in the selector on the desktop. Click to apply it.")
+                }
+            }
+        }
+
+        ContentSubsection {
+            title: Translation.tr("Transitions")
+            StyledComboBox {
+                textRole: "displayName"
+                model: transitionOptions
+                currentIndex: {
+                    const index = model.findIndex(item => item.value === Config.options.background.wallpaperAnimation);
+                    return index !== -1 ? index : 0;
+                }
+                onActivated: index => {
+                    Config.options.background.wallpaperAnimation = model[index].value;
+                }
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "blur_on"
+            text: Translation.tr("Blur wall")
+            checked: Config.options.background.showBlur
+            onCheckedChanged: {
+                Config.options.background.showBlur = checked;
+            }
+        }
+
+        ConfigSlider {
+            text: Translation.tr("Blur Size")
+            buttonIcon: "aspect_ratio"
+            usePercentTooltip: false
+            value: Config.options.background.blurRadius
+            from: 1
+            to: 64
+            stopIndicatorValues: [32]
+            onValueChanged: {
+                Config.options.background.blurRadius = value;
+            }
+        }
+
+        ContentSubsection {
+            title: Translation.tr("Split blur amount")
+            ConfigSelectionArray {
+                currentValue: Config.options.background.splitRatio
+                onSelected: newValue => {
+                    Config.options.background.splitRatio = newValue;
+                }
+                options: [
+                    { displayName: "25%", icon: "thumbnail_bar", value: "25" },
+                    { displayName: "50%", icon: "side_navigation", value: "50" },
+                    { displayName: "100%", icon: "fullscreen", value: "100" },
+                ]
+            }
+        }
+
+        ContentSubsection {
+            title: Translation.tr("Split blur side")
+            ConfigSelectionArray {
+                currentValue: Config.options.background.splitSide
+                onSelected: newValue => {
+                    Config.options.background.splitSide = newValue;
+                }
+                options: [
+                    { displayName: Translation.tr("Left"), icon: "align_horizontal_left", value: "left" },
+                    { displayName: Translation.tr("Right"), icon: "align_horizontal_right", value: "right" },
+                ]
+            }
+        }
+
+        ContentSubsection {
+            title: Translation.tr("Centered wallpaper")
+
+            ConfigRow {
+                uniform: true
+                ConfigSwitch {
+                    buttonIcon: "check"
+                    text: Translation.tr("Enable")
+                    checked: Config.options.background.centeredWallpaper
+                    onCheckedChanged: {
+                        Config.options.background.centeredWallpaper = checked;
+                    }
+                }
+                ConfigSwitch {
+                    visible: !Platform.isWindows
+                    buttonIcon: "lock"
+                    text: Translation.tr("Show only when locked")
+                    enabled: Config.options.background.centeredWallpaper
+                    checked: Config.options.background.centeredWallpaperOnlyWhenLocked
+                    onCheckedChanged: {
+                        Config.options.background.centeredWallpaperOnlyWhenLocked = checked;
+                    }
+                }
+            }
+
+            ConfigSelectionShapeArray {
+                visible: Config.options.background.centeredWallpaper
+                currentValue: Config.options.background.centeredWallpaperShape
+                shapeColor: Appearance.colors.colPrimary
+                backgroundColor: Appearance.colors.colPrimaryContainer
+                options: GlobalStates.centeredShapeOptions
+                onSelected: newValue => {
+                    Config.options.background.centeredWallpaperShape = newValue;
+                }
+            }
+
+            ColorSelectionArray {
+                visible: Config.options.background.centeredWallpaper
+                icon: "palette"
+                text: Translation.tr("Background Color")
+                currentValue: Config.options.background.centeredWallpaperColor
+                onSelected: newValue => {
+                    Config.options.background.centeredWallpaperColor = newValue;
+                }
+            }
+
+            ConfigSlider {
+                visible: Config.options.background.centeredWallpaper
+                text: Translation.tr("Size")
+                buttonIcon: "aspect_ratio"
+                usePercentTooltip: false
+                value: Config.options.background.centeredWallpaperSize
+                from: 400
+                to: 800
+                stopIndicatorValues: [400]
+                onValueChanged: {
+                    Config.options.background.centeredWallpaperSize = value;
+                }
+            }
+        }
+    }
+
+    ContentSection {
         icon: "widgets"
         title: Translation.tr("Desktop widgets")
+
+        ContentSubsection {
+            title: Translation.tr("Show widgets on")
+            visible: Quickshell.screens.length > 1 || Config.options.background.screenList.length > 0
+
+            Flow {
+                Layout.fillWidth: true
+                spacing: 2
+
+                SelectionGroupButton {
+                    leftmost: true
+                    rightmost: Quickshell.screens.length === 0
+                    buttonIcon: "tv_displays"
+                    buttonText: Translation.tr("All")
+                    toggled: Config.options.background.screenList.length === 0
+                    onClicked: Config.options.background.screenList = []
+                }
+
+                Repeater {
+                    model: Quickshell.screens
+                    delegate: SelectionGroupButton {
+                        id: screenButton
+                        required property var modelData
+                        required property int index
+                        rightmost: index === Quickshell.screens.length - 1
+                        buttonIcon: "monitor"
+                        buttonText: screenButton.modelData.name
+                        toggled: Config.options.background.screenList.includes(screenButton.modelData.name)
+                        onClicked: {
+                            const name = screenButton.modelData.name;
+                            const current = Array.from(Config.options.background.screenList);
+                            const next = current.includes(name) ? current.filter(s => s !== name) : current.concat([name]);
+                            const allNames = Quickshell.screens.map(s => s.name);
+                            Config.options.background.screenList = allNames.every(n => next.includes(n)) ? [] : next;
+                        }
+                    }
+                }
+            }
+        }
 
         ConfigRow {
             uniform: true

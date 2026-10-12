@@ -114,6 +114,7 @@ MouseArea {
     Connections {
         target: Wallpapers
         function onDirectoryChanged() {
+            Wallpapers.stopPreview();
             if (root.shown && root.source === "local")
                 root.updateThumbnails();
         }
@@ -124,6 +125,7 @@ MouseArea {
             root.updateThumbnails();
     }
     onSourceChanged: {
+        Wallpapers.stopPreview();
         if (root.shown && root.source === "local")
             root.updateThumbnails();
     }
@@ -140,10 +142,42 @@ MouseArea {
     }
 
     function selectWallpaperPath(filePath, isDirectory) {
-        if (filePath && filePath.length > 0) {
-            Wallpapers.select(filePath, isDirectory, root.useDarkMode);
+        if (!filePath || filePath.length === 0)
+            return;
+        previewTimer.stop();
+        if (!isDirectory && GlobalStates.wallpaperSelectorTarget === "lockWall") {
+            Wallpapers.setLockWallpaper(filePath);
             filterField.text = "";
+            GlobalStates.wallpaperSelectorOpen = false;
+            return;
         }
+        Wallpapers.select(filePath, isDirectory, root.useDarkMode);
+        if (!isDirectory)
+            Wallpapers.stopPreview();
+        filterField.text = "";
+    }
+
+    function queuePreview() {
+        if (!Config.options.background.enableWallpaperPreview || GlobalStates.wallpaperSelectorTarget === "lockWall"
+            || root.source !== "local" || root.spicyBlurActive)
+            return;
+        previewTimer.restart();
+    }
+
+    function previewCurrent() {
+        if (!GlobalStates.wallpaperSelectorOpen || root.source !== "local" || root.spicyBlurActive)
+            return;
+        const model = Wallpapers.folderModel;
+        const index = grid.currentIndex;
+        if (index < 0 || index >= model.count || model.get(index, "fileIsDir"))
+            return;
+        Wallpapers.startPreview(model.get(index, "filePath"));
+    }
+
+    Timer {
+        id: previewTimer
+        interval: 300
+        onTriggered: root.previewCurrent()
     }
 
     acceptedButtons: Qt.BackButton | Qt.ForwardButton
@@ -527,6 +561,7 @@ MouseArea {
                                     currentIndex = Math.max(0, Math.min(grid.model.count - 1, currentIndex
                                                                         + delta));
                                     positionViewAtIndex(currentIndex, GridView.Contain);
+                                    root.queuePreview();
                                 }
 
                                 function activateCurrent() {
@@ -557,6 +592,7 @@ MouseArea {
 
                                     onEntered: {
                                         grid.currentIndex = index;
+                                        root.queuePreview();
                                     }
 
                                     onActivated: {
@@ -906,6 +942,9 @@ MouseArea {
                 filterField.forceActiveFocus();
             } else if (!GlobalStates.wallpaperSelectorOpen) {
                 root.spicyRevealed = false;
+                previewTimer.stop();
+                Wallpapers.stopPreview();
+                GlobalStates.wallpaperSelectorTarget = "wallpaper";
                 WallhavenSearch.clearQuery();
             }
         }

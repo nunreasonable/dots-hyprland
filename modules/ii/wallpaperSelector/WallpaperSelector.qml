@@ -107,6 +107,11 @@ Scope {
         function random(): void {
             Wallpapers.randomFromCurrentFolder();
         }
+
+        function openFor(target: string): void {
+            GlobalStates.wallpaperSelectorTarget = target === "lockWall" ? "lockWall" : "wallpaper";
+            GlobalStates.wallpaperSelectorOpen = true;
+        }
     }
 
     GlobalShortcut {
