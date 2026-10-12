@@ -25,7 +25,7 @@ Scope {
         property bool fullscreen
         readonly property bool showFakeRounding: Config.options.bar.cornerStyle !== 5
             && (Config.options.appearance.fakeScreenRounding === 1 || (Config.options.appearance.fakeScreenRounding === 2 && !fullscreen))
-        visible: showFakeRounding || Config.options.sidebar.cornerOpen.enable
+        visible: showFakeRounding || (Config.options.sidebar.cornerOpen.enable && !(Platform.isWindows && fullscreen))
         property var corner
 
         exclusionMode: ExclusionMode.Ignore
