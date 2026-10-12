@@ -22,7 +22,7 @@ Singleton {
         { key: "images",      icon: "photo_library",     name: Translation.tr("Image Converter") },
         { key: "customImage", icon: "image",             name: Translation.tr("Custom Image") },
         { key: "imageCard",   icon: "photo_size_select_large", name: Translation.tr("Image Card") },
-        { key: "sticker",     icon: "sticker",           name: Translation.tr("Sticker") }
+        { key: "sticker",     icon: "sticky_note_2",           name: Translation.tr("Sticker") }
     ]
 
     readonly property var hidden: Array.from(Config.options.background.widgets.menuHidden)
