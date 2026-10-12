@@ -1661,7 +1661,6 @@
   "Export ZIP": "Exportar ZIP",
   "Fonts, accounts, keys, commands and your clipboard stay on your computer. Everything you upload is public, so only use images you own or are free to share.": "Fontes, contas, chaves, comandos e sua área de transferência ficam no seu computador. Tudo que você envia é público, então use só imagens que são suas ou que pode compartilhar livremente.",
   "GitHub sign-in failed": "O login no GitHub falhou",
-  "GitHub upload isn't set up on Windows yet (missing client id)": "O envio para o GitHub ainda não está configurado no Windows (falta o client id)",
   "Here is what happens when you upload \"%1\".": "Veja o que acontece quando você envia \"%1\".",
   "Images (*.png *.jpg *.jpeg *.webp)": "Imagens (*.png *.jpg *.jpeg *.webp)",
   "Imported": "Importados",
@@ -1685,5 +1684,6 @@
   "The shell sends it for you": "O shell envia por você",
   "The sign-in code expired, try again": "O código de login expirou, tente de novo",
   "This preset came from the gallery and can't be exported": "Esse preset veio da galeria e não pode ser exportado",
-  "Waiting for you to finish in the browser…": "Esperando você terminar no navegador…"
+  "Waiting for you to finish in the browser…": "Esperando você terminar no navegador…",
+  "Sign in with the GitHub CLI first: install it (winget install GitHub.cli), then run gh auth login": "Entre com o GitHub CLI antes: instale (winget install GitHub.cli) e rode gh auth login"
 }

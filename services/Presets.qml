@@ -1142,6 +1142,7 @@ Singleton {
 
     function _withGithubToken(callback) {
         root._ghTokenCallback = callback;
+        root._ghCliTried = false;
         root._resolveGithubToken();
     }
 
@@ -1152,10 +1153,39 @@ Singleton {
         }
         const token = KeyringStorage.keyringData?.presets?.github?.token ?? "";
         if (token === "") {
-            root._startDeviceFlow();
+            root._tryGhCli();
             return;
         }
         root._verifyToken(token);
+    }
+
+    property bool _ghCliTried: false
+
+    function _tryGhCli() {
+        if (root._ghCliTried) {
+            root._startDeviceFlow();
+            return;
+        }
+        root._ghCliTried = true;
+        const gh = Platform.isWindows ? (WindowsNative.fsUtils?.findExecutable("gh") ?? "") : "gh";
+        if (gh === "") {
+            root._startDeviceFlow();
+            return;
+        }
+        ghCliTokenProc.command = [gh, "auth", "token"];
+        ghCliTokenProc.running = true;
+    }
+
+    Process {
+        id: ghCliTokenProc
+        stdout: StdioCollector { id: ghCliTokenOut }
+        onExited: code => {
+            const token = ghCliTokenOut.text.trim();
+            if (code === 0 && token !== "")
+                root._verifyToken(token);
+            else
+                root._startDeviceFlow();
+        }
     }
 
     Connections {
@@ -1195,7 +1225,7 @@ Singleton {
                 if (cb)
                     cb(verifyTokenProc.token);
             } else {
-                root._startDeviceFlow();
+                root._tryGhCli();
             }
         }
     }
@@ -1217,7 +1247,7 @@ Singleton {
 
     function _startDeviceFlow() {
         if (root.githubClientId === "") {
-            root.githubError = Translation.tr("GitHub upload isn't set up on Windows yet (missing client id)");
+            root.githubError = Translation.tr("Sign in with the GitHub CLI first: install it (winget install GitHub.cli), then run gh auth login");
             root.githubBusy = false;
             root._ghTokenCallback = null;
             return;
