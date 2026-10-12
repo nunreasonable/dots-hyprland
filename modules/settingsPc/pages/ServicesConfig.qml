@@ -74,6 +74,29 @@ ContentPage {
                     }
                 }
             }
+
+            ContentSubsection {
+                title: Translation.tr("vLLM endpoint")
+                tooltip: Translation.tr("Address of a local OpenAI-compatible server (e.g. vLLM). Models it's currently running show up in the model picker automatically.")
+
+                GroupedList {
+                    ConfigTextArea {
+                        id: vllmEndpointField
+                        Layout.fillWidth: true
+                        fieldWidth: 320
+                        buttonIcon: "dns"
+                        text: Translation.tr("Base URL")
+                        placeholderText: "http://localhost:8000"
+                        value: Config.options.ai.vllmEndpoint
+                        onEditingFinished: {
+                            if (vllmEndpointField.value !== Config.options.ai.vllmEndpoint) {
+                                Config.options.ai.vllmEndpoint = vllmEndpointField.value;
+                                Ai.refreshLocalModels();
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         ContentSection {
@@ -428,6 +451,11 @@ ContentPage {
             icon: "weather_mix"
             shape: W.MaterialShape.Shape.Pill
             title: Translation.tr("Weather")
+
+            W.WeatherMapPreview {
+                Layout.fillWidth: true
+            }
+
             GroupedList {
                 ConfigSwitch {
                     buttonIcon: "assistant_navigation"

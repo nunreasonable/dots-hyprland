@@ -14,6 +14,7 @@ Rectangle {
     property string description: ""
     property var onApply: () => {}
     property var onRemove: () => {}
+    property var onOverwrite: null
 
     implicitWidth: 260
     implicitHeight: contentColumn.implicitHeight + 14
@@ -99,6 +100,27 @@ Rectangle {
             spacing: 8
 
             Item { Layout.fillWidth: true }
+
+            GroupButton {
+                visible: root.onOverwrite !== null
+                bounce: false
+                toggled: false
+                leftRadius: height / 2
+                rightRadius: height / 2
+                implicitHeight: 34
+                horizontalPadding: 14
+                verticalPadding: 6
+                colBackground: "transparent"
+                colBackgroundHover: ColorUtils.transparentize(Appearance.colors.colPrimaryContainerHover, 0.8)
+                colBackgroundActive: Appearance.colors.colPrimaryContainerActive
+                contentItem: StyledText {
+                    text: Translation.tr("Update")
+                    color: Appearance.colors.colPrimary
+                    horizontalAlignment: Text.AlignHCenter
+                    verticalAlignment: Text.AlignVCenter
+                }
+                onClicked: root.onOverwrite()
+            }
 
             GroupButton {
                 bounce: false

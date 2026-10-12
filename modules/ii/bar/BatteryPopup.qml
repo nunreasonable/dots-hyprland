@@ -6,13 +6,14 @@ import QtQuick.Layouts
 
 StyledPopup {
     id: root
-    
+
+    readonly property bool healthKnown: Battery.health > 0
+
     ColumnLayout {
         id: columnLayout
         anchors.centerIn: parent
-        spacing: 4
+        spacing: 10
 
-        // Header
         StyledPopupHeaderRow {
             icon: "battery_android_full"
             label: Translation.tr("Battery")
@@ -42,31 +43,33 @@ StyledPopup {
             }
         }
 
-        StyledPopupValueRow {
-            visible:  !(Battery.chargeState != 4 && Battery.energyRate == 0)
-            icon: "bolt"
-            label: {
-                if (Battery.chargeState == 4) {
-                    return Translation.tr("Fully charged");
-                } else if (Battery.chargeState == 1) {
-                    return Translation.tr("Charging:");
-                } else {
-                    return Translation.tr("Discharging:");
-                }
-            }
-            value: {
-                if (Battery.chargeState == 4) {
-                    return "";
-                } else {
-                    return `${Battery.energyRate.toFixed(2)}W`;
-                }
-            }
-        }
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 6
 
-        StyledPopupValueRow {
-            icon: "heart_check"
-            label: Translation.tr("Health:")
-            value: `${(Battery.health).toFixed(1)}%`
+            ResourceCard {
+                label: Translation.tr("Health")
+                iconText: "heart_check"
+                iconShape: MaterialShape.Shape.Clover4Leaf
+                value: root.healthKnown ? Battery.health / 100 : 0
+                valueText: root.healthKnown ? "" : "—"
+                sublabel: Battery.chargeCycles > 0 ? `${Battery.chargeCycles} ${Translation.tr("cycles")}` : Translation.tr("N/A")
+                sublabelColor: Appearance.colors.colOnSurfaceVariant
+                cardWidth: 160
+            }
+
+            ResourceCard {
+                label: Battery.isCharging ? Translation.tr("Charge rate") : Translation.tr("Draw")
+                iconText: "bolt"
+                iconShape: MaterialShape.Shape.Pentagon
+                value: Math.min(Battery.energyRate / 60, 1.0)
+                valueText: Battery.chargeState == 4 ? "0 W" : `${Battery.energyRate.toFixed(1)} W`
+                sublabel: Battery.chargeState == 4
+                    ? Translation.tr("Full")
+                    : Battery.isCharging ? Translation.tr("Plugged in") : Translation.tr("On battery")
+                sublabelColor: Appearance.colors.colOnSurfaceVariant
+                cardWidth: 160
+            }
         }
     }
 }

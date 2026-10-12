@@ -1548,5 +1548,20 @@
   "Stripes": "Listras",
   "Transitions": "Transições",
   "Use same wallpaper for both": "Usar o mesmo papel de parede nos dois",
-  "Windows is drawing the wallpaper, so transitions, blur and the centered wallpaper don't show. Turn on \"Draw ii's own wallpaper\" under Windows desktop to use them.": "O Windows está desenhando o papel de parede, então transições, desfoque e papel de parede centralizado não aparecem. Ative \"Desenhar o papel de parede do ii\" em Área de trabalho do Windows para usá-los."
+  "Windows is drawing the wallpaper, so transitions, blur and the centered wallpaper don't show. Turn on \"Draw ii's own wallpaper\" under Windows desktop to use them.": "O Windows está desenhando o papel de parede, então transições, desfoque e papel de parede centralizado não aparecem. Ative \"Desenhar o papel de parede do ii\" em Área de trabalho do Windows para usá-los.",
+  "UI background": "Fundo da interface",
+  "OLED softens panels toward true black, best for screens with per-pixel dimming": "O OLED aproxima os painéis do preto absoluto, ideal para telas com atenuação por pixel",
+  "Themed": "Com tema",
+  "OLED": "OLED",
+  "vLLM endpoint": "Endpoint do vLLM",
+  "Address of a local OpenAI-compatible server (e.g. vLLM). Models it's currently running show up in the model picker automatically.": "Endereço de um servidor local compatível com a API da OpenAI (ex.: vLLM). Os modelos que ele estiver executando aparecem automaticamente no seletor de modelos.",
+  "Health": "Saúde",
+  "cycles": "ciclos",
+  "N/A": "N/D",
+  "Charge rate": "Taxa de carga",
+  "Draw": "Consumo",
+  "Plugged in": "Na tomada",
+  "On battery": "Na bateria",
+  "Nothing playing": "Nada tocando",
+  "Update": "Atualizar"
 }

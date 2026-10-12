@@ -141,10 +141,16 @@ Singleton {
     }
 
     colors: QtObject {
+        function softenForOled(color) {
+            return Config?.options.appearance.uiBackground === "oled" ? ColorUtils.transparentize(ColorUtils.mix(color, "#000000", 0.85), 0.2) : color
+        }
         property color colSubtext: m3colors.m3outline
         // Layer 0
         property color colLayer0Base: ColorUtils.mix(m3colors.m3background, m3colors.m3primary, Config.options.appearance.extraBackgroundTint ? 0.99 : 1)
         property color colLayer0: ColorUtils.transparentize(colLayer0Base, root.backgroundTransparency)
+        property color colUiBackground: Config?.options.appearance.uiBackground === "oled" ? ColorUtils.transparentize("#000000", root.backgroundTransparency) : colLayer0
+        property color colUiPopupBackground: Config?.options.appearance.uiBackground === "oled" ? "#000000" : colLayer1Base
+        property color colUiSurfaceContainer: Config?.options.appearance.uiBackground === "oled" ? ColorUtils.transparentize("#000000", root.backgroundTransparency) : colBackgroundSurfaceContainer
         property color colOnLayer0: m3colors.m3onBackground
         property color colLayer0Hover: ColorUtils.transparentize(ColorUtils.mix(colLayer0, colOnLayer0, 0.9, root.contentTransparency))
         property color colLayer0Active: ColorUtils.transparentize(ColorUtils.mix(colLayer0, colOnLayer0, 0.8, root.contentTransparency))

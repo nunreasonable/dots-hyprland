@@ -147,6 +147,22 @@ ContentPage {
         }
 
         ContentSubsection {
+            title: Translation.tr("UI background")
+            tooltip: Translation.tr("OLED softens panels toward true black, best for screens with per-pixel dimming")
+
+            ConfigSelectionArray {
+                currentValue: Config.options.appearance.uiBackground
+                onSelected: newValue => {
+                    Config.options.appearance.uiBackground = newValue;
+                }
+                options: [
+                    { displayName: Translation.tr("Themed"), icon: "palette", value: "themed" },
+                    { displayName: Translation.tr("OLED"), icon: "contrast", value: "oled" }
+                ]
+            }
+        }
+
+        ContentSubsection {
             title: Translation.tr("Transparency")
             tooltip: Translation.tr("The values below are ignored while Automatic is on")
 

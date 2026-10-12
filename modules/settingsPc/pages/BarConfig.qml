@@ -220,6 +220,11 @@ ContentPage {
             shape: W.MaterialShape.Shape.Gem
             title: Translation.tr("Positioning & Styles")
             GroupedList {
+                W.BarPositionPreview {
+                    Layout.alignment: Qt.AlignHCenter
+                    vertical: Config.options.bar.vertical
+                    atBottom: Config.options.bar.bottom
+                }
                 ConfigSelectionArray {
                     text: Translation.tr("Bar position")
                     icon: "swap_vert"

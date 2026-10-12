@@ -400,6 +400,51 @@ Singleton {
         }
     }
 
+    function refreshLocalModels() {
+        getOllamaModels.running = false;
+        getOllamaModels.running = true;
+        getVllmModels.running = false;
+        getVllmModels.running = true;
+    }
+
+    Process {
+        id: getVllmModels
+        running: true
+        command: {
+            const vllmBase = (Config?.options?.ai?.vllmEndpoint ?? "http://localhost:8000").replace(/\/+$/, '');
+            return Platform.isWindows
+                ? ["curl.exe", "-s", "--connect-timeout", "0.5", "-m", "1", `${vllmBase}/v1/models`]
+                : ["bash", "-c", `${Directories.scriptPath}/ai/show-running-vllm-models.sh "${vllmBase}"`.replace(/file:\/\//, "")];
+        }
+        stdout: StdioCollector {
+            onStreamFinished: {
+                if (this.text.length === 0) return;
+                try {
+                    const vllmBase = (Config?.options?.ai?.vllmEndpoint ?? "http://localhost:8000").replace(/\/+$/, '');
+                    const dataJson = Platform.isWindows
+                        ? (JSON.parse(this.text).data ?? []).map(entry => entry.id)
+                        : JSON.parse(this.text);
+                    dataJson.forEach(model => {
+                        const safeModelName = root.safeModelName("vllm-" + model);
+                        const cleanModel = model.includes('/') ? model.split('/').pop() : model;
+                        root.addModel(safeModelName, {
+                            "name": `vLLM: ${guessModelName(cleanModel)}`,
+                            "icon": guessModelLogo(model),
+                            "description": Translation.tr("Local vLLM model | %1").arg(model),
+                            "homepage": "https://docs.vllm.ai",
+                            "endpoint": `${vllmBase}/v1/chat/completions`,
+                            "model": model,
+                            "requires_key": false,
+                        });
+                    });
+                    root.modelList = Object.keys(root.models);
+                } catch (e) {
+                    console.log("Could not fetch vLLM models:", e);
+                }
+            }
+        }
+    }
+
     function refreshSavedChats() {
         if (Platform.isWindows) root.listWindowsFiles();
         else getSavedChats.running = true;
