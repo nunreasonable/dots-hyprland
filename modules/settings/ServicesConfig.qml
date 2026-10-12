@@ -408,6 +408,11 @@ ContentPage {
     ContentSection {
         icon: "weather_mix"
         title: Translation.tr("Weather")
+
+        WeatherMapPreview {
+            Layout.fillWidth: true
+        }
+
         ConfigRow {
             ConfigSwitch {
                 buttonIcon: "assistant_navigation"

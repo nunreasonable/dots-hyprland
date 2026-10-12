@@ -451,6 +451,11 @@ ContentPage {
             icon: "weather_mix"
             shape: W.MaterialShape.Shape.Pill
             title: Translation.tr("Weather")
+
+            W.WeatherMapPreview {
+                Layout.fillWidth: true
+            }
+
             GroupedList {
                 ConfigSwitch {
                     buttonIcon: "assistant_navigation"
