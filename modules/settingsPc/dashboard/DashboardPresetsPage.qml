@@ -153,11 +153,12 @@ Flickable {
                                     const data = JSON.parse(text());
                                     presetDelegate.presetWallpaper = Presets.previewImage(data);
                                     presetDelegate.presetDescription = data?._presetMeta?.description ?? "";
+                                    PresetThumbs.request(presetDelegate.presetWallpaper);
                                 } catch (e) {}
                             }
                         }
 
-                        imageSource: presetDelegate.presetWallpaper
+                        imageSource: PresetThumbs.thumbFor(presetDelegate.presetWallpaper) || presetDelegate.presetWallpaper
                         title: presetDelegate.presetName
                         description: presetDelegate.presetDescription !== "" ? presetDelegate.presetDescription : Translation.tr("Saved preset")
                         onApply: () => Presets.apply(presetDelegate.presetName)
@@ -202,11 +203,12 @@ Flickable {
                                     const data = JSON.parse(text());
                                     onlineDelegate.presetWallpaper = Presets.previewImage(data);
                                     onlineDelegate.presetDescription = data?._presetMeta?.description ?? "";
+                                    PresetThumbs.request(onlineDelegate.presetWallpaper);
                                 } catch (e) {}
                             }
                         }
 
-                        imageSource: onlineDelegate.presetWallpaper
+                        imageSource: PresetThumbs.thumbFor(onlineDelegate.presetWallpaper) || onlineDelegate.presetWallpaper
                         title: onlineDelegate.presetName
                         description: onlineDelegate.presetDescription !== "" ? onlineDelegate.presetDescription : Translation.tr("Downloaded preset")
                         onApply: () => Presets.applyOnline(onlineDelegate.presetName)
