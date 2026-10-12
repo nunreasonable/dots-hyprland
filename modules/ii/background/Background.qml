@@ -548,6 +548,16 @@ Variants {
                     active: bgRoot.videoLayerActive
                     source: "VideoWallpaperLayer.qml"
                 }
+
+                Loader {
+                    id: collageLoader
+                    anchors.fill: parent
+                    active: Collage.enabled && !bgRoot.nativeWallpaper
+                    sourceComponent: MultipleWalls {
+                        screen: bgRoot.modelData
+                        transitionDone: !bgRoot.transitionPending && bgRoot.transitionProgress >= 1.0
+                    }
+                }
             }
 
             Binding {
@@ -613,11 +623,21 @@ Variants {
                 wallpaperPath: bgRoot.wallpaperSafetyTriggered ? "" : bgRoot.wallpaperPath
                 wallpaperIsVideo: bgRoot.wallpaperIsVideo
                 allowed: !bgRoot.nativeWallpaper && !bgRoot.videoLayerActive
+                collageMode: Collage.enabled && !bgRoot.nativeWallpaper
             }
 
             WallpaperDropArea {
                 anchors.fill: parent
                 screen: bgRoot.modelData
+            }
+
+            Loader {
+                anchors.fill: parent
+                active: Collage.enabled && !bgRoot.nativeWallpaper && !Config.options.background.widgetsLocked
+                    && !GlobalStates.screenLocked && !!collageLoader.item
+                sourceComponent: MultipleWallsDrop {
+                    collage: collageLoader.item
+                }
             }
 
             WidgetCanvas {
@@ -884,6 +904,15 @@ Variants {
                         wallpaperScale: 1
                         wallpaperItem: wallpaper
                     }
+                }
+            }
+
+            Loader {
+                anchors.fill: parent
+                active: Collage.enabled && !bgRoot.nativeWallpaper && !Config.options.background.widgetsLocked
+                    && !GlobalStates.screenLocked && !!collageLoader.item
+                sourceComponent: MultipleWallsEditor {
+                    collage: collageLoader.item
                 }
             }
         }

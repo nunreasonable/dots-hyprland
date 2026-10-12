@@ -1710,5 +1710,18 @@
   "Windows is limiting HDR on this display right now, for example to save battery.": "O Windows está limitando o HDR nesta tela agora, por exemplo para economizar bateria.",
   "SDR content brightness": "Brilho do conteúdo SDR",
   "Color profiles, Night light and HDR calibration are in Windows Settings.": "Perfis de cor, Luz noturna e calibração de HDR ficam nas Configurações do Windows.",
-  "Open Windows display settings": "Abrir configurações de tela do Windows"
+  "Open Windows display settings": "Abrir configurações de tela do Windows",
+  "Choose an image": "Escolher uma imagem",
+  "Images (*.png *.jpg *.jpeg *.webp *.gif *.bmp)": "Imagens (*.png *.jpg *.jpeg *.webp *.gif *.bmp)",
+  "Drop to replace this wallpaper": "Solte para substituir este papel de parede",
+  "Use this wallpaper for colors and backdrop": "Usar este papel de parede para as cores e o fundo",
+  "Change image (or drop a file on the tile)": "Trocar a imagem (ou solte um arquivo no bloco)",
+  "Split side by side": "Dividir lado a lado",
+  "Split top and bottom": "Dividir em cima e embaixo",
+  "Only when locked": "Apenas quando bloqueado",
+  "Collage": "Colagem",
+  "Splits the desktop into several wallpaper tiles. Hover a tile on the desktop to change its image, split it or remove it.": "Divide a área de trabalho em vários blocos de papel de parede. Passe o mouse sobre um bloco para trocar a imagem, dividi-lo ou removê-lo.",
+  "Gap": "Espaçamento",
+  "Margin": "Margem",
+  "Windows is drawing the wallpaper, so transitions, blur, the centered wallpaper and the collage don't show. Turn on \"Draw ii's own wallpaper\" under Windows desktop to use them.": "O Windows está desenhando o papel de parede, então transições, desfoque, o papel de parede centralizado e a colagem não aparecem. Ative \"Desenhar o papel de parede do ii\" em Área de trabalho do Windows para usá-los."
 }
