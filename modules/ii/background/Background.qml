@@ -63,11 +63,7 @@ Variants {
         property int workspaceChunkSize: Config?.options.bar.workspaces.shown ?? 10
         property int totalWorkspaces: Math.ceil(lastWorkspaceId / workspaceChunkSize) * workspaceChunkSize
         // Wallpaper
-        readonly property string effectiveWallpaperPath: {
-            if (GlobalStates.screenLocked && Config.options.background.lockWall !== "")
-                return Config.options.background.lockWall;
-            return Wallpapers.previewPath || Wallpapers.confirmedPath || Config.options.background.wallpaperPath;
-        }
+        readonly property string effectiveWallpaperPath: bgRoot.currentEffectivePath()
         property bool wallpaperIsVideo: Wallpapers.isVideoPath(bgRoot.effectiveWallpaperPath)
         readonly property string targetWallpaperPath: wallpaperIsVideo ? Config.options.background.thumbnailPath : effectiveWallpaperPath
         property string wallpaperPath: ""
@@ -163,10 +159,7 @@ Variants {
             animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
         }
 
-        Component.onCompleted: {
-            bgRoot.shownWallpaperIsVideo = bgRoot.wallpaperIsVideo;
-            bgRoot.wallpaperPath = bgRoot.targetWallpaperPath;
-        }
+        Component.onCompleted: bgRoot.syncWallpaperPath()
 
         onTargetWallpaperPathChanged: Qt.callLater(bgRoot.syncWallpaperPath)
 
@@ -176,7 +169,11 @@ Variants {
         }
 
         onPreviewActiveChanged: {
-            if (bgRoot.previewActive || !bgRoot.nativeWallpaper)
+            if (bgRoot.previewActive) {
+                bgRoot.syncWallpaperPath();
+                return;
+            }
+            if (!bgRoot.nativeWallpaper)
                 return;
             bgRoot.nativePreviewHold = true;
             nativePreviewHoldTimer.restart();
@@ -205,8 +202,14 @@ Variants {
                 && !blurLoader.active && !centeredWallpaper.centeredShapeActive;
         }
 
-        function pickTransitionShader() {
-            if (bgRoot.wallpaperIsVideo)
+        function currentEffectivePath() {
+            if (GlobalStates.screenLocked && Config.options.background.lockWall !== "")
+                return Config.options.background.lockWall;
+            return Wallpapers.previewPath || Wallpapers.confirmedPath || Config.options.background.wallpaperPath;
+        }
+
+        function pickTransitionShader(toVideo) {
+            if (toVideo)
                 return "transition";
             if (bgRoot.wallpaperAnimation === "random")
                 return bgRoot.transitionShaders[Math.floor(Math.random() * bgRoot.transitionShaders.length)];
@@ -214,17 +217,19 @@ Variants {
         }
 
         function syncWallpaperPath() {
-            const next = bgRoot.targetWallpaperPath;
+            const effective = bgRoot.currentEffectivePath();
+            const toVideo = Wallpapers.isVideoPath(effective);
+            const next = toVideo ? Config.options.background.thumbnailPath : effective;
             if (next === bgRoot.wallpaperPath)
                 return;
             bgRoot.finishTransition();
             if (bgRoot.canAnimateWallpaperChange()) {
-                bgRoot.transitionShader = bgRoot.pickTransitionShader();
+                bgRoot.transitionShader = bgRoot.pickTransitionShader(toVideo);
                 bgRoot.transitionProgress = 0;
                 bgRoot.transitionPending = true;
                 bgRoot.transitionLive = true;
             }
-            bgRoot.shownWallpaperIsVideo = bgRoot.wallpaperIsVideo;
+            bgRoot.shownWallpaperIsVideo = toVideo;
             bgRoot.wallpaperPath = next;
         }
 
