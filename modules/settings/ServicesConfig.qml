@@ -62,6 +62,24 @@ ContentPage {
                 text: Translation.tr("Animates new text in the assistant's replies as it streams in, instead of showing it immediately.")
             }
         }
+
+        ContentSubsection {
+            title: Translation.tr("vLLM endpoint")
+            tooltip: Translation.tr("Address of a local OpenAI-compatible server (e.g. vLLM). Models it's currently running show up in the model picker automatically.")
+
+            MaterialTextArea {
+                Layout.fillWidth: true
+                placeholderText: Translation.tr("Base URL")
+                text: Config.options.ai.vllmEndpoint
+                wrapMode: TextEdit.Wrap
+                onEditingFinished: {
+                    if (text !== Config.options.ai.vllmEndpoint) {
+                        Config.options.ai.vllmEndpoint = text;
+                        Ai.refreshLocalModels();
+                    }
+                }
+            }
+        }
     }
 
     ContentSection {

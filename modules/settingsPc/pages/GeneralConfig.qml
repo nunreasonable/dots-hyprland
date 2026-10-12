@@ -44,6 +44,26 @@ ContentPage {
             }
 
             ContentSubsection {
+                title: Translation.tr("UI background")
+                tooltip: Translation.tr("OLED softens panels toward true black, best for screens with per-pixel dimming")
+
+                GroupedList {
+                    ConfigSelectionArray {
+                        text: Translation.tr("Theme")
+                        icon: "contrast"
+                        currentValue: Config.options.appearance.uiBackground
+                        onSelected: newValue => {
+                            Config.options.appearance.uiBackground = newValue;
+                        }
+                        options: [
+                            { displayName: Translation.tr("Themed"), icon: "palette", value: "themed" },
+                            { displayName: Translation.tr("OLED"), icon: "contrast", value: "oled" }
+                        ]
+                    }
+                }
+            }
+
+            ContentSubsection {
                 visible: Platform.isWindows
                 title: Translation.tr("Accent color override")
                 tooltip: Translation.tr("Hex color like #a7c0ff. Leave empty to use a color extracted from the wallpaper")
