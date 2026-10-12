@@ -1,4 +1,5 @@
 pragma ComponentBehavior: Bound
+import qs
 import qs.modules.common
 import qs.modules.common.models
 import qs.modules.common.widgets
@@ -278,6 +279,11 @@ Item {
                 TrackChangeButton {
                     iconName: "skip_next"
                     downAction: () => root.player?.next()
+                }
+
+                TrackChangeButton {
+                    iconName: "equalizer"
+                    downAction: () => GlobalStates.equalizerOpen = !GlobalStates.equalizerOpen
                 }
 
                 Item { Layout.fillWidth: true }

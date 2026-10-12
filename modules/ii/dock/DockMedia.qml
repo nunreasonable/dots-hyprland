@@ -1,4 +1,5 @@
 pragma ComponentBehavior: Bound
+import qs
 import qs.modules.common
 import qs.modules.common.widgets
 import qs.modules.common.functions
@@ -287,6 +288,23 @@ Item {
                         text: "skip_next"
                         iconSize: Appearance.font.pixelSize.large
                         fill: 1
+                        color: root.blendedColors.colOnSecondaryContainer
+                    }
+                }
+
+                RippleButton {
+                    implicitWidth: 28
+                    implicitHeight: 28
+                    colBackground: ColorUtils.transparentize(root.blendedColors.colSecondaryContainer, 1)
+                    colBackgroundHover: root.blendedColors.colSecondaryContainerHover
+                    colRipple: root.blendedColors.colSecondaryContainerActive
+                    downAction: () => GlobalStates.equalizerOpen = !GlobalStates.equalizerOpen
+                    contentItem: MaterialSymbol {
+                        anchors.centerIn: parent
+                        horizontalAlignment: Text.AlignHCenter
+                        text: "equalizer"
+                        iconSize: Appearance.font.pixelSize.large
+                        fill: GlobalStates.equalizerOpen ? 1 : 0
                         color: root.blendedColors.colOnSecondaryContainer
                     }
                 }

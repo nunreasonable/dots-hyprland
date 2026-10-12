@@ -11,8 +11,8 @@ import Quickshell.Io
 // knows how to drive, just backed by Equalizer APO (WindowsNative.equalizer,
 // see src/windows/system/equalizer_apo.{hpp,cpp}) and a plain JSON state
 // file instead of EasyEffects preset JSON. Only ever touched behind
-// Platform.isWindows checks from EqualizerView.qml/EqualizerAutoService.qml -
-// loads harmlessly on Linux (the FileView just sits on an unused file).
+// Platform.isWindows checks from the equalizer view and its auto genre-follow
+// service - loads harmlessly on Linux (the FileView just sits on an unused file).
 Singleton {
     id: root
 
@@ -112,7 +112,6 @@ Singleton {
         adapter.bands = bands;
         adapter.presetName = "Custom";
         root.pending = true;
-        EqualizerAutoService.currentPresetName = "Custom";
         liveApplyTimer.restart();
     }
 
@@ -135,7 +134,6 @@ Singleton {
         const vals = root.presetValues[name];
         if (vals) adapter.bands = vals.slice();
         adapter.presetName = name;
-        EqualizerAutoService.currentPresetName = name;
         root.pending = false;
         root.writeCurrentCurve();
     }
@@ -144,7 +142,6 @@ Singleton {
         const vals = root.customPresets[name];
         if (vals) adapter.bands = vals.slice();
         adapter.presetName = name;
-        EqualizerAutoService.currentPresetName = name;
         root.pending = false;
         root.writeCurrentCurve();
     }
@@ -157,7 +154,6 @@ Singleton {
         root.customPresets = updated;
         adapter.customPresetsJson = JSON.stringify(updated);
         adapter.presetName = trimmed;
-        EqualizerAutoService.currentPresetName = trimmed;
         root.pending = false;
         root.writeCurrentCurve();
     }
@@ -169,7 +165,6 @@ Singleton {
         adapter.customPresetsJson = JSON.stringify(updated);
         if (adapter.presetName === name) {
             adapter.presetName = "Custom";
-            EqualizerAutoService.currentPresetName = "Custom";
         }
     }
 
