@@ -18,7 +18,7 @@ Item {
 
     property string activeWindowAddress: `0x${activeWindow?.HyprlandToplevel?.address}`
     property bool focusingThisMonitor: HyprlandData.activeWorkspace?.monitor == monitor?.name
-    property var biggestWindow: HyprlandData.biggestWindowForWorkspace(HyprlandData.monitors[root.monitor?.id]?.activeWorkspace.id)
+    property var biggestWindow: (Platform.isWindows && root.focusingThisMonitor && !root.activeWindow) ? null : HyprlandData.biggestWindowForWorkspace(HyprlandData.monitors[root.monitor?.id]?.activeWorkspace.id)
     readonly property string activeAppClass: (root.focusingThisMonitor && root.activeWindow?.activated) ? (root.activeWindow?.appId ?? root.biggestWindow?.class ?? "") : (root.biggestWindow?.class ?? "")
 
     implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth : root.classic ? colLayout.implicitWidth : Math.min(colLayout.implicitWidth + 12, 280)
