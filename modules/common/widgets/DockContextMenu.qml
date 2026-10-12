@@ -11,18 +11,12 @@ import qs.modules.common.functions
 Item {
     id: root
 
-    // Screen the dock lives on, used to pick the workspace group to offer.
     property var screen
 
     property string appId: ""
     property alias isOpen: menuLoader.active
-    // Button geometry in dock-window coordinates, captured on open. Anchoring to
-    // the button item itself would close the menu whenever the dock rebuilds its
-    // app list (any window opening/closing destroys the unpinned buttons).
     property rect anchorRect
 
-    // Looked up live so the menu follows windows opening/closing while open.
-    // TaskbarApps keys entries by lowercased appId.
     readonly property var appToplevel: root.appId !== ""
         ? (TaskbarApps.apps.find(a => a.appId === root.appId.toLowerCase()) ?? null)
         : null
@@ -51,7 +45,6 @@ Item {
 
     function close() {
         menuLoader.active = false;
-        // Drop the live lookups so closed menus don't track TaskbarApps.
         root.appId = "";
         root.desktopEntry = null;
     }
@@ -71,7 +64,6 @@ Item {
             id: contextPopup
             visible: true
 
-            // Open away from the screen edge the dock is attached to.
             readonly property int side: DockStyle.position === "left" ? Edges.Right
                 : DockStyle.position === "right" ? Edges.Left
                 : Edges.Top
@@ -97,7 +89,6 @@ Item {
             }
 
             color: "transparent"
-            // Clicks on the transparent shadow margin should count as outside.
             mask: Region {
                 item: menuInputArea
             }
@@ -172,7 +163,6 @@ Item {
                     }
                     spacing: 0
 
-                    // Desktop entry actions
                     Repeater {
                         model: root.desktopEntry?.actions ?? []
                         delegate: ContextMenuItem {
@@ -277,7 +267,6 @@ Item {
     component ContextMenuItem: RippleButton {
         id: menuItemRoot
         property string iconName
-        // Themed icon; falls back to iconName (a Material Symbol) when empty.
         property string iconSource
         property string label
         readonly property color contentColor: enabled ? Appearance.m3colors.m3onSurface : Appearance.m3colors.m3outline
