@@ -46,6 +46,7 @@ Rectangle {
 
         RippleButton {
             id: parentDirButton
+            focusPolicy: Qt.NoFocus
             downAction: () => root.navigate(FileUtils.parentDirectory(root.directory))
             contentItem: MaterialSymbol {
                 text: "drive_folder_upload"
@@ -60,6 +61,7 @@ Rectangle {
             Rectangle {
                 id: directoryEntry
                 visible: !root.showBreadcrumb
+                clip: true
                 anchors.fill: parent
                 color: Appearance.colors.colLayer1
                 radius: Appearance.rounding.full
@@ -115,8 +117,14 @@ Rectangle {
 
         RippleButton {
             id: dirEditButton
+            focusPolicy: Qt.NoFocus
             toggled: !root.showBreadcrumb
-            downAction: () => root.showBreadcrumb = !root.showBreadcrumb
+            downAction: () => {
+                if (root.showBreadcrumb)
+                    root.focusBreadcrumb();
+                else
+                    root.showBreadcrumb = true;
+            }
             contentItem: MaterialSymbol {
                 text: "edit"
                 iconSize: Appearance.font.pixelSize.larger
