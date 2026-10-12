@@ -113,7 +113,7 @@ Singleton {
         root.downloading = true;
         root.lastError = "";
         root.downloadDest = `${Directories.selfUpdateDownloadDir}/${root.setupAssetName}`;
-        downloadProc.command = [root.curlBin, "-fsSL", "--max-time", "180", "-o", root.downloadDest,
+        downloadProc.command = [root.curlBin, "--create-dirs", "-fsSL", "--max-time", "180", "-o", root.downloadDest,
             "-w", "SIZE:%{size_download}", root.setupUrl];
         downloadProc.running = true;
     }
