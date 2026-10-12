@@ -370,6 +370,8 @@ ContentPage {
                 text: Translation.tr("Enable")
                 checked: Config.options.background.collage.enable
                 onCheckedChanged: {
+                    if (checked && !Config.options.background.collage.enable)
+                        Collage.reset();
                     Config.options.background.collage.enable = checked;
                 }
                 StyledToolTip {
