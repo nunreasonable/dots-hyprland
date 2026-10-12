@@ -126,7 +126,7 @@ Item {
         case "sliders":
             return sidebar.quickSliders.enable && (sidebar.quickSliders.showMic || sidebar.quickSliders.showVolume || sidebar.quickSliders.showBrightness);
         case "media":
-            return sidebar.mediaPlayer && sidebar.media.enable && root.activePlayer !== null;
+            return sidebar.mediaPlayer && root.activePlayer !== null;
         case "bottom":
             return sidebar.bottomGroup;
         default:

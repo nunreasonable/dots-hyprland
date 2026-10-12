@@ -307,18 +307,9 @@ ContentPage {
                         }
                     }
                     ConfigSwitch {
-                        buttonIcon: "play_circle"
-                        text: Translation.tr("Enable media card")
-                        enabled: Config.options.sidebar.mediaPlayer
-                        checked: Config.options.sidebar.media.enable
-                        onCheckedChanged: {
-                            Config.options.sidebar.media.enable = checked;
-                        }
-                    }
-                    ConfigSwitch {
                         buttonIcon: "lyrics"
                         text: Translation.tr("Show lyrics")
-                        enabled: Config.options.sidebar.mediaPlayer && Config.options.sidebar.media.enable
+                        enabled: Config.options.sidebar.mediaPlayer
                         checked: Config.options.sidebar.media.showLyrics
                         onCheckedChanged: {
                             Config.options.sidebar.media.showLyrics = checked;
@@ -327,7 +318,7 @@ ContentPage {
                     ConfigSwitch {
                         buttonIcon: "palette"
                         text: Translation.tr("Color from album art")
-                        enabled: Config.options.sidebar.mediaPlayer && Config.options.sidebar.media.enable
+                        enabled: Config.options.sidebar.mediaPlayer
                         checked: Config.options.sidebar.media.artColors
                         onCheckedChanged: {
                             Config.options.sidebar.media.artColors = checked;
@@ -336,7 +327,7 @@ ContentPage {
                     ConfigSwitch {
                         buttonIcon: "blur_on"
                         text: Translation.tr("Blurred art background")
-                        enabled: Config.options.sidebar.mediaPlayer && Config.options.sidebar.media.enable
+                        enabled: Config.options.sidebar.mediaPlayer
                         checked: Config.options.sidebar.media.blurredBackground
                         onCheckedChanged: {
                             Config.options.sidebar.media.blurredBackground = checked;
@@ -345,7 +336,7 @@ ContentPage {
                     ConfigSwitch {
                         buttonIcon: "shapes"
                         text: Translation.tr("Shaped art")
-                        enabled: Config.options.sidebar.mediaPlayer && Config.options.sidebar.media.enable
+                        enabled: Config.options.sidebar.mediaPlayer
                         checked: Config.options.sidebar.media.shapeArt
                         onCheckedChanged: {
                             Config.options.sidebar.media.shapeArt = checked;
@@ -355,7 +346,7 @@ ContentPage {
                         Layout.fillWidth: true
                         buttonIcon: "category"
                         text: Translation.tr("Art shape")
-                        enabled: Config.options.sidebar.mediaPlayer && Config.options.sidebar.media.enable && Config.options.sidebar.media.shapeArt
+                        enabled: Config.options.sidebar.mediaPlayer && Config.options.sidebar.media.shapeArt
                         fieldWidth: 200
                         fixedWidth: true
                         model: GlobalStates.centeredShapeOptions.map(shape => ({ displayName: shape, value: shape }))
