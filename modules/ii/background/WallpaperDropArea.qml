@@ -35,8 +35,6 @@ DropArea {
                 return;
             if (paths.length === 1 && root.isWallpaperPath(paths[0]))
                 Wallpapers.apply(paths[0], Appearance.m3colors.darkmode);
-            else
-                WindowsNative.desktopDrop.copyToDesktop(paths);
         }
     }
 
