@@ -636,57 +636,6 @@ ContentPage {
                     }
                 }
             }
-
-            ContentSubsection {
-                visible: Config.options.policies.weeb === 1
-                title: Translation.tr("Random Konachan wallpaper")
-
-                GroupedList {
-                    ConfigSwitch {
-                        buttonIcon: "local_fire_department"
-                        text: Translation.tr("Spicy Stuff")
-                        enabled: SpicyStuff.allowed
-                        checked: Config.options.background.konachanSpicy && SpicyStuff.allowed
-                        onCheckedChanged: {
-                            if (SpicyStuff.allowed)
-                                Config.options.background.konachanSpicy = checked;
-                        }
-                        W.StyledToolTip {
-                            text: Translation.tr("Lets Konachan pick wallpapers of any rating, not only safe ones")
-                        }
-                    }
-                    ConfigSwitch {
-                        buttonIcon: "favorite"
-                        text: Translation.tr("Only yuri")
-                        checked: Config.options.background.konachanOnlyYuri
-                        onCheckedChanged: {
-                            Config.options.background.konachanOnlyYuri = checked;
-                        }
-                    }
-                    ConfigTextArea {
-                        Layout.fillWidth: true
-                        fieldWidth: 300
-                        enabled: SpicyStuff.konachan
-                        buttonIcon: "sell"
-                        text: Translation.tr("Extra tags")
-                        description: SpicyStuff.konachan
-                            ? Translation.tr("Separated by spaces, up to %1").arg(SpicyStuff.maxExtraTags)
-                            : Translation.tr("Turn on Spicy Stuff first")
-                        placeholderText: Translation.tr("Extra tags")
-                        value: Config.options.background.konachanExtraTags
-                        onValueChanged: {
-                            Config.options.background.konachanExtraTags = value;
-                        }
-                    }
-                }
-
-                W.NoticeBox {
-                    Layout.fillWidth: true
-                    visible: !SpicyStuff.allowed
-                    materialIcon: SpicyStuff.checking ? "hourglass_top" : "lock"
-                    text: SpicyStuff.restriction
-                }
-            }
         }
 
         ContentSection {

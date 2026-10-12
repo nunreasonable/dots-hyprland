@@ -42,6 +42,56 @@ ContentPage {
                 }
             }
         }
+
+        ContentSubsection {
+            visible: Config.options.policies.weeb === 1
+            title: Translation.tr("Random Konachan wallpaper")
+
+            ConfigRow {
+                uniform: true
+                ConfigSwitch {
+                    buttonIcon: "local_fire_department"
+                    text: Translation.tr("Spicy Stuff")
+                    enabled: SpicyStuff.allowed
+                    checked: Config.options.background.konachanSpicy && SpicyStuff.allowed
+                    onCheckedChanged: {
+                        if (SpicyStuff.allowed)
+                            Config.options.background.konachanSpicy = checked;
+                    }
+                    StyledToolTip {
+                        text: Translation.tr("Lets Konachan pick wallpapers of any rating, not only safe ones")
+                    }
+                }
+                ConfigSwitch {
+                    buttonIcon: "favorite"
+                    text: Translation.tr("Only yuri")
+                    checked: Config.options.background.konachanOnlyYuri
+                    onCheckedChanged: {
+                        Config.options.background.konachanOnlyYuri = checked;
+                    }
+                }
+            }
+
+            NoticeBox {
+                Layout.fillWidth: true
+                visible: !SpicyStuff.allowed
+                materialIcon: SpicyStuff.checking ? "hourglass_top" : "lock"
+                text: SpicyStuff.restriction
+            }
+
+            MaterialTextArea {
+                Layout.fillWidth: true
+                enabled: SpicyStuff.konachan
+                placeholderText: SpicyStuff.konachan
+                    ? Translation.tr("Extra tags, separated by spaces (up to %1)").arg(SpicyStuff.maxExtraTags)
+                    : Translation.tr("Extra tags (turn on Spicy Stuff first)")
+                text: Config.options.background.konachanExtraTags
+                wrapMode: TextEdit.Wrap
+                onTextChanged: {
+                    Config.options.background.konachanExtraTags = text;
+                }
+            }
+        }
     }
 
     ContentSection {
