@@ -15,6 +15,34 @@ Rectangle {
     property var onApply: () => {}
     property var onRemove: () => {}
     property var onOverwrite: null
+    property var onRename: null
+    property list<var> menuActions: []
+
+    property bool renaming: false
+
+    function startRename() {
+        if (!root.onRename)
+            return;
+        renameInput.text = root.title;
+        root.renaming = true;
+        renameFocusTimer.restart();
+    }
+
+    function commitRename() {
+        const next = renameInput.text.trim();
+        root.renaming = false;
+        if (next !== "" && next !== root.title)
+            root.onRename(next);
+    }
+
+    Timer {
+        id: renameFocusTimer
+        interval: 60
+        onTriggered: {
+            renameInput.forceActiveFocus();
+            renameInput.selectAll();
+        }
+    }
 
     implicitWidth: 260
     implicitHeight: contentColumn.implicitHeight + 14
@@ -45,22 +73,82 @@ Rectangle {
             ColumnLayout {
                 spacing: -4
                 Layout.fillWidth: true
-                StyledText {
+
+                Item {
                     Layout.fillWidth: true
-                    text: root.title
-                    font.pixelSize: Appearance.font.pixelSize.large
-                    font.weight: Font.DemiBold
-                    color: Appearance.colors.colOnLayer1
-                    elide: Text.ElideRight
-                    wrapMode: Text.NoWrap
+                    implicitHeight: Math.max(titleText.implicitHeight, renameInput.implicitHeight)
+                    visible: true
+
+                    StyledText {
+                        id: titleText
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        visible: !root.renaming
+                        text: root.title
+                        font.pixelSize: Appearance.font.pixelSize.large
+                        font.weight: Font.DemiBold
+                        color: Appearance.colors.colOnLayer1
+                        elide: Text.ElideRight
+                        wrapMode: Text.NoWrap
+                    }
+
+                    TextInput {
+                        id: renameInput
+                        anchors.left: parent.left
+                        anchors.right: parent.right
+                        visible: root.renaming
+                        clip: true
+                        font.pixelSize: Appearance.font.pixelSize.large
+                        font.family: Appearance.font.family.main
+                        color: Appearance.colors.colOnLayer1
+                        selectionColor: Appearance.colors.colPrimary
+                        onAccepted: root.commitRename()
+                        Keys.onEscapePressed: root.renaming = false
+                        onActiveFocusChanged: if (!activeFocus && root.renaming) root.commitRename()
+                    }
                 }
+
                 StyledText {
                     Layout.fillWidth: true
-                    visible: root.description.length > 0
+                    visible: root.description.length > 0 && !root.renaming
                     text: root.description
                     font.pixelSize: Appearance.font.pixelSize.small
                     color: Appearance.colors.colSubtext
                     elide: Text.ElideRight
+                }
+            }
+
+            Item {
+                visible: root.menuActions.length > 0
+                Layout.alignment: Qt.AlignRight
+                implicitWidth: 32
+                implicitHeight: 32
+
+                RippleButton {
+                    id: menuBtn
+                    anchors.centerIn: parent
+                    implicitWidth: 32
+                    implicitHeight: 32
+                    buttonRadius: Appearance.rounding.full
+                    colBackground: "transparent"
+                    colBackgroundHover: Appearance.colors.colLayer2Hover
+                    colRipple: Appearance.colors.colLayer2Active
+                    onClicked: menuPopup.visible = !menuPopup.visible
+                    contentItem: MaterialSymbol {
+                        anchors.centerIn: parent
+                        text: "more_vert"
+                        iconSize: Appearance.font.pixelSize.large
+                        color: Appearance.colors.colOnLayer1
+                    }
+                }
+
+                PresetPopup {
+                    id: menuPopup
+                    y: menuBtn.height + 4
+                    x: menuBtn.width - width + 8
+                    actions: root.menuActions.map(action => action.id === "rename"
+                        ? Object.assign({}, action, { onTrigger: root.startRename })
+                        : action)
                 }
             }
         }

@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Dialogs
 import Quickshell.Io
 import qs.services
 import qs.modules.common
@@ -16,11 +17,69 @@ Flickable {
 
     property bool importDropHover: false
 
+    function presetMenuActions(name, scope, hasOrigin) {
+        const actions = [];
+        if (scope === "mine") {
+            actions.push({ id: "rename", icon: "edit", label: Translation.tr("Rename") });
+            if (!hasOrigin) {
+                actions.push({ id: "export", icon: "ios_share", label: Translation.tr("Export ZIP"), onTrigger: () => Presets.exportZip(name) });
+                if (Presets.isPublished(name))
+                    actions.push({ id: "unshare", icon: "cloud_off", label: Translation.tr("Remove from gallery"), confirm: true, onTrigger: () => Presets.unpublish(name) });
+                else
+                    actions.push({ id: "upload", icon: "cloud_upload", label: Translation.tr("Upload"), onTrigger: () => Presets.publish(name) });
+            }
+        } else if (scope === "downloaded" || scope === "imported") {
+            actions.push({ id: "install", icon: "download_done", label: Translation.tr("Install"), onTrigger: () => Presets.install(name, scope) });
+        }
+        return actions;
+    }
+
     FileView {
         id: importReadFile
         property string suggestedName: ""
         printErrors: false
         onLoaded: Presets.importJsonText(importReadFile.text(), importReadFile.suggestedName)
+    }
+
+    FileDialog {
+        id: zipImportDialog
+        title: Translation.tr("Choose a preset ZIP")
+        nameFilters: [Translation.tr("Preset ZIP (*.zip)"), Translation.tr("All files (*)")]
+        onAccepted: Presets.importZip(FileUtils.trimFileProtocol(selectedFile.toString()))
+    }
+
+    FileDialog {
+        id: previewPickDialog
+        property string pendingName: ""
+        title: Translation.tr("Choose the preview image (a screenshot of your desktop)")
+        nameFilters: [Translation.tr("Images (*.png *.jpg *.jpeg *.webp)"), Translation.tr("All files (*)")]
+        onAccepted: Presets.publishWithPreview(previewPickDialog.pendingName, FileUtils.trimFileProtocol(selectedFile.toString()))
+    }
+
+    Connections {
+        target: Presets
+        function onPickPreviewRequested(name) {
+            previewPickDialog.pendingName = name;
+            previewPickDialog.open();
+        }
+    }
+
+    Loader {
+        x: 0
+        y: root.contentY
+        width: root.width
+        height: root.height
+        z: 10
+        active: Presets.uploadGuideOpen
+        sourceComponent: W.PresetUploadGuide {
+            presetName: Presets.uploadGuideName
+            onProceed: Presets.confirmUploadGuide()
+            onCancel: Presets.cancelUploadGuide()
+        }
+    }
+
+    W.PresetGithubSignInDialog {
+        visible: Presets.deviceFlowOpen
     }
 
     ColumnLayout {
@@ -55,6 +114,34 @@ Flickable {
                 colBackgroundHover: Appearance.colors.colSecondaryContainerHover
                 colRipple: Appearance.colors.colSecondaryContainerActive
                 onClicked: Presets.openPresetsFolder()
+            }
+
+            W.RippleButtonWithIcon {
+                materialIcon: "folder_zip"
+                mainText: Translation.tr("Import ZIP")
+                colBackground: Appearance.colors.colSecondaryContainer
+                colBackgroundHover: Appearance.colors.colSecondaryContainerHover
+                colRipple: Appearance.colors.colSecondaryContainerActive
+                onClicked: zipImportDialog.open()
+            }
+        }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 6
+            visible: Presets.githubBusy || Presets.githubError !== ""
+
+            W.MaterialSymbol {
+                text: Presets.githubError !== "" ? "error" : "cloud_sync"
+                iconSize: Appearance.font.pixelSize.small
+                color: Presets.githubError !== "" ? Appearance.colors.colError : Appearance.colors.colSubtext
+            }
+            W.StyledText {
+                Layout.fillWidth: true
+                wrapMode: Text.Wrap
+                text: Presets.githubError !== "" ? Presets.githubError : Translation.tr("Talking to GitHub…")
+                color: Presets.githubError !== "" ? Appearance.colors.colError : Appearance.colors.colSubtext
+                font.pixelSize: Appearance.font.pixelSize.smaller
             }
         }
 
@@ -144,6 +231,7 @@ Flickable {
                         property string presetName: fileName.replace(".json", "")
                         property string presetWallpaper: ""
                         property string presetDescription: ""
+                        property string presetOrigin: ""
 
                         FileView {
                             path: presetDelegate.filePath
@@ -153,6 +241,7 @@ Flickable {
                                     const data = JSON.parse(text());
                                     presetDelegate.presetWallpaper = Presets.previewImage(data);
                                     presetDelegate.presetDescription = data?._presetMeta?.description ?? "";
+                                    presetDelegate.presetOrigin = data?._presetMeta?.origin ?? "";
                                     PresetThumbs.request(presetDelegate.presetWallpaper);
                                 } catch (e) {}
                             }
@@ -161,8 +250,62 @@ Flickable {
                         imageSource: PresetThumbs.thumbFor(presetDelegate.presetWallpaper) || presetDelegate.presetWallpaper
                         title: presetDelegate.presetName
                         description: presetDelegate.presetDescription !== "" ? presetDelegate.presetDescription : Translation.tr("Saved preset")
+                        menuActions: root.presetMenuActions(presetDelegate.presetName, "mine", presetDelegate.presetOrigin !== "")
                         onApply: () => Presets.apply(presetDelegate.presetName)
                         onRemove: () => Presets.remove(presetDelegate.presetName)
+                        onOverwrite: () => Presets.overwrite(presetDelegate.presetName)
+                        onRename: newName => Presets.rename(presetDelegate.presetName, newName)
+                    }
+                }
+            }
+        }
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 10
+            visible: Presets.importedFolderModel.count > 0
+
+            W.StyledText {
+                text: Translation.tr("Imported")
+                font.pixelSize: Appearance.font.pixelSize.large
+                font.weight: Font.Medium
+                color: Appearance.colors.colOnLayer0
+            }
+
+            Flow {
+                Layout.fillWidth: true
+                width: parent.width
+                spacing: 12
+
+                Repeater {
+                    model: Presets.importedFolderModel
+                    delegate: W.PresetsCard {
+                        id: importedDelegate
+                        required property string fileName
+                        required property string filePath
+                        property string presetName: fileName.replace(".json", "")
+                        property string presetWallpaper: ""
+                        property string presetDescription: ""
+
+                        FileView {
+                            path: importedDelegate.filePath
+                            printErrors: false
+                            onLoaded: {
+                                try {
+                                    const data = JSON.parse(text());
+                                    importedDelegate.presetWallpaper = Presets.previewImage(data);
+                                    importedDelegate.presetDescription = data?._presetMeta?.description ?? "";
+                                    PresetThumbs.request(importedDelegate.presetWallpaper);
+                                } catch (e) {}
+                            }
+                        }
+
+                        imageSource: PresetThumbs.thumbFor(importedDelegate.presetWallpaper) || importedDelegate.presetWallpaper
+                        title: importedDelegate.presetName
+                        description: importedDelegate.presetDescription !== "" ? importedDelegate.presetDescription : Translation.tr("Imported preset")
+                        menuActions: root.presetMenuActions(importedDelegate.presetName, "imported", false)
+                        onApply: () => Presets.applyImported(importedDelegate.presetName)
+                        onRemove: () => Presets.removeImported(importedDelegate.presetName)
                     }
                 }
             }
@@ -211,6 +354,7 @@ Flickable {
                         imageSource: PresetThumbs.thumbFor(onlineDelegate.presetWallpaper) || onlineDelegate.presetWallpaper
                         title: onlineDelegate.presetName
                         description: onlineDelegate.presetDescription !== "" ? onlineDelegate.presetDescription : Translation.tr("Downloaded preset")
+                        menuActions: root.presetMenuActions(onlineDelegate.presetName, "downloaded", false)
                         onApply: () => Presets.applyOnline(onlineDelegate.presetName)
                         onRemove: () => Presets.removeOnline(onlineDelegate.presetName)
                     }
