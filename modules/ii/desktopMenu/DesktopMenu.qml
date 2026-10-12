@@ -4,9 +4,11 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.functions
 import qs.modules.settings
 import QtQuick
 import QtQuick.Layouts
+import Qt.labs.folderlistmodel
 import Quickshell
 import Quickshell.Io
 import Quickshell.Wayland
@@ -14,6 +16,36 @@ import Quickshell.Hyprland
 
 Scope {
     id: desktopMenuScope
+
+    readonly property int carouselExtraCount: 5
+    readonly property string _carouselCurrentWallpaper: FileUtils.trimFileProtocol(Config.options.background.wallpaperPath ?? "")
+
+    FolderListModel {
+        id: carouselFolder
+        folder: {
+            const current = desktopMenuScope._carouselCurrentWallpaper;
+            const lastSlash = current.lastIndexOf("/");
+            return lastSlash === -1 ? "" : FileUtils.folderUrl(current.substring(0, lastSlash));
+        }
+        showDirs: false
+        nameFilters: ["*.jpg", "*.jpeg", "*.png", "*.webp"]
+    }
+
+    readonly property var carouselModel: {
+        const current = desktopMenuScope._carouselCurrentWallpaper;
+        const others = [];
+        for (let i = 0; i < carouselFolder.count; i++) {
+            const fp = FileUtils.trimFileProtocol(carouselFolder.get(i, "filePath").toString());
+            if (fp !== current)
+                others.push(fp);
+        }
+        for (let i = others.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [others[i], others[j]] = [others[j], others[i]];
+        }
+        const extra = others.slice(0, desktopMenuScope.carouselExtraCount);
+        return current.length > 0 ? [current, ...extra] : extra;
+    }
 
     component DesktopMenuItem: RippleButton {
         id: itemRoot
@@ -158,6 +190,26 @@ Scope {
                         margins: 6
                     }
                     spacing: 2
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.bottomMargin: 4
+                        visible: desktopMenuScope.carouselModel.length > 0
+                        implicitHeight: 140
+                        radius: Appearance.rounding.verylarge
+                        color: Appearance.colors.colUiBackground
+                        clip: true
+
+                        Carousel {
+                            anchors.fill: parent
+                            anchors.margins: 8
+                            model: desktopMenuScope.carouselModel
+                            onWallpaperSelected: path => {
+                                Wallpapers.apply(path, Appearance.m3colors.darkmode);
+                                GlobalStates.desktopMenuOpen = false;
+                            }
+                        }
+                    }
 
                     DesktopMenuItem {
                         iconName: "wallpaper"
