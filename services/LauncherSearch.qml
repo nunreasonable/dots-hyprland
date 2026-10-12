@@ -112,6 +112,28 @@ Singleton {
             }
         },
         {
+            action: "unsplash",
+            execute: args => {
+                if (!args || args.trim().length === 0) {
+                    Notifications.sendDesktop("Unsplash", Translation.tr("Usage: %1unsplash YOUR_API_KEY").arg(Config.options.search.prefix.action), ["-a", "Shell"]);
+                    return;
+                }
+                KeyringStorage.setNestedField(["apiKeys", "unsplash"], args.trim());
+                Notifications.sendDesktop("Unsplash", Translation.tr("API key saved!"), ["-a", "Shell"]);
+            }
+        },
+        {
+            action: "pexels",
+            execute: args => {
+                if (!args || args.trim().length === 0) {
+                    Notifications.sendDesktop("Pexels", Translation.tr("Usage: %1pexels YOUR_API_KEY").arg(Config.options.search.prefix.action), ["-a", "Shell"]);
+                    return;
+                }
+                KeyringStorage.setNestedField(["apiKeys", "pexels"], args.trim());
+                Notifications.sendDesktop("Pexels", Translation.tr("API key saved!"), ["-a", "Shell"]);
+            }
+        },
+        {
             action: "wallpaper",
             execute: () => {
                 Hyprland.dispatch(`hl.dsp.global("quickshell:wallpaperSelectorToggle")`)

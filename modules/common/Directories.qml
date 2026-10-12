@@ -69,6 +69,9 @@ Singleton {
     property string shellConfigPath: `${Directories.shellConfig}/${Directories.shellConfigName}`
     property string userPresetsPath: FileUtils.trimFileProtocol(`${Directories.shellConfig}/presets`)
     property string onlinePresetsPath: FileUtils.trimFileProtocol(`${Directories.cache}/presets_online`)
+    property string presetLocalThumbsPath: FileUtils.trimFileProtocol(`${Directories.cache}/presets_local_thumbs`)
+    property string presetOnlineThumbsPath: FileUtils.trimFileProtocol(`${Directories.cache}/presets_online_thumbs`)
+    property string presetsOnlineIndexPath: FileUtils.trimFileProtocol(`${Directories.cache}/presets_online_index.json`)
 	property string todoPath: FileUtils.trimFileProtocol(`${Directories.state}/user/todo.json`)
 	property string notesPath: FileUtils.trimFileProtocol(`${Directories.state}/user/notes.txt`)
 	property string desktopNotesPath: FileUtils.trimFileProtocol(`${Directories.state}/user/desktopnotes.json`)

@@ -17,7 +17,7 @@ ContentPage {
 
     Component.onCompleted: {
         if (Config.options.profile.onlinePresets)
-            PresetsOnline.refresh();
+            PresetsOnline.ensureFresh();
     }
 
     FileView {
@@ -424,7 +424,7 @@ ContentPage {
                                 W.StyledImage {
                                     anchors.fill: parent
                                     fillMode: Image.PreserveAspectCrop
-                                    source: onlineCard.modelData.screenshot
+                                    source: PresetsOnline.thumbFor(onlineCard.modelData) || onlineCard.modelData.screenshot
                                     cache: true
                                     sourceSize.width: 400
                                     sourceSize.height: 220
