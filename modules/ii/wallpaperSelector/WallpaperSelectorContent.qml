@@ -17,8 +17,13 @@ MouseArea {
     property bool useDarkMode: Appearance.m3colors.darkmode
     property bool shown: true
     property string source: "local"
+    property string selectedResolution: "1080p"
+    property string selectedColorGroup: ""
     property bool showControls: false
     readonly property bool toolbarVisible: root.showControls || Config.options.wallpaperSelector.showSearchbar
+    readonly property var onlineProviders: ["unsplash", "pexels", "blapples", "naive"]
+    readonly property bool onlineSource: root.onlineProviders.includes(root.source)
+    readonly property Item activeOnlineLoader: root.source === "wallhaven" ? wallhavenLoader : (root.onlineSource ? onlineLoader : null)
 
     property bool spicyRevealed: false
     readonly property bool inSpicyDir: Wallpapers.isInSpicyFolder(Wallpapers.effectiveDirectory)
@@ -192,31 +197,31 @@ MouseArea {
             if (root.source === "local")
                 grid.moveSelection(-1);
             else
-                wallhavenLoader.item?.moveSelection(-1);
+                root.activeOnlineLoader?.item?.moveSelection(-1);
             event.accepted = true;
         } else if (event.key === Qt.Key_Right) {
             if (root.source === "local")
                 grid.moveSelection(1);
             else
-                wallhavenLoader.item?.moveSelection(1);
+                root.activeOnlineLoader?.item?.moveSelection(1);
             event.accepted = true;
         } else if (event.key === Qt.Key_Up) {
             if (root.source === "local")
                 grid.moveSelection(-grid.columns);
             else
-                wallhavenLoader.item?.moveSelection(-root.columns);
+                root.activeOnlineLoader?.item?.moveSelection(-root.columns);
             event.accepted = true;
         } else if (event.key === Qt.Key_Down) {
             if (root.source === "local")
                 grid.moveSelection(grid.columns);
             else
-                wallhavenLoader.item?.moveSelection(root.columns);
+                root.activeOnlineLoader?.item?.moveSelection(root.columns);
             event.accepted = true;
         } else if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
             if (root.source === "local")
                 grid.activateCurrent();
             else
-                wallhavenLoader.item?.activateCurrent();
+                root.activeOnlineLoader?.item?.activateCurrent();
             event.accepted = true;
         } else if (event.key === Qt.Key_Backspace) {
             if (filterField.text.length > 0) {
@@ -420,7 +425,7 @@ MouseArea {
                     StyledText {
                         visible: root.source !== "local"
                         Layout.fillWidth: true
-                        text: Translation.tr("Wallhaven")
+                        text: sourceCombo.model.find(m => m.value === root.source)?.displayName ?? ""
                         font.pixelSize: Appearance.font.pixelSize.normal
                         color: Appearance.colors.colOnLayer1
                     }
@@ -439,9 +444,29 @@ MouseArea {
                                 displayName: Translation.tr("Wallhaven"),
                                 icon: "travel_explore"
                             },
+                            {
+                                value: "blapples",
+                                displayName: Translation.tr("Blapples"),
+                                icon: "travel_explore"
+                            },
+                            {
+                                value: "naive",
+                                displayName: Translation.tr("NA-ive"),
+                                icon: "travel_explore"
+                            },
+                            {
+                                value: "unsplash",
+                                displayName: Translation.tr("Unsplash"),
+                                icon: "travel_explore"
+                            },
+                            {
+                                value: "pexels",
+                                displayName: Translation.tr("Pexels"),
+                                icon: "travel_explore"
+                            },
                         ]
                         textRole: "displayName"
-                        currentIndex: root.source === "wallhaven" ? 1 : 0
+                        currentIndex: Math.max(0, model.findIndex(m => m.value === root.source))
                         onCurrentIndexChanged: {
                             root.source = model[currentIndex].value;
                             root.forceActiveFocus();
@@ -467,6 +492,26 @@ MouseArea {
                                 if (Config.options.wallpaperSelector.closeAfterSelection)
                                     GlobalStates.wallpaperSelectorOpen = false;
                             }
+                        }
+                    }
+
+                    Loader {
+                        id: onlineLoader
+                        anchors.fill: parent
+                        active: root.onlineSource
+                        visible: active
+                        sourceComponent: OnlineWallpaperGrid {
+                            provider: root.source
+                            resolution: root.selectedResolution
+                            colorGroup: root.selectedColorGroup
+                            columns: root.columns
+                            previewCellAspectRatio: root.previewCellAspectRatio
+                            onWallpaperSelected: path => {
+                                Wallpapers.apply(path, root.useDarkMode);
+                                if (Config.options.wallpaperSelector.closeAfterSelection)
+                                    GlobalStates.wallpaperSelectorOpen = false;
+                            }
+                            onUpdateThumbnailsRequested: root.updateThumbnails()
                         }
                     }
 
@@ -879,6 +924,84 @@ MouseArea {
                                     implicitWidth: height
                                     text: "refresh"
                                     onClicked: WallhavenSearch.search(WallhavenSearch.currentQuery, 1)
+                                    StyledToolTip {
+                                        text: Translation.tr("Refresh search results")
+                                    }
+                                }
+                            }
+                        }
+
+                        Loader {
+                            active: root.onlineSource
+                            visible: active
+                            sourceComponent: Toolbar {
+                                id: onlineToolbar
+
+                                ToolbarTextField {
+                                    id: onlineSearchField
+                                    text: OnlineWallpapers.query
+                                    placeholderText: Translation.tr("Search online wallpapers...")
+                                    implicitWidth: 180
+                                    onTextChanged: OnlineWallpapers.query = text
+                                    onAccepted: OnlineWallpapers.fetch()
+                                    Keys.onPressed: event => {
+                                        if (event.key === Qt.Key_Return || event.key === Qt.Key_Enter) {
+                                            event.accepted = true;
+                                            return;
+                                        }
+                                        event.accepted = false;
+                                    }
+                                    Connections {
+                                        target: GlobalStates
+                                        function onWallpaperSelectorOpenChanged() {
+                                            if (!GlobalStates.wallpaperSelectorOpen)
+                                                onlineSearchField.text = "";
+                                        }
+                                    }
+                                }
+
+                                StyledComboBox {
+                                    implicitWidth: 90
+                                    model: [
+                                        { value: "1080p", displayName: "1080p" },
+                                        { value: "2K", displayName: "2K" },
+                                        { value: "4K", displayName: "4K" },
+                                    ]
+                                    textRole: "displayName"
+                                    currentIndex: Math.max(0, model.findIndex(m => m.value === root.selectedResolution))
+                                    onCurrentIndexChanged: root.selectedResolution = model[currentIndex].value
+                                }
+
+                                CustomColorSelectionArray {
+                                    visible: root.source === "naive" || root.source === "blapples"
+                                    swatchSize: 22
+                                    currentValue: root.selectedColorGroup
+                                    options: [
+                                        { value: "", displayName: Translation.tr("All colors"), color: "transparent", rainbow: true },
+                                        { value: "red", displayName: Translation.tr("Red"), color: "#E0483E" },
+                                        { value: "orange", displayName: Translation.tr("Orange"), color: "#E08A3E" },
+                                        { value: "yellow", displayName: Translation.tr("Yellow"), color: "#E0C93E" },
+                                        { value: "green", displayName: Translation.tr("Green"), color: "#6CBF5C" },
+                                        { value: "blue", displayName: Translation.tr("Blue"), color: "#4C7FE0" },
+                                        { value: "purple", displayName: Translation.tr("Purple"), color: "#8A5CE0" },
+                                    ]
+                                    onSelected: newValue => root.selectedColorGroup = newValue
+                                }
+
+                                IconToolbarButton {
+                                    implicitWidth: height
+                                    text: root.useDarkMode ? "dark_mode" : "light_mode"
+                                    onClicked: root.useDarkMode = !root.useDarkMode
+                                    StyledToolTip {
+                                        text: Translation.tr(
+                                                  "Click to toggle light/dark mode\n(applied when wallpaper is chosen)")
+                                    }
+                                }
+
+                                IconToolbarButton {
+                                    implicitWidth: height
+                                    text: "refresh"
+                                    onClicked: OnlineWallpapers.fetch()
                                     StyledToolTip {
                                         text: Translation.tr("Refresh search results")
                                     }
