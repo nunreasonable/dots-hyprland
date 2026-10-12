@@ -14,6 +14,7 @@ MouseArea {
     property bool centerYActive: false
 
     property var registeredWidgets: []
+    property bool settled: false
     property bool selecting: false
     property point selectionStartPoint: Qt.point(0, 0)
     property rect selectionRect: Qt.rect(0, 0, 0, 0)
@@ -55,6 +56,28 @@ MouseArea {
 
     function unregisterWidget(widget) {
         root.registeredWidgets = root.registeredWidgets.filter(w => w !== widget);
+    }
+
+    function freeSpotFor(widget, areaWidth, areaHeight) {
+        const others = root.registeredWidgets.filter(w => w !== widget && w.visible);
+        const gap = root.gridSize;
+        const fits = (x, y) => !others.some(w => root.rectsIntersect(Qt.rect(x - gap, y - gap, widget.width + gap * 2, widget.height + gap * 2), Qt.rect(w.x, w.y, w.width, w.height)));
+        if (fits(widget.x, widget.y))
+            return null;
+        const step = root.gridSize * 2;
+        for (let y = step; y + widget.height <= areaHeight - step; y += step) {
+            for (let x = step; x + widget.width <= areaWidth - step; x += step) {
+                if (fits(x, y))
+                    return Qt.point(x, y);
+            }
+        }
+        return null;
+    }
+
+    Timer {
+        interval: 3000
+        running: true
+        onTriggered: root.settled = true
     }
 
     function bringToFront(widget) {

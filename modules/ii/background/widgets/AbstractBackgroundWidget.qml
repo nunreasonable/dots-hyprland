@@ -59,6 +59,25 @@ AbstractWidget {
 
     onReleased: root.commitPosition()
 
+    Component.onCompleted: {
+        const canvas = root.findCanvas(root.parent);
+        if (canvas && canvas.settled && root.placementStrategy === "free")
+            freeSpotTimer.start();
+    }
+
+    Timer {
+        id: freeSpotTimer
+        interval: 100
+        onTriggered: {
+            const canvas = root.findCanvas(root.parent);
+            const spot = canvas ? canvas.freeSpotFor(root, root.scaledScreenWidth, root.scaledScreenHeight) : null;
+            if (!spot)
+                return;
+            root.configEntry.x = spot.x;
+            root.configEntry.y = spot.y;
+        }
+    }
+
     property bool needsColText: false
     property color dominantColor: Appearance.colors.colPrimary
     property bool dominantColorIsDark: dominantColor.hslLightness < 0.5
