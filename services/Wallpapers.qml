@@ -152,6 +152,13 @@ Singleton {
         return root.videoExtensions.some(ext => lower.endsWith(`.${ext}`));
     }
 
+    function stillFor(path) {
+        if (!path || !root.isVideoPath(path)) return path ?? "";
+        if (root.normalizedPath(path) === root.normalizedPath(Config.options.background.wallpaperPath) && Config.options.background.thumbnailPath)
+            return Config.options.background.thumbnailPath;
+        return root._videoFramePath(path);
+    }
+
     function openFallbackPicker(darkMode = Appearance.m3colors.darkmode, folder = "") {
         if (Platform.isWindows) {
             if (folder && folder.length > 0) root.setDirectory(folder);
