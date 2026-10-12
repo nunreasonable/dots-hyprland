@@ -8,12 +8,16 @@ import qs
 import qs.services
 import Qt5Compat.GraphicalEffects
 import qs.modules.common
+import qs.modules.common.models
 import qs.modules.common.functions
 import qs.modules.common.widgets
+import qs.modules.common.widgets.widgetCanvas
 import qs.modules.ii.background.widgets
 
 AbstractBackgroundWidget {
     id: root
+
+    signal requestReset()
 
     configEntryName: "media"
     hoverEnabled: true
@@ -27,6 +31,25 @@ AbstractBackgroundWidget {
 
     property real buttonSize: 34
     property real buttonIconSize: 18
+
+    readonly property bool showControls: root.configEntry.showControls ?? true
+    readonly property bool showTitles: root.configEntry.showTitles ?? true
+    readonly property string backgroundShape: root.configEntry.backgroundShape ?? "Cookie4Sided"
+
+    function shapeForName(name) {
+        switch (name) {
+        case "Cookie4Sided": return MaterialShape.Shape.Cookie4Sided;
+        case "Cookie7Sided": return MaterialShape.Shape.Cookie7Sided;
+        case "Cookie12Sided": return MaterialShape.Shape.Cookie12Sided;
+        default: return -1;
+        }
+    }
+
+    readonly property real mediaProgress: {
+        const pos = root.currentPlayer?.position ?? 0;
+        const len = root.currentPlayer?.length ?? 0;
+        return len > 0 ? Math.max(0, Math.min(1, pos / len)) : 0;
+    }
 
     readonly property real cardSpacing: 12
     readonly property real singleWidth: 132
@@ -47,6 +70,8 @@ AbstractBackgroundWidget {
             return root.snapWidth2;
         case "2x2":
             return root.snapWidth2;
+        case "2x3":
+            return root.snapWidth3;
         default:
             return root.snapWidth3;
         }
@@ -67,7 +92,9 @@ AbstractBackgroundWidget {
 
     function modeForDrag(dx, dy, startWidth) {
         if (dy > root.heightEnterDelta) {
-            if (root.sizeMode === "1x3" || root.sizeMode === "2x2")
+            if (root.sizeMode === "1x3" || root.sizeMode === "2x3")
+                return "2x3";
+            if (root.sizeMode === "1x2" || root.sizeMode === "2x2")
                 return "2x2";
         }
         return root.modeForWidth(startWidth + dx);
@@ -78,6 +105,7 @@ AbstractBackgroundWidget {
     }
 
     property bool downloaded: false
+    property bool showLyrics: false
 
     readonly property bool artIsLocal: Platform.isWindows && String(root.artUrl ?? "").startsWith("file:")
     property string displayedArtFilePath: root.artIsLocal ? root.artUrl : (root.downloaded ? (Platform.isWindows ? `file:///${artFilePath}` : Qt.resolvedUrl(artFilePath)) : "")
@@ -127,7 +155,7 @@ AbstractBackgroundWidget {
         widget: root
         shadowed: false
         implicitWidth: root.widgetWidth
-        implicitHeight: root.sizeMode === "2x2" ? root.doubleCardHeight : root.cardHeight
+        implicitHeight: (root.sizeMode === "2x3" || root.sizeMode === "2x2") ? root.doubleCardHeight : (root.cardHeight + (root.sizeMode === "1x3" && root.showLyrics ? 264 : 0))
         clip: true
 
         Behavior on implicitHeight {
@@ -146,6 +174,8 @@ AbstractBackgroundWidget {
                     return oneByTwoContent;
                 if (root.sizeMode === "2x2")
                     return twoByTwoContent;
+                if (root.sizeMode === "2x3")
+                    return twoByThreeContent;
                 return oneByThreeContent;
             }
         }
@@ -157,11 +187,23 @@ AbstractBackgroundWidget {
                 anchors.fill: parent
                 layer.enabled: true
                 layer.effect: OpacityMask {
-                    maskSource: Rectangle {
-                        width: squareArt.width
-                        height: squareArt.height
-                        radius: card.radius
-                    }
+                    maskSource: root.shapeForName(root.backgroundShape) === -1 ? squareMask : squareShapeMask
+                }
+
+                Rectangle {
+                    id: squareMask
+                    visible: false
+                    width: squareArt.width
+                    height: squareArt.height
+                    radius: card.radius
+                }
+
+                MaterialShape {
+                    id: squareShapeMask
+                    visible: false
+                    shape: root.shapeForName(root.backgroundShape) === -1 ? MaterialShape.Shape.Cookie4Sided : root.shapeForName(root.backgroundShape)
+                    implicitSize: Math.max(squareArt.width, squareArt.height)
+                    anchors.centerIn: squareArt
                 }
 
                 StyledImage {
@@ -209,7 +251,7 @@ AbstractBackgroundWidget {
                         bottomMargin: 10
                     }
                     spacing: 4
-                    visible: MprisController.activePlayer !== null
+                    visible: root.showControls && MprisController.activePlayer !== null
 
                     RippleButton {
                         implicitWidth: 26
@@ -326,6 +368,7 @@ AbstractBackgroundWidget {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 2
+                        visible: root.showTitles
 
                         StyledText {
                             Layout.fillWidth: true
@@ -353,6 +396,7 @@ AbstractBackgroundWidget {
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignHCenter
                         spacing: 4
+                        visible: root.showControls
 
                         RippleButton {
                             implicitWidth: 28
@@ -464,6 +508,7 @@ AbstractBackgroundWidget {
                     Layout.rightMargin: 14
                     Layout.topMargin: 10
                     spacing: 2
+                    visible: root.showTitles
 
                     StyledText {
                         Layout.fillWidth: true
@@ -489,6 +534,7 @@ AbstractBackgroundWidget {
                     Layout.topMargin: 8
                     Layout.bottomMargin: 12
                     spacing: 6
+                    visible: root.showControls
 
                     RippleButton {
                         implicitWidth: 28
@@ -546,154 +592,355 @@ AbstractBackgroundWidget {
 
         Component {
             id: oneByThreeContent
-            Item {
+            Column {
                 anchors.fill: parent
+                spacing: 0
 
-                Rectangle {
-                    id: artRect
-                    anchors.left: parent.left
-                    anchors.top: parent.top
-                    anchors.bottom: parent.bottom
-                    width: root.cardHeight
-                    color: Appearance.colors.colSurfaceContainerLow
-                    topLeftRadius: card.radius
-                    bottomLeftRadius: card.radius
-                    topRightRadius: 0
-                    bottomRightRadius: 0
-                    clip: true
-                    layer.enabled: true
-                    layer.effect: OpacityMask {
-                        maskSource: Rectangle {
-                            width: artRect.width
-                            height: artRect.height
-                            topLeftRadius: card.radius
-                            bottomLeftRadius: card.radius
-                            topRightRadius: 0
-                            bottomRightRadius: 0
+                Item {
+                    width: parent.width
+                    height: root.cardHeight
+
+                    Rectangle {
+                        id: artRect
+                        anchors.left: parent.left
+                        anchors.top: parent.top
+                        anchors.bottom: parent.bottom
+                        width: root.cardHeight
+                        color: Appearance.colors.colSurfaceContainerLow
+                        topLeftRadius: card.radius
+                        bottomLeftRadius: card.radius
+                        topRightRadius: 0
+                        bottomRightRadius: 0
+                        clip: true
+                        layer.enabled: true
+                        layer.effect: OpacityMask {
+                            maskSource: Rectangle {
+                                width: artRect.width
+                                height: artRect.height
+                                topLeftRadius: card.radius
+                                bottomLeftRadius: card.radius
+                                topRightRadius: 0
+                                bottomRightRadius: 0
+                            }
+                        }
+
+                        StyledImage {
+                            anchors.fill: parent
+                            source: root.displayedArtFilePath
+                            fillMode: Image.PreserveAspectCrop
+                            cache: false
+                            antialiasing: true
+                            sourceSize.width: artRect.width * 2
+                            sourceSize.height: artRect.height * 2
+                            visible: root.displayedArtFilePath !== ""
+                        }
+
+                        MaterialSymbol {
+                            anchors.centerIn: parent
+                            fill: 1
+                            text: "music_note"
+                            iconSize: root.cardHeight / 3
+                            color: Appearance.colors.colOnSecondaryContainer
+                            visible: root.displayedArtFilePath === ""
                         }
                     }
 
-                    StyledImage {
-                        anchors.fill: parent
-                        source: root.displayedArtFilePath
-                        fillMode: Image.PreserveAspectCrop
-                        cache: false
-                        antialiasing: true
-                        sourceSize.width: artRect.width * 2
-                        sourceSize.height: artRect.height * 2
-                        visible: root.displayedArtFilePath !== ""
-                    }
+                    ColumnLayout {
+                        anchors {
+                            left: artRect.right
+                            right: parent.right
+                            top: parent.top
+                            bottom: parent.bottom
+                            leftMargin: 16
+                            rightMargin: 14
+                        }
+                        spacing: -10
 
-                    MaterialSymbol {
-                        anchors.centerIn: parent
-                        fill: 1
-                        text: "music_note"
-                        iconSize: root.cardHeight / 3
-                        color: Appearance.colors.colOnSecondaryContainer
-                        visible: root.displayedArtFilePath === ""
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            spacing: 2
+                            visible: root.showTitles
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: root.currentPlayer?.trackArtist ?? Translation.tr("Play")
+                                font.pixelSize: Appearance.font.pixelSize.normal
+                                font.weight: Font.DemiBold
+                                color: Appearance.colors.colOnPrimaryContainer
+                                elide: Text.ElideRight
+                            }
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: root.currentPlayer?.trackTitle ?? Translation.tr("Something")
+                                font.pixelSize: Appearance.font.pixelSize.small
+                                color: Appearance.colors.colOnPrimaryContainer
+                                opacity: 0.65
+                                elide: Text.ElideRight
+                            }
+                        }
+
+                        Rectangle {
+                            id: controlsPill
+                            visible: root.showControls
+                            Layout.alignment: Qt.AlignRight
+                            implicitWidth: controlsRow.implicitWidth + 10
+                            implicitHeight: root.buttonSize + 8
+                            radius: Appearance.rounding?.full ?? 999
+                            color: ColorUtils.transparentize(Appearance.colors.colOnPrimaryContainer, 0.9)
+
+                            RowLayout {
+                                id: controlsRow
+                                anchors.centerIn: parent
+                                spacing: 2
+
+                                RippleButton {
+                                    implicitWidth: root.buttonSize
+                                    implicitHeight: root.buttonSize
+                                    buttonRadius: Appearance.rounding?.full ?? 999
+                                    colBackground: root.showLyrics ? Appearance.colors.colPrimary : "transparent"
+                                    colBackgroundHover: Appearance.colors.colPrimaryContainerHover
+                                    colRipple: Appearance.colors.colPrimaryContainerActive
+                                    downAction: () => { root.showLyrics = !root.showLyrics; }
+
+                                    MaterialSymbol {
+                                        anchors.centerIn: parent
+                                        text: "lyrics"
+                                        iconSize: root.buttonIconSize
+                                        fill: root.showLyrics ? 1 : 0
+                                        color: root.showLyrics ? Appearance.colors.colOnPrimary : Appearance.colors.colOnPrimaryContainer
+                                    }
+                                }
+
+                                MaterialShapeWrappedMaterialSymbol {
+                                    shape: MaterialShape.Shape.Cookie12Sided
+                                    color: Appearance.colors.colPrimary
+                                    colSymbol: Appearance.colors.colOnPrimary
+                                    text: root.currentPlayer?.isPlaying ? "pause" : "play_arrow"
+                                    iconSize: root.buttonIconSize + 12
+                                    fill: 1
+                                    padding: 8
+
+                                    MouseArea {
+                                        anchors.fill: parent
+                                        onClicked: root.currentPlayer?.togglePlaying()
+                                    }
+                                }
+
+                                RippleButton {
+                                    implicitWidth: root.buttonSize
+                                    implicitHeight: root.buttonSize
+                                    buttonRadius: Appearance.rounding?.full ?? 999
+                                    colBackground: "transparent"
+                                    colBackgroundHover: Appearance.colors.colPrimaryContainerHover
+                                    colRipple: Appearance.colors.colPrimaryContainerActive
+                                    downAction: () => root.currentPlayer?.next()
+                                    altAction: () => root.currentPlayer?.previous()
+
+                                    MaterialSymbol {
+                                        anchors.centerIn: parent
+                                        text: "skip_next"
+                                        iconSize: root.buttonIconSize
+                                        fill: 1
+                                        color: Appearance.colors.colOnPrimaryContainer
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
-                ColumnLayout {
-                    anchors {
-                        left: artRect.right
-                        right: parent.right
-                        top: parent.top
-                        bottom: parent.bottom
-                        leftMargin: 16
-                        rightMargin: 14
-                    }
-                    spacing: -10
-
-                    ColumnLayout {
-                        Layout.fillWidth: true
-                        Layout.alignment: Qt.AlignVCenter
-                        spacing: 2
-
-                        StyledText {
-                            Layout.fillWidth: true
-                            text: root.currentPlayer?.trackArtist ?? Translation.tr("Play")
-                            font.pixelSize: Appearance.font.pixelSize.normal
-                            font.weight: Font.DemiBold
-                            color: Appearance.colors.colOnPrimaryContainer
-                            elide: Text.ElideRight
-                        }
-
-                        StyledText {
-                            Layout.fillWidth: true
-                            text: root.currentPlayer?.trackTitle ?? Translation.tr("Something")
-                            font.pixelSize: Appearance.font.pixelSize.small
-                            color: Appearance.colors.colOnPrimaryContainer
-                            opacity: 0.65
-                            elide: Text.ElideRight
-                        }
-                    }
+                Item {
+                    width: parent.width
+                    height: root.showLyrics ? 2 : 0
+                    visible: root.showLyrics
 
                     Rectangle {
-                        id: controlsPill
-                        Layout.alignment: Qt.AlignRight
-                        implicitWidth: controlsRow.implicitWidth + 10
-                        implicitHeight: root.buttonSize + 8
-                        radius: Appearance.rounding?.full ?? 999
-                        color: ColorUtils.transparentize(Appearance.colors.colOnPrimaryContainer, 0.9)
+                        anchors.centerIn: parent
+                        width: parent.width - 48
+                        height: 1
+                        gradient: Gradient {
+                            orientation: Gradient.Horizontal
+                            GradientStop {
+                                position: 0.0
+                                color: "transparent"
+                            }
+                            GradientStop {
+                                position: 0.2
+                                color: Appearance.colors.colOnPrimaryContainer
+                            }
+                            GradientStop {
+                                position: 0.8
+                                color: Appearance.colors.colOnPrimaryContainer
+                            }
+                            GradientStop {
+                                position: 1.0
+                                color: "transparent"
+                            }
+                        }
+                        opacity: 0.15
+                    }
+                }
 
-                        RowLayout {
-                            id: controlsRow
-                            anchors.centerIn: parent
-                            spacing: 2
+                Item {
+                    width: parent.width
+                    height: root.showLyrics ? 250 : 0
+                    visible: root.showLyrics
 
-                            RippleButton {
-                                implicitWidth: root.buttonSize
-                                implicitHeight: root.buttonSize
-                                buttonRadius: Appearance.rounding?.full ?? 999
-                                colBackground: "transparent"
-                                colBackgroundHover: Appearance.colors.colPrimaryContainerHover
-                                colRipple: Appearance.colors.colPrimaryContainerActive
-                                downAction: () => root.currentPlayer?.previous()
+                    Lyrics {
+                        anchors.fill: parent
+                        anchors.leftMargin: 16
+                        anchors.rightMargin: 16
+                        textAlignment: Text.AlignHCenter
+                        textColor: Appearance.colors.colOnPrimaryContainer
+                        activeColor: Appearance.colors.colPrimary
+                        dimColor: Appearance.colors.colSubtext
+                        indicatorColor: Appearance.colors.colPrimary
+                        indicatorShapeColor: Appearance.colors.colOnPrimary
+                    }
+                }
+            }
+        }
 
-                                MaterialSymbol {
-                                    anchors.centerIn: parent
-                                    text: "skip_previous"
-                                    iconSize: root.buttonIconSize
-                                    fill: 1
-                                    color: Appearance.colors.colOnPrimaryContainer
+        Component {
+            id: twoByThreeContent
+
+            ColumnLayout {
+                anchors.fill: parent
+                spacing: 0
+
+                Rectangle {
+                    id: labelArea
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 82
+                    color: Appearance.colors.colSurfaceContainerLow
+                    topLeftRadius: card.radius
+                    topRightRadius: card.radius
+                    bottomLeftRadius: 0
+                    bottomRightRadius: 0
+
+                    RowLayout {
+                        anchors {
+                            fill: parent
+                            leftMargin: 14
+                            rightMargin: 16
+                            topMargin: 14
+                            bottomMargin: 14
+                        }
+                        spacing: 12
+
+                        Rectangle {
+                            id: labelArt
+                            Layout.preferredWidth: 54
+                            Layout.preferredHeight: 54
+                            Layout.alignment: Qt.AlignVCenter
+                            color: Appearance.colors.colPrimaryContainer
+                            radius: Appearance.rounding?.normal ?? 12
+                            clip: true
+                            layer.enabled: true
+                            layer.effect: OpacityMask {
+                                maskSource: Rectangle {
+                                    width: labelArt.width
+                                    height: labelArt.height
+                                    radius: labelArt.radius
                                 }
                             }
+
+                            StyledImage {
+                                anchors.fill: parent
+                                source: root.displayedArtFilePath
+                                fillMode: Image.PreserveAspectCrop
+                                cache: false
+                                antialiasing: true
+                                sourceSize.width: labelArt.width * 2
+                                sourceSize.height: labelArt.height * 2
+                                visible: root.displayedArtFilePath !== ""
+                            }
+
+                            MaterialSymbol {
+                                anchors.centerIn: parent
+                                fill: 1
+                                text: "music_note"
+                                iconSize: 22
+                                color: Appearance.colors.colOnPrimaryContainer
+                                visible: root.displayedArtFilePath === ""
+                            }
+                        }
+
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            Layout.alignment: Qt.AlignVCenter
+                            spacing: 2
+                            visible: root.showTitles
+
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: root.currentPlayer?.trackTitle ?? Translation.tr("Play")
+                                font.pixelSize: Appearance.font.pixelSize.small
+                                font.weight: Font.DemiBold
+                                font.italic: true
+                                color: Appearance.colors.colOnPrimaryContainer
+                                elide: Text.ElideRight
+                            }
+                            StyledText {
+                                Layout.fillWidth: true
+                                text: root.currentPlayer?.trackArtist ?? Translation.tr("Something")
+                                font.pixelSize: Appearance.font.pixelSize.smaller
+                                color: Appearance.colors.colOnPrimaryContainer
+                                opacity: 0.65
+                                elide: Text.ElideRight
+                            }
+                        }
+
+                        RowLayout {
+                            spacing: 2
+                            visible: root.showControls
 
                             MaterialShapeWrappedMaterialSymbol {
                                 shape: MaterialShape.Shape.Cookie12Sided
                                 color: Appearance.colors.colPrimary
                                 colSymbol: Appearance.colors.colOnPrimary
                                 text: root.currentPlayer?.isPlaying ? "pause" : "play_arrow"
-                                iconSize: root.buttonIconSize + 12
+                                iconSize: root.buttonIconSize + 10
                                 fill: 1
-                                padding: 8
+                                padding: 6
 
                                 MouseArea {
                                     anchors.fill: parent
-                                    onClicked: root.currentPlayer?.togglePlaying()
-                                }
-                            }
-
-                            RippleButton {
-                                implicitWidth: root.buttonSize
-                                implicitHeight: root.buttonSize
-                                buttonRadius: Appearance.rounding?.full ?? 999
-                                colBackground: "transparent"
-                                colBackgroundHover: Appearance.colors.colPrimaryContainerHover
-                                colRipple: Appearance.colors.colPrimaryContainerActive
-                                downAction: () => root.currentPlayer?.next()
-                                altAction: () => root.currentPlayer?.previous()
-
-                                MaterialSymbol {
-                                    anchors.centerIn: parent
-                                    text: "skip_next"
-                                    iconSize: root.buttonIconSize
-                                    fill: 1
-                                    color: Appearance.colors.colOnPrimaryContainer
+                                    acceptedButtons: Qt.LeftButton | Qt.RightButton
+                                    onClicked: (mouse) => {
+                                        if (mouse.button === Qt.RightButton) {
+                                            root.currentPlayer?.next();
+                                        } else {
+                                            root.currentPlayer?.togglePlaying();
+                                        }
+                                    }
                                 }
                             }
                         }
+                    }
+                }
+
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.fillHeight: true
+                    color: ColorUtils.transparentize(Appearance.colors.colOnPrimaryContainer, 0.88)
+                    topLeftRadius: 0
+                    topRightRadius: 0
+                    bottomLeftRadius: card.radius
+                    bottomRightRadius: card.radius
+                    clip: true
+
+                    Lyrics {
+                        anchors.fill: parent
+                        anchors.margins: 10
+                        textAlignment: Text.AlignHCenter
+                        textColor: Appearance.colors.colOnPrimaryContainer
+                        activeColor: Appearance.colors.colPrimary
+                        dimColor: Appearance.colors.colSubtext
+                        indicatorColor: Appearance.colors.colPrimary
+                        indicatorShapeColor: Appearance.colors.colOnPrimary
                     }
                 }
             }
