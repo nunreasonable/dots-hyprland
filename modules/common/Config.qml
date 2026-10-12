@@ -692,6 +692,9 @@ Singleton {
                     property int prevTilingGapsIn: 4
                     property int prevTilingGapsOut: 5
                 }
+                property JsonObject idle: JsonObject {
+                    property int lock: 300
+                }
             }
 
             property JsonObject networking: JsonObject {

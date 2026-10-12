@@ -301,6 +301,107 @@ ContentPage {
             icon: "bedtime"
             shape: W.MaterialShape.Shape.Sunny
             title: Translation.tr("Idle")
+
+            ContentSubsection {
+                title: Translation.tr("Lock screen")
+
+                GroupedList {
+                    ConfigSwitch {
+                        buttonIcon: "lock_clock"
+                        text: Translation.tr("Lock after inactivity")
+                        checked: Config.options.windowsPort.idle.lock > 0
+                        onCheckedChanged: {
+                            if (checked && Config.options.windowsPort.idle.lock <= 0)
+                                Config.options.windowsPort.idle.lock = 300;
+                            else if (!checked && Config.options.windowsPort.idle.lock > 0)
+                                Config.options.windowsPort.idle.lock = 0;
+                        }
+                    }
+                    ConfigSpinBox {
+                        icon: "timer"
+                        enabled: Config.options.windowsPort.idle.lock > 0
+                        text: Translation.tr("Lock after (minutes)")
+                        value: Math.max(1, Math.round(Config.options.windowsPort.idle.lock / 60))
+                        from: 1; to: 999; stepSize: 1
+                        onValueChanged: {
+                            if (Config.options.windowsPort.idle.lock > 0 && value * 60 !== Config.options.windowsPort.idle.lock)
+                                Config.options.windowsPort.idle.lock = value * 60;
+                        }
+                    }
+                }
+                W.NoticeBox {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 6
+                    visible: Config.options.windowsPort.idle.lock > 0 && (Idle.inhibit || WindowsGameMode.enabled)
+                    text: Translation.tr("Paused right now: something is keeping the screen awake, or Game Mode is on.")
+                }
+                W.NoticeBox {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 6
+                    text: Translation.tr("This locks the session with Windows' own lock screen. It's separate from the screen/sleep timeouts below, which Windows controls directly.")
+                }
+            }
+
+            ContentSubsection {
+                Layout.topMargin: 10
+                title: Translation.tr("Screen and sleep")
+
+                GroupedList {
+                    ConfigSpinBox {
+                        icon: "monitor"
+                        text: Translation.tr("Turn off screen after (minutes), plugged in")
+                        value: WindowsNative.idlePower?.screenOffAcMinutes ?? 0
+                        from: 0; to: 999; stepSize: 1
+                        onValueChanged: {
+                            if (WindowsNative.idlePower && value !== WindowsNative.idlePower.screenOffAcMinutes)
+                                WindowsNative.idlePower.screenOffAcMinutes = value;
+                        }
+                    }
+                    ConfigSpinBox {
+                        icon: "battery_full"
+                        visible: WindowsNative.idlePower?.hasBattery ?? false
+                        text: Translation.tr("Turn off screen after (minutes), on battery")
+                        value: WindowsNative.idlePower?.screenOffDcMinutes ?? 0
+                        from: 0; to: 999; stepSize: 1
+                        onValueChanged: {
+                            if (WindowsNative.idlePower && value !== WindowsNative.idlePower.screenOffDcMinutes)
+                                WindowsNative.idlePower.screenOffDcMinutes = value;
+                        }
+                    }
+                    ConfigSpinBox {
+                        icon: "bedtime"
+                        text: Translation.tr("Sleep after (minutes), plugged in")
+                        value: WindowsNative.idlePower?.sleepAcMinutes ?? 0
+                        from: 0; to: 999; stepSize: 1
+                        onValueChanged: {
+                            if (WindowsNative.idlePower && value !== WindowsNative.idlePower.sleepAcMinutes)
+                                WindowsNative.idlePower.sleepAcMinutes = value;
+                        }
+                    }
+                    ConfigSpinBox {
+                        icon: "battery_full"
+                        visible: WindowsNative.idlePower?.hasBattery ?? false
+                        text: Translation.tr("Sleep after (minutes), on battery")
+                        value: WindowsNative.idlePower?.sleepDcMinutes ?? 0
+                        from: 0; to: 999; stepSize: 1
+                        onValueChanged: {
+                            if (WindowsNative.idlePower && value !== WindowsNative.idlePower.sleepDcMinutes)
+                                WindowsNative.idlePower.sleepDcMinutes = value;
+                        }
+                    }
+                }
+                W.NoticeBox {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 6
+                    visible: !(WindowsNative.idlePower?.lastWriteOk ?? true)
+                    text: Translation.tr("Windows did not accept the last change to this power plan.")
+                }
+                W.NoticeBox {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 6
+                    text: Translation.tr("0 means never. These change your current Windows power plan directly.")
+                }
+            }
         }
 
         ContentSection {

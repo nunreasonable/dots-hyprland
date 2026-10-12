@@ -236,6 +236,21 @@ ContentPage {
                 }
             }
 
+            W.NoticeBox {
+                Layout.fillWidth: true
+                visible: Platform.isWindows && !(WindowsNative.wallpaper?.lockScreenImageSupported ?? true)
+                materialIcon: "info"
+                text: Translation.tr("Windows wouldn't accept this picture as the lock screen image automatically. Pick it yourself in Windows Settings.")
+
+                Item { Layout.fillWidth: true }
+                W.RippleButtonWithIcon {
+                    buttonRadius: Appearance.rounding.small
+                    materialIcon: "open_in_new"
+                    mainText: Translation.tr("Open Windows settings")
+                    onClicked: WindowsNative.wallpaper?.openLockScreenPersonalizationSettings()
+                }
+            }
+
             GroupedList {
                 ConfigSwitch {
                     buttonIcon: "fullscreen"

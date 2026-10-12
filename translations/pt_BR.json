@@ -1655,5 +1655,18 @@
   "Pre": "Pré",
   "Preset": "Predefinição",
   "Untitled": "Sem título",
-  "You don't have an EasyEffects preset yet. Make one below to start using this equalizer.": "Você ainda não tem uma predefinição do EasyEffects. Crie uma abaixo para começar a usar este equalizador."
+  "You don't have an EasyEffects preset yet. Make one below to start using this equalizer.": "Você ainda não tem uma predefinição do EasyEffects. Crie uma abaixo para começar a usar este equalizador.",
+  "Lock after inactivity": "Bloquear após inatividade",
+  "Lock after (minutes)": "Bloquear após (minutos)",
+  "Paused right now: something is keeping the screen awake, or Game Mode is on.": "Pausado agora: algo está mantendo a tela acordada, ou o Modo de Jogo está ativado.",
+  "This locks the session with Windows' own lock screen. It's separate from the screen/sleep timeouts below, which Windows controls directly.": "Isso bloqueia a sessão com a própria tela de bloqueio do Windows. É independente dos tempos de tela/suspensão abaixo, que o Windows controla diretamente.",
+  "Screen and sleep": "Tela e suspensão",
+  "Turn off screen after (minutes), plugged in": "Desligar a tela após (minutos), na tomada",
+  "Turn off screen after (minutes), on battery": "Desligar a tela após (minutos), na bateria",
+  "Sleep after (minutes), plugged in": "Suspender após (minutos), na tomada",
+  "Sleep after (minutes), on battery": "Suspender após (minutos), na bateria",
+  "Windows did not accept the last change to this power plan.": "O Windows não aceitou a última alteração neste plano de energia.",
+  "0 means never. These change your current Windows power plan directly.": "0 significa nunca. Isso altera diretamente o seu plano de energia atual do Windows.",
+  "Windows wouldn't accept this picture as the lock screen image automatically. Pick it yourself in Windows Settings.": "O Windows não aceitou essa imagem como tela de bloqueio automaticamente. Escolha-a você mesmo nas Configurações do Windows.",
+  "Open Windows settings": "Abrir configurações do Windows"
 }

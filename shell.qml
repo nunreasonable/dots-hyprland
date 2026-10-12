@@ -41,6 +41,7 @@ ShellRoot {
             WindowsTerminalTheme.load()
             WindowsPins.load()
             SettingsApp.load()
+            WindowsIdleLock.load()
         }
     }
 
