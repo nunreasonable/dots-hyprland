@@ -66,6 +66,7 @@ Scope { // Scope
             WlrLayershell.namespace: "quickshell:cheatsheet"
             // Setting this value makes it take its sweet time to open
             // WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+            WlrLayershell.keyboardFocus: Platform.isWindows ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
             color: "transparent"
 
             mask: Region {
