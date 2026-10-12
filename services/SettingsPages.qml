@@ -3,13 +3,14 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import qs.services
+import qs.modules.common
 
 Singleton {
     id: root
 
     readonly property string pagesDir: "modules/settingsPc/pages/"
-    readonly property list<string> ids: ["quick", "general", "bar", "desktop", "interface", "services", "profile", "about"]
-    readonly property list<string> files: ["QuickConfig.qml", "GeneralConfig.qml", "BarConfig.qml", "BackgroundConfig.qml", "InterfaceConfig.qml", "ServicesConfig.qml", "Profile.qml", "About.qml"]
+    readonly property list<string> ids: root.pages.map(page => page.id)
+    readonly property list<string> files: root.pages.map(page => page.file)
     readonly property list<url> sources: root.files.map(file => Qt.resolvedUrl("../" + root.pagesDir + file))
     readonly property var fontCache: ({
             families: null
@@ -23,6 +24,7 @@ Singleton {
             { id: "desktop",   name: Translation.tr("Desktop"),   icon: "texture",        file: "BackgroundConfig.qml" },
             { id: "interface", name: Translation.tr("Interface"), icon: "bottom_app_bar", file: "InterfaceConfig.qml" },
             { id: "services",  name: Translation.tr("Services"),  icon: "settings",       file: "ServicesConfig.qml" },
+            ...(Platform.isWindows ? [{ id: "system", name: Translation.tr("System"), icon: "computer", file: "SystemConfig.qml" }] : []),
             { id: "profile",   name: Translation.tr("Profile"),   icon: "account_circle", file: "Profile.qml" },
             { id: "about",     name: Translation.tr("About"),     icon: "info",           file: "About.qml" },
         ];

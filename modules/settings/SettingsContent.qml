@@ -14,48 +14,53 @@ Item {
     readonly property bool lookReady: Config.ready && MaterialThemeLoader.ready && Translation.ready
     property bool ready: false
     readonly property bool pageShown: pageArea.shownPage !== -1
-    readonly property list<url> pageSources: [
-        Qt.resolvedUrl("QuickConfig.qml"),
-        Qt.resolvedUrl("GeneralConfig.qml"),
-        Qt.resolvedUrl("BarConfig.qml"),
-        Qt.resolvedUrl("BackgroundConfig.qml"),
-        Qt.resolvedUrl("InterfaceConfig.qml"),
-        Qt.resolvedUrl("ServicesConfig.qml"),
-        Qt.resolvedUrl("AdvancedConfig.qml"),
-        Qt.resolvedUrl("About.qml")
-    ]
-    property var pages: [
+    readonly property list<url> pageSources: root.pageList.map(page => Qt.resolvedUrl(page.file))
+    readonly property var pages: root.pageList
+    readonly property var pageList: [
         {
             name: Translation.tr("Quick"),
+            file: "QuickConfig.qml",
             icon: "instant_mix"
         },
         {
             name: Translation.tr("General"),
+            file: "GeneralConfig.qml",
             icon: "browse"
         },
         {
             name: Translation.tr("Bar"),
+            file: "BarConfig.qml",
             icon: "toast",
             iconRotation: 180
         },
         {
             name: Translation.tr("Background"),
+            file: "BackgroundConfig.qml",
             icon: "texture"
         },
         {
             name: Translation.tr("Interface"),
+            file: "InterfaceConfig.qml",
             icon: "bottom_app_bar"
         },
         {
             name: Translation.tr("Services"),
+            file: "ServicesConfig.qml",
             icon: "settings"
         },
+        ...(Platform.isWindows ? [{
+            name: Translation.tr("System"),
+            file: "SystemConfig.qml",
+            icon: "computer"
+        }] : []),
         {
             name: Translation.tr("Advanced"),
+            file: "AdvancedConfig.qml",
             icon: "construction"
         },
         {
             name: Translation.tr("About"),
+            file: "About.qml",
             icon: "info"
         }
     ]
