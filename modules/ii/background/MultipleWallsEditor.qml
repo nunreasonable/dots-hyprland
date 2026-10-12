@@ -15,6 +15,15 @@ Item {
     readonly property var result: root.collage.result
     readonly property bool canSplit: Collage.leafCount < Collage.maxTiles
     readonly property bool canRemove: Collage.leafCount > 1
+    property var controls: []
+
+    function addControl(item) {
+        root.controls = root.controls.concat([item]);
+    }
+
+    function removeControl(item) {
+        root.controls = root.controls.filter(control => control !== item);
+    }
 
     Repeater {
         model: ScriptModel {
@@ -26,6 +35,15 @@ Item {
             id: tileControls
             required property var modelData
             readonly property bool primary: modelData.id === Collage.primaryId
+
+            Component.onCompleted: {
+                root.addControl(starButton);
+                root.addControl(actionPill);
+            }
+            Component.onDestruction: {
+                root.removeControl(starButton);
+                root.removeControl(actionPill);
+            }
 
             x: modelData.x
             y: modelData.y
@@ -136,6 +154,9 @@ Item {
             required property var modelData
             readonly property bool vertical: modelData.d === "v"
             readonly property real hitSize: Math.max(Collage.gap, 20)
+
+            Component.onCompleted: root.addControl(gutter)
+            Component.onDestruction: root.removeControl(gutter)
 
             x: vertical ? modelData.line - hitSize / 2 : modelData.from
             y: vertical ? modelData.from : modelData.line - hitSize / 2

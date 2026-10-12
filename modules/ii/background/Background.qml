@@ -33,6 +33,15 @@ Variants {
     id: root
     model: Quickshell.screens
 
+    component ControlMaskRegion: Region {
+        required property Item target
+        readonly property bool shown: target !== null && target.visible
+        x: shown ? Math.floor(target.x + (target.parent?.x ?? 0)) : 0
+        y: shown ? Math.floor(target.y + (target.parent?.y ?? 0)) : 0
+        width: shown ? Math.ceil(target.width) : 0
+        height: shown ? Math.ceil(target.height) : 0
+    }
+
     component WidgetMaskRegion: Region {
         required property Loader loader
         required property Item canvas
@@ -103,6 +112,20 @@ Variants {
         readonly property bool widgetsAboveIcons: Platform.isWindows && (WindowsNative.desktopLayer?.active ?? false) && !GlobalStates.screenLocked
         readonly property bool nativeWallpaper: Platform.isWindows && Config.options.windowsPort.backgroundBehindIcons && !Config.options.windowsPort.ownWallpaper
         readonly property Item widgetsSlot: widgetsWindowLoader.active ? (widgetsWindowLoader.item?.slot ?? null) : null
+
+        function rebuildCollageMask() {
+            const region = widgetsWindowLoader.item?.collageRegion ?? null;
+            if (!region)
+                return;
+            const old = [];
+            for (let i = 0; i < region.regions.length; i++)
+                old.push(region.regions[i]);
+            const controls = (collageEditorLoader.active && collageEditorLoader.item) ? collageEditorLoader.item.controls : [];
+            region.regions = controls.map(control => controlMaskRegionComponent.createObject(region, { target: control }));
+            old.forEach(r => r.destroy());
+        }
+
+        onWidgetsSlotChanged: Qt.callLater(bgRoot.rebuildCollageMask)
         readonly property bool widgetsOnThisScreen: Config.options.background.screenList.length === 0
             || Config.options.background.screenList.includes(bgRoot.modelData.name)
 
@@ -311,6 +334,7 @@ Variants {
             PanelWindow {
                 id: widgetsWindow
                 readonly property Item slot: widgetsSlotItem
+                readonly property Region collageRegion: collageControlsRegion
 
                 screen: bgRoot.modelData
                 visible: bgRoot.widgetsAboveIcons
@@ -327,6 +351,9 @@ Variants {
                 color: "transparent"
 
                 mask: Region {
+                    Region {
+                        id: collageControlsRegion
+                    }
                     WidgetMaskRegion {
                         loader: weatherLoader
                         canvas: widgetCanvas
@@ -908,12 +935,23 @@ Variants {
             }
 
             Loader {
+                id: collageEditorLoader
+                parent: bgRoot.widgetsAboveIcons && bgRoot.widgetsSlot ? bgRoot.widgetsSlot : wallpaperLayer
                 anchors.fill: parent
+                z: 1
                 active: Collage.enabled && !bgRoot.nativeWallpaper && !Config.options.background.widgetsLocked
                     && !GlobalStates.screenLocked && !!collageLoader.item
                 sourceComponent: MultipleWallsEditor {
                     collage: collageLoader.item
+                    onControlsChanged: bgRoot.rebuildCollageMask()
                 }
+                onLoaded: bgRoot.rebuildCollageMask()
+                onActiveChanged: if (!active) bgRoot.rebuildCollageMask()
+            }
+
+            Component {
+                id: controlMaskRegionComponent
+                ControlMaskRegion {}
             }
         }
     }
