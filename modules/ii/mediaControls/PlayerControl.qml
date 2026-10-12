@@ -1,4 +1,5 @@
 pragma ComponentBehavior: Bound
+import qs
 import qs.modules.common
 import qs.modules.common.models
 import qs.modules.common.widgets
@@ -318,6 +319,14 @@ Item { // Player instance
                             downAction: () => {
                                 Config.options.bar.media.showLyrics = !Config.options.bar.media.showLyrics;
                             }
+                        }
+                        TrackChangeButton {
+                            iconName: "equalizer"
+                            toggled: GlobalStates.equalizerOpen
+                            colBackgroundToggled: blendedColors.colSecondaryContainer
+                            colBackgroundToggledHover: blendedColors.colSecondaryContainerHover
+                            colRippleToggled: blendedColors.colSecondaryContainerActive
+                            downAction: () => GlobalStates.equalizerOpen = !GlobalStates.equalizerOpen
                         }
                     }
 

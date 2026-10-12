@@ -27,6 +27,7 @@ Singleton {
     readonly property QtObject imageTools: _impl ? _impl.imageTools : null
     readonly property QtObject thumbnailer: _impl ? _impl.thumbnailer : null
     readonly property QtObject fsUtils: _impl ? _impl.fsUtils : null
+    readonly property QtObject equalizer: _impl ? _impl.equalizer : null
     readonly property QtObject taskbar: _impl ? _impl.taskbar : null
     readonly property QtObject desktopLayer: _impl ? _impl.desktopLayer : null
     readonly property QtObject screenshot: _impl ? _impl.screenshot : null

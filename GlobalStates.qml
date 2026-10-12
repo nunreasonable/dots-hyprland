@@ -18,6 +18,7 @@ Singleton {
     property real desktopMenuX: 0
     property real desktopMenuY: 0
     property bool dropoverOpen: false
+    property bool equalizerOpen: false
     property var dropoverScreen: null
     property real dropoverX: 0
     property real dropoverY: 0
@@ -105,7 +106,8 @@ Singleton {
         { displayName: Translation.tr("Screenshot Region"), value: "regionSelectorOpen" },
         { displayName: Translation.tr("Screen Translator"), value: "screenTranslatorOpen" },
         { displayName: Translation.tr("On-screen keyboard"), value: "oskOpen" },
-        { displayName: Translation.tr("Session Menu"), value: "sessionOpen" }
+        { displayName: Translation.tr("Session Menu"), value: "sessionOpen" },
+        { displayName: Translation.tr("Equalizer"), value: "equalizerOpen" }
     ]
 
     function toggleState(name) {

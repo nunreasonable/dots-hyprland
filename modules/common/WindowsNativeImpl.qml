@@ -24,6 +24,7 @@ QtObject {
     readonly property QtObject imageTools: QSWin.ImageTools
     readonly property QtObject thumbnailer: root.full ? QSWin.Thumbnailer : null
     readonly property QtObject fsUtils: QSWin.FsUtils
+    readonly property QtObject equalizer: QSWin.EqualizerApo
     readonly property QtObject taskbar: root.full ? QSWin.Taskbar : null
     readonly property QtObject desktopLayer: root.full ? QSWin.DesktopLayer : null
     readonly property QtObject screenshot: root.full ? QSWin.Screenshot : null
