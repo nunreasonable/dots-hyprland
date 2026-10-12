@@ -1252,6 +1252,18 @@ ContentPage {
         }
 
         ConfigSwitch {
+            buttonIcon: "music_note_2"
+            text: Translation.tr('Enable media tab in left sidebar')
+            checked: Config.options.sidebar.media.enable
+            onCheckedChanged: {
+                Config.options.sidebar.media.enable = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Adds a Media tab next to Intelligence, Translator and Anime in the left sidebar")
+            }
+        }
+
+        ConfigSwitch {
             buttonIcon: "wallpaper"
             text: Translation.tr('Show banner')
             checked: Config.options.sidebar.banner
