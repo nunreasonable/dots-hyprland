@@ -6,17 +6,6 @@ import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Mpris
 
-// Owns "Auto" genre-follow, same job end4-pC's EqualizerAutoService.qml has
-// on Linux (watch for track changes, look up genre tags, switch the EQ
-// preset to match) - kept running here regardless of whether the equalizer
-// popup is open, same reasoning as upstream: a Connections/Process chain
-// living inside EqualizerView.qml would only exist while that view is
-// instantiated.
-//
-// Linux still talks to EasyEffects through scripts/eq/equalizer.sh exactly
-// as before. Windows has no bash/jq/Last.fm-via-curl-in-bash available, so
-// that half is reimplemented in EqualizerApoBackend.qml (curl.exe Process +
-// a plain JSON state file) behind every Platform.isWindows branch below.
 Singleton {
     id: root
 

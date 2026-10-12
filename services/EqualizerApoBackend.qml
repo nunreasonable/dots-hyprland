@@ -6,13 +6,6 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Windows counterpart to equalizer.sh/EasyEffects.qml - same 10-band +
-// preamp + presets + Auto genre-follow model EqualizerView.qml already
-// knows how to drive, just backed by Equalizer APO (WindowsNative.equalizer,
-// see src/windows/system/equalizer_apo.{hpp,cpp}) and a plain JSON state
-// file instead of EasyEffects preset JSON. Only ever touched behind
-// Platform.isWindows checks from the equalizer view and its auto genre-follow
-// service - loads harmlessly on Linux (the FileView just sits on an unused file).
 Singleton {
     id: root
 
@@ -33,11 +26,6 @@ Singleton {
         && WindowsNative.equalizer.installed && !WindowsNative.equalizer.hooked
     property bool pending: false
 
-    // customPresets/genreCache/trackGenreCache have caller-chosen keys
-    // (preset names, artist names, "artist\x1ftrack" pairs) - JsonObject
-    // needs a fixed schema, so those three live as plain JSON-text fields
-    // in the adapter (customPresetsJson etc.) and get mirrored into these
-    // ordinary parsed properties on load/every write.
     property var customPresets: ({})
     property var genreCache: ({})
     property var trackGenreCache: ({})
@@ -50,11 +38,6 @@ Singleton {
         return text;
     }
 
-    // Mirrors equalizer.sh's apply_eq() mapping, just emitted as Equalizer
-    // APO "Filter N: ON PK Fc <freq> Hz Gain <gain> dB Q 1.00" lines instead
-    // of an EasyEffects 32-band JSON blob - see
-    // $IIW/build/inventory (equalizer port report) for the host-side parity
-    // check of this exact function.
     function buildApoConfig(bands, preamp, bypassed) {
         if (bypassed || !bands || bands.length !== 10) return "Preamp: 0 dB\n";
         const lines = [`Preamp: ${root.fmtGain(preamp)} dB`];
@@ -181,10 +164,6 @@ Singleton {
         adapter.autoEnabled = !adapter.autoEnabled;
     }
 
-    // Collab-string fallback, same reasoning/order as equalizer.sh's
-    // strip_featured_artists(): try the full MPRIS artist string first, and
-    // only fall back to this (the first-listed name) when that lookup comes
-    // back with nothing.
     function primaryArtist(artist) {
         return String(artist)
             .replace(/\s*,.*/, "")

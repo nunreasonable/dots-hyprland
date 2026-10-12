@@ -3,13 +3,6 @@ import qs.modules.common
 import QtQuick
 import Quickshell
 
-// None of these OEM audio-enhancement apps (Realtek Audio Console, Dolby
-// Access, DTS, etc.) have a public API for their own EQ/effects - that logic
-// lives inside the vendor's driver/app, not something Equalizer APO or ii can
-// reach. All this does is recognize which of them are installed (by matching
-// Start Menu entries from DesktopEntries - covers both classic .lnk apps and
-// UWP apps by AUMID/package-family-name prefix) and hand back something the
-// equalizer popup can turn into "Open <app>" buttons.
 Singleton {
     id: root
 
@@ -42,10 +35,6 @@ Singleton {
         return root.containsAny(id, row.ids) || root.containsAny(name, row.names);
     }
 
-    // Returns [{ label, entry }] - one per table row that has a matching,
-    // launchable Start Menu entry. Only ever called on Windows (empty list
-    // on Linux, since DesktopEntries there is a different, Linux-only app
-    // catalog with no bearing on these Windows-only OEM apps).
     function installed() {
         if (!Platform.isWindows) return [];
         const all = Array.from(DesktopEntries.applications.values ?? []);

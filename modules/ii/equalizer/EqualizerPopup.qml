@@ -14,22 +14,6 @@ import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Services.Mpris
 
-// Standalone popup, opened only via the "equalizer" button inside the media
-// popup's controls (PlayerControl.qml / SidebarMediaCard.qml / DockMedia.qml) -
-// there is no separate bar icon for it. Sized on its own terms - nothing here
-// references Appearance.sizes.mediaControlsWidth.
-//
-// Visually styled like the media cards (blurred now-playing art, wave
-// visualizer, border), even though this popup isn't tied to any one
-// player/track - it just reflects whatever MprisController.activePlayer
-// currently is, same as the bar's media widget.
-//
-// Uses the same Loader-active pattern as modules/ii/mediaControls/MediaControls.qml:
-// the PanelWindow is created/destroyed by the Loader in step with
-// GlobalStates.equalizerOpen, so the popup's entrance/exit is whatever native
-// map/unmap animation the compositor already plays for every other layer-shell
-// surface - the same "pop" you see opening media - rather than a hand-rolled
-// QML slide.
 Scope {
     id: root
 
@@ -37,10 +21,6 @@ Scope {
     readonly property real popupHeight: 600
     readonly property real popupRounding: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
 
-    // No standalone "equalizer" bar entry - it only opens via the button
-    // inside the media controls/cards, so position it the same way the
-    // media controls popup itself is positioned (wherever "media" sits in
-    // the bar layout).
     readonly property string equalizerPosition: {
         if (Config.options.bar.layouts.leftLayout.includes("media")) return "left"
         if (Config.options.bar.layouts.middleLayout.includes("media")) return "center"
@@ -57,9 +37,6 @@ Scope {
     readonly property bool cornerStyleReducesGap: Config.options.bar.cornerStyle === 1 || Config.options.bar.cornerStyle === 2
     readonly property real barThickness: barVertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight
 
-    // Now-playing art, purely decorative here (same download-cache approach
-    // the media cards use) - if nothing is playing this just stays blank
-    // and the card falls back to a plain tinted background.
     readonly property MprisPlayer activePlayer: MprisController.activePlayer
     readonly property var artUrl: activePlayer?.trackArtUrl ?? ""
     readonly property string artFilePath: `${Directories.coverArt}/${Qt.md5(root.artUrl)}`
@@ -131,11 +108,6 @@ Scope {
             implicitHeight: root.popupHeight
             color: "transparent"
             WlrLayershell.namespace: "quickshell:equalizer"
-            // Layer-shell surfaces don't get keyboard input by default - this
-            // popup has text fields (custom preset naming, Last.fm key), which
-            // need the surface to actually be grantable keyboard focus.
-            // OnDemand means it only takes focus when something inside asks
-            // for it.
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
             anchors {
@@ -183,9 +155,6 @@ Scope {
                 border.width: 2
                 border.color: Qt.rgba(0, 0, 0, 0.55)
 
-                // root.blendedColors settles onto new album art in place -
-                // without this, the whole card would hard-snap to the new
-                // tint the instant it resolves instead of easing into it.
                 Behavior on color {
                     ColorAnimation { duration: 420; easing.type: Easing.OutCubic }
                 }
@@ -219,9 +188,6 @@ Scope {
                     antialiasing: true
                     asynchronous: true
                     visible: root.displayedArtFilePath.length > 0
-                    // Fades in once the async load actually finishes, rather
-                    // than popping straight to a fully-loaded frame the
-                    // instant `visible` flips true.
                     opacity: blurredArt.status === Image.Ready ? 1 : 0
 
                     Behavior on opacity {
@@ -239,10 +205,6 @@ Scope {
                     }
 
                     Rectangle {
-                        // Neutral dark scrim, no color tint - keeps the
-                        // blurred art readable without recoloring it from
-                        // matugen's blend. Alpha is user-controlled via
-                        // eqView.dimAmount (persisted alongside the curve).
                         anchors.fill: parent
                         color: ColorUtils.transparentize(Appearance.colors.colScrim, eqView.dimAmount)
 
