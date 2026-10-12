@@ -17,6 +17,9 @@ ContentPage {
         readonly property var current: displayConfig.monitors[displayCanvas.selectedIndex] ?? null
         readonly property bool active: displaysSection.current !== null && !displaysSection.current.disabled
         readonly property bool busy: displayConfig.busy
+        readonly property var resolutionOptions: displayConfig.resolutionOptions(displaysSection.current)
+        readonly property var refreshRateOptions: displayConfig.refreshRateOptions(displaysSection.current)
+        readonly property var scaleOptions: displayConfig.scaleOptions(displaysSection.current)
 
         WinModels.MonitorConfigOption {
             id: displayConfig
@@ -75,12 +78,12 @@ ContentPage {
                 StyledComboBox {
                     enabled: !displaysSection.busy
                     textRole: "displayName"
-                    model: displayConfig.resolutionOptions(displaysSection.current)
+                    model: displaysSection.resolutionOptions
                     currentIndex: {
                         const value = displayConfig.resolutionValue(displaysSection.current?.resolutionWidth, displaysSection.current?.resolutionHeight);
-                        return Math.max(0, model.findIndex(option => option.value === value));
+                        return Math.max(0, displaysSection.resolutionOptions.findIndex(option => option.value === value));
                     }
-                    onActivated: index => displayConfig.setResolution(displaysSection.current, model[index].value)
+                    onActivated: index => displayConfig.setResolution(displaysSection.current, displaysSection.resolutionOptions[index]?.value)
                 }
             }
 
@@ -89,11 +92,11 @@ ContentPage {
                 title: Translation.tr("Refresh rate")
 
                 StyledComboBox {
-                    enabled: !displaysSection.busy && model.length > 1
+                    enabled: !displaysSection.busy && displaysSection.refreshRateOptions.length > 1
                     textRole: "displayName"
-                    model: displayConfig.refreshRateOptions(displaysSection.current)
-                    currentIndex: Math.max(0, model.findIndex(option => option.value === displaysSection.current?.refreshRate))
-                    onActivated: index => displayConfig.setRefreshRate(displaysSection.current, model[index].value)
+                    model: displaysSection.refreshRateOptions
+                    currentIndex: Math.max(0, displaysSection.refreshRateOptions.findIndex(option => option.value === displaysSection.current?.refreshRate))
+                    onActivated: index => displayConfig.setRefreshRate(displaysSection.current, displaysSection.refreshRateOptions[index]?.value)
                 }
             }
 
@@ -121,9 +124,9 @@ ContentPage {
                 StyledComboBox {
                     enabled: !displaysSection.busy
                     textRole: "displayName"
-                    model: displayConfig.scaleOptions(displaysSection.current)
-                    currentIndex: Math.max(0, model.findIndex(option => option.value === displaysSection.current?.scale))
-                    onActivated: index => displayConfig.setScale(displaysSection.current, model[index].value)
+                    model: displaysSection.scaleOptions
+                    currentIndex: Math.max(0, displaysSection.scaleOptions.findIndex(option => option.value === displaysSection.current?.scale))
+                    onActivated: index => displayConfig.setScale(displaysSection.current, displaysSection.scaleOptions[index]?.value)
                 }
             }
         }
@@ -159,6 +162,8 @@ ContentPage {
                 textWidth: 180
                 from: 80
                 to: 480
+                stepSize: 4
+                usePercentTooltip: false
                 value: displaysSection.current?.sdrBrightness ?? 80
                 onMoved: sdrBrightnessTimer.restart()
 

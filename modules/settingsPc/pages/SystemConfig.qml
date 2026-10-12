@@ -174,6 +174,8 @@ ContentPage {
                         textWidth: 180
                         from: 80
                         to: 480
+                        stepSize: 4
+                        usePercentTooltip: false
                         value: displaysSection.current?.sdrBrightness ?? 80
                         onMoved: sdrBrightnessTimer.restart()
 
