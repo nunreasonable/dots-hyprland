@@ -238,7 +238,7 @@ ContentPage {
 
             W.NoticeBox {
                 Layout.fillWidth: true
-                visible: Platform.isWindows && !(WindowsNative.wallpaper?.lockScreenImageSupported ?? true)
+                visible: Platform.isWindows && !Config.options.background.lockScreenImageSupported
                 materialIcon: "info"
                 text: Translation.tr("Windows wouldn't accept this picture as the lock screen image automatically. Pick it yourself in Windows Settings.")
 

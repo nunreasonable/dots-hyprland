@@ -192,6 +192,7 @@ Singleton {
             property JsonObject background: JsonObject {
                 property bool widgetsLocked: false
                 property string lockWall: ""
+                property bool lockScreenImageSupported: true
                 property bool showGrid: true
                 property bool showBlur: false
                 property real blurRadius: 32

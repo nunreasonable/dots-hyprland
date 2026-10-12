@@ -634,6 +634,14 @@ Singleton {
         }
     }
 
+    Connections {
+        target: WindowsNative.wallpaper
+        function onLockScreenImageApplied(ok) {
+            if (ok !== Config.options.background.lockScreenImageSupported)
+                Config.options.background.lockScreenImageSupported = ok;
+        }
+    }
+
     Timer {
         id: changeIntervalTimer
         interval: Config.options?.wallpaperSelector.changeInterval ?? 0
