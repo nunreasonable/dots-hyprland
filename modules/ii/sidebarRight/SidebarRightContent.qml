@@ -205,7 +205,7 @@ Item {
                             fillMode: Image.PreserveAspectCrop
                             source: Config.options.sidebar.bannerImage !== ""
                                 ? Config.options.sidebar.bannerImage
-                                : Config.options.background.wallpaperPath
+                                : Wallpapers.stillPath
                             cache: false
                             antialiasing: true
                             sourceSize.width: wallpaperRect.width * 2

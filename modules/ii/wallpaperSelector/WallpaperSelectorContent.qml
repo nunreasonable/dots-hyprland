@@ -283,7 +283,7 @@ MouseArea {
                 visible: Config.options.wallpaperSelector.showBlurBackground
                 fillMode: Image.PreserveAspectCrop
                 source: Config.options.wallpaperSelector.showBlurBackground
-                        ? Config.options.background.wallpaperPath : ""
+                        ? Wallpapers.stillPath : ""
                 sourceSize: Qt.size(480, 480)
                 layer.enabled: true
                 layer.effect: OpacityMask {

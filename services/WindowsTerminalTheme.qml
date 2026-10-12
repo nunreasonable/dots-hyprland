@@ -140,7 +140,7 @@ Singleton {
 
         const accentColor = Config.options.appearance.palette.accentColor;
         const hasAccentColor = /^#[0-9a-fA-F]{6}$/.test(accentColor ?? "");
-        const path = Config.options.background.wallpaperPath;
+        const path = Wallpapers.stillPath;
         if (!hasAccentColor && !path) return;
 
         const schemeType = root._resolveSchemeType(path);

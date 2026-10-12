@@ -29,6 +29,8 @@ Singleton {
     readonly property list<string> imageExtensions: ["jpg", "jpeg", "png", "webp", "avif", "bmp", "svg"]
     readonly property list<string> videoExtensions: ["mp4", "webm", "mkv", "avi", "mov"]
     readonly property list<string> extensions: Platform.isWindows ? root.imageExtensions.concat(root.videoExtensions) : root.imageExtensions
+    readonly property string stillPath: root.isVideoPath(Config.options.background.wallpaperPath) && Config.options.background.thumbnailPath
+        ? Config.options.background.thumbnailPath : Config.options.background.wallpaperPath
     readonly property bool thumbnailGenerationRunning: thumbgenProc.running || _windowsThumbnailTotal > 0
     property real thumbnailGenerationProgress: 0
     readonly property string sortMode: Config.options?.wallpaperSelector.sortMode || "time"
@@ -387,9 +389,9 @@ Singleton {
             if (/^\/*$/.test(nicePath)) nicePath = "/";
             const kind = WindowsNative.fsUtils ? WindowsNative.fsUtils.classify(nicePath) : "invalid";
             if (kind === "dir") {
-                root._setFolder(Qt.resolvedUrl(nicePath));
+                root._setFolder(FileUtils.folderUrl(nicePath));
             } else if (kind === "file") {
-                root._setFolder(Qt.resolvedUrl(FileUtils.parentDirectory(nicePath)));
+                root._setFolder(FileUtils.folderUrl(FileUtils.parentDirectory(nicePath)));
             }
             return;
         }
