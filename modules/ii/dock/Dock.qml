@@ -68,7 +68,7 @@ Scope {
             visible: !GlobalStates.screenLocked
 
             readonly property bool hug: DockStyle.hug
-            readonly property string position: modelData.position
+            readonly property string position: DockStyle.position
             readonly property bool vertical: position !== "bottom"
             readonly property real gap: Appearance.sizes.hyprlandGapsOut
             readonly property real shadowMargin: Appearance.sizes.elevationMargin
