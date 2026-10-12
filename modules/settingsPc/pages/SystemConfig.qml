@@ -493,20 +493,34 @@ ContentPage {
                 title: Translation.tr("Keyboard")
 
                 GroupedList {
-                    ConfigSelectionArray {
-                        text: Translation.tr("Repeat delay")
-                        textOnlyWhenActive: true
-                        icon: "keyboard_return"
-                        currentValue: WindowsNative.inputSettings?.keyboardRepeatDelay ?? 0
-                        onSelected: newValue => {
-                            if (WindowsNative.inputSettings) WindowsNative.inputSettings.keyboardRepeatDelay = newValue;
+                    ColumnLayout {
+                        spacing: 6
+                        RowLayout {
+                            spacing: 10
+                            Layout.leftMargin: 8
+                            W.MaterialSymbol {
+                                text: "keyboard_return"
+                                iconSize: Appearance.font.pixelSize.larger
+                                color: Appearance.colors.colOnSecondaryContainer
+                            }
+                            W.StyledText {
+                                text: Translation.tr("Repeat delay")
+                                color: Appearance.colors.colOnSecondaryContainer
+                            }
                         }
-                        options: [
-                            { displayName: Translation.tr("Short"), icon: "bolt", value: 0 },
-                            { displayName: Translation.tr("Medium-short"), icon: "timer", value: 1 },
-                            { displayName: Translation.tr("Medium-long"), icon: "av_timer", value: 2 },
-                            { displayName: Translation.tr("Long"), icon: "hourglass_empty", value: 3 }
-                        ]
+                        ConfigSelectionArray {
+                            Layout.fillWidth: true
+                            currentValue: WindowsNative.inputSettings?.keyboardRepeatDelay ?? 0
+                            onSelected: newValue => {
+                                if (WindowsNative.inputSettings) WindowsNative.inputSettings.keyboardRepeatDelay = newValue;
+                            }
+                            options: [
+                                { displayName: Translation.tr("Short"), icon: "bolt", value: 0 },
+                                { displayName: Translation.tr("Medium-short"), icon: "timer", value: 1 },
+                                { displayName: Translation.tr("Medium-long"), icon: "av_timer", value: 2 },
+                                { displayName: Translation.tr("Long"), icon: "hourglass_empty", value: 3 }
+                            ]
+                        }
                     }
 
                     ConfigSpinBox {
@@ -673,22 +687,37 @@ ContentPage {
                                 WindowsNative.inputSettings.touchpadNaturalScroll = checked;
                         }
                     }
-                    ConfigSelectionArray {
-                        text: Translation.tr("Sensitivity")
-                        textOnlyWhenActive: true
-                        icon: "touch_app"
+                    ColumnLayout {
+                        spacing: 6
                         enabled: WindowsNative.inputSettings?.touchpadEnabled ?? true
-                        currentValue: WindowsNative.inputSettings?.touchpadSensitivity ?? 2
-                        onSelected: newValue => {
-                            if (WindowsNative.inputSettings) WindowsNative.inputSettings.touchpadSensitivity = newValue;
+                        RowLayout {
+                            spacing: 10
+                            Layout.leftMargin: 8
+                            W.MaterialSymbol {
+                                text: "touch_app"
+                                iconSize: Appearance.font.pixelSize.larger
+                                color: Appearance.colors.colOnSecondaryContainer
+                            }
+                            W.StyledText {
+                                text: Translation.tr("Sensitivity")
+                                color: Appearance.colors.colOnSecondaryContainer
+                            }
                         }
-                        options: [
-                            { displayName: Translation.tr("Most sensitive"), icon: "touch_app", value: 0 },
-                            { displayName: Translation.tr("High sensitivity"), icon: "ads_click", value: 1 },
-                            { displayName: Translation.tr("Medium sensitivity"), icon: "mouse", value: 2 },
-                            { displayName: Translation.tr("Low sensitivity"), icon: "front_hand", value: 3 },
-                            { displayName: Translation.tr("Least sensitive"), icon: "pan_tool", value: 4 }
-                        ]
+                        ConfigSelectionArray {
+                            Layout.fillWidth: true
+                            enabled: WindowsNative.inputSettings?.touchpadEnabled ?? true
+                            currentValue: WindowsNative.inputSettings?.touchpadSensitivity ?? 2
+                            onSelected: newValue => {
+                                if (WindowsNative.inputSettings) WindowsNative.inputSettings.touchpadSensitivity = newValue;
+                            }
+                            options: [
+                                { displayName: Translation.tr("Most sensitive"), icon: "touch_app", value: 0 },
+                                { displayName: Translation.tr("High sensitivity"), icon: "ads_click", value: 1 },
+                                { displayName: Translation.tr("Medium sensitivity"), icon: "mouse", value: 2 },
+                                { displayName: Translation.tr("Low sensitivity"), icon: "front_hand", value: 3 },
+                                { displayName: Translation.tr("Least sensitive"), icon: "pan_tool", value: 4 }
+                            ]
+                        }
                     }
                 }
             }
