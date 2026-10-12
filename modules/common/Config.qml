@@ -195,6 +195,7 @@ Singleton {
                     property bool blurWidgets: false
                     property real blurRadius: 32
                     property bool shadow: true
+                    property list<string> menuHidden: []
                     property JsonObject clock: JsonObject {
                         property bool enable: true
                         property bool showOnlyWhenLocked: false
@@ -202,7 +203,8 @@ Singleton {
                         property real x: 100
                         property real y: 100
                         property real z: 0
-                        property string style: "cookie"        // Options: "cookie", "digital"
+                        property string style: "cookie"        // Options: "cookie", "digital", "pixel"
+                        property string color: ""
                         property string styleLocked: "cookie"  // Options: "cookie", "digital"
                         property JsonObject cookie: JsonObject {
                             property bool aiStyling: false
@@ -231,9 +233,13 @@ Singleton {
                                 property real roundness: 0
                             }
                         }
+                        property JsonObject pixel: JsonObject {
+                            property string orientation: "vertical"
+                        }
                         property JsonObject quote: JsonObject {
                             property bool enable: false
                             property string text: ""
+                            property bool followClock: false
                         }
                     }
                     property JsonObject weather: JsonObject {
@@ -242,6 +248,8 @@ Singleton {
                         property real x: 400
                         property real y: 100
                         property real z: 0
+                        property string sizeMode: "1x3"
+                        property bool expanded: false
                     }
                     property JsonObject resources: JsonObject {
                         property bool enable: false
@@ -249,6 +257,7 @@ Singleton {
                         property real x: 220
                         property real y: 100
                         property real z: 0
+                        property bool vertical: false
                     }
                     property JsonObject calendar: JsonObject {
                         property bool enable: false
@@ -312,6 +321,10 @@ Singleton {
                     }
                     property JsonObject media: JsonObject {
                         property bool enable: false
+                        property bool showControls: true
+                        property bool showLyrics: false
+                        property bool showTitles: true
+                        property string backgroundShape: "Cookie4Sided"
                         property string placementStrategy: "free"
                         property real x: 800
                         property real y: 500
