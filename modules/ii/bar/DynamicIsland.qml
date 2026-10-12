@@ -184,10 +184,12 @@ Item {
     Connections {
         target: root.activePlayer
         function onTrackTitleChanged() {
-            mediaTrackChangeTimer.restart();
+            if (!Config.options.media.nowPlaying.enable)
+                mediaTrackChangeTimer.restart();
         }
         function onTrackArtistChanged() {
-            mediaTrackChangeTimer.restart();
+            if (!Config.options.media.nowPlaying.enable)
+                mediaTrackChangeTimer.restart();
         }
     }
 

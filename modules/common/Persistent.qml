@@ -83,6 +83,12 @@ Singleton {
                 property bool inhibit: false
             }
 
+            property JsonObject nowPlaying: JsonObject {
+                property real x: -1
+                property real y: -1
+                property string screen: ""
+            }
+
             property JsonObject overlay: JsonObject {
                 property list<string> open: ["crosshair", "recorder", "volumeMixer", "resources"]
                 property JsonObject crosshair: JsonObject {

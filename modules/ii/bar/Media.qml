@@ -7,6 +7,7 @@ import qs.modules.common.functions
 import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import Quickshell.Services.Mpris
 
 Item {
@@ -30,6 +31,61 @@ Item {
     Layout.fillHeight: true
     implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth : root.isMaterial ? materialRow.implicitWidth : root.classic ? rowLayout.implicitWidth + rowLayout.spacing * 2 : Math.max(Config.options.bar.media.minWidth, Math.min(rowLayout.implicitWidth + 8, Config.options.bar.media.maxWidth))
     implicitHeight: root.vertical ? (root.isMaterial ? 32 : verticalProgress.implicitHeight + 12) : Appearance.sizes.barHeight
+    opacity: GlobalStates.nowPlayingShown ? 0 : 1
+    transform: Scale {
+        origin.x: root.artLocalRect().x + root.artLocalRect().width / 2
+        origin.y: root.height / 2
+        xScale: GlobalStates.nowPlayingShown ? 0.6 : 1
+        yScale: xScale
+        Behavior on xScale {
+            NumberAnimation {
+                duration: 250
+                easing.type: Easing.OutCubic
+            }
+        }
+    }
+
+    Behavior on opacity {
+        NumberAnimation {
+            duration: 180
+            easing.type: Easing.OutCubic
+        }
+    }
+
+    function artLocalRect() {
+        if (root.vertical) {
+            const s = root.isMaterial ? 32 : 20;
+            return Qt.rect((root.width - s) / 2, (root.height - s) / 2, s, s);
+        }
+        if (root.isMaterial)
+            return Qt.rect(materialRow.x - 2, (root.height - 26) / 2, 26, 26);
+        return Qt.rect(rowLayout.x + (root.classic ? 0 : 3), (root.height - 20) / 2, 20, 20);
+    }
+
+    function publishNowPlayingSource() {
+        const win = root.QsWindow.window;
+        const scr = win?.screen;
+        if (!win || !scr || !root.visible) return;
+        const r = root.artLocalRect();
+        const p = root.mapToItem(null, r.x, r.y);
+        let gx = p.x;
+        let gy = p.y;
+        if (root.vertical) {
+            if (Config.options.bar.bottom) gx = scr.width - win.width + p.x;
+        } else if (Config.options.bar.bottom) {
+            gy = scr.height - win.height + p.y;
+        }
+        const sources = Object.assign({}, GlobalStates.nowPlayingSources);
+        sources[scr.name] = { x: gx, y: gy, size: r.width };
+        GlobalStates.nowPlayingSources = sources;
+    }
+
+    Connections {
+        target: GlobalStates
+        function onNowPlayingSourceRequested() {
+            root.publishNowPlayingSource();
+        }
+    }
 
     Timer {
         running: activePlayer?.playbackState == MprisPlaybackState.Playing

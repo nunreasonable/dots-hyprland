@@ -693,6 +693,15 @@ Singleton {
             property JsonObject media: JsonObject {
                 // Attempt to remove dupes (the aggregator playerctl one and browsers' native ones when there's plasma browser integration)
                 property bool filterDuplicatePlayers: true
+                property JsonObject nowPlaying: JsonObject {
+                    property bool enable: true
+                    property int duration: 2000
+                    property int openDuration: 1000
+                    property int closeDuration: 600
+                    property int size: 100
+                    property bool flyFromBar: true
+                    property int flyDuration: 650
+                }
             }
 
             property JsonObject windowsPort: JsonObject {

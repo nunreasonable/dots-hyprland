@@ -25,6 +25,10 @@ Singleton {
     property bool sidebarLeftOpen: false
     property bool sidebarRightOpen: false
     property bool mediaControlsOpen: false
+    property bool nowPlayingShown: false
+    property var nowPlayingSources: ({})
+    signal nowPlayingSourceRequested()
+    signal nowPlayingPositionRequested()
     property bool osdBrightnessOpen: false
     property bool osdVolumeOpen: false
     property bool oskOpen: false

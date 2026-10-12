@@ -143,8 +143,17 @@ Item {
 
     default property alias items: gridLayout.children
 
+    readonly property bool hiddenByNowPlaying: root.widgetName === "media" && GlobalStates.nowPlayingShown
+
     Rectangle {
         id: background
+        opacity: root.hiddenByNowPlaying ? 0 : 1
+        Behavior on opacity {
+            NumberAnimation {
+                duration: 250
+                easing.type: Easing.OutCubic
+            }
+        }
         anchors {
             fill: parent
             topMargin: root.vertical ? 0 : 4

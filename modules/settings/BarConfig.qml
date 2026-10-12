@@ -1,5 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
+import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
@@ -990,6 +992,99 @@ ContentPage {
             stepSize: 10
             onValueChanged: {
                 Config.options.bar.media.minWidth = value;
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "album"
+        title: Translation.tr("Now Playing")
+
+    ConfigSwitch {
+        buttonIcon: "album"
+        text: Translation.tr("Show a pill when the track changes")
+        checked: Config.options.media.nowPlaying.enable
+        onCheckedChanged: { Config.options.media.nowPlaying.enable = checked; }
+    }
+    ConfigSpinBox {
+        icon: "timer"
+        text: Translation.tr("Seconds on screen")
+        value: Math.round(Config.options.media.nowPlaying.duration / 1000)
+        from: 1
+        to: 10
+        stepSize: 1
+        onValueChanged: { Config.options.media.nowPlaying.duration = value * 1000; }
+    }
+    ConfigSpinBox {
+        icon: "slow_motion_video"
+        text: Translation.tr("Opening animation (ms)")
+        value: Config.options.media.nowPlaying.openDuration
+        from: 200
+        to: 3000
+        stepSize: 100
+        onValueChanged: { Config.options.media.nowPlaying.openDuration = value; }
+    }
+    ConfigSpinBox {
+        icon: "speed"
+        text: Translation.tr("Closing animation (ms)")
+        value: Config.options.media.nowPlaying.closeDuration
+        from: 200
+        to: 3000
+        stepSize: 100
+        onValueChanged: { Config.options.media.nowPlaying.closeDuration = value; }
+    }
+    ConfigSwitch {
+        buttonIcon: "flight"
+        text: Translation.tr("Cover flies out of the bar")
+        checked: Config.options.media.nowPlaying.flyFromBar
+        onCheckedChanged: { Config.options.media.nowPlaying.flyFromBar = checked; }
+    }
+    ConfigSpinBox {
+        icon: "flight_takeoff"
+        text: Translation.tr("Flight animation (ms)")
+        value: Config.options.media.nowPlaying.flyDuration
+        from: 200
+        to: 3000
+        stepSize: 50
+        onValueChanged: { Config.options.media.nowPlaying.flyDuration = value; }
+    }
+    ConfigSpinBox {
+        icon: "aspect_ratio"
+        text: Translation.tr("Size (%)")
+        value: Config.options.media.nowPlaying.size
+        from: 60
+        to: 200
+        stepSize: 10
+        onValueChanged: { Config.options.media.nowPlaying.size = value; }
+    }
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: 8
+
+            RippleButtonWithIcon {
+                materialIcon: "drag_pan"
+                mainText: Translation.tr("Move the pill")
+                onClicked: {
+                    if (Platform.isWindows)
+                        GlobalStates.nowPlayingPositionRequested();
+                    else
+                        Quickshell.execDetached(["qs", "-p", Quickshell.shellPath("shell.qml"), "ipc", "call", "nowPlaying", "position"]);
+                }
+            }
+
+            RippleButtonWithIcon {
+                materialIcon: "restart_alt"
+                mainText: Translation.tr("Reset position")
+                onClicked: {
+                    Persistent.states.nowPlaying.x = -1;
+                    Persistent.states.nowPlaying.y = -1;
+                    Persistent.states.nowPlaying.screen = "";
+                }
+            }
+
+            Item {
+                Layout.fillWidth: true
             }
         }
     }

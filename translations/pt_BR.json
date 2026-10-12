@@ -1852,5 +1852,16 @@
   "Failed to download preset assets": "Falha ao baixar os arquivos do preset",
   "Failed to finalize preset": "Falha ao finalizar o preset",
   "ii-windows update": "Atualização do ii-windows",
-  "%1 \"%2\" is ready to install. Nothing changes until you confirm it in the setup.": "%1 \"%2\" está pronta para instalar. Nada muda até você confirmar no setup."
+  "%1 \"%2\" is ready to install. Nothing changes until you confirm it in the setup.": "%1 \"%2\" está pronta para instalar. Nada muda até você confirmar no setup.",
+  "Now Playing": "Tocando agora",
+  "Drag to move": "Arraste para mover",
+  "Show a pill when the track changes": "Mostrar uma pílula quando a música muda",
+  "Seconds on screen": "Segundos na tela",
+  "Move the pill": "Mover a pílula",
+  "Reset position": "Restaurar posição",
+  "Opening animation (ms)": "Animação de abertura (ms)",
+  "Closing animation (ms)": "Animação de fechamento (ms)",
+  "Size (%)": "Tamanho (%)",
+  "Cover flies out of the bar": "A capa sai voando da barra",
+  "Flight animation (ms)": "Animação do voo (ms)"
 }
