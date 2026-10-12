@@ -1850,5 +1850,7 @@
   "Update \"%1\"": "Atualizar \"%1\"",
   "Local vLLM model | %1": "Modelo vLLM local | %1",
   "Failed to download preset assets": "Falha ao baixar os arquivos do preset",
-  "Failed to finalize preset": "Falha ao finalizar o preset"
+  "Failed to finalize preset": "Falha ao finalizar o preset",
+  "ii-windows update": "Atualização do ii-windows",
+  "%1 \"%2\" is ready to install. Nothing changes until you confirm it in the setup.": "%1 \"%2\" está pronta para instalar. Nada muda até você confirmar no setup."
 }

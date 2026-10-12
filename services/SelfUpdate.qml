@@ -14,11 +14,15 @@ Singleton {
     readonly property string curlBin: Platform.isWindows ? "curl.exe" : "curl"
     readonly property string repo: "nunreasonable/ii-windows"
     readonly property string setupAssetName: "ii-windows-setup.exe"
-    readonly property string apiUrl: Quickshell.env("IIW_SELF_UPDATE_RELEASE_JSON") || `https://api.github.com/repos/${root.repo}/releases/latest`
+    readonly property string apiOverride: Quickshell.env("IIW_SELF_UPDATE_RELEASE_JSON") || ""
+    readonly property string apiUrl: root.apiOverride !== "" ? root.apiOverride
+        : root.installedIsPrerelease ? `https://api.github.com/repos/${root.repo}/releases?per_page=20`
+        : `https://api.github.com/repos/${root.repo}/releases/latest`
     readonly property string installedVersionOverride: Quickshell.env("IIW_SELF_UPDATE_INSTALLED_VERSION") || ""
-    readonly property int checkIntervalMs: 24 * 60 * 60 * 1000
+    readonly property int recheckIntervalMs: 24 * 60 * 60 * 1000
 
     property string installedVersion: root.installedVersionOverride
+    readonly property bool installedIsPrerelease: (root._parseVersion(root.installedVersion)?.pre ?? null) !== null
     property bool checking: false
     property bool downloading: false
     property string lastError: ""
@@ -30,7 +34,13 @@ Singleton {
     property string setupUrl: ""
     property int setupSize: 0
     property double lastCheckedAt: 0
-    property string notifiedVersion: ""
+
+    property bool _cacheDone: false
+    property bool _versionDone: root.installedVersionOverride !== ""
+    property bool _startupChecked: false
+    property string _sessionNotifiedVersion: ""
+    property int _notificationId: -1
+    property bool _updateFromNotification: false
 
     readonly property bool updateAvailable: Platform.isWindows
         && root.installedVersion !== ""
@@ -59,6 +69,24 @@ Singleton {
         return { parts: parts, pre: pre };
     }
 
+    function _comparePre(a, b) {
+        const xs = a.split(".");
+        const ys = b.split(".");
+        for (let i = 0; i < Math.min(xs.length, ys.length); i++) {
+            const xNum = /^\d+$/.test(xs[i]);
+            const yNum = /^\d+$/.test(ys[i]);
+            if (xNum && yNum) {
+                const d = parseInt(xs[i], 10) - parseInt(ys[i], 10);
+                if (d !== 0) return d < 0 ? -1 : 1;
+            } else if (xNum !== yNum) {
+                return xNum ? -1 : 1;
+            } else if (xs[i] !== ys[i]) {
+                return xs[i] < ys[i] ? -1 : 1;
+            }
+        }
+        return xs.length === ys.length ? 0 : (xs.length < ys.length ? -1 : 1);
+    }
+
     function _compareVersions(a, b) {
         const len = Math.max(a.parts.length, b.parts.length);
         for (let i = 0; i < len; i++) {
@@ -69,7 +97,7 @@ Singleton {
         if (a.pre === null && b.pre === null) return 0;
         if (a.pre === null) return 1;
         if (b.pre === null) return -1;
-        return a.pre < b.pre ? -1 : (a.pre > b.pre ? 1 : 0);
+        return root._comparePre(a.pre, b.pre);
     }
 
     function _isNewer(candidate, installed) {
@@ -92,6 +120,25 @@ Singleton {
         return (tag || "").replace(/^v/i, "");
     }
 
+    function _pickRelease(json) {
+        if (!Array.isArray(json)) {
+            if (json.draft || (json.prerelease && !root.installedIsPrerelease)) return null;
+            return json;
+        }
+        let best = null;
+        let bestVersion = null;
+        for (const release of json) {
+            if (release.draft || (release.prerelease && !root.installedIsPrerelease)) continue;
+            const version = root._parseVersion(release.tag_name ?? "");
+            if (!version) continue;
+            if (best === null || root._compareVersions(version, bestVersion) > 0) {
+                best = release;
+                bestVersion = version;
+            }
+        }
+        return best;
+    }
+
     function load() {}
 
     function refresh() {
@@ -105,9 +152,10 @@ Singleton {
         checkProc.running = true;
     }
 
-    function maybeAutoCheck() {
-        if (!Platform.isWindows || root.checking) return;
-        if (Date.now() - root.lastCheckedAt >= root.checkIntervalMs) root.refresh();
+    function _startupCheck() {
+        if (!Platform.isWindows || root._startupChecked || !root._cacheDone || !root._versionDone) return;
+        root._startupChecked = true;
+        root.refresh();
     }
 
     function startUpdate() {
@@ -120,15 +168,25 @@ Singleton {
         downloadProc.running = true;
     }
 
+    function _updateFromNotificationAction() {
+        if (root.downloading) return;
+        root._updateFromNotification = true;
+        Notifications.sendDesktop(Translation.tr("ii-windows update"), Translation.tr("Downloading the update…"), ["-e"]);
+        root.startUpdate();
+    }
+
     function _maybeNotify() {
         if (!Config.ready || !Config.options.windowsPort.selfUpdate.notify) return;
-        if (!root.updateAvailable || root.notifiedVersion === root.latestVersion) return;
-        Notifications.sendDesktop(
+        if (!root.updateAvailable || root._sessionNotifiedVersion === root.latestVersion) return;
+        root._sessionNotifiedVersion = root.latestVersion;
+        const actions = [];
+        if (root.setupUrl !== "") actions.push("-A", `update=${Translation.tr("Update")}`);
+        if (root.htmlUrl !== "") actions.push("-A", `notes=${Translation.tr("What's new")}`);
+        root._notificationId = Notifications.sendDesktop(
             Translation.tr("ii-windows update available"),
-            Translation.tr("%1 \"%2\" is ready to install.").arg(root.latestVersion).arg(root.releaseName),
-            []
-        );
-        root.notifiedVersion = root.latestVersion;
+            Translation.tr("%1 \"%2\" is ready to install. Nothing changes until you confirm it in the setup.").arg(root.latestVersion).arg(root.releaseName),
+            actions
+        ) ?? -1;
     }
 
     function _saveCache() {
@@ -139,8 +197,7 @@ Singleton {
             releaseName: root.releaseName,
             htmlUrl: root.htmlUrl,
             setupUrl: root.setupUrl,
-            setupSize: root.setupSize,
-            notifiedVersion: root.notifiedVersion
+            setupSize: root.setupSize
         }));
     }
 
@@ -148,6 +205,29 @@ Singleton {
         if (!Platform.isWindows) return;
         manifestFileView.reload();
         cacheFileView.reload();
+    }
+
+    Connections {
+        target: Platform.isWindows ? Notifications : null
+        function onDesktopActionInvoked(id, action) {
+            if (id !== root._notificationId) return;
+            if (action === "update") root._updateFromNotificationAction();
+            else if (action === "notes" && root.htmlUrl !== "") Qt.openUrlExternally(root.htmlUrl);
+        }
+    }
+
+    Connections {
+        target: Config
+        function onReadyChanged() {
+            if (Config.ready && !root.checking) root._maybeNotify();
+        }
+    }
+
+    Timer {
+        running: Platform.isWindows && root._startupChecked
+        interval: root.recheckIntervalMs
+        repeat: true
+        onTriggered: root.refresh()
     }
 
     FileView {
@@ -163,11 +243,14 @@ Singleton {
                 root.setupUrl = data.setupUrl ?? "";
                 root.setupSize = data.setupSize ?? 0;
                 root.lastCheckedAt = data.lastCheckedAt ?? 0;
-                root.notifiedVersion = data.notifiedVersion ?? "";
             } catch (e) {}
-            root.maybeAutoCheck();
+            root._cacheDone = true;
+            root._startupCheck();
         }
-        onLoadFailed: root.maybeAutoCheck()
+        onLoadFailed: {
+            root._cacheDone = true;
+            root._startupCheck();
+        }
     }
 
     FileView {
@@ -179,6 +262,8 @@ Singleton {
                 const data = JSON.parse(manifestFileView.text());
                 if (data.version) {
                     root.installedVersion = data.version;
+                    root._versionDone = true;
+                    root._startupCheck();
                     return;
                 }
             } catch (e) {}
@@ -194,6 +279,12 @@ Singleton {
         onLoaded: {
             const text = versionFileView.text().trim();
             if (text.length > 0) root.installedVersion = text.replace(/^v/i, "");
+            root._versionDone = true;
+            root._startupCheck();
+        }
+        onLoadFailed: {
+            root._versionDone = true;
+            root._startupCheck();
         }
     }
 
@@ -211,23 +302,22 @@ Singleton {
                 root.lastError = status
                     ? Translation.tr("GitHub answered HTTP %1.").arg(status)
                     : Translation.tr("Could not reach GitHub.");
+                root._maybeNotify();
                 root._saveCache();
                 return;
             }
             try {
-                const json = JSON.parse(body);
-                if (json.prerelease) {
-                    root._saveCache();
-                    return;
+                const release = root._pickRelease(JSON.parse(body));
+                if (release) {
+                    const tag = release.tag_name ?? "";
+                    root.latestVersion = tag.replace(/^v/i, "");
+                    root.releaseName = root._parseReleaseName(release.name ?? "", tag);
+                    root.htmlUrl = release.html_url ?? "";
+                    const assets = release.assets ?? [];
+                    const setupAsset = assets.find(a => (a.name ?? "").toLowerCase() === root.setupAssetName);
+                    root.setupUrl = setupAsset ? (setupAsset.browser_download_url ?? "") : "";
+                    root.setupSize = setupAsset ? (setupAsset.size ?? 0) : 0;
                 }
-                const tag = json.tag_name ?? "";
-                root.latestVersion = tag.replace(/^v/i, "");
-                root.releaseName = root._parseReleaseName(json.name ?? "", tag);
-                root.htmlUrl = json.html_url ?? "";
-                const assets = json.assets ?? [];
-                const setupAsset = assets.find(a => (a.name ?? "").toLowerCase() === root.setupAssetName);
-                root.setupUrl = setupAsset ? (setupAsset.browser_download_url ?? "") : "";
-                root.setupSize = setupAsset ? (setupAsset.size ?? 0) : 0;
                 root.lastError = "";
                 root._maybeNotify();
                 root._saveCache();
@@ -243,14 +333,18 @@ Singleton {
         stdout: StdioCollector { id: downloadCollector }
         onExited: (exitCode, exitStatus) => {
             root.downloading = false;
+            const fromNotification = root._updateFromNotification;
+            root._updateFromNotification = false;
             if (exitCode !== 0) {
                 root.lastError = Translation.tr("Couldn't download the update.");
+                if (fromNotification) Notifications.sendDesktop(Translation.tr("ii-windows update"), root.lastError, []);
                 return;
             }
             const sizeMatch = downloadCollector.text.match(/SIZE:(\d+)/);
             const downloadedSize = sizeMatch ? parseInt(sizeMatch[1], 10) : -1;
             if (root.setupSize > 0 && downloadedSize !== root.setupSize) {
                 root.lastError = Translation.tr("The downloaded file doesn't match the size GitHub reported.");
+                if (fromNotification) Notifications.sendDesktop(Translation.tr("ii-windows update"), root.lastError, []);
                 return;
             }
             Quickshell.execDetached([root.downloadDest, "--update"]);
