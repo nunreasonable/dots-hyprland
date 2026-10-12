@@ -547,6 +547,11 @@ ContentPage {
                             displayName: Translation.tr("Cookie"),
                             icon: "cookie",
                             value: "cookie"
+                        },
+                        {
+                            displayName: Translation.tr("Pixel"),
+                            icon: "grid_view",
+                            value: "pixel"
                         }
                     ]
                 }
@@ -567,8 +572,44 @@ ContentPage {
                             displayName: Translation.tr("Cookie"),
                             icon: "cookie",
                             value: "cookie"
+                        },
+                        {
+                            displayName: Translation.tr("Pixel"),
+                            icon: "grid_view",
+                            value: "pixel"
                         }
                     ]
+                }
+            }
+
+            Loader {
+                Layout.fillWidth: true
+                active: Config.options.background.widgets.clock.style === "pixel"
+                visible: active
+                sourceComponent: ContentSubsection {
+                    title: Translation.tr("Pixel clock settings")
+                    GroupedList {
+                        ConfigSelectionArray {
+                            text: Translation.tr("Pixel clock orientation")
+                            icon: "screen_rotation"
+                            currentValue: Config.options.background.widgets.clock.pixel.orientation
+                            onSelected: newValue => {
+                                Config.options.background.widgets.clock.pixel.orientation = newValue;
+                            }
+                            options: [
+                                {
+                                    displayName: Translation.tr("Horizontal"),
+                                    icon: "swap_horiz",
+                                    value: "horizontal"
+                                },
+                                {
+                                    displayName: Translation.tr("Vertical"),
+                                    icon: "swap_vert",
+                                    value: "vertical"
+                                }
+                            ]
+                        }
+                    }
                 }
             }
 
@@ -946,6 +987,15 @@ ContentPage {
                         checked: Config.options.background.widgets.clock.quote.enable
                         onCheckedChanged: {
                             Config.options.background.widgets.clock.quote.enable = checked;
+                        }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "font_download"
+                        text: Translation.tr("Follow clock font")
+                        enabled: Config.options.background.widgets.clock.style !== "pixel"
+                        checked: Config.options.background.widgets.clock.quote.followClock
+                        onCheckedChanged: {
+                            Config.options.background.widgets.clock.quote.followClock = checked;
                         }
                     }
                     ConfigTextArea {
@@ -2251,6 +2301,67 @@ ContentPage {
         }
 
         ContentSection {
+            icon: "weather_mix"
+            shape: W.MaterialShape.Shape.Flower
+            title: Translation.tr("Widget: Weather")
+
+            GroupedList {
+                ConfigSelectionArray {
+                    text: Translation.tr("Size")
+                    icon: "aspect_ratio"
+                    currentValue: Config.options.background.widgets.weather.sizeMode
+                    onSelected: newValue => {
+                        Config.options.background.widgets.weather.sizeMode = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: "1×1",
+                            icon: "crop_square",
+                            value: "1x1"
+                        },
+                        {
+                            displayName: "1×2",
+                            icon: "crop_landscape",
+                            value: "1x2"
+                        },
+                        {
+                            displayName: "1×3",
+                            icon: "crop_landscape",
+                            value: "1x3"
+                        },
+                        {
+                            displayName: "2×2",
+                            icon: "crop_square",
+                            value: "2x2"
+                        },
+                        {
+                            displayName: "2×3",
+                            icon: "crop_portrait",
+                            value: "2x3"
+                        },
+                    ]
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "memory"
+            shape: W.MaterialShape.Shape.Boom
+            title: Translation.tr("Widget: Resources")
+
+            GroupedList {
+                ConfigSwitch {
+                    buttonIcon: "swap_horiz"
+                    text: Translation.tr("Stack vertically")
+                    checked: Config.options.background.widgets.resources.vertical
+                    onCheckedChanged: {
+                        Config.options.background.widgets.resources.vertical = checked;
+                    }
+                }
+            }
+        }
+
+        ContentSection {
             icon: "music_note"
             shape: W.MaterialShape.Shape.Burst
             title: Translation.tr("Widget: Media")
@@ -2283,6 +2394,52 @@ ContentPage {
                             displayName: "1×3",
                             icon: "crop_landscape",
                             value: "1x3"
+                        },
+                    ]
+                }
+                ConfigSwitch {
+                    buttonIcon: "tune"
+                    text: Translation.tr("Show controls")
+                    checked: Config.options.background.widgets.media.showControls
+                    onCheckedChanged: {
+                        Config.options.background.widgets.media.showControls = checked;
+                    }
+                }
+                ConfigSwitch {
+                    buttonIcon: "title"
+                    text: Translation.tr("Show titles")
+                    checked: Config.options.background.widgets.media.showTitles
+                    onCheckedChanged: {
+                        Config.options.background.widgets.media.showTitles = checked;
+                    }
+                }
+                ConfigSelectionArray {
+                    text: Translation.tr("Background shape")
+                    icon: "cookie"
+                    currentValue: Config.options.background.widgets.media.backgroundShape
+                    onSelected: newValue => {
+                        Config.options.background.widgets.media.backgroundShape = newValue;
+                    }
+                    options: [
+                        {
+                            displayName: "",
+                            icon: "square",
+                            value: "Square"
+                        },
+                        {
+                            displayName: "",
+                            icon: "cookie",
+                            value: "Cookie4Sided"
+                        },
+                        {
+                            displayName: "",
+                            icon: "cookie",
+                            value: "Cookie7Sided"
+                        },
+                        {
+                            displayName: "",
+                            icon: "cookie",
+                            value: "Cookie12Sided"
                         },
                     ]
                 }
@@ -2421,7 +2578,7 @@ ContentPage {
                 W.StyledText {
                     Layout.fillWidth: true
                     wrapMode: Text.Wrap
-                    text: Translation.tr("Only the Bars style is implemented on Windows so far; the others fall back to it.")
+                    text: Translation.tr("The Ring style can be dragged and resized; the others sit at the bottom of the screen.")
                     font.pixelSize: Appearance.font.pixelSize.small
                     color: Appearance.colors.colSubtext
                 }

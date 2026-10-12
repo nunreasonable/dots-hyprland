@@ -18,6 +18,7 @@ Scope {
     component DesktopMenuItem: RippleButton {
         id: itemRoot
         property string iconName: ""
+        property bool hasSubmenu: false
         Layout.fillWidth: true
         implicitHeight: 36
         buttonRadius: Appearance.rounding.small
@@ -38,6 +39,13 @@ Scope {
                 Layout.fillWidth: true
                 text: itemRoot.buttonText
                 color: Appearance.colors.colOnLayer0
+            }
+            MaterialSymbol {
+                visible: itemRoot.hasSubmenu
+                text: "chevron_right"
+                iconSize: Appearance.font.pixelSize.normal
+                color: Appearance.colors.colOnLayer0
+                opacity: 0.5
             }
         }
     }
@@ -111,6 +119,16 @@ Scope {
             exclusionMode: ExclusionMode.Ignore
             color: "transparent"
 
+            property Component openSubmenuComponent: null
+            property real submenuAnchorY: 0
+            readonly property real submenuWidth: 260
+
+            Timer {
+                id: submenuCloseTimer
+                interval: 250
+                onTriggered: root.openSubmenuComponent = null
+            }
+
             anchors {
                 top: true
                 bottom: true
@@ -120,6 +138,9 @@ Scope {
 
             mask: Region {
                 item: menuCard
+                Region {
+                    item: submenuLoader
+                }
             }
 
             Keys.onEscapePressed: GlobalStates.desktopMenuOpen = false
@@ -189,6 +210,24 @@ Scope {
                             GlobalStates.dropoverOpen = true;
                         }
                     }
+                    DesktopMenuItem {
+                        id: widgetsItem
+                        iconName: "widgets"
+                        buttonText: Translation.tr("Widgets")
+                        hasSubmenu: true
+
+                        HoverHandler {
+                            onHoveredChanged: {
+                                if (hovered) {
+                                    submenuCloseTimer.stop();
+                                    root.submenuAnchorY = menuCard.y + widgetsItem.mapToItem(menuCard, 0, 0).y;
+                                    root.openSubmenuComponent = widgetsSubmenuComponent;
+                                } else {
+                                    submenuCloseTimer.restart();
+                                }
+                            }
+                        }
+                    }
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.topMargin: 2
@@ -203,6 +242,30 @@ Scope {
                             GlobalStates.desktopMenuOpen = false;
                             SettingsApp.open();
                         }
+                    }
+                }
+            }
+
+            Component {
+                id: widgetsSubmenuComponent
+                WidgetsSubmenu {}
+            }
+
+            Loader {
+                id: submenuLoader
+                active: root.openSubmenuComponent !== null
+                width: root.submenuWidth
+                sourceComponent: root.openSubmenuComponent
+
+                x: (menuCard.x + menuCard.width + 8 + root.submenuWidth > root.width) ? menuCard.x - root.submenuWidth - 8 : menuCard.x + menuCard.width + 8
+                y: Math.min(Math.max(root.submenuAnchorY, 8), root.height - (item?.implicitHeight ?? 0) - 8)
+
+                HoverHandler {
+                    onHoveredChanged: {
+                        if (hovered)
+                            submenuCloseTimer.stop();
+                        else
+                            submenuCloseTimer.restart();
                     }
                 }
             }
