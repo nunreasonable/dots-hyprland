@@ -730,8 +730,20 @@ q="$1"; h="$2"
                                 comparisonMode: ObjectComparison.Identity
                                 values: resultsList.visible ? root.keyedItems.keys : []
                             }
-                            currentIndex: root.currentIndex
-                            onCurrentIndexChanged: positionViewAtIndex(currentIndex, ListView.Contain)
+                            currentIndex: -1
+                            function revealCurrent() {
+                                if (resultsList.visible)
+                                    resultsList.positionViewAtIndex(root.currentIndex, ListView.Contain);
+                            }
+                            Connections {
+                                target: root
+                                function onCurrentIndexChanged() {
+                                    resultsList.revealCurrent();
+                                }
+                                function onItemsChanged() {
+                                    Qt.callLater(resultsList.revealCurrent);
+                                }
+                            }
                             delegate: SearchItem {
                                 id: resultItem
                                 required property string modelData
@@ -758,8 +770,20 @@ q="$1"; h="$2"
                                 comparisonMode: ObjectComparison.Identity
                                 values: tileGrid.visible ? root.keyedItems.keys : []
                             }
-                            currentIndex: root.currentIndex
-                            onCurrentIndexChanged: positionViewAtIndex(currentIndex, GridView.Contain)
+                            currentIndex: -1
+                            function revealCurrent() {
+                                if (tileGrid.visible)
+                                    tileGrid.positionViewAtIndex(root.currentIndex, GridView.Contain);
+                            }
+                            Connections {
+                                target: root
+                                function onCurrentIndexChanged() {
+                                    tileGrid.revealCurrent();
+                                }
+                                function onItemsChanged() {
+                                    Qt.callLater(tileGrid.revealCurrent);
+                                }
+                            }
                             boundsBehavior: Flickable.StopAtBounds
                             delegate: Item {
                                 id: tileCell
@@ -795,8 +819,20 @@ q="$1"; h="$2"
                                 comparisonMode: ObjectComparison.Identity
                                 values: rowList.visible ? root.keyedItems.keys : []
                             }
-                            currentIndex: root.currentIndex
-                            onCurrentIndexChanged: positionViewAtIndex(currentIndex, ListView.Contain)
+                            currentIndex: -1
+                            function revealCurrent() {
+                                if (rowList.visible)
+                                    rowList.positionViewAtIndex(root.currentIndex, ListView.Contain);
+                            }
+                            Connections {
+                                target: root
+                                function onCurrentIndexChanged() {
+                                    rowList.revealCurrent();
+                                }
+                                function onItemsChanged() {
+                                    Qt.callLater(rowList.revealCurrent);
+                                }
+                            }
                             boundsBehavior: Flickable.StopAtBounds
                             delegate: SpotlightRow {
                                 id: row
