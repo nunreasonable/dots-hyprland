@@ -31,6 +31,7 @@ Singleton {
         { id: "sysTray", name: Translation.tr("Tray"), icon: "inbox", file: "SysTray.qml" },
         { id: "systemIcons", name: Translation.tr("System Icons"), icon: "info", file: "SystemIcons.qml" },
         { id: "batteryIndicator", name: Translation.tr("Battery"), icon: "battery_android_frame_full", file: "BatteryIndicator.qml" },
+        { id: "docktoPanel", name: Translation.tr("Dock to Panel"), icon: "apps", file: "DocktoPanel.qml" },
         { id: "bluetooth", name: Translation.tr("Bluetooth"), icon: "bluetooth", file: "Bluetooth.qml" },
         { id: "networkSpeed", name: Translation.tr("Network Speed"), icon: "network_check", file: "NetworkSpeed.qml", linuxOnly: true },
         { id: "weatherBar", name: Translation.tr("Weather"), icon: "flare", file: "weather/WeatherBar.qml" },
