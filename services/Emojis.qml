@@ -20,24 +20,25 @@ Singleton {
         name: Fuzzy.prepare(`${a}`),
         entry: a
     })) : []
-    function fuzzyQuery(search: string): var {
-        if (root.sloppySearch) {
-            const results = entries.slice(0, 100).map(str => ({
-                entry: str,
-                score: Levendist.computeTextMatchScore(str.toLowerCase(), search.toLowerCase())
-            })).filter(item => item.score > root.scoreThreshold)
-                .sort((a, b) => b.score - a.score)
-            return results
-                .map(item => item.entry)
-        }
+    function matchTier(entry: string, needle: string): int {
+        const name = entry.slice(entry.indexOf(" ") + 1).toLowerCase();
+        if (name === needle || name.startsWith(needle + " ")) return 0;
+        if ((" " + name + " ").includes(" " + needle + " ")) return 1;
+        if ((" " + name).includes(" " + needle)) return 2;
+        return 3;
+    }
 
+    function fuzzyQuery(search: string): var {
         root.searched = true;
+        const needle = search.trim().toLowerCase();
         return Fuzzy.go(search, root.preparedEntries, {
             all: true,
             key: "name"
-        }).map(r => {
-            return r.obj.entry
-        });
+        }).map((r, i) => ({
+            entry: r.obj.entry,
+            tier: root.matchTier(r.obj.entry, needle),
+            index: i
+        })).sort((a, b) => a.tier - b.tier || a.index - b.index).map(r => r.entry);
     }
 
     function load() {
@@ -52,6 +53,7 @@ Singleton {
             return
         }
         const emojis = lines.slice(dataIndex + 1).filter(line => line.trim() !== "")
+            .filter(line => !Platform.isWindows || !/^\uD83C[\uDDE6-\uDDFF]|\uDB40[\uDC20-\uDC7F]/.test(line))
         root.list = emojis.map(line => line.trim())
     }
 
