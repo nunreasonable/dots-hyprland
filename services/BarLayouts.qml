@@ -39,7 +39,9 @@ Singleton {
         { id: "powerButton", name: Translation.tr("Power Button"), icon: "power_settings_new", file: "PowerButton.qml" },
         { id: "divisor", name: Translation.tr("Divider"), icon: "horizontal_distribute", file: "Divisor.qml" },
         { id: "dynamicIsland", name: Translation.tr("Dynamic Island"), icon: "nest_wifi_pro", file: "DynamicIsland.qml" },
-        { id: "aiUsage", name: Translation.tr("AI Usage"), icon: "neurology", file: "AiUsage.qml" }
+        { id: "aiUsage", name: Translation.tr("AI Usage"), icon: "neurology", file: "AiUsage.qml" },
+        { id: "updatesCount", name: Translation.tr("Updates"), icon: "deployed_code_update", file: "UpdatesCount.qml" },
+        { id: "avatar", name: Translation.tr("Avatar"), icon: "account_circle", file: "Avatar.qml" }
     ]
 
     readonly property var supportedWidgets: root.widgets.filter(widget => !(widget.linuxOnly && Platform.isWindows))

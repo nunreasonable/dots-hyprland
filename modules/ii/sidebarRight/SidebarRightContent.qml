@@ -594,7 +594,13 @@ Item {
     }
 
     component SystemButtonRow: Item {
+        id: systemButtonRow
         implicitHeight: Math.max(uptimeContainer.implicitHeight, systemButtonsRow.implicitHeight)
+
+        readonly property color distroIconColor: {
+            const name = Config.options.custom.iconColor || "onLayer0"
+            return Appearance.colors[`col${name.charAt(0).toUpperCase()}${name.slice(1)}`] ?? Appearance.colors.colOnLayer0
+        }
 
         Rectangle {
             id: uptimeContainer
@@ -612,14 +618,105 @@ Item {
                 id: uptimeRow
                 anchors.centerIn: parent
                 spacing: 8
-                CustomIcon {
-                    id: distroIcon
+
+                Item {
+                    id: distroIconArea
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 25
-                    height: 25
-                    source: SystemInfo.distroIcon
-                    colorize: true
-                    color: Appearance.colors.colOnLayer0
+                    implicitWidth: 25
+                    implicitHeight: 25
+
+                    CustomIcon {
+                        id: distroIcon
+                        anchors.fill: parent
+                        source: Config.options.custom.distroIcon || SystemInfo.distroIcon
+                        customFolder: Config.options.custom.distroIcon !== "" ? Config.options.custom.iconsPath : ""
+                        colorize: Config.options.custom.colorizeIcon
+                        color: systemButtonRow.distroIconColor
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: iconPickerPopup.visible = !iconPickerPopup.visible
+                    }
+
+                    Popup {
+                        id: iconPickerPopup
+                        y: distroIconArea.height + 8
+                        width: 260
+                        padding: 12
+                        modal: true
+                        dim: false
+                        closePolicy: Popup.CloseOnPressOutside | Popup.CloseOnEscape
+
+                        enter: Transition {
+                            ParallelAnimation {
+                                NumberAnimation { property: "scale"; from: 0.6; to: 1; duration: 220; easing.type: Easing.OutBack; easing.overshoot: 1.4 }
+                                NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 160 }
+                            }
+                        }
+                        exit: Transition {
+                            ParallelAnimation {
+                                NumberAnimation { property: "scale"; to: 0.85; duration: 140 }
+                                NumberAnimation { property: "opacity"; to: 0; duration: 120 }
+                            }
+                        }
+
+                        background: Rectangle {
+                            color: Appearance.m3colors.m3surfaceContainer
+                            radius: Appearance.rounding.normal
+                            border.width: 1
+                            border.color: Appearance.colors.colLayer0Border
+                        }
+
+                        contentItem: ColumnLayout {
+                            spacing: 8
+
+                            RowLayout {
+                                Layout.fillWidth: true
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: Translation.tr("Pick an icon")
+                                    color: Appearance.colors.colOnLayer0
+                                }
+                                RippleButton {
+                                    implicitWidth: 28
+                                    implicitHeight: 28
+                                    buttonRadius: Appearance.rounding.full
+                                    enabled: Config.options.custom.distroIcon !== ""
+                                    onClicked: { Config.options.custom.distroIcon = ""; }
+                                    contentItem: MaterialSymbol {
+                                        anchors.centerIn: parent
+                                        horizontalAlignment: Text.AlignHCenter
+                                        text: "restart_alt"
+                                        iconSize: Appearance.font.pixelSize.normal
+                                        color: Appearance.colors.colOnLayer1
+                                    }
+                                    StyledToolTip {
+                                        text: Translation.tr("Reset to the distro icon")
+                                    }
+                                }
+                            }
+
+                            IconPickerGrid {
+                                Layout.fillWidth: true
+                                Layout.preferredWidth: 236
+                                customFolder: Config.options.custom.iconsPath
+                                currentValue: Config.options.custom.distroIcon
+                                colorize: Config.options.custom.colorizeIcon
+                                iconColor: systemButtonRow.distroIconColor
+                                onSelected: name => { Config.options.custom.distroIcon = name; }
+                            }
+
+                            ConfigSwitch {
+                                buttonIcon: "colors"
+                                text: Translation.tr("Colorize")
+                                checked: Config.options.custom.colorizeIcon
+                                onCheckedChanged: { Config.options.custom.colorizeIcon = checked; }
+                            }
+                        }
+                    }
                 }
                 StyledText {
                     anchors.verticalCenter: parent.verticalCenter

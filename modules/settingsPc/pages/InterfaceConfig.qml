@@ -252,6 +252,30 @@ ContentPage {
                     }
                 }
             }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.topMargin: 4
+                implicitHeight: mediaTabCol.implicitHeight + 24
+                radius: Appearance.rounding.normal
+                color: Appearance.colors.colLayer1
+
+                ColumnLayout {
+                    id: mediaTabCol
+                    anchors { fill: parent; margins: 12 }
+                    spacing: 8
+
+                    ConfigSwitch {
+                        buttonIcon: "music_note_2"
+                        text: Translation.tr("Enable media tab")
+                        checked: Config.options.sidebar.media.enable
+                        onCheckedChanged: { Config.options.sidebar.media.enable = checked }
+                        W.StyledToolTip {
+                            text: Translation.tr("Adds a Media tab next to Intelligence, Translator and Anime in the left sidebar")
+                        }
+                    }
+                }
+            }
         }
 
         ContentSection {
