@@ -339,6 +339,92 @@ ContentPage {
             }
 
             ContentSubsection {
+                title: Translation.tr("Collage")
+                Layout.fillWidth: true
+
+                GroupedList {
+                    ConfigSwitch {
+                        Layout.fillWidth: true
+                        buttonIcon: "grid_view"
+                        text: Translation.tr("Enable")
+                        checked: Config.options.background.collage.enable
+                        onCheckedChanged: {
+                            Config.options.background.collage.enable = checked;
+                        }
+                        W.StyledToolTip {
+                            text: Translation.tr("Splits the desktop into several wallpaper tiles. Hover a tile on the desktop to change its image, split it or remove it.")
+                        }
+                    }
+                }
+
+                GroupedList {
+                    visible: Config.options.background.collage.enable
+
+                    ConfigComboBox {
+                        Layout.fillWidth: true
+                        buttonIcon: "dashboard_customize"
+                        text: Translation.tr("Preset")
+                        fieldWidth: 200
+                        model: Collage.presetOptions
+                        currentValue: Collage.currentPreset
+                        onSelected: newValue => {
+                            Collage.applyPresetByName(newValue);
+                        }
+                    }
+
+                    ConfigSlider {
+                        text: Translation.tr("Gap")
+                        buttonIcon: "space_bar"
+                        usePercentTooltip: false
+                        value: Config.options.background.collage.gap
+                        from: 0
+                        to: 80
+                        stopIndicatorValues: [30]
+                        onValueChanged: {
+                            Config.options.background.collage.gap = value;
+                        }
+                    }
+
+                    ConfigSlider {
+                        text: Translation.tr("Margin")
+                        buttonIcon: "crop_free"
+                        usePercentTooltip: false
+                        value: Config.options.background.collage.margin
+                        from: 0
+                        to: 120
+                        stopIndicatorValues: [30]
+                        onValueChanged: {
+                            Config.options.background.collage.margin = value;
+                        }
+                    }
+
+                    ConfigSlider {
+                        text: Translation.tr("Corner radius")
+                        buttonIcon: "rounded_corner"
+                        usePercentTooltip: false
+                        value: Config.options.background.collage.radius
+                        from: 0
+                        to: 60
+                        stopIndicatorValues: [30]
+                        onValueChanged: {
+                            Config.options.background.collage.radius = value;
+                        }
+                    }
+
+                    W.RippleButtonWithIcon {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 40
+                        buttonRadius: Appearance.rounding.normal
+                        materialIcon: "restart_alt"
+                        mainText: Translation.tr("Reset")
+                        onClicked: {
+                            Collage.reset();
+                        }
+                    }
+                }
+            }
+
+            ContentSubsection {
                 visible: Config.options.policies.weeb === 1
                 title: Translation.tr("Random Konachan wallpaper")
 

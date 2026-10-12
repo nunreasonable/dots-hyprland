@@ -197,7 +197,7 @@ ContentPage {
             Layout.fillWidth: true
             visible: Platform.isWindows && Config.options.windowsPort.backgroundBehindIcons && !Config.options.windowsPort.ownWallpaper
             materialIcon: "info"
-            text: Translation.tr("Windows is drawing the wallpaper, so transitions, blur and the centered wallpaper don't show. Turn on \"Draw ii's own wallpaper\" under Windows desktop to use them.")
+            text: Translation.tr("Windows is drawing the wallpaper, so transitions, blur, the centered wallpaper and the collage don't show. Turn on \"Draw ii's own wallpaper\" under Windows desktop to use them.")
         }
 
         ConfigRow {
@@ -358,6 +358,88 @@ ContentPage {
                 stopIndicatorValues: [400]
                 onValueChanged: {
                     Config.options.background.centeredWallpaperSize = value;
+                }
+            }
+        }
+
+        ContentSubsection {
+            title: Translation.tr("Collage")
+
+            ConfigSwitch {
+                buttonIcon: "grid_view"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.collage.enable
+                onCheckedChanged: {
+                    Config.options.background.collage.enable = checked;
+                }
+                StyledToolTip {
+                    text: Translation.tr("Splits the desktop into several wallpaper tiles. Hover a tile on the desktop to change its image, split it or remove it.")
+                }
+            }
+
+            StyledComboBox {
+                visible: Config.options.background.collage.enable
+                textRole: "displayName"
+                model: Collage.presetOptions
+                currentIndex: {
+                    const index = model.findIndex(item => item.value === Collage.currentPreset);
+                    return index !== -1 ? index : 0;
+                }
+                onActivated: index => {
+                    Collage.applyPresetByName(model[index].value);
+                }
+            }
+
+            ConfigRow {
+                uniform: true
+                visible: Config.options.background.collage.enable
+                ConfigSlider {
+                    text: Translation.tr("Gap")
+                    buttonIcon: "space_bar"
+                    usePercentTooltip: false
+                    value: Config.options.background.collage.gap
+                    from: 0
+                    to: 80
+                    stopIndicatorValues: [30]
+                    onValueChanged: {
+                        Config.options.background.collage.gap = value;
+                    }
+                }
+                ConfigSlider {
+                    text: Translation.tr("Margin")
+                    buttonIcon: "crop_free"
+                    usePercentTooltip: false
+                    value: Config.options.background.collage.margin
+                    from: 0
+                    to: 120
+                    stopIndicatorValues: [30]
+                    onValueChanged: {
+                        Config.options.background.collage.margin = value;
+                    }
+                }
+            }
+
+            ConfigSlider {
+                visible: Config.options.background.collage.enable
+                text: Translation.tr("Corner radius")
+                buttonIcon: "rounded_corner"
+                usePercentTooltip: false
+                value: Config.options.background.collage.radius
+                from: 0
+                to: 60
+                stopIndicatorValues: [30]
+                onValueChanged: {
+                    Config.options.background.collage.radius = value;
+                }
+            }
+
+            RippleButtonWithIcon {
+                Layout.fillWidth: true
+                visible: Config.options.background.collage.enable
+                materialIcon: "restart_alt"
+                mainText: Translation.tr("Reset")
+                onClicked: {
+                    Collage.reset();
                 }
             }
         }

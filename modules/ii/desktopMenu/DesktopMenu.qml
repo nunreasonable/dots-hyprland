@@ -233,11 +233,25 @@ Scope {
                     }
 
                     DesktopMenuItem {
+                        id: wallpaperItem
                         iconName: "wallpaper"
                         buttonText: Translation.tr("Wallpaper & style")
+                        hasSubmenu: true
                         onClicked: {
                             GlobalStates.desktopMenuOpen = false;
                             GlobalStates.wallpaperSelectorOpen = true;
+                        }
+
+                        HoverHandler {
+                            onHoveredChanged: {
+                                if (hovered) {
+                                    submenuCloseTimer.stop();
+                                    root.submenuAnchorY = menuCard.y + wallpaperItem.mapToItem(menuCard, 0, 0).y;
+                                    root.openSubmenuComponent = wallpaperSubmenuComponent;
+                                } else {
+                                    submenuCloseTimer.restart();
+                                }
+                            }
                         }
                     }
                     DesktopMenuItem {
@@ -301,6 +315,11 @@ Scope {
             Component {
                 id: widgetsSubmenuComponent
                 WidgetsSubmenu {}
+            }
+
+            Component {
+                id: wallpaperSubmenuComponent
+                WallpaperSubmenu {}
             }
 
             Loader {
