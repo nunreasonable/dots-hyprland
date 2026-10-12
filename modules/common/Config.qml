@@ -158,6 +158,20 @@ Singleton {
                 }
             }
 
+            property JsonObject hyprland: JsonObject {
+                property JsonObject general: JsonObject {
+                    property int borderSize: 1
+                    property string layout: "dwindle"
+                    property JsonObject borderColor: JsonObject {
+                        property bool enable: false
+                        property string activeRole: "layer0Border"
+                        property string inactiveRole: "layer0Border"
+                        property real activeOpacity: 0.47
+                        property real inactiveOpacity: 0.2
+                    }
+                }
+            }
+
             property JsonObject apps: JsonObject {
                 property string bluetooth: "kcmshell6 kcm_bluetooth"
                 property string changePassword: "kitty -1 --hold=yes fish -i -c 'passwd'"
@@ -685,6 +699,24 @@ Singleton {
                         "title:Picture-in-Picture*",
                         "title:Picture in picture*"
                     ]
+                    property bool smartSplit: false
+                    property int forceSplit: 0
+                    property real defaultSplitRatio: 1.0
+                    property JsonObject master: JsonObject {
+                        property string newStatus: "slave"
+                        property bool newOnTop: false
+                        property string orientation: "left"
+                        property real mfact: 0.55
+                    }
+                }
+                property JsonObject decoration: JsonObject {
+                    property string corners: "default"
+                }
+                property JsonObject binds: JsonObject {
+                    property bool workspaceBackAndForth: false
+                }
+                property JsonObject cursor: JsonObject {
+                    property int warpOnChangeWorkspace: 0
                 }
                 property JsonObject gameMode: JsonObject {
                     property bool enable: false

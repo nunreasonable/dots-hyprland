@@ -100,6 +100,96 @@ ShellRoot {
     }
     Binding {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
+        property: "layout"
+        value: Config.options.hyprland.general.layout
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
+        property: "smartSplit"
+        value: Config.options.windowsPort.tiling.smartSplit
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
+        property: "forceSplit"
+        value: Config.options.windowsPort.tiling.forceSplit
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
+        property: "defaultSplitRatio"
+        value: Config.options.windowsPort.tiling.defaultSplitRatio
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
+        property: "masterNewStatus"
+        value: Config.options.windowsPort.tiling.master.newStatus
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
+        property: "masterNewOnTop"
+        value: Config.options.windowsPort.tiling.master.newOnTop
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
+        property: "masterOrientation"
+        value: Config.options.windowsPort.tiling.master.orientation
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
+        property: "masterFactor"
+        value: Config.options.windowsPort.tiling.master.mfact
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.windowManager
+        property: "borders"
+        value: Config.options.hyprland.general.borderSize <= 0 ? "none" : Config.options.hyprland.general.borderColor.enable ? "colors" : "system"
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.windowManager
+        property: "activeBorderColor"
+        value: root.windowBorderColor(Config.options.hyprland.general.borderColor.activeRole, Config.options.hyprland.general.borderColor.activeOpacity)
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.windowManager
+        property: "inactiveBorderColor"
+        value: root.windowBorderColor(Config.options.hyprland.general.borderColor.inactiveRole, Config.options.hyprland.general.borderColor.inactiveOpacity)
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.windowManager
+        property: "corners"
+        value: Config.options.windowsPort.decoration.corners
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.windowManager
+        property: "workspaceBackAndForth"
+        value: Config.options.windowsPort.binds.workspaceBackAndForth
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.windowManager
+        property: "warpOnChangeWorkspace"
+        value: Config.options.windowsPort.cursor.warpOnChangeWorkspace
+    }
+    function windowBorderColor(role, opacity) {
+        const c = Qt.color(Appearance.getColorFromName(role));
+        const b = Appearance.m3colors.m3background;
+        const a = Math.max(0, Math.min(1, opacity * c.a));
+        return Qt.rgba(c.r * a + b.r * (1 - a), c.g * a + b.g * (1 - a), c.b * a + b.b * (1 - a), 1);
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.superDrag
         property: "enabled"
         value: Config.options.windowsPort.superDrag
