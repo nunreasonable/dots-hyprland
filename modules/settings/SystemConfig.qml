@@ -109,7 +109,7 @@ ContentPage {
                     currentIndex: {
                         const codes = WindowsNative.keyboard?.layoutCodes ?? [];
                         const idx = codes.indexOf(WindowsNative.keyboard?.currentLayoutCode ?? "");
-                        return idx !== -1 ? idx : 0;
+                        return idx;
                     }
                     onActivated: index => {
                         const codes = WindowsNative.keyboard?.layoutCodes ?? [];
@@ -274,11 +274,11 @@ ContentPage {
                 StyledComboBox {
                     id: cursorSchemeSelector
                     textRole: "displayName"
-                    model: (WindowsNative.inputSettings?.cursorSchemeNames ?? []).map(name => ({ displayName: name, value: name }))
+                    model: (WindowsNative.inputSettings?.cursorSchemeNames ?? []).map((name, i) => ({ displayName: WindowsNative.inputSettings?.cursorSchemeLabels[i] ?? name, value: name }))
                     currentIndex: {
                         const names = WindowsNative.inputSettings?.cursorSchemeNames ?? [];
                         const idx = names.indexOf(WindowsNative.inputSettings?.cursorSchemeName ?? "");
-                        return idx !== -1 ? idx : 0;
+                        return idx;
                     }
                     onActivated: index => {
                         const names = WindowsNative.inputSettings?.cursorSchemeNames ?? [];

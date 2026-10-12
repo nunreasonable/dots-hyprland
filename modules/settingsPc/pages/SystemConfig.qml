@@ -68,6 +68,7 @@ ContentPage {
                 GroupedList {
                     ConfigSelectionArray {
                         text: Translation.tr("Repeat delay")
+                        textOnlyWhenActive: true
                         icon: "keyboard_return"
                         currentValue: WindowsNative.inputSettings?.keyboardRepeatDelay ?? 0
                         onSelected: newValue => {
@@ -247,6 +248,7 @@ ContentPage {
                     }
                     ConfigSelectionArray {
                         text: Translation.tr("Sensitivity")
+                        textOnlyWhenActive: true
                         icon: "touch_app"
                         enabled: WindowsNative.inputSettings?.touchpadEnabled ?? true
                         currentValue: WindowsNative.inputSettings?.touchpadSensitivity ?? 2
@@ -275,7 +277,7 @@ ContentPage {
                         text: Translation.tr("Cursor scheme")
                         searchable: true
                         textRole: "displayName"
-                        model: (WindowsNative.inputSettings?.cursorSchemeNames ?? []).map(name => ({ displayName: name, value: name }))
+                        model: (WindowsNative.inputSettings?.cursorSchemeNames ?? []).map((name, i) => ({ displayName: WindowsNative.inputSettings?.cursorSchemeLabels[i] ?? name, value: name }))
                         currentValue: WindowsNative.inputSettings?.cursorSchemeName ?? ""
                         onSelected: newValue => {
                             if (WindowsNative.inputSettings) WindowsNative.inputSettings.setCursorScheme(newValue);
