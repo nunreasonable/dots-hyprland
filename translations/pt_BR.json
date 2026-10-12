@@ -1791,5 +1791,21 @@
   "Windows did not accept the last change to this power plan.": "O Windows não aceitou a última alteração neste plano de energia.",
   "0 means never. These change your current Windows power plan directly.": "0 significa nunca. Isso altera diretamente o seu plano de energia atual do Windows.",
   "Windows wouldn't accept this picture as the lock screen image automatically. Pick it yourself in Windows Settings.": "O Windows não aceitou essa imagem como tela de bloqueio automaticamente. Escolha-a você mesmo nas Configurações do Windows.",
-  "Open Windows settings": "Abrir configurações do Windows"
+  "Open Windows settings": "Abrir configurações do Windows",
+  "ii-windows updates": "Atualizações do ii-windows",
+  "Update available: %1 \"%2\"": "Atualização disponível: %1 \"%2\"",
+  "Downloading the update…": "Baixando a atualização…",
+  "What's new": "Novidades",
+  "Checking for updates…": "Verificando atualizações…",
+  "ii-windows %1 is up to date.": "O ii-windows %1 está atualizado.",
+  "Couldn't determine the installed version.": "Não foi possível identificar a versão instalada.",
+  "Check for updates": "Verificar atualizações",
+  "Notify me when a new version is available": "Avisar quando uma nova versão estiver disponível",
+  "GitHub answered HTTP %1.": "O GitHub respondeu HTTP %1.",
+  "Could not reach GitHub.": "Não foi possível acessar o GitHub.",
+  "Could not parse GitHub's response.": "Não foi possível interpretar a resposta do GitHub.",
+  "Couldn't download the update.": "Não foi possível baixar a atualização.",
+  "The downloaded file doesn't match the size GitHub reported.": "O arquivo baixado não corresponde ao tamanho informado pelo GitHub.",
+  "ii-windows update available": "Atualização do ii-windows disponível",
+  "%1 \"%2\" is ready to install.": "%1 \"%2\" está pronta para instalar."
 }

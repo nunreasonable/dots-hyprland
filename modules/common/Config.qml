@@ -737,6 +737,9 @@ Singleton {
                 property JsonObject idle: JsonObject {
                     property int lock: 0
                 }
+                property JsonObject selfUpdate: JsonObject {
+                    property bool notify: true
+                }
             }
 
             property JsonObject networking: JsonObject {

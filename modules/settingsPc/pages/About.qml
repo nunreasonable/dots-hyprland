@@ -168,6 +168,78 @@ ContentPage {
         }
     }
 
+    ColumnLayout {
+        Layout.fillWidth: true
+        visible: Platform.isWindows
+        spacing: 8
+
+        W.NoticeBox {
+            Layout.fillWidth: true
+            visible: SelfUpdate.updateAvailable
+            materialIcon: "new_releases"
+            text: Translation.tr("Update available: %1 \"%2\"").arg(SelfUpdate.latestVersion).arg(SelfUpdate.releaseName)
+                + (SelfUpdate.downloading ? "\n" + Translation.tr("Downloading the update…") : "")
+                + (!SelfUpdate.downloading && SelfUpdate.lastError !== "" ? "\n" + SelfUpdate.lastError : "")
+
+            W.RippleButtonWithIcon {
+                materialIcon: "open_in_new"
+                mainText: Translation.tr("What's new")
+                onClicked: {
+                    Qt.openUrlExternally(SelfUpdate.htmlUrl)
+                }
+            }
+            W.RippleButtonWithIcon {
+                materialIcon: "system_update"
+                mainText: Translation.tr("Update")
+                enabled: !SelfUpdate.downloading
+                onClicked: {
+                    SelfUpdate.startUpdate()
+                }
+            }
+        }
+
+        W.StyledText {
+            Layout.fillWidth: true
+            visible: !SelfUpdate.updateAvailable
+            wrapMode: Text.WordWrap
+            color: Appearance.colors.colSubtext
+            text: SelfUpdate.checking
+                ? Translation.tr("Checking for updates…")
+                : SelfUpdate.lastError !== ""
+                    ? SelfUpdate.lastError
+                    : SelfUpdate.installedVersion !== ""
+                        ? Translation.tr("ii-windows %1 is up to date.").arg(SelfUpdate.installedVersion)
+                        : Translation.tr("Couldn't determine the installed version.")
+        }
+
+        Flow {
+            Layout.fillWidth: true
+            visible: !SelfUpdate.updateAvailable
+            spacing: 5
+
+            W.RippleButtonWithIcon {
+                materialIcon: "refresh"
+                mainText: Translation.tr("Check for updates")
+                enabled: !SelfUpdate.checking
+                onClicked: {
+                    SelfUpdate.refresh()
+                }
+            }
+        }
+
+        GroupedList {
+            ConfigSwitch {
+                buttonIcon: "notifications"
+                text: Translation.tr("Notify me when a new version is available")
+                checked: Config.options.windowsPort.selfUpdate.notify
+                onCheckedChanged: {
+                    if (checked !== Config.options.windowsPort.selfUpdate.notify)
+                        Config.options.windowsPort.selfUpdate.notify = checked;
+                }
+            }
+        }
+    }
+
     HeroCard {
         iconSource: Quickshell.iconPath("illogical-impulse")
         title: Translation.tr("illogical-impulse")
