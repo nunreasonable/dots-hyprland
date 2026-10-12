@@ -33,7 +33,16 @@ Scope {
         Timer {
             id: releaseTimer
             interval: 120000
-            onTriggered: sessionLoader.kept = false
+            onTriggered: {
+                sessionLoader.kept = false;
+                gcTimer.restart();
+            }
+        }
+
+        Timer {
+            id: gcTimer
+            interval: 2000
+            onTriggered: gc()
         }
 
         Connections {

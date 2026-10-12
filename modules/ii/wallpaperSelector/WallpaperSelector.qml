@@ -32,7 +32,16 @@ Scope {
         Timer {
             id: releaseTimer
             interval: 120000
-            onTriggered: wallpaperSelectorLoader.kept = false
+            onTriggered: {
+                wallpaperSelectorLoader.kept = false;
+                gcTimer.restart();
+            }
+        }
+
+        Timer {
+            id: gcTimer
+            interval: 2000
+            onTriggered: gc()
         }
 
         sourceComponent: PanelWindow {

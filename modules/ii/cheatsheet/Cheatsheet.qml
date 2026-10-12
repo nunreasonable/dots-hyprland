@@ -46,6 +46,31 @@ Scope { // Scope
         asynchronous: Platform.isWindows && !root.open
         onLoaded: cheatsheetLoader.kept = true
 
+        Connections {
+            target: root
+            function onOpenChanged() {
+                if (root.open)
+                    releaseTimer.stop();
+                else if (Platform.isWindows && cheatsheetLoader.kept)
+                    releaseTimer.restart();
+            }
+        }
+
+        Timer {
+            id: releaseTimer
+            interval: 120000
+            onTriggered: {
+                cheatsheetLoader.kept = false;
+                gcTimer.restart();
+            }
+        }
+
+        Timer {
+            id: gcTimer
+            interval: 2000
+            onTriggered: gc()
+        }
+
         sourceComponent: PanelWindow { // Window
             id: cheatsheetRoot
             visible: root.open
