@@ -63,9 +63,20 @@ ShellRoot {
         if (root.nativeTaskbarTakesOver)
             Qt.callLater(() => WindowsNative.taskbar.turnOffAutoHide());
     }
+    readonly property bool startupSettled: Platform.isWindows && Config.ready && WindowsNative.ready && (WindowsNative.startupGate?.settled ?? false)
+    onStartupSettledChanged: {
+        if (root.startupSettled)
+            WindowsAutostartApps.runAtStartup();
+    }
     Binding {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.desktopLayer
+        property: "enabled"
+        value: Config.options.windowsPort.backgroundBehindIcons
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.desktopDrop
         property: "enabled"
         value: Config.options.windowsPort.backgroundBehindIcons
     }

@@ -170,6 +170,10 @@ Singleton {
                         property real inactiveOpacity: 0.2
                     }
                 }
+                property JsonObject autostartApps: JsonObject {
+                    property bool enable: false
+                    property list<var> apps: []
+                }
             }
 
             property JsonObject apps: JsonObject {

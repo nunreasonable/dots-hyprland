@@ -24,6 +24,22 @@ DropArea {
         return root.wallpaperPattern.test(root.pathOf(url));
     }
 
+    function isWallpaperPath(path) {
+        return root.wallpaperPattern.test(path);
+    }
+
+    Connections {
+        target: Platform.isWindows ? WindowsNative.desktopDrop : null
+        function onFilesDropped(paths, screenName) {
+            if (!root.screen || root.screen.name !== screenName)
+                return;
+            if (paths.length === 1 && root.isWallpaperPath(paths[0]))
+                Wallpapers.apply(paths[0], Appearance.m3colors.darkmode);
+            else
+                WindowsNative.desktopDrop.copyToDesktop(paths);
+        }
+    }
+
     onEntered: drag => {
         drag.accepted = drag.hasUrls;
         root.currentUrls = drag.hasUrls ? drag.urls : [];

@@ -1019,6 +1019,24 @@ ContentPage {
                     }
                 }
             }
+
+            ContentSubsection {
+                Layout.topMargin: 10
+                title: Translation.tr("Start with ii")
+
+                W.StyledText {
+                    Layout.fillWidth: true
+                    text: Translation.tr("Apps ii itself opens when the shell starts, each on its own workspace.")
+                    font.pixelSize: Appearance.font.pixelSize.smaller
+                    color: Appearance.colors.colSubtext
+                    wrapMode: Text.Wrap
+                }
+
+                W.AutostartApps {
+                    Layout.fillWidth: true
+                    Layout.topMargin: 6
+                }
+            }
         }
 
         ContentSection {

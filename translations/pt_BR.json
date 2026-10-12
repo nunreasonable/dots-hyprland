@@ -1791,5 +1791,15 @@
   "Windows did not accept the last change to this power plan.": "O Windows não aceitou a última alteração neste plano de energia.",
   "0 means never. These change your current Windows power plan directly.": "0 significa nunca. Isso altera diretamente o seu plano de energia atual do Windows.",
   "Windows wouldn't accept this picture as the lock screen image automatically. Pick it yourself in Windows Settings.": "O Windows não aceitou essa imagem como tela de bloqueio automaticamente. Escolha-a você mesmo nas Configurações do Windows.",
-  "Open Windows settings": "Abrir configurações do Windows"
+  "Open Windows settings": "Abrir configurações do Windows",
+  "Hold Shift to drop it on the desktop instead": "Mantenha Shift pressionado para soltar no desktop normalmente",
+  "Start with ii": "Iniciar com o ii",
+  "Apps ii itself opens when the shell starts, each on its own workspace.": "Apps que o próprio ii abre quando o shell inicia, cada um na sua área de trabalho.",
+  "Run all now": "Executar tudo agora",
+  "No apps yet. Each app opens on its workspace when the shell starts.": "Nenhum app ainda. Cada um abre na sua área de trabalho quando o shell inicia.",
+  "App %1": "App %1",
+  "Delay after launch (seconds)": "Atraso após abrir (segundos)",
+  "Add app": "Adicionar app",
+  "e.g. firefox": "ex.: firefox",
+  "e.g. firefox.exe": "ex.: firefox.exe"
 }
