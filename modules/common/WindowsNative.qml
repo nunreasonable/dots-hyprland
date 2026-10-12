@@ -30,6 +30,8 @@ Singleton {
     readonly property QtObject equalizer: _impl ? _impl.equalizer : null
     readonly property QtObject taskbar: _impl ? _impl.taskbar : null
     readonly property QtObject desktopLayer: _impl ? _impl.desktopLayer : null
+    readonly property QtObject desktopDrop: _impl ? _impl.desktopDrop : null
+    readonly property QtObject startupGate: _impl ? _impl.startupGate : null
     readonly property QtObject screenshot: _impl ? _impl.screenshot : null
     readonly property QtObject ocr: _impl ? _impl.ocr : null
     readonly property QtObject screenRecorder: _impl ? _impl.screenRecorder : null

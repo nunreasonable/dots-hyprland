@@ -27,6 +27,8 @@ QtObject {
     readonly property QtObject equalizer: QSWin.EqualizerApo
     readonly property QtObject taskbar: root.full ? QSWin.Taskbar : null
     readonly property QtObject desktopLayer: root.full ? QSWin.DesktopLayer : null
+    readonly property QtObject desktopDrop: root.full ? QSWin.DesktopDrop : null
+    readonly property QtObject startupGate: root.full ? QSWin.StartupGate : null
     readonly property QtObject screenshot: root.full ? QSWin.Screenshot : null
     readonly property QtObject ocr: root.full ? QSWin.Ocr : null
     readonly property QtObject screenRecorder: (root.full || root.process === "settings") ? QSWin.ScreenRecorder : null

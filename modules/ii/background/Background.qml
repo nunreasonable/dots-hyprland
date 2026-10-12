@@ -424,6 +424,39 @@ Variants {
                     id: widgetsSlotItem
                     anchors.fill: parent
                 }
+
+                Rectangle {
+                    id: desktopDropHint
+                    anchors.centerIn: parent
+                    visible: (WindowsNative.desktopDrop?.active ?? false) && WindowsNative.desktopDrop.activeScreen === bgRoot.modelData.name
+                    radius: Appearance.rounding.normal
+                    color: CF.ColorUtils.transparentize(Appearance.colors.colPrimary, 0.15)
+                    implicitWidth: desktopDropHintLayout.implicitWidth + 32
+                    implicitHeight: desktopDropHintLayout.implicitHeight + 20
+
+                    ColumnLayout {
+                        id: desktopDropHintLayout
+                        anchors.centerIn: parent
+                        spacing: 4
+                        MaterialSymbol {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: "wallpaper"
+                            iconSize: 40
+                            color: Appearance.colors.colOnPrimary
+                        }
+                        StyledText {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: Translation.tr("Drop to set as wallpaper")
+                            color: Appearance.colors.colOnPrimary
+                        }
+                        StyledText {
+                            Layout.alignment: Qt.AlignHCenter
+                            text: Translation.tr("Hold Shift to drop it on the desktop instead")
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            color: Appearance.colors.colOnPrimary
+                        }
+                    }
+                }
             }
         }
 

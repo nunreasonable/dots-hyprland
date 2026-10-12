@@ -1823,5 +1823,15 @@
   "Adds what your speakers or headphones play": "Inclui o que toca nos alto-falantes ou fones",
   "Record microphone": "Gravar o microfone",
   "Adds the default microphone, mixed with the system audio": "Inclui o microfone padrão, mixado com o áudio do sistema",
-  "Windows' privacy settings are blocking the microphone for desktop apps, so recordings won't include it.": "As configurações de privacidade do Windows estão bloqueando o microfone para aplicativos da área de trabalho, então as gravações não vão incluí-lo."
+  "Windows' privacy settings are blocking the microphone for desktop apps, so recordings won't include it.": "As configurações de privacidade do Windows estão bloqueando o microfone para aplicativos da área de trabalho, então as gravações não vão incluí-lo.",
+  "Hold Shift to drop it on the desktop instead": "Mantenha Shift pressionado para soltar no desktop normalmente",
+  "Start with ii": "Iniciar com o ii",
+  "Apps ii itself opens when the shell starts, each on its own workspace.": "Apps que o próprio ii abre quando o shell inicia, cada um na sua área de trabalho.",
+  "Run all now": "Executar tudo agora",
+  "No apps yet. Each app opens on its workspace when the shell starts.": "Nenhum app ainda. Cada um abre na sua área de trabalho quando o shell inicia.",
+  "App %1": "App %1",
+  "Delay after launch (seconds)": "Atraso após abrir (segundos)",
+  "Add app": "Adicionar app",
+  "e.g. firefox": "ex.: firefox",
+  "e.g. firefox.exe": "ex.: firefox.exe"
 }
