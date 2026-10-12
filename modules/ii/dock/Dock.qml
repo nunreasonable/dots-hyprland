@@ -78,6 +78,8 @@ Scope {
             readonly property real borderWidth: (Config.options.dock.showBackground && Config.options.dock.showBorder && !hug) ? Config.options.dock.borderWidth : 0
 
             property bool reveal: {
+                if (dockContextMenu.isOpen)
+                    return true;
                 if (root.pinned)
                     return true;
                 if (Config.options?.dock.hoverToReveal) {
@@ -203,6 +205,11 @@ Scope {
                                 : RoundCorner.CornerEnum.BottomLeft
                         }
 
+                        DockContextMenu {
+                            id: dockContextMenu
+                            screen: dockRoot.screen
+                        }
+
                         GridLayout {
                             id: dockRow
                             anchors.top: dockRoot.vertical ? undefined : parent.top
@@ -228,6 +235,7 @@ Scope {
                             DockApps {
                                 id: dockApps
                                 buttonPadding: dockRow.padding
+                                contextMenu: dockContextMenu
                             }
 
                             DockSeparator {

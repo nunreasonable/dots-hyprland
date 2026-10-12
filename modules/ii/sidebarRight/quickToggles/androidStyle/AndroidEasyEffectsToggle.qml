@@ -7,5 +7,6 @@ import Quickshell
 
 AndroidQuickToggleButton {
     toggleModel: EasyEffectsToggle {}
+    visible: EasyEffects.available
 }
 

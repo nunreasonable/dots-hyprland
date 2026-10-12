@@ -43,8 +43,9 @@ Scope {
         WlrLayershell.keyboardFocus: GlobalStates.overviewOpen ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
         color: "transparent"
 
+        readonly property bool windowDragging: (overviewLoader.item?.draggingFromWorkspace ?? -1) !== -1
         mask: Region {
-            item: GlobalStates.overviewOpen ? columnLayout : null
+            item: GlobalStates.overviewOpen ? (panelWindow.windowDragging ? fullscreenMask : columnMask) : null
         }
 
         anchors {
@@ -52,6 +53,19 @@ Scope {
             bottom: true
             left: true
             right: true
+        }
+
+        Item {
+            id: fullscreenMask
+            anchors.fill: parent
+        }
+
+        Item {
+            id: columnMask
+            x: columnLayout.x
+            y: columnLayout.y
+            width: columnLayout.width
+            height: columnLayout.height
         }
 
         Connections {
