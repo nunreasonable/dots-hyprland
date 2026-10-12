@@ -46,6 +46,12 @@ ShellRoot {
     }
 
     Timer {
+        running: Platform.isWindows && PanelLoaderQueue.drained
+        interval: 20000
+        onTriggered: SelfUpdate.load()
+    }
+
+    Timer {
         running: FirstRunExperience.welcomePending
         interval: PanelLoaderQueue.drained ? 0 : 10000
         onTriggered: FirstRunExperience.launchWelcome()

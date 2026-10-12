@@ -92,6 +92,8 @@ Singleton {
         return (tag || "").replace(/^v/i, "");
     }
 
+    function load() {}
+
     function refresh() {
         if (!Platform.isWindows || root.checking) return;
         root.checking = true;
