@@ -60,7 +60,6 @@ ContentPage {
         title: Translation.tr("Choose the preview image (a screenshot of your desktop)")
         nameFilters: [Translation.tr("Images (*.png *.jpg *.jpeg *.webp)"), Translation.tr("All files (*)")]
         onAccepted: Presets.publishWithPreview(previewPickDialog.pendingName, FileUtils.trimFileProtocol(selectedFile.toString()))
-        onRejected: Presets.publishWithPreview(previewPickDialog.pendingName, "")
     }
 
     Connections {
