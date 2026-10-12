@@ -42,4 +42,5 @@ QtObject {
     readonly property QtObject webapps: QSWin.WebApps
     readonly property QtObject autostart: QSWin.Autostart
     readonly property QtObject accountAge: root.full || root.process === "settings" || root.process === "welcome" ? QSWin.AccountAge : null
+    readonly property QtObject displays: (root.full || root.process === "settings") ? QSWin.Displays : null
 }

@@ -45,6 +45,7 @@ Singleton {
     readonly property QtObject webapps: _impl ? _impl.webapps : null
     readonly property QtObject autostart: _impl ? _impl.autostart : null
     readonly property QtObject accountAge: _impl ? _impl.accountAge : null
+    readonly property QtObject displays: _impl ? _impl.displays : null
 
     Component.onCompleted: {
         if (!Platform.isWindows) return;
