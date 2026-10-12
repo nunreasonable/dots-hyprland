@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Mpris
@@ -11,131 +12,248 @@ import qs.modules.ii.background.widgets
 
 AbstractBackgroundWidget {
     id: root
+
     configEntryName: "visualizer"
-    pinnedBottom: true
-    showSelectionBorder: false
 
     readonly property string style: configEntry.style ?? "bars"
-    readonly property string colorSource: configEntry.colorSource ?? "theme"
-    readonly property real sensitivity: configEntry.sensitivity ?? 1
-    readonly property int bandHeight: configEntry.height ?? 260
+    readonly property bool shaderStyle: ["aurora", "ring", "dots", "mirror"].includes(style)
+    readonly property bool isRing: style === "ring"
+    readonly property bool useCoverColors: shaderStyle && (configEntry.colorSource ?? "theme") === "cover"
 
-    readonly property int bandCount: 32
-    property var points: AudioSpectrum.points
-    readonly property bool live: MprisController.activePlayer?.isPlaying ?? false
+    pinnedBottom: !root.isRing
+    showSelectionBorder: root.isRing
+    hoverEnabled: root.isRing
 
-    implicitWidth: 360
-    implicitHeight: Math.min(root.bandHeight, 160)
+    property real ringSizeOverride: -1
+    readonly property real ringSize: ringSizeOverride > 0 ? ringSizeOverride : (configEntry.ringSize ?? 380)
+    readonly property real bandHeight: configEntry.height ?? 260
+    readonly property real barsHeight: 240
 
-    readonly property var activePlayer: MprisController.activePlayer
-    property var artUrl: root.colorSource === "cover" ? (activePlayer?.trackArtUrl ?? "") : ""
-    readonly property bool artIsLocal: Platform.isWindows && String(root.artUrl).startsWith("file:")
-    property string artFilePath: `${Directories.coverArt}/${Qt.md5(root.artUrl)}`
-    property bool artDownloaded: false
-    property string resolvedArtPath: root.artIsLocal ? root.artUrl : (root.artDownloaded ? (Platform.isWindows ? `file:///${artFilePath}` : Qt.resolvedUrl(artFilePath)) : "")
+    implicitWidth: isRing ? ringSize : screenWidth
+    implicitHeight: isRing ? ringSize : shaderStyle ? bandHeight : barsHeight
+    x: isRing ? targetX : 0
+    y: isRing ? targetY : screenHeight - implicitHeight
+    draggable: isRing && placementStrategy === "free" && !Config.options.background.widgetsLocked
 
-    onArtUrlChanged: {
-        if (!root.artUrl) {
-            root.artDownloaded = false;
-            return;
+    function restoreXYBinding() {
+        root.x = Qt.binding(() => root.isRing ? root.targetX : 0);
+        root.y = Qt.binding(() => root.isRing ? root.targetY : root.screenHeight - root.implicitHeight);
+        root.z = Qt.binding(() => root.targetZ);
+    }
+
+    readonly property var themePalette: {
+        const c = Appearance.m3colors;
+        switch (root.style) {
+        case "aurora": return [c.m3primary, c.m3tertiary, c.m3secondary];
+        case "ring": return [c.m3primary, c.m3tertiary, c.m3primaryContainer];
+        case "dots": return [c.m3onBackground, c.m3primary, c.m3error];
+        default: return [c.m3primary, c.m3primaryContainer, c.m3tertiary];
         }
-        if (root.artIsLocal) {
-            root.artDownloaded = true;
-            return;
-        }
-        coverDownloader.targetFile = root.artUrl;
-        coverDownloader.artFilePath = root.artFilePath;
-        root.artDownloaded = false;
+    }
+    readonly property var coverPalette: {
+        const colors = Array.from(coverQuantizer.colors).sort((a, b) => b.hslSaturation - a.hslSaturation);
+        if (colors.length < 3) return null;
+        const lifted = colors.map(c => Qt.hsla(Math.max(c.hslHue, 0), Math.max(c.hslSaturation, 0.45), Math.min(Math.max(c.hslLightness, 0.62), 0.85), 1));
+        return root.style === "dots" ? [root.themePalette[0], lifted[0], lifted[1]] : lifted.slice(0, 3);
+    }
+    readonly property var visualizerColors: (root.useCoverColors && root.coverPalette) ? root.coverPalette : root.themePalette
+
+    readonly property MprisPlayer activePlayer: MprisController.activePlayer
+    readonly property string artUrl: activePlayer?.trackArtUrl ?? ""
+    readonly property bool needsCover: isRing || useCoverColors
+    readonly property bool artIsLocal: Platform.isWindows && String(root.artUrl ?? "").startsWith("file:")
+    readonly property string artFilePath: `${Directories.coverArt}/${Qt.md5(artUrl)}`
+    property bool coverDownloaded: false
+    readonly property string coverUrl: {
+        if (!root.needsCover || root.artUrl.length === 0) return "";
+        if (root.artIsLocal) return root.artUrl;
+        if (!Platform.isWindows && root.artUrl.startsWith("file://")) return root.artUrl;
+        return root.coverDownloaded ? (Platform.isWindows ? `file:///${artFilePath}` : Qt.resolvedUrl(root.artFilePath)) : "";
+    }
+
+    onArtFilePathChanged: fetchCover()
+    onNeedsCoverChanged: fetchCover()
+    function fetchCover() {
+        root.coverDownloaded = false;
+        if (!root.needsCover || root.artUrl.length === 0 || root.artIsLocal) return;
+        if (!Platform.isWindows && root.artUrl.startsWith("file://")) return;
         if (Platform.isWindows && WindowsNative.fsUtils?.classify(root.artFilePath) === "file") {
-            root.artDownloaded = true;
+            root.coverDownloaded = true;
             return;
         }
+        coverDownloader.command = Platform.isWindows ? ["curl", "-4", "-sSL", "-o", root.artFilePath, "--url", root.artUrl] : ["bash", "-c", '[ -f "$1" ] || curl -sSL "$2" -o "$1"', "_", root.artFilePath, root.artUrl];
         coverDownloader.running = true;
     }
-
     Process {
         id: coverDownloader
-        property string targetFile: root.artUrl
-        property string artFilePath: root.artFilePath
-        command: Platform.isWindows ? ["curl", "-4", "-sSL", "-o", artFilePath, "--url", targetFile] : ["bash", "-c", '[ -f "$2" ] || curl -4 -sSL -o "$2" --url "$1"', "art", targetFile, artFilePath]
         onExited: (exitCode, exitStatus) => {
-            root.artDownloaded = !Platform.isWindows || exitCode === 0;
+            root.coverDownloaded = !Platform.isWindows || exitCode === 0;
         }
     }
-
     ColorQuantizer {
         id: coverQuantizer
-        source: root.colorSource === "cover" ? root.resolvedArtPath : ""
-        depth: 0
-        rescaleSize: 1
+        source: root.useCoverColors ? root.coverUrl : ""
+        depth: 2
+        rescaleSize: 64
     }
 
-    readonly property color barColor: (root.colorSource === "cover" && coverQuantizer.colors.length > 0) ? coverQuantizer.colors[0] : Appearance.colors.colPrimary
+    VisualizerEngine {
+        id: levelEngine
+        active: root.shaderStyle
+        sensitivity: root.configEntry.sensitivity ?? 1
+    }
 
-    property var levels: []
+    Loader {
+        anchors.fill: parent
+        active: root.style === "bars"
+        sourceComponent: BarsVisualizer {}
+    }
 
-    function recompute() {
-        const raw = root.points;
-        const n = root.bandCount;
-        let result = new Array(n).fill(0);
-        if (raw && raw.length > 0 && root.live) {
-            const bucket = raw.length / n;
-            for (let i = 0; i < n; i++) {
-                const start = Math.floor(i * bucket);
-                const end = Math.max(start + 1, Math.floor((i + 1) * bucket));
-                let sum = 0;
-                let count = 0;
-                for (let j = start; j < end && j < raw.length; j++) {
-                    sum += raw[j] ?? 0;
-                    count++;
+    Loader {
+        anchors.fill: parent
+        active: root.shaderStyle
+        sourceComponent: Item {
+            Item {
+                id: coverItem
+                width: 512
+                height: 512
+                visible: root.isRing
+                Image {
+                    id: coverImage
+                    anchors.fill: parent
+                    source: root.isRing ? root.coverUrl : ""
+                    fillMode: Image.PreserveAspectCrop
+                    sourceSize: Qt.size(512, 512)
+                    asynchronous: true
+                    smooth: true
                 }
-                result[i] = count > 0 ? (sum / count) : 0;
+            }
+            ShaderEffectSource {
+                id: coverTexture
+                sourceItem: coverItem
+                hideSource: true
+                visible: false
+            }
+
+            VisualizerShader {
+                anchors.fill: parent
+                style: root.style
+                engine: levelEngine
+                color1: root.visualizerColors[0]
+                color2: root.visualizerColors[1]
+                color3: root.visualizerColors[2]
+                cover: coverTexture
+                hasCover: coverImage.status === Image.Ready ? 1 : 0
             }
         }
-        const prev = root.levels.length === n ? root.levels : new Array(n).fill(0);
-        const smoothed = new Array(n);
-        for (let i = 0; i < n; i++) {
-            const target = Math.max(0, Math.min(1, (result[i] / 1000) * root.sensitivity));
-            smoothed[i] = target > prev[i] ? target : prev[i] * 0.82 + target * 0.18;
-        }
-        root.levels = smoothed;
-        canvas.requestPaint();
     }
 
-    onPointsChanged: root.recompute()
-    onLiveChanged: root.recompute()
+    ResizeHandler {
+        anchorItem: root
+        hoverActive: root.containsMouse
+        locked: Config.options.background.widgetsLocked || !root.isRing
+        currentWidth: root.ringSize
+        resizeMode: "diagonal"
+        onResized: newValue => root.ringSizeOverride = Math.round(Math.min(Math.max(newValue, 200), 900))
+        onResizeFinished: {
+            if (root.ringSizeOverride > 0) root.configEntry.ringSize = root.ringSizeOverride;
+            root.ringSizeOverride = -1;
+        }
+    }
 
-    Canvas {
-        id: canvas
-        anchors.fill: parent
+    component BarsVisualizer: Item {
+        id: bars
 
-        onPaint: {
-            const ctx = getContext("2d");
-            ctx.clearRect(0, 0, width, height);
-            const levels = root.levels;
-            const n = levels.length;
-            if (n === 0)
-                return;
+        readonly property list<real> points: AudioSpectrum.points
 
-            const gap = 3;
-            const barWidth = Math.max(1, (width - gap * (n - 1)) / n);
-            const col = root.barColor;
-            ctx.fillStyle = Qt.rgba(col.r, col.g, col.b, 0.9);
+        property real barWidth: 4
+        property real barSpacing: 8
+        property real maxBarHeight: 220
+        property real maxVisualizerValue: 1000
+        property real smoothingDuration: 150
 
-            for (let i = 0; i < n; i++) {
-                const h = Math.max(2, levels[i] * height);
-                const x = i * (barWidth + gap);
-                const y = height - h;
-                const r = Math.min(barWidth / 2, 4);
-                ctx.beginPath();
-                ctx.moveTo(x, y + r);
-                ctx.arcTo(x, y, x + r, y, r);
-                ctx.lineTo(x + barWidth - r, y);
-                ctx.arcTo(x + barWidth, y, x + barWidth, y + r, r);
-                ctx.lineTo(x + barWidth, height);
-                ctx.lineTo(x, height);
-                ctx.closePath();
-                ctx.fill();
+        readonly property int barCount: Math.max(1, Math.floor(root.screenWidth / (barWidth + barSpacing)))
+
+        readonly property var smoothedPoints: {
+            let raw = points;
+            if (!raw || raw.length === 0) return Array(barCount).fill(0);
+            let count = barCount;
+            let mapped = new Array(count);
+            let rawLenM1 = raw.length - 1;
+
+            for (let i = 0; i < count; i++) {
+                let progress = i / (count - 1 || 1);
+                let relPos = progress * rawLenM1;
+                let low = Math.floor(relPos);
+                let high = Math.ceil(relPos);
+                let mix = relPos - low;
+                mapped[i] = (raw[low] * (1 - mix)) + (raw[high] * (high < raw.length ? mix : 0));
+            }
+
+            let smoothed = new Array(count);
+            let sW = 0.2;
+            for (let j = 0; j < count; j++) {
+                let p = mapped[Math.max(0, j - 1)];
+                let n = mapped[Math.min(count - 1, j + 1)];
+                smoothed[j] = (p * sW) + (mapped[j] * (1.0 - 2 * sW)) + (n * sW);
+            }
+            return smoothed;
+        }
+
+        property real activityOpacity: 0
+        Behavior on activityOpacity {
+            NumberAnimation { duration: 500; easing.type: Easing.OutCubic }
+        }
+
+        Timer {
+            id: silenceTimer
+            interval: 1000
+            onTriggered: bars.activityOpacity = 0
+        }
+
+        onPointsChanged: {
+            if (points.some(p => p > 0)) {
+                bars.activityOpacity = 1.0;
+                silenceTimer.restart();
+            }
+        }
+
+        Row {
+            anchors.bottom: parent.bottom
+            anchors.horizontalCenter: parent.horizontalCenter
+            spacing: bars.barSpacing
+            opacity: bars.activityOpacity
+
+            Behavior on opacity {
+                NumberAnimation { duration: 400; easing.type: Easing.OutCubic }
+            }
+
+            Repeater {
+                model: bars.barCount
+                Rectangle {
+                    required property int index
+                    width: bars.barWidth
+                    property real pointValue: {
+                        const v = bars.smoothedPoints[index] ?? 0;
+                        return Math.max(bars.barWidth, (v / bars.maxVisualizerValue) * bars.maxBarHeight);
+                    }
+                    height: pointValue
+                    topLeftRadius: bars.barWidth / 2
+                    topRightRadius: bars.barWidth / 2
+                    anchors.bottom: parent.bottom
+
+                    property real intensity: pointValue / bars.maxBarHeight
+                    color: Qt.rgba(
+                        Appearance.colors.colPrimary.r * intensity + Appearance.colors.colPrimaryContainer.r * (1 - intensity),
+                        Appearance.colors.colPrimary.g * intensity + Appearance.colors.colPrimaryContainer.g * (1 - intensity),
+                        Appearance.colors.colPrimary.b * intensity + Appearance.colors.colPrimaryContainer.b * (1 - intensity),
+                        1
+                    )
+
+                    Behavior on height {
+                        NumberAnimation { duration: bars.smoothingDuration; easing.type: Easing.OutQuad }
+                    }
+                }
             }
         }
     }
