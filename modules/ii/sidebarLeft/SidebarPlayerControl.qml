@@ -4,6 +4,7 @@ import qs.modules.common.models
 import qs.modules.common.widgets
 import qs.services
 import qs.modules.common.functions
+import qs.modules.ii.bar as Bar
 import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Controls
@@ -289,7 +290,7 @@ Item {
                     opacity: active ? 1 : 0
                     Behavior on opacity { NumberAnimation { duration: 200 } }
 
-                    sourceComponent: Visualizer {
+                    sourceComponent: Bar.Visualizer {
                         vertical: false
                         mirrored: false
                         barCount: 32
