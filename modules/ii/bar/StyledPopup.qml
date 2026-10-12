@@ -255,7 +255,7 @@ LazyLoader {
                 anchors.fill: parent
                 implicitWidth: contentLoader.implicitWidth + margin * 2
                 implicitHeight: contentLoader.implicitHeight + margin * 2
-                color: Appearance.m3colors.m3surfaceContainer
+                color: Appearance.colors.colUiPopupBackground
                 radius: root.morph ? Appearance.rounding.large : Appearance.rounding.small
                 topLeftRadius: popupWindow.flat("tl") ? 0 : radius
                 topRightRadius: popupWindow.flat("tr") ? 0 : radius

@@ -9,14 +9,15 @@ RippleButton {
     property color contentColor: Appearance.colors.colOnLayer0
     property bool contentColorOverridden: false
     property bool vertical: Config.options.bar.vertical
+    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
 
-    implicitWidth: 22
+    implicitWidth: root.isMaterial ? 32 : 22
     implicitHeight: implicitWidth
 
     buttonRadius: Appearance.rounding.full
-    colBackground: "transparent"
-    colBackgroundHover: Appearance.colors.colLayer1Hover
-    colRipple: Appearance.colors.colLayer1Active
+    colBackground: root.isMaterial ? Appearance.colors.colPrimary : "transparent"
+    colBackgroundHover: root.isMaterial ? Appearance.colors.colPrimaryHover : Appearance.colors.colLayer1Hover
+    colRipple: root.isMaterial ? Appearance.colors.colPrimaryActive : Appearance.colors.colLayer1Active
 
     onPressed: {
         GlobalStates.sessionOpen = !GlobalStates.sessionOpen;
@@ -24,8 +25,20 @@ RippleButton {
 
     MaterialSymbol {
         anchors.centerIn: parent
+        visible: !root.isMaterial
         text: "power_settings_new"
         iconSize: 18
         color: root.contentColor
+    }
+
+    MaterialShapeWrappedMaterialSymbol {
+        anchors.centerIn: parent
+        visible: root.isMaterial
+        text: "power_settings_new"
+        iconSize: Appearance.font.pixelSize.normal
+        color: Appearance.colors.colOnPrimary
+        colSymbol: Appearance.colors.colPrimary
+        wrappedShape: MaterialShape.Shape.Cookie12Sided
+        padding: 2
     }
 }

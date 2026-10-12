@@ -12,6 +12,7 @@ MouseArea {
     signal styleEditorRequested
 
     property bool vertical: false
+    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
     readonly property var screen: root.QsWindow?.window?.screen
     readonly property int screenWidth: screen?.width ?? 1920
     readonly property bool veryConstrained: !root.vertical && screenWidth <= Appearance.sizes.barHellaShortenScreenWidthThreshold
@@ -58,7 +59,7 @@ MouseArea {
                 Layout.alignment: Qt.AlignVCenter
                 text: root.stateIcon
                 iconSize: Appearance.font.pixelSize.larger
-                color: root.contentColor
+                color: root.isMaterial ? Appearance.colors.colOnPrimaryContainer : root.contentColor
             }
 
             StyledText {
@@ -68,7 +69,7 @@ MouseArea {
                 font.features: {
                     "tnum": 1
                 }
-                color: root.isLow ? Appearance.colors.colError : root.contentColor
+                color: root.isLow ? Appearance.colors.colError : root.isMaterial ? Appearance.colors.colOnPrimaryContainer : root.contentColor
                 text: root.percentageText
             }
         }
@@ -84,7 +85,7 @@ MouseArea {
                 Layout.alignment: Qt.AlignHCenter
                 text: root.stateIcon
                 iconSize: Appearance.font.pixelSize.larger
-                color: root.contentColor
+                color: root.isMaterial ? Appearance.colors.colOnPrimaryContainer : root.contentColor
             }
 
             StyledText {
@@ -96,7 +97,7 @@ MouseArea {
                 font.features: {
                     "tnum": 1
                 }
-                color: root.isLow ? Appearance.colors.colError : root.contentColor
+                color: root.isLow ? Appearance.colors.colError : root.isMaterial ? Appearance.colors.colOnPrimaryContainer : root.contentColor
                 text: root.percentageText
             }
         }

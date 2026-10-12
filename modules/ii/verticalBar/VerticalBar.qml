@@ -58,7 +58,7 @@ Scope {
                     || (Config.options.bar.autoHide.enable && GlobalStates.isFrameHovered(barRoot.screen?.name, Config.options.bar.bottom ? "right" : "left"))
                 readonly property real frameInset: BarLayouts.windowsFrameInset
                 readonly property int normalExclusiveZone: (Config?.options.bar.autoHide.enable && (!mustShow || !Config?.options.bar.autoHide.pushWindows)) ? 0 :
-                    Appearance.sizes.baseVerticalBarWidth + (Config.options.bar.cornerStyle === 1 ? Appearance.sizes.hyprlandGapsOut : 0)
+                    Appearance.sizes.baseVerticalBarWidth + BarLayouts.styleZone
                 exclusionMode: ExclusionMode.Ignore
                 exclusiveZone: (barContent.centerOnly && Config.options.bar.showFrame && Config.options.bar.centerOnlyReserveFrame)
                     ? Config.options.bar.frameThickness
@@ -66,8 +66,18 @@ Scope {
                 WlrLayershell.namespace: "quickshell:verticalBar"
                 // WlrLayershell.layer: WlrLayer.Overlay // TODO enable this when bar can hide when fullscreen
                 implicitWidth: Appearance.sizes.verticalBarWidth + Appearance.rounding.screenRounding
+                readonly property bool pillMask: barContent.item?.pillMask ?? false
                 mask: Region {
-                    item: hoverMaskRegion
+                    item: barRoot.pillMask ? null : hoverMaskRegion
+                    Region {
+                        item: barRoot.pillMask ? topPillMask : null
+                    }
+                    Region {
+                        item: barRoot.pillMask ? middlePillMask : null
+                    }
+                    Region {
+                        item: barRoot.pillMask ? bottomPillMask : null
+                    }
                 }
                 color: "transparent"
 
@@ -106,6 +116,33 @@ Scope {
                         }
                     }
 
+                    Item {
+                        id: topPillMask
+                        readonly property rect area: barRoot.pillMask ? barContent.item.leftMaskRect : Qt.rect(0, 0, 0, 0)
+                        x: barContent.x + area.x
+                        y: barContent.y + area.y
+                        width: area.width
+                        height: area.height
+                    }
+
+                    Item {
+                        id: middlePillMask
+                        readonly property rect area: barRoot.pillMask ? barContent.item.centerMaskRect : Qt.rect(0, 0, 0, 0)
+                        x: barContent.x + area.x
+                        y: barContent.y + area.y
+                        width: area.width
+                        height: area.height
+                    }
+
+                    Item {
+                        id: bottomPillMask
+                        readonly property rect area: barRoot.pillMask ? barContent.item.rightMaskRect : Qt.rect(0, 0, 0, 0)
+                        x: barContent.x + area.x
+                        y: barContent.y + area.y
+                        width: area.width
+                        height: area.height
+                    }
+
                     Component {
                         id: classicContent
                         VerticalBarContent {}
@@ -121,13 +158,13 @@ Scope {
                         readonly property bool centerOnly: barContent.item?.centerOnly ?? false
 
                         width: Appearance.sizes.verticalBarWidth
-                        sourceComponent: BarLayouts.classic ? classicContent : layoutContent
+                        sourceComponent: BarLayouts.classicContent ? classicContent : layoutContent
                         anchors {
                             top: parent.top
                             bottom: parent.bottom
                             left: parent.left
                             right: undefined
-                            leftMargin: (Config?.options.bar.autoHide.enable && !mustShow) ? -Appearance.sizes.verticalBarWidth : 0
+                            leftMargin: (Config?.options.bar.autoHide.enable && !mustShow) ? -Appearance.sizes.verticalBarWidth : BarLayouts.edgeGap
                             rightMargin: 0
                         }
                         Behavior on anchors.leftMargin {
@@ -152,7 +189,7 @@ Scope {
                             PropertyChanges {
                                 target: barContent
                                 anchors.topMargin: 0
-                                anchors.rightMargin: (Config?.options.bar.autoHide.enable && !mustShow) ? -Appearance.sizes.barHeight : 0
+                                anchors.rightMargin: (Config?.options.bar.autoHide.enable && !mustShow) ? -Appearance.sizes.barHeight : BarLayouts.edgeGap
                             }
                         }
                     }
@@ -167,7 +204,8 @@ Scope {
                             right: undefined
                         }
                         width: Appearance.rounding.screenRounding
-                        active: showBarBackground && Config.options.bar.cornerStyle === 0 && !barContent.centerOnly
+                        active: (showBarBackground && Config.options.bar.cornerStyle === 0 && !barContent.centerOnly)
+                            || Config.options.bar.cornerStyle === 4 || Config.options.bar.cornerStyle === 6
 
                         states: State {
                             name: "right"
@@ -185,9 +223,10 @@ Scope {
 
                         sourceComponent: Item {
                             implicitHeight: Appearance.rounding.screenRounding
-                            readonly property color decoratorColor: !showBarBackground ? "transparent" : Config.options.bar.followFrameColor ? Appearance.getColorFromName(Config.options.bar.frameColor) : Appearance.colors.colLayer0
+                            readonly property color decoratorColor: (!showBarBackground && Config.options.bar.cornerStyle !== 4 && Config.options.bar.cornerStyle !== 6) ? "transparent" : Config.options.bar.followFrameColor ? Appearance.getColorFromName(Config.options.bar.frameColor) : Appearance.colors.colLayer0
                             RoundCorner {
                                 id: topCorner
+                                visible: Config.options.bar.cornerStyle === 0 || (barContent.item?.effectiveLeftLayout.length ?? 0) > 0
                                 anchors {
                                     left: parent.left
                                     right: parent.right
@@ -208,6 +247,7 @@ Scope {
                             }
                             RoundCorner {
                                 id: bottomCorner
+                                visible: Config.options.bar.cornerStyle === 0 || (barContent.item?.effectiveRightLayout.length ?? 0) > 0
                                 anchors {
                                     bottom: parent.bottom
                                     left: !Config.options.bar.bottom ? parent.left : undefined

@@ -8,7 +8,10 @@ Item {
     property bool vertical: false
     property int currentIndex: 0
     property int totalCount: 0
+    property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    property bool paintMaterialPill: false
     property bool paintBackground: true
+    property color bgColor: Appearance.colors.colPrimaryContainer
     property string widgetName: ""
     property string morphEdge: ""
     property bool morphStartFlat: false
@@ -20,9 +23,11 @@ Item {
     readonly property bool flatBR: (morphEdge === "bottom" || morphEdge === "right") && morphEndFlat
 
     readonly property string borderlessMode: Config.options.bar.borderless ? "transparent" : "pills"
-    readonly property bool styleEditable: root.paintBackground && root.widgetName !== ""
+    readonly property bool styleEditable: !root.isMaterial && root.paintBackground && root.widgetName !== ""
     property var stylePreview: ({})
     readonly property var style: {
+        if (root.isMaterial)
+            return ({});
         const entry = (Config.options.bar.widgetStyles ?? []).find(e => e.mode === root.borderlessMode && e.widget === root.widgetName);
         return Object.assign({}, entry ?? {}, root.stylePreview);
     }
@@ -43,7 +48,7 @@ Item {
     readonly property bool rightClickFree: !["weatherBar", "bluetooth", "workspaces", "sysTray", "media", "docktoPanel"].includes(root.widgetName)
 
     readonly property Item loadedWidget: gridLayout.children[0]?.item ?? null
-    readonly property bool hasContentOverride: root.style.color !== undefined && root.style.color !== "transparent"
+    readonly property bool hasContentOverride: !root.isMaterial && root.style.color !== undefined && root.style.color !== "transparent"
     readonly property color contentColor: {
         const name = root.style.color ?? "";
         const special = {
@@ -124,14 +129,16 @@ Item {
     readonly property real currentRadius: background.topLeftRadius
     readonly property real currentBorderWidth: background.border.width
 
-    property real padding: root.style.padding ?? 5
+    property real padding: root.style.padding ?? ((root.isMaterial && !root.paintMaterialPill) ? 0 : 5)
 
-    readonly property real fullRadius: (root.vertical ? width : height) / 2
-    readonly property real midRadius: Appearance.rounding.unsharpenmore
+    readonly property bool isPanel: Config.options.bar.cornerStyle === 5
+    readonly property real panelRadius: Appearance.rounding.unsharpenmore + 4
+    readonly property real fullRadius: root.isPanel ? root.panelRadius : (root.vertical ? width : height) / 2
+    readonly property real midRadius: root.isPanel ? root.panelRadius : Appearance.rounding.unsharpenmore
     readonly property real startRadius: (root.totalCount <= 1 || root.currentIndex === 0) ? root.fullRadius : root.midRadius
     readonly property real endRadius: (root.totalCount <= 1 || root.currentIndex === root.totalCount - 1) ? root.fullRadius : root.midRadius
 
-    implicitWidth: root.vertical ? Appearance.sizes.baseVerticalBarWidth : (gridLayout.implicitWidth + root.padding * 2)
+    implicitWidth: root.vertical ? (root.isMaterial ? Appearance.sizes.baseVerticalBarWidth - 6 : Appearance.sizes.baseVerticalBarWidth) : (gridLayout.implicitWidth + root.padding * 2)
     implicitHeight: root.vertical ? (gridLayout.implicitHeight + root.padding * 2) : Appearance.sizes.baseBarHeight
 
     default property alias items: gridLayout.children
@@ -145,15 +152,15 @@ Item {
             leftMargin: root.vertical ? 4 : 0
             rightMargin: root.vertical ? 4 : 0
         }
-        color: root.morphEdge !== "" ? Appearance.m3colors.m3surfaceContainer : !root.paintBackground ? "transparent" : root.resolveColorName(root.style.color) !== undefined ? root.resolveColorName(root.style.color) : Config.options.bar.borderless ? "transparent" : root.resolvedGroupColor
+        color: root.morphEdge !== "" ? Appearance.colors.colUiPopupBackground : !root.paintBackground ? "transparent" : root.resolveColorName(root.style.color) !== undefined ? root.resolveColorName(root.style.color) : (root.isMaterial && !root.paintMaterialPill) ? "transparent" : (root.isMaterial && root.paintMaterialPill) ? root.bgColor : Config.options.bar.borderless ? "transparent" : root.resolvedGroupColor
 
         border.width: root.morphEdge !== "" ? 0 : (root.style.borderWidth ?? 0)
         border.color: root.resolveColorName(root.style.borderColor) ?? Appearance.colors.colLayer0Border
 
-        topLeftRadius: root.flatTL ? 0 : root.style.radius ?? root.startRadius
-        bottomLeftRadius: root.flatBL ? 0 : root.style.radius ?? (root.vertical ? root.endRadius : root.startRadius)
-        topRightRadius: root.flatTR ? 0 : root.style.radius ?? (root.vertical ? root.startRadius : root.endRadius)
-        bottomRightRadius: root.flatBR ? 0 : root.style.radius ?? root.endRadius
+        topLeftRadius: root.flatTL ? 0 : root.style.radius ?? (root.paintMaterialPill ? root.fullRadius : root.startRadius)
+        bottomLeftRadius: root.flatBL ? 0 : root.style.radius ?? (root.paintMaterialPill ? root.fullRadius : root.vertical ? root.endRadius : root.startRadius)
+        topRightRadius: root.flatTR ? 0 : root.style.radius ?? (root.paintMaterialPill ? root.fullRadius : root.vertical ? root.startRadius : root.endRadius)
+        bottomRightRadius: root.flatBR ? 0 : root.style.radius ?? (root.paintMaterialPill ? root.fullRadius : root.endRadius)
 
         Behavior on color {
             enabled: root.morphEdge === ""

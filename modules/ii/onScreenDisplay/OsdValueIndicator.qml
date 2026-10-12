@@ -31,7 +31,7 @@ Item {
             margins: Appearance.sizes.elevationMargin
         }
         radius: Appearance.rounding.full
-        color: Appearance.colors.colLayer0
+        color: Appearance.colors.colUiBackground
 
         implicitWidth: valueRow.implicitWidth
         implicitHeight: valueRow.implicitHeight

@@ -242,6 +242,17 @@ ContentPage {
                         text: Translation.tr("Enable if you want clocks to show seconds accurately")
                     }
                 }
+                ConfigSwitch {
+                    buttonIcon: "date_range"
+                    text: Translation.tr("Show date")
+                    checked: Config.options.time.showDate
+                    onCheckedChanged: {
+                        Config.options.time.showDate = checked;
+                    }
+                    W.StyledToolTip {
+                        text: Translation.tr("Shows the date next to the time in the bar clock")
+                    }
+                }
             }
 
             ContentSubsection {

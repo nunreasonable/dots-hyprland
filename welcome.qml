@@ -271,6 +271,11 @@ ApplicationWindow {
                                             value: 0
                                         },
                                         {
+                                            displayName: Translation.tr("Split Hug"),
+                                            icon: "splitscreen",
+                                            value: 6
+                                        },
+                                        {
                                             displayName: Translation.tr("Float"),
                                             icon: "page_header",
                                             value: 1
@@ -279,6 +284,21 @@ ApplicationWindow {
                                             displayName: Translation.tr("Rect"),
                                             icon: "toolbar",
                                             value: 2
+                                        },
+                                        {
+                                            displayName: Translation.tr("M3"),
+                                            icon: "interests",
+                                            value: 3
+                                        },
+                                        {
+                                            displayName: Translation.tr("M3 Hug"),
+                                            icon: "category",
+                                            value: 4
+                                        },
+                                        {
+                                            displayName: Translation.tr("Panel"),
+                                            icon: "call_to_action",
+                                            value: 5
                                         }
                                     ]
                                 }

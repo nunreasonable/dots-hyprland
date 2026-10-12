@@ -13,7 +13,8 @@ Item {
     property bool contentColorOverridden: false
     signal styleEditorRequested
     property bool classic: false
-    implicitWidth: root.classic ? gridLayout.implicitWidth : root.vertical ? Appearance.sizes.verticalBarWidth : gridLayout.implicitWidth + 4
+    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
+    implicitWidth: root.classic ? gridLayout.implicitWidth : root.vertical ? Appearance.sizes.verticalBarWidth : root.isMaterial ? gridLayout.implicitWidth - 4 : gridLayout.implicitWidth + 4
     implicitHeight: root.classic ? gridLayout.implicitHeight : root.vertical ? gridLayout.implicitHeight + 6 : Appearance.sizes.barHeight
     property bool vertical: false
     property bool invertSide: !root.classic && Config.options.bar.bottom

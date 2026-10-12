@@ -17,7 +17,7 @@ Item {
     property bool borderless: Config.options.bar.borderless
     property bool classic: false
     property bool vertical: false
-    readonly property bool isMaterial: false
+    readonly property bool isMaterial: Config.options.bar.cornerStyle === 3 || Config.options.bar.cornerStyle === 4
     readonly property bool recording: Platform.isWindows && ScreenshotAction.windowsNativeRecording
     property int recordingSeconds: 0
 

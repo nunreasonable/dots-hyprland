@@ -19,14 +19,14 @@ Item {
 
     Rectangle {
         id: artMask
-        width: diMediaRoot.di.pillHeight - 8
-        height: diMediaRoot.di.pillHeight - 8
+        width: diMediaRoot.di.isMaterial ? diMediaRoot.di.pillHeight : diMediaRoot.di.pillHeight - 8
+        height: diMediaRoot.di.isMaterial ? diMediaRoot.di.pillHeight : diMediaRoot.di.pillHeight - 8
         anchors {
             left: parent.left
-            leftMargin: 4
+            leftMargin: diMediaRoot.di.isMaterial ? 0 : 4
             verticalCenter: parent.verticalCenter
         }
-        radius: Appearance.rounding?.small ?? 8
+        radius: diMediaRoot.di.isMaterial ? Appearance.rounding.full : (Appearance.rounding?.small ?? 8)
         color: Appearance.colors.colLayer1
 
         StyledImage {
@@ -80,7 +80,7 @@ Item {
             right: mediaControlsRow.visible ? mediaControlsRow.left : (visualizerCanvas.visible ? visualizerCanvas.left : (islandVisualizer.visible ? islandVisualizer.left : parent.right))
             rightMargin: 8
         }
-        spacing: -4
+        spacing: diMediaRoot.di.isMaterial ? -2 : -4
         opacity: diMediaRoot.di.mediaTrackInfoVisible ? 1 : 0
 
         Behavior on opacity {
@@ -113,7 +113,7 @@ Item {
 
         readonly property real widestLineWidth: Math.max(trackTitleMetrics.implicitWidth, trackArtistMetrics.implicitWidth)
 
-        readonly property real computedContentWidth: artMask.width + 8 + trackInfoColumn.widestLineWidth + 12 + (mediaControlsRow.visible ? mediaControlsRow.implicitWidth : (visualizerCanvas.visible ? visualizerCanvas.width : (islandVisualizer.visible ? islandVisualizer.width : 0))) + 4 + 10
+        readonly property real computedContentWidth: artMask.width + (diMediaRoot.di.isMaterial ? 14 : 8) + trackInfoColumn.widestLineWidth + 12 + (mediaControlsRow.visible ? mediaControlsRow.implicitWidth : (visualizerCanvas.visible ? visualizerCanvas.width : (islandVisualizer.visible ? islandVisualizer.width : 0))) + (diMediaRoot.di.isMaterial ? 0 : 4) + 10
 
         onComputedContentWidthChanged: diMediaRoot.di.mediaTextContentWidth = trackInfoColumn.computedContentWidth
         Component.onCompleted: diMediaRoot.di.mediaTextContentWidth = trackInfoColumn.computedContentWidth
@@ -132,8 +132,8 @@ Item {
             rightMargin: mediaControlsRow.visible ? 6 : 10
             verticalCenter: parent.verticalCenter
         }
-        width: 50
-        height: diMediaRoot.di.pillHeight * 0.85
+        width: diMediaRoot.di.isMaterial ? 60 : 50
+        height: diMediaRoot.di.isMaterial ? diMediaRoot.di.pillHeight * 1.5 : diMediaRoot.di.pillHeight * 0.85
         live: diMediaRoot.player?.isPlaying ?? false
         points: AudioSpectrum.points
         maxVisualizerValue: 1000
@@ -153,12 +153,13 @@ Item {
             rightMargin: 10
             verticalCenter: parent.verticalCenter
         }
-        height: diMediaRoot.di.pillHeight * 0.85
+        height: diMediaRoot.di.isMaterial ? diMediaRoot.di.pillHeight * 1.5 : diMediaRoot.di.pillHeight * 0.85
         vertical: false
+        isMaterial: false
         barCount: 5
         dotSize: 3
         dotSpacing: 3
-        maxBarHeight: diMediaRoot.di.pillHeight * 0.85
+        maxBarHeight: diMediaRoot.di.isMaterial ? diMediaRoot.di.pillHeight * 1.5 : diMediaRoot.di.pillHeight * 0.85
         contentColor: Appearance.colors.colOnLayer0
         visible: !Config.options.bar.dynamicIsland.showMediaControls && Config.options.bar.dynamicIsland.visualizerStyle === "dots"
     }
@@ -167,10 +168,10 @@ Item {
         id: mediaControlsRow
         anchors {
             right: parent.right
-            rightMargin: 8
+            rightMargin: diMediaRoot.di.isMaterial ? 4 : 8
             verticalCenter: parent.verticalCenter
         }
-        spacing: -4
+        spacing: diMediaRoot.di.isMaterial ? -2 : -4
         visible: Config.options.bar.dynamicIsland.showMediaControls
 
         Item {
@@ -183,7 +184,7 @@ Item {
                 anchors.centerIn: parent
                 text: "skip_previous"
                 fill: 1
-                iconSize: 16
+                iconSize: diMediaRoot.di.isMaterial ? 20 : 16
                 color: Appearance.colors.colOnLayer0
             }
 
@@ -203,7 +204,7 @@ Item {
                 anchors.centerIn: parent
                 text: diMediaRoot.player?.isPlaying ? "pause" : "play_arrow"
                 fill: 1
-                iconSize: 18
+                iconSize: diMediaRoot.di.isMaterial ? 20 : 18
                 color: Appearance.colors.colOnLayer0
             }
 
@@ -224,7 +225,7 @@ Item {
                 anchors.centerIn: parent
                 text: "skip_next"
                 fill: 1
-                iconSize: 16
+                iconSize: diMediaRoot.di.isMaterial ? 20 : 16
                 color: Appearance.colors.colOnLayer0
             }
 
