@@ -40,6 +40,8 @@ Singleton {
     readonly property QtObject systemMonitor: _impl ? _impl.systemMonitor : null
     readonly property QtObject fileIndex: _impl ? _impl.fileIndex : null
     readonly property QtObject timeZones: _impl ? _impl.timeZones : null
+    readonly property QtObject webapps: _impl ? _impl.webapps : null
+    readonly property QtObject autostart: _impl ? _impl.autostart : null
     readonly property QtObject accountAge: _impl ? _impl.accountAge : null
 
     Component.onCompleted: {

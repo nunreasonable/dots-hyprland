@@ -7,6 +7,160 @@ import qs.modules.common.widgets
 ContentPage {
     forceWidth: true
 
+    function webappIconSource(icon) {
+        if (!icon || icon.length === 0) return "";
+        if (Platform.isWindows) return "file:///" + icon.replace(/\\/g, "/");
+        return icon.startsWith("/") ? "file://" + icon : "";
+    }
+
+    ContentSection {
+        icon: "web_asset"
+        title: Translation.tr("Web apps")
+
+        StyledText {
+            Layout.fillWidth: true
+            text: Translation.tr("Creates a Start menu shortcut that opens a site like an app.")
+            font.pixelSize: Appearance.font.pixelSize.smaller
+            color: Appearance.colors.colSubtext
+            wrapMode: Text.Wrap
+        }
+
+        MaterialTextArea {
+            id: webappUrlInput
+            Layout.fillWidth: true
+            placeholderText: Translation.tr("example.com (one per line)")
+            wrapMode: TextEdit.Wrap
+        }
+
+        StyledText {
+            Layout.fillWidth: true
+            visible: Webapps.error !== ""
+            text: Translation.tr("Could not create: %1").arg(Webapps.error)
+            font.pixelSize: Appearance.font.pixelSize.smaller
+            color: Appearance.colors.colError
+            wrapMode: Text.Wrap
+        }
+
+        RippleButton {
+            Layout.fillWidth: true
+            implicitHeight: 44
+            buttonRadius: Appearance.rounding.normal
+            enabled: webappUrlInput.text.trim() !== "" && !Webapps.busy
+            colBackground: Appearance.colors.colSecondaryContainer
+            colBackgroundHover: Appearance.colors.colSecondaryContainerHover
+            colRipple: Appearance.colors.colSecondaryContainerActive
+            onClicked: {
+                Webapps.create(webappUrlInput.text);
+                webappUrlInput.text = "";
+            }
+            contentItem: RowLayout {
+                spacing: 8
+                Item { Layout.fillWidth: true }
+                MaterialSymbol {
+                    text: "add"
+                    iconSize: 20
+                    fill: 1
+                    color: Appearance.colors.colOnSecondaryContainer
+                }
+                StyledText {
+                    text: Translation.tr("Create webapp")
+                    font.weight: Font.Medium
+                    color: Appearance.colors.colOnSecondaryContainer
+                }
+                Item { Layout.fillWidth: true }
+            }
+        }
+
+        StyledText {
+            Layout.fillWidth: true
+            Layout.topMargin: 4
+            visible: Webapps.items.length === 0
+            text: Translation.tr("No webapps yet")
+            color: Appearance.colors.colSubtext
+            font.pixelSize: Appearance.font.pixelSize.small
+        }
+
+        Repeater {
+            model: Webapps.items
+
+            delegate: RowLayout {
+                id: webappRow
+                required property var modelData
+                Layout.fillWidth: true
+                Layout.topMargin: 4
+                spacing: 10
+
+                Image {
+                    Layout.preferredWidth: 28
+                    Layout.preferredHeight: 28
+                    source: webappIconSource(webappRow.modelData.icon)
+                    sourceSize: Qt.size(56, 56)
+                    fillMode: Image.PreserveAspectFit
+                    asynchronous: true
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 0
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: webappRow.modelData.name
+                        color: Appearance.colors.colOnLayer1
+                        elide: Text.ElideRight
+                    }
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: webappRow.modelData.url
+                        font.pixelSize: Appearance.font.pixelSize.smaller
+                        color: Appearance.colors.colSubtext
+                        elide: Text.ElideRight
+                    }
+                }
+
+                RippleButton {
+                    implicitWidth: 36
+                    implicitHeight: 36
+                    buttonRadius: 18
+                    colBackground: "transparent"
+                    colBackgroundHover: Qt.rgba(1, 1, 1, 0.12)
+                    colRipple: Qt.rgba(1, 1, 1, 0.2)
+                    onClicked: Webapps.open(webappRow.modelData.id)
+                    contentItem: MaterialSymbol {
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        text: "open_in_new"
+                        iconSize: 20
+                        color: Appearance.colors.colOnLayer1
+                    }
+                    StyledToolTip {
+                        text: Translation.tr("Open")
+                    }
+                }
+
+                RippleButton {
+                    implicitWidth: 36
+                    implicitHeight: 36
+                    buttonRadius: 18
+                    colBackground: "transparent"
+                    colBackgroundHover: Qt.rgba(1, 1, 1, 0.12)
+                    colRipple: Qt.rgba(1, 1, 1, 0.2)
+                    onClicked: Webapps.remove(webappRow.modelData.id)
+                    contentItem: MaterialSymbol {
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        text: "delete"
+                        iconSize: 20
+                        color: Appearance.colors.colOnLayer1
+                    }
+                    StyledToolTip {
+                        text: Translation.tr("Remove")
+                    }
+                }
+            }
+        }
+    }
+
     ContentSection {
         icon: "neurology"
         title: Translation.tr("AI")
