@@ -310,6 +310,7 @@ ContentPage {
                         description: presetDelegate.presetDescription !== "" ? presetDelegate.presetDescription : Translation.tr("Saved preset")
                         onApply: () => Presets.apply(presetDelegate.presetName)
                         onRemove: () => Presets.remove(presetDelegate.presetName)
+                        onOverwrite: () => Presets.overwrite(presetDelegate.presetName)
                     }
                 }
             }
@@ -351,6 +352,7 @@ ContentPage {
                             description: onlineDelegate.presetDescription !== "" ? onlineDelegate.presetDescription : Translation.tr("Downloaded preset")
                             onApply: () => Presets.applyOnline(onlineDelegate.presetName)
                             onRemove: () => Presets.removeOnline(onlineDelegate.presetName)
+                            onOverwrite: () => Presets.overwrite(onlineDelegate.presetName)
                         }
                     }
                 }
