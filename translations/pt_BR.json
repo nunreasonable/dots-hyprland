@@ -1479,6 +1479,9 @@
   "Wallpapers here stay blurred and can't be applied unless Spicy Stuff is available on this account": "Os papéis de parede daqui ficam borrados e não podem ser aplicados a menos que o Spicy Stuff esteja disponível nesta conta",
   "Keep open when clicking outside": "Manter aberto ao clicar fora",
   "The end4-pC settings card then closes only with its close button or Esc": "O cartão de configurações do end4-pC passa a fechar só pelo botão de fechar ou pelo Esc",
+  "Live wallpaper folder, e.g. C:/Users/you/Videos/Wallpapers": "Pasta de papéis de parede animados, ex.: C:/Users/voce/Videos/Wallpapers",
+  "Videos for Live Wallpaper in the desktop menu": "Vídeos do Papel de parede animado no menu da área de trabalho",
+  "Pause the live wallpaper when a window covers the desktop": "Pausar o papel de parede animado quando uma janela cobre a área de trabalho",
   "Hide computer name": "Esconder o nome do computador",
   "Keeps the computer name out of the sidebar and the cheatsheet, for screenshots and recordings": "Tira o nome do computador da barra lateral e da tela de Atalhos, para capturas de tela e gravações"
 }

@@ -172,7 +172,7 @@ Scope {
                         buttonText: Translation.tr("Live wallpaper...")
                         onClicked: {
                             GlobalStates.desktopMenuOpen = false;
-                            Wallpapers.openFallbackPicker();
+                            Wallpapers.openFallbackPicker(Appearance.m3colors.darkmode, Config.options.wallpaperSelector.liveWallpapersPath ?? "");
                         }
                     }
                     DesktopMenuItem {

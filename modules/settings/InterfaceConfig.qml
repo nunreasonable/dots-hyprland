@@ -1920,12 +1920,20 @@ ContentPage {
 
         MaterialTextArea {
             Layout.fillWidth: true
-            visible: !Platform.isWindows
-            placeholderText: Translation.tr("Live wallpaper folder (not supported on Windows yet)")
+            placeholderText: Translation.tr("Live wallpaper folder, e.g. C:/Users/you/Videos/Wallpapers")
             text: Config.options.wallpaperSelector.liveWallpapersPath ?? ""
             wrapMode: TextEdit.NoWrap
             onTextChanged: {
                 Config.options.wallpaperSelector.liveWallpapersPath = text;
+            }
+        }
+
+        ConfigSwitch {
+            buttonIcon: "pause_circle"
+            text: Translation.tr("Pause the live wallpaper when a window covers the desktop")
+            checked: Config.options.background.pauseVideoWhenCovered
+            onCheckedChanged: {
+                Config.options.background.pauseVideoWhenCovered = checked;
             }
         }
 

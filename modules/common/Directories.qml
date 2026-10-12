@@ -55,6 +55,7 @@ Singleton {
     property string scriptPath: Quickshell.shellPath("scripts")
     property string favicons: FileUtils.trimFileProtocol(`${Directories.cache}/media/favicons`)
     property string coverArt: FileUtils.trimFileProtocol(`${Directories.cache}/media/coverart`)
+    property string videoFrames: FileUtils.trimFileProtocol(`${Directories.cache}/media/video-frames`)
     readonly property string tempRoot: Platform.isWindows
         ? `${FileUtils.trimFileProtocol(StandardPaths.standardLocations(StandardPaths.TempLocation)[0])}/quickshell`
         : "/tmp/quickshell"

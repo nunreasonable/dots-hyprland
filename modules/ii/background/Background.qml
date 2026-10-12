@@ -65,6 +65,10 @@ Variants {
         // Wallpaper
         property bool wallpaperIsVideo: Config.options.background.wallpaperPath.endsWith(".mp4") || Config.options.background.wallpaperPath.endsWith(".webm") || Config.options.background.wallpaperPath.endsWith(".mkv") || Config.options.background.wallpaperPath.endsWith(".avi") || Config.options.background.wallpaperPath.endsWith(".mov")
         property string wallpaperPath: wallpaperIsVideo ? Config.options.background.thumbnailPath : Config.options.background.wallpaperPath
+        readonly property bool videoLayerActive: Platform.isWindows && wallpaperIsVideo && !wallpaperSafetyTriggered
+        readonly property bool showVideoFrame: videoLayerActive && !(videoWallpaperLoader.item?.ready ?? false)
+        readonly property bool desktopCovered: HyprlandData.windowList.some(win => win.monitor == monitor?.id
+            && win.workspace?.id === monitor?.activeWorkspace?.id && (win.fullscreen ?? 0) > 0 && !win.minimized)
         property bool wallpaperSafetyTriggered: {
             const enabled = Config.options.workSafety.enable.wallpaper;
             const sensitiveWallpaper = (CF.StringUtils.stringListContainsSubstring(wallpaperPath.toLowerCase(), Config.options.workSafety.triggerCondition.fileKeywords));
@@ -276,7 +280,7 @@ Variants {
             StyledImage {
                 id: wallpaper
                 visible: opacity > 0 && !blurLoader.active
-                opacity: (status === Image.Ready && !bgRoot.wallpaperIsVideo) ? 1 : 0
+                opacity: (status === Image.Ready && (!bgRoot.wallpaperIsVideo || bgRoot.showVideoFrame)) ? 1 : 0
                 cache: false
                 smooth: false
 
@@ -341,6 +345,27 @@ Variants {
                 }
                 width: bgRoot.scaledWallpaperWidth
                 height: bgRoot.scaledWallpaperHeight
+            }
+
+            Loader {
+                id: videoWallpaperLoader
+                anchors.fill: parent
+                active: bgRoot.videoLayerActive
+                source: "VideoWallpaperLayer.qml"
+            }
+
+            Binding {
+                target: videoWallpaperLoader.item
+                property: "shown"
+                value: bgRoot.visible
+                when: videoWallpaperLoader.item !== null
+            }
+
+            Binding {
+                target: videoWallpaperLoader.item
+                property: "covered"
+                value: bgRoot.desktopCovered
+                when: videoWallpaperLoader.item !== null
             }
 
             Loader {

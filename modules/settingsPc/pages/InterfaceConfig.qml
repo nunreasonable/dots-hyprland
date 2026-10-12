@@ -1925,17 +1925,23 @@ ContentPage {
 
                 ConfigTextArea {
                     id: liveWallpapersPathField
-                    visible: !Platform.isWindows
                     Layout.fillWidth: true
                     buttonIcon: "video_template"
                     text: Translation.tr("Live wallpaper folder")
-                    description: Translation.tr("Not supported on Windows yet")
+                    description: Translation.tr("Videos for Live Wallpaper in the desktop menu")
                     placeholderText: Translation.tr("e.g., C:/Users/you/Videos/Wallpapers")
                     fieldWidth: 300
                     value: Config.options.wallpaperSelector.liveWallpapersPath ?? ""
                     onValueChanged: {
                         Config.options.wallpaperSelector.liveWallpapersPath = liveWallpapersPathField.value;
                     }
+                }
+
+                ConfigSwitch {
+                    buttonIcon: "pause_circle"
+                    text: Translation.tr("Pause the live wallpaper when a window covers the desktop")
+                    checked: Config.options.background.pauseVideoWhenCovered
+                    onCheckedChanged: { Config.options.background.pauseVideoWhenCovered = checked }
                 }
 
                 ConfigTextArea {

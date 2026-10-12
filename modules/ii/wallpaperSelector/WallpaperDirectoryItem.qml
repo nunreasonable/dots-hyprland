@@ -10,7 +10,8 @@ MouseArea {
     id: root
     required property var fileModelData
     property bool isDirectory: fileModelData.fileIsDir
-    property bool useThumbnail: Images.isValidImageByName(fileModelData.fileName)
+    property bool isVideo: Platform.isWindows && Wallpapers.isVideoPath(fileModelData.fileName)
+    property bool useThumbnail: Images.isValidImageByName(fileModelData.fileName) || root.isVideo
 
     property alias colBackground: background.color
     property alias colText: wallpaperItemName.color
@@ -91,6 +92,24 @@ MouseArea {
                                 radius: Appearance.rounding.small
                             }
                         }
+                    }
+                }
+
+                Rectangle {
+                    visible: root.isVideo
+                    anchors.right: thumbnailImageLoader.right
+                    anchors.bottom: thumbnailImageLoader.bottom
+                    anchors.margins: 6
+                    implicitWidth: 28
+                    implicitHeight: 28
+                    radius: Appearance.rounding.full
+                    color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.25)
+
+                    MaterialSymbol {
+                        anchors.centerIn: parent
+                        text: "play_circle"
+                        iconSize: Appearance.font.pixelSize.larger
+                        color: Appearance.colors.colOnLayer0
                     }
                 }
 

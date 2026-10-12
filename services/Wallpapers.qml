@@ -26,10 +26,9 @@ Singleton {
     property bool _folderModelFresh: false
     readonly property var folderModel: root._folderModel ?? emptyFolderModel
     property string searchQuery: ""
-    readonly property list<string> extensions: [ // TODO: add videos
-        "jpg", "jpeg", "png", "webp", "avif", "bmp", "svg"
-    ]
+    readonly property list<string> imageExtensions: ["jpg", "jpeg", "png", "webp", "avif", "bmp", "svg"]
     readonly property list<string> videoExtensions: ["mp4", "webm", "mkv", "avi", "mov"]
+    readonly property list<string> extensions: Platform.isWindows ? root.imageExtensions.concat(root.videoExtensions) : root.imageExtensions
     readonly property bool thumbnailGenerationRunning: thumbgenProc.running || _windowsThumbnailTotal > 0
     property real thumbnailGenerationProgress: 0
     readonly property string sortMode: Config.options?.wallpaperSelector.sortMode || "time"
@@ -70,6 +69,8 @@ Singleton {
         if (!current || current.length === 0) return;
         const normalized = path => FileUtils.trimFileProtocol(path).replace(/\\/g, "/").toLowerCase();
         if (normalized(current) === normalized(Config.options.background.wallpaperPath)) return;
+        if (root.isVideoPath(Config.options.background.wallpaperPath)
+            && normalized(current) === normalized(Config.options.background.thumbnailPath)) return;
         root._retheme(current, wn.isDarkMode(), false);
     }
 
@@ -95,9 +96,9 @@ Singleton {
         return root.videoExtensions.some(ext => lower.endsWith(`.${ext}`));
     }
 
-    function openFallbackPicker(darkMode = Appearance.m3colors.darkmode) {
+    function openFallbackPicker(darkMode = Appearance.m3colors.darkmode, folder = "") {
         if (Platform.isWindows) {
-            console.warn("[Wallpapers] Native file dialog not available on Windows yet, opening the in-shell picker instead");
+            if (folder && folder.length > 0) root.setDirectory(folder);
             GlobalStates.wallpaperSelectorOpen = true;
             return;
         }
@@ -180,7 +181,13 @@ Singleton {
         Quickshell.execDetached(args);
     }
 
-    function _retheme(path, darkMode, applyToSystem = true) {
+    property var _pendingVideo: null
+
+    function _videoFramePath(path) {
+        return `${Directories.videoFrames}/${Qt.md5(root.normalizedPath(path))}.png`;
+    }
+
+    function _retheme(path, darkMode, applyToSystem = true, videoPath = "") {
         const wn = WindowsNative.wallpaper;
         if (!wn) return;
         if (!SpicyStuff.allowed && root.isInSpicyFolder(path)) {
@@ -190,7 +197,13 @@ Singleton {
 
         const hasPath = !!path && path.length > 0;
         if (hasPath && root.isVideoPath(path)) {
-            console.warn("[Wallpapers] Video wallpapers are not supported on Windows, skipping:", path);
+            if (!WindowsNative.thumbnailer) {
+                console.warn("[Wallpapers] Can't read a frame of the video yet, skipping:", path);
+                return;
+            }
+            const frame = root._videoFramePath(path);
+            root._pendingVideo = { video: path, frame: frame, darkMode: darkMode, applyToSystem: applyToSystem };
+            WindowsNative.thumbnailer.generate(path, frame, 1920);
             return;
         }
 
@@ -198,7 +211,8 @@ Singleton {
 
         if (hasPath) {
             if (applyToSystem) wn.setWallpaper(path);
-            Config.options.background.wallpaperPath = path;
+            Config.options.background.wallpaperPath = videoPath.length > 0 ? videoPath : path;
+            if (videoPath.length > 0) Config.options.background.thumbnailPath = path;
         }
 
         if (Config.options.appearance.wallpaperTheming.enableAppsAndShell === false) {
@@ -334,7 +348,7 @@ Singleton {
         }
         const files = [];
         for (let i = 0; i < model.count; i++) {
-            if (!model.get(i, "fileIsDir"))
+            if (!model.get(i, "fileIsDir") && !root.isVideoPath(model.get(i, "fileName")))
                 files.push(model.get(i, "filePath"));
         }
         if (files.length === 0) return;
@@ -509,7 +523,7 @@ Singleton {
         for (let i = 0; i < model.count; i++) {
             if (model.get(i, "fileIsDir")) continue;
             const fileName = model.get(i, "fileName");
-            if (!Images.isValidImageByName(fileName)) continue;
+            if (!Images.isValidImageByName(fileName) && !root.isVideoPath(fileName)) continue;
             const filePath = model.get(i, "filePath");
             pending[FileUtils.trimFileProtocol(Images.thumbnailPathFor(filePath, size))] = filePath;
         }
@@ -531,6 +545,13 @@ Singleton {
     Connections {
         target: WindowsNative.thumbnailer
         function onFinished(sourcePath, outputPath, ok) {
+            const video = root._pendingVideo;
+            if (video && outputPath === video.frame) {
+                root._pendingVideo = null;
+                if (ok) root._retheme(video.frame, video.darkMode, video.applyToSystem, video.video);
+                else console.warn("[Wallpapers] Could not read a frame of", video.video);
+                return;
+            }
             if (!(outputPath in root._windowsPendingThumbnails)) return;
             delete root._windowsPendingThumbnails[outputPath];
             const remaining = Object.keys(root._windowsPendingThumbnails).length;
