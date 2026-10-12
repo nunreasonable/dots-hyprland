@@ -187,7 +187,7 @@ PopupWindow {
             }
             implicitHeight: content.implicitHeight + root.cardPadding * 2
             radius: root.cardRadius
-            color: Appearance.colors.colUiPopupBackground
+            color: Appearance.colors.colLayer1Base
             border.width: 1
             border.color: Appearance.colors.colLayer0Border
             opacity: 0

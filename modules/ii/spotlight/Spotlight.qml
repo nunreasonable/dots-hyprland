@@ -578,6 +578,7 @@ q="$1"; h="$2"
 
                     TextField {
                         id: searchInput
+                        ContextMenu.menu: StyledTextEditMenu { editor: searchInput }
                         Layout.fillWidth: true
                         Layout.alignment: Qt.AlignVCenter
                         background: null
