@@ -16,13 +16,14 @@ Singleton {
     readonly property bool wantsDashboard: Config.options?.settings?.style === "dashboard"
     property bool pcLayout: false
     property bool dashboardMode: false
+    property bool handoff: false
     readonly property var activeLoader: root.pcLayout ? pcLoader : windowLoader
 
     function load() {
     }
 
-    function ensureSource() {
-        if (root.pcLayout) {
+    function ensureSource(pc = root.pcLayout) {
+        if (pc) {
             if (pcLoader.source == "")
                 pcLoader.source = Qt.resolvedUrl(root.dashboardMode ? "../settingsPc/dashboard/SettingsPcDashboardWindow.qml" : "../settingsPc/SettingsPcPanel.qml");
         } else if (windowLoader.source == "") {
@@ -63,8 +64,14 @@ Singleton {
     }
 
     function close() {
+        root.handoff = false;
         root.isOpen = false;
         root.target = null;
+    }
+
+    function finishHandoff() {
+        if (root.handoff && root.activeLoader.item && root.activeLoader.item.visible)
+            handoffTimer.restart();
     }
 
     function toggle() {
@@ -84,6 +91,14 @@ Singleton {
             if (root.pcLayout === root.wantsPcLayout && root.dashboardMode === root.wantsDashboard)
                 return;
             const reopen = root.isOpen;
+            if (reopen && root.dashboardMode === root.wantsDashboard) {
+                root.ensureSource(root.wantsPcLayout);
+                root.handoff = true;
+                handoffLimit.restart();
+                root.pcLayout = root.wantsPcLayout;
+                root.finishHandoff();
+                return;
+            }
             root.isOpen = false;
             root.pcLayout = root.wantsPcLayout;
             if (root.dashboardMode !== root.wantsDashboard) {
@@ -97,28 +112,53 @@ Singleton {
         }
     }
 
+    Timer {
+        id: handoffTimer
+        interval: 300
+        onTriggered: root.handoff = false
+    }
+
+    Timer {
+        id: handoffLimit
+        interval: 3500
+        onTriggered: root.handoff = false
+    }
+
+    Connections {
+        target: root.handoff ? root.activeLoader.item : null
+        function onVisibleChanged() {
+            root.finishHandoff();
+        }
+    }
+
     LazyLoader {
         id: windowLoader
-        active: root.isOpen && !root.pcLayout
+        active: root.isOpen && (!root.pcLayout || root.handoff)
+        onItemChanged: root.finishHandoff()
     }
 
     LazyLoader {
         id: pcLoader
-        active: root.isOpen && root.pcLayout
-        onItemChanged: root.applyTarget()
+        active: root.isOpen && (root.pcLayout || root.handoff)
+        onItemChanged: {
+            root.applyTarget();
+            root.finishHandoff();
+        }
     }
 
     Connections {
         target: windowLoader.item
         function onCloseRequested() {
-            root.close();
+            if (!root.pcLayout)
+                root.close();
         }
     }
 
     Connections {
         target: pcLoader.item
         function onCloseRequested() {
-            root.close();
+            if (root.pcLayout)
+                root.close();
         }
     }
 
