@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell.Io
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.services
 
 MouseArea {
     id: root
@@ -10,18 +11,31 @@ MouseArea {
     property bool contentColorOverridden: false
 
     property bool vertical: false
-    property real downloadBytesPerSecond: 0
-    property real uploadBytesPerSecond: 0
-    property real downloadedBytes: 0
-    property real uploadedBytes: 0
+    property real downloadBytesPerSecond: Platform.isWindows ? ResourceUsage.networkDownloadBytesPerSecond : 0
+    property real uploadBytesPerSecond: Platform.isWindows ? ResourceUsage.networkUploadBytesPerSecond : 0
+    property real downloadedBytes: Platform.isWindows ? ResourceUsage.networkDownloadedBytes : 0
+    property real uploadedBytes: Platform.isWindows ? ResourceUsage.networkUploadedBytes : 0
     property real previousReceivedBytes: -1
     property real previousTransmittedBytes: -1
     property double previousSampleTime: 0
+    property bool networkRegistered: false
 
     implicitWidth: vertical ? 36 : speedColumn.implicitWidth + 8
     implicitHeight: vertical ? speedColumn.implicitHeight + 6 : 32
 
     hoverEnabled: !Config.options.bar.tooltips.clickToShow
+
+    function syncNetworkConsumer(alive) {
+        const want = alive && root.visible && Platform.isWindows;
+        if (want !== root.networkRegistered) {
+            ResourceUsage.networkConsumers += want ? 1 : -1;
+            root.networkRegistered = want;
+        }
+    }
+
+    onVisibleChanged: root.syncNetworkConsumer(true)
+    Component.onCompleted: root.syncNetworkConsumer(true)
+    Component.onDestruction: root.syncNetworkConsumer(false)
 
     function formatRate(rate, compact) {
         const units = compact
