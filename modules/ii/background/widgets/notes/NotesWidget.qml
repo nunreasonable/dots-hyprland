@@ -21,11 +21,13 @@ AbstractBackgroundWidget {
     property string editingText: ""
     onModeChanged: {
         GlobalStates.desktopWidgetKeyboardFocus = (mode === "edit");
-        if (mode === "edit")
-            Qt.callLater(() => {
-                editTextArea.cursorPosition = editTextArea.length;
-                editTextArea.forceActiveFocus();
-            });
+        if (mode !== "edit")
+            return;
+        root.takeKeyboard();
+        Qt.callLater(() => {
+            editTextArea.cursorPosition = editTextArea.length;
+            editTextArea.forceActiveFocus();
+        });
     }
     Component.onDestruction: {
         if (root.mode === "edit")

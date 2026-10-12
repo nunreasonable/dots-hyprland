@@ -26,7 +26,11 @@ AbstractBackgroundWidget {
     implicitHeight: editor.implicitHeight + root.padding * 2
     draggable: placementStrategy === "free" && !Config.options.background.widgetsLocked && !root.editing
 
-    onEditingChanged: GlobalStates.desktopWidgetKeyboardFocus = root.editing
+    onEditingChanged: {
+        GlobalStates.desktopWidgetKeyboardFocus = root.editing;
+        if (root.editing)
+            root.takeKeyboard();
+    }
     Component.onDestruction: if (root.editing)
         GlobalStates.desktopWidgetKeyboardFocus = false
 

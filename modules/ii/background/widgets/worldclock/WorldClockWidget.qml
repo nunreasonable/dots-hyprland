@@ -44,7 +44,11 @@ AbstractBackgroundWidget {
     property var worldCities: WorldClock.entries
     property bool showingSettings: false
 
-    onShowingSettingsChanged: GlobalStates.desktopWidgetKeyboardFocus = showingSettings
+    onShowingSettingsChanged: {
+        GlobalStates.desktopWidgetKeyboardFocus = showingSettings;
+        if (showingSettings)
+            root.takeKeyboard();
+    }
     Component.onDestruction: {
         if (root.showingSettings)
             GlobalStates.desktopWidgetKeyboardFocus = false;

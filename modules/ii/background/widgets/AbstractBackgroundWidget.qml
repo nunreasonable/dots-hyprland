@@ -1,5 +1,6 @@
 import QtQuick
 import Quickshell
+import Quickshell.Hyprland
 import Quickshell.Io
 import qs
 import qs.modules.common
@@ -58,6 +59,24 @@ AbstractWidget {
     }
 
     onReleased: root.commitPosition()
+
+    function takeKeyboard() {
+        if (!Platform.isWindows)
+            return;
+        Qt.callLater(() => {
+            keyboardGrab.active = false;
+            keyboardGrab.active = true;
+        });
+    }
+
+    HyprlandFocusGrab {
+        id: keyboardGrab
+        windows: root.QsWindow.window ? [root.QsWindow.window] : []
+        onActiveChanged: {
+            if (keyboardGrab.active)
+                Qt.callLater(() => keyboardGrab.active = false);
+        }
+    }
 
     Component.onCompleted: {
         const canvas = root.findCanvas(root.parent);
