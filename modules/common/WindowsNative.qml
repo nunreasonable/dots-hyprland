@@ -41,6 +41,7 @@ Singleton {
     readonly property QtObject fileIndex: _impl ? _impl.fileIndex : null
     readonly property QtObject timeZones: _impl ? _impl.timeZones : null
     readonly property QtObject accountAge: _impl ? _impl.accountAge : null
+    readonly property QtObject displays: _impl ? _impl.displays : null
 
     Component.onCompleted: {
         if (!Platform.isWindows) return;
