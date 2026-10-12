@@ -1,3 +1,5 @@
+import QtQuick
+import QtQuick.Layouts
 import qs
 import qs.services
 import qs.modules.common
@@ -5,65 +7,119 @@ import qs.modules.common.functions
 import qs.modules.common.widgets
 import qs.modules.common.widgets.widgetCanvas
 import qs.modules.ii.background.widgets
-import QtQuick
-import Quickshell
 
 AbstractBackgroundWidget {
     id: root
+    Component.onCompleted: ResourceUsage.diskConsumers++
+    Component.onDestruction: ResourceUsage.diskConsumers--
 
     configEntryName: "resources"
+    hoverEnabled: true
 
-    implicitWidth: contentRow.implicitWidth
-    implicitHeight: contentRow.implicitHeight
+    property real cardSpacing: 12
+    property real cardHeight: 120
+    property real widgetWidth: 420
+    property real cardWidth: (widgetWidth - cardSpacing * 2) / 3
+    property bool isVertical: root.configEntry.vertical ?? false
+    property bool hasBattery: Battery.available
 
-    property var diskUsage: ({})
-    readonly property real diskRatio: {
-        const used = root.diskUsage.usedBytes;
-        const total = root.diskUsage.totalBytes;
-        if (typeof used !== "number" || typeof total !== "number" || total <= 0) return 0;
-        return Math.max(0, Math.min(1, used / total));
-    }
+    implicitWidth: row.implicitWidth
+    implicitHeight: row.implicitHeight
 
-    function refreshDisk() {
-        if (!Platform.isWindows || !WindowsNative.systemMonitor) return;
-        const drive = (Quickshell.env("SystemDrive") || "C:") + "\\";
-        root.diskUsage = WindowsNative.systemMonitor.volumeUsage(drive) ?? {};
-    }
+    component StatCard: WidgetCard {
+        id: statCard
+        property string icon: ""
+        property string value: ""
+        property string label: ""
+        property int shape: MaterialShape.Shape.Cookie12Sided
+        property color bgColor: Appearance.colors.colPrimaryContainer
+        property color shapeColor: Appearance.colors.colPrimary
 
-    Connections {
-        target: Platform.isWindows ? WindowsNative : null
-        function onReadyChanged() {
-            if (WindowsNative.ready) root.refreshDisk();
+        implicitWidth: root.cardWidth
+        implicitHeight: root.cardHeight
+        widget: root
+        color: statCard.bgColor
+
+        ColumnLayout {
+            anchors {
+                fill: parent
+                margins: 14
+            }
+            spacing: -4
+
+            MaterialShapeWrappedMaterialSymbol {
+                Layout.alignment: Qt.AlignRight
+                shape: statCard.shape
+                color: statCard.shapeColor
+                colSymbol: Appearance.colors.colOnPrimary
+                text: statCard.icon
+                iconSize: 18
+                fill: 1
+                padding: 6
+                implicitWidth: 34
+                implicitHeight: 34
+            }
+
+            Item { Layout.fillHeight: true }
+
+            StyledText {
+                text: statCard.value
+                font.pixelSize: Appearance.font.pixelSize.hugeass
+                font.weight: Font.Bold
+                color: Appearance.colors.colOnPrimaryContainer
+            }
+
+            StyledText {
+                text: statCard.label
+                font.pixelSize: Appearance.font.pixelSize.small
+                color: Appearance.colors.colOnPrimaryContainer
+                opacity: 0.6
+            }
         }
     }
 
-    Timer {
-        interval: 30000
-        triggeredOnStart: true
-        repeat: true
-        running: Platform.isWindows && WindowsNative.ready && WindowsNative.systemMonitor !== null
-        onTriggered: root.refreshDisk()
-    }
+    Grid {
+        id: row
+        columns: root.isVertical ? 1 : 3
+        rows: root.isVertical ? 3 : 1
+        spacing: root.cardSpacing
 
-    Row {
-        id: contentRow
-        spacing: 10
+        Behavior on columns {
+            NumberAnimation { duration: 300; easing.type: Easing.OutCubic }
+        }
 
-        ResourcesStatCard {
-            icon: "settings"
-            percentValue: ResourceUsage.cpuUsage
+        StatCard {
+            icon: "planner_review"
+            value: Math.round(ResourceUsage.cpuUsage * 100) + "%"
             label: Translation.tr("CPU")
+            shape: MaterialShape.Shape.Gem
         }
-        ResourcesStatCard {
-            icon: "memory_alt"
-            percentValue: ResourceUsage.memoryUsedPercentage
+        StatCard {
+            icon: "memory"
+            value: Math.round(ResourceUsage.memoryUsedPercentage * 100) + "%"
             label: Translation.tr("RAM")
+            shape: MaterialShape.Shape.Cookie4Sided
+            bgColor: Appearance.colors.colSecondaryContainer
+            shapeColor: Appearance.colors.colSecondary
         }
-        ResourcesStatCard {
-            visible: Platform.isWindows
-            icon: "storage"
-            percentValue: root.diskRatio
-            label: Translation.tr("Disk")
+        StatCard {
+            icon: root.hasBattery ? "battery_full" : "storage"
+            value: root.hasBattery
+                ? Math.round(Battery.percentage * 100) + "%"
+                : Math.round(ResourceUsage.diskUsedPercentage * 100) + "%"
+            label: root.hasBattery ? Translation.tr("Battery") : Translation.tr("Disk")
+            shape: MaterialShape.Shape.Cookie12Sided
+            bgColor: Appearance.colors.colTertiaryContainer
+            shapeColor: Appearance.colors.colTertiary
+        }
+    }
+    WidgetFlipHandle {
+        anchorItem: root
+        hoverActive: root.containsMouse
+        locked: Config.options.background.widgetsLocked
+        onClicked: {
+            root.isVertical = !root.isVertical
+            root.configEntry.vertical = root.isVertical
         }
     }
 }
