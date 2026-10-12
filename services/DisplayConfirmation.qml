@@ -53,6 +53,9 @@ Singleton {
                 right: true
             }
 
+            Component.onCompleted: GlobalFocusGrab.addDismissable(panel)
+            Component.onDestruction: GlobalFocusGrab.removeDismissable(panel)
+
             Item {
                 id: content
                 anchors.fill: parent

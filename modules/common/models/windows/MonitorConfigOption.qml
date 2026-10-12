@@ -187,11 +187,14 @@ NestableObject {
         }
     }
 
-    Component.onCompleted: {
+    function attach() {
         if (!root.backend)
             return;
         DisplayConfirmation.load();
         root.backend.refresh();
         root.rebuild();
     }
+
+    onBackendChanged: root.attach()
+    Component.onCompleted: root.attach()
 }
