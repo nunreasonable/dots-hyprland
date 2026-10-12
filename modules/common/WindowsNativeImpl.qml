@@ -29,7 +29,7 @@ QtObject {
     readonly property QtObject desktopLayer: root.full ? QSWin.DesktopLayer : null
     readonly property QtObject screenshot: root.full ? QSWin.Screenshot : null
     readonly property QtObject ocr: root.full ? QSWin.Ocr : null
-    readonly property QtObject screenRecorder: root.full ? QSWin.ScreenRecorder : null
+    readonly property QtObject screenRecorder: (root.full || root.process === "settings") ? QSWin.ScreenRecorder : null
     readonly property QtObject terminalColors: root.full ? QSWin.TerminalColors : null
     readonly property QtObject tiling: root.full ? QSWin.Tiling : null
     readonly property QtObject windowManager: root.full ? QSWin.WindowManager : null

@@ -388,18 +388,18 @@ ContentPage {
                 }
             }
 
-            RowLayout {
+            W.NoticeBox {
                 Layout.fillWidth: true
                 visible: Platform.isWindows && Config.options.screenRecord.microphone && screenRecordSection.microphoneBlocked !== ""
-                spacing: 6
-                W.NoticeBox {
+                materialIcon: "mic_off"
+                text: Translation.tr("Windows' privacy settings are blocking the microphone for desktop apps, so recordings won't include it.")
+
+                Item {
                     Layout.fillWidth: true
-                    materialIcon: "mic_off"
-                    text: Translation.tr("Windows' privacy settings are blocking the microphone for desktop apps, so recordings won't include it.")
                 }
                 W.RippleButtonWithIcon {
-                    Layout.preferredHeight: 40
-                    buttonRadius: Appearance.rounding.normal
+                    Layout.fillWidth: false
+                    buttonRadius: Appearance.rounding.small
                     materialIcon: "open_in_new"
                     mainText: Translation.tr("Open privacy settings")
                     onClicked: Qt.openUrlExternally("ms-settings:privacy-microphone")
