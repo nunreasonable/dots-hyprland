@@ -215,6 +215,7 @@ Singleton {
                     property int nextId: 2
                     property string tree: "{\"t\":\"leaf\",\"id\":1,\"img\":\"\"}"
                 }
+                property bool lockScreenImageSupported: true
                 property bool showGrid: true
                 property bool showBlur: false
                 property real blurRadius: 32
@@ -732,6 +733,9 @@ Singleton {
                     property bool prevTransparencyEnable: false
                     property int prevTilingGapsIn: 4
                     property int prevTilingGapsOut: 5
+                }
+                property JsonObject idle: JsonObject {
+                    property int lock: 300
                 }
             }
 
