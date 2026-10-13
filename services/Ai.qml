@@ -112,13 +112,13 @@ Singleton {
                 },
                 {
                     "name": "run_shell_command",
-                    "description": "Run a shell command in bash and get its output. Use this only for quick commands that don't require user interaction. For commands that require interaction, ask the user to run manually instead.",
+                    "description": (Platform.isWindows ? "Run a PowerShell command on Windows and get its output." : "Run a shell command in bash and get its output.") + " Use this only for quick commands that don't require user interaction. For commands that require interaction, ask the user to run manually instead.",
                     "parameters": {
                         "type": "object",
                         "properties": {
                             "command": {
                                 "type": "string",
-                                "description": "The bash command to run",
+                                "description": Platform.isWindows ? "The PowerShell command to run" : "The bash command to run",
                             },
                         },
                         "required": ["command"]
@@ -165,13 +165,13 @@ Singleton {
                     "type": "function",
                     "function": {
                         "name": "run_shell_command",
-                        "description": "Run a shell command in bash and get its output. Use this only for quick commands that don't require user interaction. For commands that require interaction, ask the user to run manually instead.",
+                        "description": (Platform.isWindows ? "Run a PowerShell command on Windows and get its output." : "Run a shell command in bash and get its output.") + " Use this only for quick commands that don't require user interaction. For commands that require interaction, ask the user to run manually instead.",
                         "parameters": {
                             "type": "object",
                             "properties": {
                                 "command": {
                                     "type": "string",
-                                    "description": "The bash command to run",
+                                    "description": Platform.isWindows ? "The PowerShell command to run" : "The bash command to run",
                                 },
                             },
                             "required": ["command"]
@@ -217,13 +217,13 @@ Singleton {
                     "type": "function",
                     "function": {
                         "name": "run_shell_command",
-                        "description": "Run a shell command in bash and get its output. Use this only for quick commands that don't require user interaction. For commands that require interaction, ask the user to run manually instead.",
+                        "description": (Platform.isWindows ? "Run a PowerShell command on Windows and get its output." : "Run a shell command in bash and get its output.") + " Use this only for quick commands that don't require user interaction. For commands that require interaction, ask the user to run manually instead.",
                         "parameters": {
                             "type": "object",
                             "properties": {
                                 "command": {
                                     "type": "string",
-                                    "description": "The bash command to run",
+                                    "description": Platform.isWindows ? "The PowerShell command to run" : "The bash command to run",
                                 },
                             },
                             "required": ["command"]
@@ -321,6 +321,8 @@ Singleton {
     }
 
     property string requestScriptFilePath: "/tmp/quickshell/ai/request.sh"
+    property string windowsRequestDir: `${Directories.tempRoot}/ai`
+    property string windowsRequestBodyPath: `${root.windowsRequestDir}/request.json`
     property string pendingFilePath: ""
 
     Component.onCompleted: {
@@ -590,6 +592,8 @@ Singleton {
                     root.addApiKeyAdvice(model)
                 }
             }
+        } else if (modelId.length === 0) {
+            if (feedback) root.addMessage(Translation.tr("Models you can pick (type the command with one of these names):") + "\n```\n" + modelList.join("\n") + "\n```", Ai.interfaceRole);
         } else {
             if (feedback) root.addMessage(Translation.tr("Invalid model. Supported: \n```\n") + modelList.join("\n```\n```\n"), Ai.interfaceRole) + "\n```"
         }
@@ -647,6 +651,11 @@ Singleton {
         }
     }
 
+    function printGuide(prefix) {
+        const p = prefix ?? "/";
+        root.addMessage(Translation.tr("### Getting started\n\n1. **Pick a model.** Type `%1model` to see the list, then for example `%1model gemini-2.5-flash` (Gemini is free).\n2. **Get a key.** Open [Google AI Studio](https://aistudio.google.com/app/apikey), sign in with your Google account and click *Create API key*. Copy the key.\n3. **Paste it here.** Type `%1key` followed by the key. It's kept in %2, not in a plain file.\n4. **Chat.** Write your message and press Enter.\n\n**Handy commands**: `%1clear` starts over, `%1prompt` changes how the assistant behaves, `%1temp 0.2` makes the answers less random, `%1save NAME` and `%1load NAME` keep a chat for later, and `%1tool` picks what the model may do (search the web, change ii's settings or run commands).\n\n**No key at all**: install [Ollama](https://ollama.com), run `ollama pull llama3.2` once, and its models show up in `%1model`.\n\n**Sidebar**: Ctrl+O expands it, Ctrl+P pins it, Ctrl+D detaches it.").arg(p).arg(Platform.isWindows ? Translation.tr("Windows' Credential Manager") : Translation.tr("your system keyring")), Ai.interfaceRole);
+    }
+
     function printTemperature() {
         root.addMessage(Translation.tr("Temperature: %1").arg(root.temperature), Ai.interfaceRole);
     }
@@ -661,6 +670,15 @@ Singleton {
 
     FileView {
         id: requesterScriptFile
+    }
+
+    Component {
+        id: requestBodyWriter
+        FileView {
+            preload: false
+            blockWrites: true
+            printErrors: false
+        }
     }
 
     Process {
@@ -687,6 +705,11 @@ Singleton {
             
             requester.currentStrategy = root.currentApiStrategy;
             requester.currentStrategy.reset(); // Reset strategy state
+
+            if (Platform.isWindows && root.pendingFilePath && root.pendingFilePath.length > 0) {
+                root.addMessage(Translation.tr("Attaching files to online models doesn't work on Windows yet, so this message was sent without the file."), Ai.interfaceRole);
+                root.pendingFilePath = "";
+            }
 
             /* Put API key in environment variable */
             if (model.requires_key) requester.environment[`${root.apiKeyEnvVarName}`] = root.apiKeys ? (root.apiKeys[model.key_id] ?? "") : ""
@@ -726,6 +749,26 @@ Singleton {
 
             /* Get authorization header from strategy */
             const authHeader = requester.currentStrategy.buildAuthorizationHeader(root.apiKeyEnvVarName);
+
+            if (Platform.isWindows) {
+                const key = model.requires_key ? (root.apiKeys ? (root.apiKeys[model.key_id] ?? "") : "") : "";
+                const url = endpoint.split(`\${${root.apiKeyEnvVarName}}`).join(encodeURIComponent(key));
+                const args = ["curl.exe", "--no-buffer", "-sS", url];
+                for (const [name, value] of Object.entries(requestHeaders)) {
+                    if (value && value.length > 0) args.push("-H", `${name}: ${value}`);
+                }
+                if (authHeader && authHeader.length > 0) args.push("-H", `Authorization: Bearer ${key}`);
+                WindowsNative.fsUtils?.makePath(root.windowsRequestDir);
+                const bodyWriter = requestBodyWriter.createObject(root, {
+                    "path": root.windowsRequestBodyPath
+                });
+                bodyWriter.setText(JSON.stringify(data));
+                bodyWriter.destroy();
+                args.push("--data-binary", `@${root.windowsRequestBodyPath}`);
+                requester.command = args;
+                requester.running = true;
+                return;
+            }
             
             /* Script shebang */
             const scriptShebang = "#!/usr/bin/env bash\n";
@@ -871,7 +914,9 @@ Singleton {
         property string shellCommand: ""
         property AiMessageData message
         property string baseMessageContent: ""
-        command: ["bash", "-c", shellCommand]
+        command: Platform.isWindows
+            ? ["powershell.exe", "-NoProfile", "-NonInteractive", "-Command", `[Console]::OutputEncoding = [System.Text.Encoding]::UTF8; ${shellCommand}`]
+            : ["bash", "-c", shellCommand]
         stdout: SplitParser {
             onRead: (output) => {
                 commandExecutionProc.message.functionResponse += output + "\n\n";
