@@ -64,12 +64,14 @@ Singleton {
         id: presetsDirMarker
         path: `${Directories.userPresetsPath}/.keep`
         printErrors: false
+        onSaved: root.refresh()
     }
 
     FileView {
         id: onlineDirMarker
         path: `${Directories.onlinePresetsPath}/.keep`
         printErrors: false
+        onSaved: root.refreshOnline()
     }
 
     FolderListModel {
@@ -87,15 +89,13 @@ Singleton {
     }
 
     function refresh() {
-        const current = presetsFolderModel.folder;
         presetsFolderModel.folder = "";
-        presetsFolderModel.folder = current;
+        presetsFolderModel.folder = FileUtils.folderUrl(Directories.userPresetsPath);
     }
 
     function refreshOnline() {
-        const current = onlinePresetsFolderModel.folder;
         onlinePresetsFolderModel.folder = "";
-        onlinePresetsFolderModel.folder = current;
+        onlinePresetsFolderModel.folder = FileUtils.folderUrl(Directories.onlinePresetsPath);
     }
 
     function previewImage(data) {
