@@ -74,7 +74,10 @@ Item {
         onTriggered: root.ready = true
     }
 
-    onCurrentPageChanged: pageArea.showPending()
+    onCurrentPageChanged: {
+        pageArea.showPending();
+        navRailFlick.showCurrent();
+    }
 
     ColumnLayout {
         id: keyHandler
@@ -124,120 +127,152 @@ Item {
                     }
                 }
 
-                NavigationRail {
-                    id: navRail
-                    anchors { left: parent.left; top: parent.top; bottom: parent.bottom; leftMargin: 20 }
-                    spacing: 10
-                    expanded: root.width > 900
+                Item {
+                    anchors.fill: parent
+                    anchors.leftMargin: -root.contentPadding
+                    anchors.rightMargin: -root.contentPadding
+                    clip: navRailFlick.interactive
 
-                    Item {
-                        id: profileRowContainer
-                        Layout.fillWidth: false
-                        Layout.margins: 5
-                        Layout.topMargin: 15
-                        implicitHeight: profileRow.implicitHeight
-                        implicitWidth: profileRow.implicitWidth
+                    Flickable {
+                        id: navRailFlick
+                        anchors.fill: parent
+                        contentWidth: width
+                        contentHeight: navRail.height
+                        bottomMargin: 16
+                        interactive: navRail.implicitHeight + bottomMargin > height
+                        boundsBehavior: Flickable.StopAtBounds
 
-                        RowLayout {
-                            id: profileRow
-                            anchors.fill: parent
+                        function showCurrent() {
+                            const button = navRailRepeater.itemAt(root.currentPage);
+                            if (!navRailFlick.interactive || !button)
+                                return;
+                            const top = button.mapToItem(navRail, 0, 0).y;
+                            const bottom = top + button.height + navRailFlick.bottomMargin;
+                            const maxY = navRailFlick.contentHeight + navRailFlick.bottomMargin - navRailFlick.height;
+                            if (top < navRailFlick.contentY)
+                                navRailFlick.contentY = Math.max(0, top);
+                            else if (bottom > navRailFlick.contentY + navRailFlick.height)
+                                navRailFlick.contentY = Math.min(maxY, bottom - navRailFlick.height);
+                        }
+
+                        NavigationRail {
+                            id: navRail
+                            x: 20 + root.contentPadding
+                            height: Math.max(navRailFlick.height, implicitHeight)
                             spacing: 10
+                            expanded: root.width > 900
 
-                            Pc.UserAvatar {
-                                Layout.preferredWidth: 48
-                                Layout.preferredHeight: 48
-                            }
+                            Item {
+                                id: profileRowContainer
+                                Layout.fillWidth: false
+                                Layout.margins: 5
+                                Layout.topMargin: 15
+                                implicitHeight: profileRow.implicitHeight
+                                implicitWidth: profileRow.implicitWidth
 
-                            ColumnLayout {
-                                spacing: 2
-                                Layout.fillWidth: true
-                                visible: navRail.expanded && !root.isMinimal
+                                RowLayout {
+                                    id: profileRow
+                                    anchors.fill: parent
+                                    spacing: 10
 
-                                StyledText {
-                                    text: Config.options.profile.displayName !== "" ? Config.options.profile.displayName : SystemInfo.username
-                                    font.pixelSize: Appearance.font.pixelSize.normal
-                                    color: Appearance.colors.colOnLayer1
-                                    font.weight: Font.Medium
-                                    elide: Text.ElideRight
-                                    Layout.maximumWidth: 100
+                                    Pc.UserAvatar {
+                                        Layout.preferredWidth: 48
+                                        Layout.preferredHeight: 48
+                                    }
+
+                                    ColumnLayout {
+                                        spacing: 2
+                                        Layout.fillWidth: true
+                                        visible: navRail.expanded && !root.isMinimal
+
+                                        StyledText {
+                                            text: Config.options.profile.displayName !== "" ? Config.options.profile.displayName : SystemInfo.username
+                                            font.pixelSize: Appearance.font.pixelSize.normal
+                                            color: Appearance.colors.colOnLayer1
+                                            font.weight: Font.Medium
+                                            elide: Text.ElideRight
+                                            Layout.maximumWidth: 100
+                                        }
+
+                                        StyledText {
+                                            font.pixelSize: Appearance.font.pixelSize.smaller
+                                            color: Appearance.colors.colSubtext
+                                            elide: Text.ElideRight
+                                            Layout.maximumWidth: 100
+                                            text: Config.options.profile.descriptionText === "::uptime::" ? Translation.tr("Up • %1").arg(DateTime.uptime) : SystemInfo.distroName
+                                        }
+                                    }
                                 }
 
-                                StyledText {
-                                    font.pixelSize: Appearance.font.pixelSize.smaller
-                                    color: Appearance.colors.colSubtext
-                                    elide: Text.ElideRight
-                                    Layout.maximumWidth: 100
-                                    text: Config.options.profile.descriptionText === "::uptime::" ? Translation.tr("Up • %1").arg(DateTime.uptime) : SystemInfo.distroName
+                                MouseArea {
+                                    anchors.fill: parent
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: {
+                                        const idx = SettingsPages.indexOf("profile");
+                                        if (idx >= 0)
+                                            root.currentPage = idx;
+                                    }
                                 }
                             }
-                        }
 
-                        MouseArea {
-                            anchors.fill: parent
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: {
-                                const idx = SettingsPages.indexOf("profile");
-                                if (idx >= 0)
-                                    root.currentPage = idx;
+                            Rectangle {
+                                Layout.preferredWidth: navRail.expanded ? 160 : fab.baseSize
+                                Layout.topMargin: -5
+                                height: 2
+                                gradient: Gradient {
+                                    orientation: Gradient.Horizontal
+                                    GradientStop { position: 0.0; color: "transparent" }
+                                    GradientStop { position: 0.2; color: Appearance.colors.colOutline }
+                                    GradientStop { position: 0.8; color: Appearance.colors.colOutline }
+                                    GradientStop { position: 1.0; color: "transparent" }
+                                }
+                                opacity: 0.15
                             }
-                        }
-                    }
 
-                    Rectangle {
-                        Layout.preferredWidth: navRail.expanded ? 160 : fab.baseSize
-                        Layout.topMargin: -5
-                        height: 2
-                        gradient: Gradient {
-                            orientation: Gradient.Horizontal
-                            GradientStop { position: 0.0; color: "transparent" }
-                            GradientStop { position: 0.2; color: Appearance.colors.colOutline }
-                            GradientStop { position: 0.8; color: Appearance.colors.colOutline }
-                            GradientStop { position: 1.0; color: "transparent" }
-                        }
-                        opacity: 0.15
-                    }
-
-                    FloatingActionButton {
-                        id: fab
-                        visible: !root.isMinimal
-                        Layout.bottomMargin: -25
-                        property bool justCopied: false
-                        iconText: justCopied ? "check" : "edit"
-                        buttonText: justCopied ? Translation.tr("Path copied") : Translation.tr("Config file")
-                        expanded: navRail.expanded
-                        downAction: () => {
-                            Qt.openUrlExternally(`${Directories.config}/illogical-impulse/config.json`);
-                        }
-                        altAction: () => {
-                            Quickshell.clipboardText = CF.FileUtils.trimFileProtocol(`${Directories.config}/illogical-impulse/config.json`);
-                            fab.justCopied = true;
-                            revertTextTimer.restart();
-                        }
-                        Timer {
-                            id: revertTextTimer
-                            interval: 1500
-                            onTriggered: fab.justCopied = false
-                        }
-                        StyledToolTip {
-                            text: Translation.tr("Open the shell config file\nAlternatively right-click to copy path")
-                        }
-                    }
-
-                    NavigationRailTabArray {
-                        currentIndex: root.currentPage
-                        expanded: navRail.expanded
-                        Repeater {
-                            model: root.ready ? root.pages : []
-                            NavigationRailButton {
-                                required property var index
-                                required property var modelData
-                                toggled: root.currentPage === index
-                                onPressed: root.currentPage = index
+                            FloatingActionButton {
+                                id: fab
+                                visible: !root.isMinimal
+                                Layout.bottomMargin: -25
+                                property bool justCopied: false
+                                iconText: justCopied ? "check" : "edit"
+                                buttonText: justCopied ? Translation.tr("Path copied") : Translation.tr("Config file")
                                 expanded: navRail.expanded
-                                buttonIcon: modelData.icon
-                                buttonIconRotation: modelData.iconRotation || 0
-                                buttonText: modelData.name
-                                showToggledHighlight: false
+                                downAction: () => {
+                                    Qt.openUrlExternally(`${Directories.config}/illogical-impulse/config.json`);
+                                }
+                                altAction: () => {
+                                    Quickshell.clipboardText = CF.FileUtils.trimFileProtocol(`${Directories.config}/illogical-impulse/config.json`);
+                                    fab.justCopied = true;
+                                    revertTextTimer.restart();
+                                }
+                                Timer {
+                                    id: revertTextTimer
+                                    interval: 1500
+                                    onTriggered: fab.justCopied = false
+                                }
+                                StyledToolTip {
+                                    text: Translation.tr("Open the shell config file\nAlternatively right-click to copy path")
+                                }
+                            }
+
+                            NavigationRailTabArray {
+                                currentIndex: root.currentPage
+                                expanded: navRail.expanded
+                                Repeater {
+                                    id: navRailRepeater
+                                    model: root.ready ? root.pages : []
+                                    NavigationRailButton {
+                                        required property var index
+                                        required property var modelData
+                                        toggled: root.currentPage === index
+                                        onPressed: root.currentPage = index
+                                        expanded: navRail.expanded
+                                        buttonIcon: modelData.icon
+                                        buttonIconRotation: modelData.iconRotation || 0
+                                        buttonText: modelData.name
+                                        showToggledHighlight: false
+                                    }
+                                }
                             }
                         }
                     }
