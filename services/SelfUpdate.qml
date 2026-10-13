@@ -23,7 +23,7 @@ Singleton {
     readonly property var notifyIdentity: ["-a", "ii-windows", "-i", "illogical-impulse"]
 
     property string installedVersion: root.installedVersionOverride
-    readonly property bool installedIsPrerelease: (root._parseVersion(root.installedVersion)?.pre ?? null) !== null
+    readonly property bool installedIsPrerelease: root._preRank(root._parseVersion(root.installedVersion)?.pre ?? null) < 0
     property bool checking: false
     property bool downloading: false
     property string lastError: ""
@@ -88,6 +88,11 @@ Singleton {
         return xs.length === ys.length ? 0 : (xs.length < ys.length ? -1 : 1);
     }
 
+    function _preRank(pre) {
+        if (pre === null) return 0;
+        return /^fix\d+$/i.test(pre) ? 1 : -1;
+    }
+
     function _compareVersions(a, b) {
         const len = Math.max(a.parts.length, b.parts.length);
         for (let i = 0; i < len; i++) {
@@ -95,9 +100,14 @@ Singleton {
             const pb = b.parts[i] ?? 0;
             if (pa !== pb) return pa < pb ? -1 : 1;
         }
-        if (a.pre === null && b.pre === null) return 0;
-        if (a.pre === null) return 1;
-        if (b.pre === null) return -1;
+        const ra = root._preRank(a.pre);
+        const rb = root._preRank(b.pre);
+        if (ra !== rb) return ra < rb ? -1 : 1;
+        if (ra === 0) return 0;
+        if (ra === 1) {
+            const d = parseInt(a.pre.slice(3), 10) - parseInt(b.pre.slice(3), 10);
+            return d === 0 ? 0 : (d < 0 ? -1 : 1);
+        }
         return root._comparePre(a.pre, b.pre);
     }
 
