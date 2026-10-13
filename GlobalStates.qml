@@ -25,6 +25,7 @@ Singleton {
     property bool sidebarLeftOpen: false
     property bool sidebarRightOpen: false
     property bool mediaControlsOpen: false
+    property bool keybindsEditorOpen: false
     property bool nowPlayingShown: false
     property var nowPlayingSources: ({})
     signal nowPlayingSourceRequested()

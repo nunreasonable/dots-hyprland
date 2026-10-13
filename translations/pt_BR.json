@@ -1864,5 +1864,14 @@
   "Size (%)": "Tamanho (%)",
   "Cover flies out of the bar": "A capa sai voando da barra",
   "Flight animation (ms)": "Animação do voo (ms)",
-  "Edit keybinds": "Editar atalhos"
+  "Edit keybinds": "Editar atalhos",
+  "Turn a shortcut off to give it back to Windows. Changes apply right away.": "Desligue um atalho para devolvê-lo ao Windows. As mudanças valem na hora.",
+  "Open file": "Abrir arquivo",
+  "Reset to defaults": "Restaurar padrões",
+  "Click again to reset": "Clique de novo para restaurar",
+  "Your keybinds file has an error, so it can't be edited here. Fix it in the file or reset it to the defaults.": "Seu arquivo de atalhos tem um erro, então não dá para editar aqui. Corrija no arquivo ou restaure os padrões.",
+  "Another shortcut uses the same keys": "Outro atalho usa as mesmas teclas",
+  "Press a key": "Aperte uma tecla",
+  "Pick a key": "Escolha uma tecla",
+  "Change keys": "Trocar teclas"
 }
