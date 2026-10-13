@@ -1,3 +1,4 @@
+import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
@@ -38,51 +39,10 @@ Scope { // Scope
     ]
     readonly property int systemTabIndex: Platform.isWindows ? 1 : -1
     property bool open: false
-    readonly property string userKeybindsPath: `${Directories.shellConfig}/keybinds.json`
-    readonly property string defaultKeybindsPath: Quickshell.shellPath("defaults/windows/keybinds.json")
-
     function editKeybinds() {
         if (!Platform.isWindows) return;
         root.open = false;
-        if (WindowsNative.fsUtils?.classify(root.userKeybindsPath) === "file") {
-            root.openKeybindsFile();
-            return;
-        }
-        defaultKeybindsFile.reload();
-        const text = defaultKeybindsFile.text();
-        if (!text) {
-            root.openKeybindsFile();
-            return;
-        }
-        const writer = keybindsWriter.createObject(root, {
-            "path": root.userKeybindsPath
-        });
-        writer.setText(text);
-    }
-
-    function openKeybindsFile() {
-        if (!Qt.openUrlExternally(`file:///${root.userKeybindsPath}`))
-            Quickshell.execDetached(["notepad.exe", root.userKeybindsPath.replace(/\//g, "\\")]);
-    }
-
-    FileView {
-        id: defaultKeybindsFile
-        path: Platform.isWindows ? root.defaultKeybindsPath : ""
-        blockLoading: true
-        printErrors: false
-    }
-
-    Component {
-        id: keybindsWriter
-        FileView {
-            preload: false
-            printErrors: false
-            onSaved: {
-                root.openKeybindsFile();
-                destroy();
-            }
-            onSaveFailed: destroy()
-        }
+        GlobalStates.keybindsEditorOpen = true;
     }
 
     Loader {
