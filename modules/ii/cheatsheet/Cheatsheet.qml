@@ -38,6 +38,52 @@ Scope { // Scope
     ]
     readonly property int systemTabIndex: Platform.isWindows ? 1 : -1
     property bool open: false
+    readonly property string userKeybindsPath: `${Directories.shellConfig}/keybinds.json`
+    readonly property string defaultKeybindsPath: Quickshell.shellPath("defaults/windows/keybinds.json")
+
+    function editKeybinds() {
+        if (!Platform.isWindows) return;
+        root.open = false;
+        if (WindowsNative.fsUtils?.classify(root.userKeybindsPath) === "file") {
+            root.openKeybindsFile();
+            return;
+        }
+        defaultKeybindsFile.reload();
+        const text = defaultKeybindsFile.text();
+        if (!text) {
+            root.openKeybindsFile();
+            return;
+        }
+        const writer = keybindsWriter.createObject(root, {
+            "path": root.userKeybindsPath
+        });
+        writer.setText(text);
+    }
+
+    function openKeybindsFile() {
+        if (!Qt.openUrlExternally(`file:///${root.userKeybindsPath}`))
+            Quickshell.execDetached(["notepad.exe", root.userKeybindsPath.replace(/\//g, "\\")]);
+    }
+
+    FileView {
+        id: defaultKeybindsFile
+        path: Platform.isWindows ? root.defaultKeybindsPath : ""
+        blockLoading: true
+        printErrors: false
+    }
+
+    Component {
+        id: keybindsWriter
+        FileView {
+            preload: false
+            printErrors: false
+            onSaved: {
+                root.openKeybindsFile();
+                destroy();
+            }
+            onSaveFailed: destroy()
+        }
+    }
 
     Loader {
         id: cheatsheetLoader
@@ -126,6 +172,33 @@ Scope { // Scope
                             tabBar.setCurrentIndex((tabBar.currentIndex - 1 + root.tabButtonList.length) % root.tabButtonList.length);
                             event.accepted = true;
                         }
+                    }
+                }
+
+                RippleButton {
+                    id: editKeybindsButton
+                    visible: Platform.isWindows && tabBar.currentIndex === 0
+                    implicitWidth: 40
+                    implicitHeight: 40
+                    buttonRadius: Appearance.rounding.full
+                    anchors {
+                        top: parent.top
+                        right: closeButton.left
+                        topMargin: 20
+                        rightMargin: 4
+                    }
+
+                    onClicked: root.editKeybinds()
+
+                    contentItem: MaterialSymbol {
+                        anchors.centerIn: parent
+                        horizontalAlignment: Text.AlignHCenter
+                        font.pixelSize: Appearance.font.pixelSize.title
+                        text: "edit"
+                    }
+
+                    StyledToolTip {
+                        text: Translation.tr("Edit keybinds")
                     }
                 }
 
@@ -239,6 +312,10 @@ Scope { // Scope
         function open(): void {
             root.open = true;
         }
+
+        function editKeybinds(): void {
+            root.editKeybinds();
+        }
     }
 
     GlobalShortcut {
@@ -248,6 +325,13 @@ Scope { // Scope
         onPressed: {
             root.open = !root.open;
         }
+    }
+
+    GlobalShortcut {
+        name: "keybindsEdit"
+        description: "Opens the keybinds file in an editor"
+
+        onPressed: root.editKeybinds()
     }
 
     GlobalShortcut {
