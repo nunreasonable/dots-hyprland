@@ -438,7 +438,7 @@ ContentPage {
                             }
 
                             imageSource: onlineDelegate.presetWallpaper
-                            title: onlineDelegate.presetName
+                            title: PresetsOnline.displayName(onlineDelegate.presetName).replace(/_/g, " ")
                             description: onlineDelegate.presetDescription !== "" ? onlineDelegate.presetDescription : Translation.tr("Downloaded preset")
                             menuActions: page.presetMenuActions(onlineDelegate.presetName, "downloaded", false)
                             onApply: () => Presets.applyOnline(onlineDelegate.presetName)

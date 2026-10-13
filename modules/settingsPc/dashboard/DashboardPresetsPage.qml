@@ -352,7 +352,7 @@ Flickable {
                         }
 
                         imageSource: PresetThumbs.thumbFor(onlineDelegate.presetWallpaper) || onlineDelegate.presetWallpaper
-                        title: onlineDelegate.presetName
+                        title: PresetsOnline.displayName(onlineDelegate.presetName).replace(/_/g, " ")
                         description: onlineDelegate.presetDescription !== "" ? onlineDelegate.presetDescription : Translation.tr("Downloaded preset")
                         menuActions: root.presetMenuActions(onlineDelegate.presetName, "downloaded", false)
                         onApply: () => Presets.applyOnline(onlineDelegate.presetName)
