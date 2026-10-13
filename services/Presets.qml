@@ -100,18 +100,21 @@ Singleton {
         id: presetsDirMarker
         path: `${Directories.userPresetsPath}/.keep`
         printErrors: false
+        onSaved: root.refresh()
     }
 
     FileView {
         id: onlineDirMarker
         path: `${Directories.onlinePresetsPath}/.keep`
         printErrors: false
+        onSaved: root.refreshOnline()
     }
 
     FileView {
         id: importedDirMarker
         path: `${Directories.importedPresetsPath}/.keep`
         printErrors: false
+        onSaved: root.refreshImported()
     }
 
     FolderListModel {
@@ -136,21 +139,18 @@ Singleton {
     }
 
     function refresh() {
-        const current = presetsFolderModel.folder;
         presetsFolderModel.folder = "";
-        presetsFolderModel.folder = current;
+        presetsFolderModel.folder = FileUtils.folderUrl(Directories.userPresetsPath);
     }
 
     function refreshOnline() {
-        const current = onlinePresetsFolderModel.folder;
         onlinePresetsFolderModel.folder = "";
-        onlinePresetsFolderModel.folder = current;
+        onlinePresetsFolderModel.folder = FileUtils.folderUrl(Directories.onlinePresetsPath);
     }
 
     function refreshImported() {
-        const current = importedPresetsFolderModel.folder;
         importedPresetsFolderModel.folder = "";
-        importedPresetsFolderModel.folder = current;
+        importedPresetsFolderModel.folder = FileUtils.folderUrl(Directories.importedPresetsPath);
     }
 
     function previewImage(data) {
