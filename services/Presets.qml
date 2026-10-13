@@ -29,6 +29,13 @@ Singleton {
         "bar.screenList",
         "notifications.forceMonitor"
     ]
+    readonly property var themingDefaults: ({
+        "appearance.palette.type": "auto",
+        "appearance.palette.accentColor": "",
+        "appearance.palette.namedScheme": "",
+        "appearance.palette.namedSchemePrimary": "",
+        "appearance.palette.namedSchemeSecondary": ""
+    })
     readonly property var sensitiveNamePattern: /(api[-_]?key|token|secret|credential|password|useragent)/i
     readonly property var pathLikeLeafPattern: /(path|url|uri|folder|dir|file|picture|image|icon|city|username|prompt|location|pins)$/i
 
@@ -172,6 +179,27 @@ Singleton {
         }
     }
 
+    function presetHasKey(preset, dottedKey) {
+        let node = preset;
+        for (const part of dottedKey.split(".")) {
+            if (!root.isPlainObject(node) || !Object.prototype.hasOwnProperty.call(node, part))
+                return false;
+            node = node[part];
+        }
+        return true;
+    }
+
+    function resetMissingTheming(preset) {
+        const hasPalette = root.isPlainObject(preset?.appearance?.palette);
+        const hasWallpaper = String(preset?.background?.wallpaperPath ?? "") !== "";
+        if (!hasPalette && !hasWallpaper)
+            return;
+        for (const key in root.themingDefaults) {
+            if (!root.presetHasKey(preset, key))
+                Config.setNestedValue(key, root.themingDefaults[key]);
+        }
+    }
+
     function sanitizeName(rawName) {
         let name = String(rawName).trim().replace(/[\\/:*?"<>|\x00-\x1f]/g, "_").replace(/\s+/g, "_").replace(/^\.+/, "").slice(0, 80);
         if (/^(con|prn|aux|nul|com\d|lpt\d)$/i.test(name))
@@ -269,6 +297,7 @@ Singleton {
         }
         const skipped = [];
         root.applyFiltered(parsed, "", skipped);
+        root.resetMissingTheming(parsed);
         root.lastSkippedKeys = skipped;
         Qt.callLater(() => Wallpapers.reapplyPalette());
     }
