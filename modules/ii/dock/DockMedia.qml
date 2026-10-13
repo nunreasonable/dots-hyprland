@@ -11,11 +11,16 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Mpris
+import Quickshell.Widgets
 
 Item {
     id: root
 
     property real cardLength: DockStyle.vertical ? mediaGrid.implicitHeight + Appearance.sizes.hyprlandGapsOut * 2 : DockStyle.mediaLength
+    readonly property real innerMargin: Appearance.sizes.elevationMargin + DockStyle.padding
+    readonly property real outerMargin: Appearance.sizes.hyprlandGapsOut + DockStyle.padding
+    readonly property real alongStart: Appearance.sizes.hyprlandGapsOut
+    readonly property real alongEnd: Appearance.sizes.hyprlandGapsOut - (DockStyle.vertical ? 0 : 2)
 
     property var player: MprisController.activePlayer
 
@@ -110,10 +115,10 @@ Item {
     Rectangle {
         id: card
         anchors.fill: parent
-        anchors.topMargin: Appearance.sizes.hyprlandGapsOut
-        anchors.bottomMargin: Appearance.sizes.hyprlandGapsOut
-        anchors.leftMargin: Appearance.sizes.hyprlandGapsOut
-        anchors.rightMargin: Appearance.sizes.hyprlandGapsOut - (DockStyle.vertical ? 0 : 2)
+        anchors.topMargin: DockStyle.mTop(root.innerMargin, root.outerMargin, root.alongStart)
+        anchors.bottomMargin: DockStyle.mBottom(root.innerMargin, root.outerMargin, root.alongEnd)
+        anchors.leftMargin: DockStyle.mLeft(root.innerMargin, root.outerMargin, root.alongStart)
+        anchors.rightMargin: DockStyle.mRight(root.innerMargin, root.outerMargin, root.alongEnd)
         radius: Appearance.rounding.normal
         color: "transparent"
 
@@ -137,6 +142,7 @@ Item {
 
         Rectangle {
             anchors.fill: parent
+            radius: card.radius
             color: ColorUtils.applyAlpha(root.blendedColors.colLayer0, 1)
             z: 0
         }
@@ -163,6 +169,7 @@ Item {
 
         Rectangle {
             anchors.fill: parent
+            radius: card.radius
             color: ColorUtils.transparentize(root.blendedColors.colLayer0, 0.3)
             z: 2
         }
@@ -177,7 +184,7 @@ Item {
             columnSpacing: 8
             z: 3
 
-            Rectangle {
+            ClippingRectangle {
                 id: artRect
                 Layout.alignment: DockStyle.vertical ? Qt.AlignHCenter : Qt.AlignVCenter
                 Layout.leftMargin: DockStyle.vertical ? 0 : 7
@@ -186,15 +193,6 @@ Item {
                 implicitHeight: 36
                 color: ColorUtils.transparentize(root.blendedColors.colLayer1, 0.5)
                 radius: Appearance.rounding.small
-
-                layer.enabled: !Platform.isWindows
-                layer.effect: OpacityMask {
-                    maskSource: Rectangle {
-                        width: artRect.width
-                        height: artRect.height
-                        radius: artRect.radius
-                    }
-                }
 
                 StyledImage {
                     anchors.fill: parent
