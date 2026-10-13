@@ -3,6 +3,7 @@ import QtQml
 import QtQuick
 import Quickshell.Io
 import qs.services
+import qs.modules.common
 import "../"
 
 NestableObject {
@@ -23,6 +24,8 @@ NestableObject {
     }
 
     function fetch() {
+        if (Platform.isWindows)
+            return;
         fetchProc.command = fetchProc.baseCommand.concat([root.key]);
         fetchProc.running = true;
     }
