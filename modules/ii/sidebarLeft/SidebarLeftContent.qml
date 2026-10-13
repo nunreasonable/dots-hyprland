@@ -24,8 +24,37 @@ Item {
         ...(root.mediaEnabled ? [{"icon": "music_note", "name": Translation.tr("Media")}] : []),
         ...((root.animeEnabled && !root.animeCloset) ? [{"icon": "bookmark_heart", "name": Translation.tr("Anime")}] : [])
     ]
+    property var pageKeys: [
+        ...(root.aiChatEnabled ? ["aiChat"] : []),
+        ...(root.translatorEnabled ? ["translator"] : []),
+        ...(root.mediaEnabled ? ["media"] : []),
+        ...((root.tabButtonList.length === 0 || (!root.aiChatEnabled && !root.translatorEnabled && !root.mediaEnabled && root.animeCloset)) ? ["placeholder"] : []),
+        ...(root.animeEnabled ? ["anime"] : []),
+    ]
     property int tabCount: swipeView.count
     property bool loadAsync: Platform.isWindows && !GlobalStates.sidebarLeftOpen
+
+    onPageKeysChanged: root.syncPages()
+    Component.onCompleted: root.syncPages()
+
+    function syncPages() {
+        const components = {
+            "aiChat": aiChat,
+            "translator": translator,
+            "media": media,
+            "placeholder": placeholder,
+            "anime": anime,
+        };
+        for (let i = swipeView.count - 1; i >= 0; i--) {
+            const page = swipeView.itemAt(i);
+            if (!root.pageKeys.includes(page.pageKey))
+                swipeView.removeItem(page);
+        }
+        root.pageKeys.forEach((key, index) => {
+            if (swipeView.itemAt(index)?.pageKey !== key)
+                swipeView.insertItem(index, components[key].createObject(null));
+        });
+    }
 
     function focusActiveItem() {
         swipeView.currentItem.forceActiveFocus()
@@ -86,44 +115,41 @@ Item {
                         radius: Appearance.rounding.small
                     }
                 }
-
-                contentChildren: [
-                    ...(root.aiChatEnabled ? [aiChat.createObject()] : []),
-                    ...(root.translatorEnabled ? [translator.createObject()] : []),
-                    ...(root.mediaEnabled ? [media.createObject()] : []),
-                    ...((root.tabButtonList.length === 0 || (!root.aiChatEnabled && !root.translatorEnabled && !root.mediaEnabled && root.animeCloset)) ? [placeholder.createObject()] : []),
-                    ...(root.animeEnabled ? [anime.createObject()] : []),
-                ]
             }
         }
 
         Component {
             id: aiChat
             SidebarLeftPage {
+                pageKey: "aiChat"
                 sourceComponent: AiChat {}
             }
         }
         Component {
             id: translator
             SidebarLeftPage {
+                pageKey: "translator"
                 sourceComponent: Translator {}
             }
         }
         Component {
             id: media
             SidebarLeftPage {
+                pageKey: "media"
                 sourceComponent: SidebarPlayerControl {}
             }
         }
         Component {
             id: anime
             SidebarLeftPage {
+                pageKey: "anime"
                 sourceComponent: Anime {}
             }
         }
         Component {
             id: placeholder
             Item {
+                property string pageKey: "placeholder"
                 StyledText {
                     anchors.centerIn: parent
                     text: root.animeCloset ? Translation.tr("Nothing") : Translation.tr("Enjoy your empty sidebar...")
@@ -135,6 +161,7 @@ Item {
 
     component SidebarLeftPage: Loader {
         id: page
+        property string pageKey
         property bool wasLoaded: false
         readonly property bool current: page.SwipeView.isCurrentItem
         active: !Platform.isWindows || page.current || page.wasLoaded || root.loadAsync
