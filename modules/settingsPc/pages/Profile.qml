@@ -347,7 +347,7 @@ ContentPage {
                             }
 
                             imageSource: onlineDelegate.presetWallpaper
-                            title: onlineDelegate.presetName
+                            title: PresetsOnline.displayName(onlineDelegate.presetName).replace(/_/g, " ")
                             description: onlineDelegate.presetDescription !== "" ? onlineDelegate.presetDescription : Translation.tr("Downloaded preset")
                             onApply: () => Presets.applyOnline(onlineDelegate.presetName)
                             onRemove: () => Presets.removeOnline(onlineDelegate.presetName)
