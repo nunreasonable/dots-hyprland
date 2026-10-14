@@ -944,6 +944,7 @@ Variants {
                     asynchronous: Platform.isWindows
                     shown: Config.options.background.widgets.visualizer.enable && bgRoot.widgetsOnThisScreen
                     sourceComponent: VisualizerWidget {
+                        animate: bgRoot.visible && !bgRoot.desktopCovered && !GlobalStates.screenLocked && !(Config.options.windowsPort.gameMode.enable ?? false)
                         screenWidth: bgRoot.screen.width
                         screenHeight: bgRoot.screen.height
                         scaledScreenWidth: bgRoot.screen.width

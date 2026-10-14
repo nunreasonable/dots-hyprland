@@ -7,6 +7,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions
+import qs.modules.common.utils
 import qs.modules.common.widgets
 import qs.modules.ii.background.widgets
 
@@ -14,6 +15,12 @@ AbstractBackgroundWidget {
     id: root
 
     configEntryName: "visualizer"
+    property bool animate: true
+    readonly property bool active: root.animate && root.visible && (QsWindow.window?.visible ?? false)
+
+    SpectrumConsumer {
+        active: root.active
+    }
 
     readonly property string style: configEntry.style ?? "bars"
     readonly property bool shaderStyle: ["aurora", "ring", "dots", "mirror"].includes(style)
@@ -99,13 +106,13 @@ AbstractBackgroundWidget {
 
     VisualizerEngine {
         id: levelEngine
-        active: root.shaderStyle
+        active: root.active && root.shaderStyle
         sensitivity: root.configEntry.sensitivity ?? 1
     }
 
     Loader {
         anchors.fill: parent
-        active: root.style === "bars"
+        active: root.active && root.style === "bars"
         sourceComponent: BarsVisualizer {}
     }
 

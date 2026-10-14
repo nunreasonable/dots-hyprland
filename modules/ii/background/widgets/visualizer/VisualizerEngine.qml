@@ -25,7 +25,18 @@ Item {
     property real bassAverage: 0
     readonly property var peakHold: new Array(maxBands).fill(0)
 
-    onRawChanged: {
+    onActiveChanged: {
+        if (!root.active) {
+            ticker.running = false;
+            ticker.sinceLastStep = 0;
+        } else {
+            root.acceptSample();
+        }
+    }
+
+    onRawChanged: root.acceptSample()
+
+    function acceptSample() {
         if (!root.active) return;
         if (root.raw.length > 0) root.bandCount = Math.min(root.raw.length, root.maxBands);
         for (let i = 0; i < root.raw.length; i++) {

@@ -14,8 +14,7 @@ Singleton {
     property list<real> points: []
     readonly property bool playing: MprisController.activePlayer?.isPlaying ?? false
     property int consumers: 0
-    readonly property bool desktopVisualizer: Config.options.background.widgets.visualizer.enable
-    readonly property bool wanted: GlobalStates.mediaControlsOpen || (root.playing && (root.desktopVisualizer || root.consumers > 0))
+    readonly property bool wanted: GlobalStates.mediaControlsOpen || (root.playing && root.consumers > 0)
 
     onWantedChanged: {
         if (!root.wanted)
