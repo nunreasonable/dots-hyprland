@@ -26,6 +26,7 @@ AbstractBackgroundWidget {
         return Appearance.colors[propName] ?? root.colText;
     }
     property bool wallpaperSafetyTriggered: false
+    property bool animate: true
     needsColText: clockStyle === "digital"
     x: forceCenter ? ((root.screenWidth - root.width) / 2) : targetX
     y: forceCenter ? ((root.screenHeight - root.height) / 2) : targetY
@@ -58,6 +59,7 @@ AbstractBackgroundWidget {
             fade: false
             sourceComponent: CookieClock {
                 anchors.horizontalCenter: parent.horizontalCenter
+                animate: root.animate
             }
         }
 

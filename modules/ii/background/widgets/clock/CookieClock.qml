@@ -17,6 +17,7 @@ Item {
 
     readonly property string clockStyle: Config.options.background.widgets.clock.style
 
+    property bool animate: true
     property real implicitSize: 230
 
     property color colShadow: Appearance.colors.colShadow
@@ -81,7 +82,7 @@ Item {
         target: root.useSineCookie ? sineCookieLoader : roundedPolygonCookieLoader
 
         RotationAnimation on rotation {
-            running: Config.options.background.widgets.clock.cookie.constantlyRotate
+            running: Config.options.background.widgets.clock.cookie.constantlyRotate && root.animate
             duration: 30000
             easing.type: Easing.Linear
             loops: Animation.Infinite
@@ -182,6 +183,7 @@ Item {
             clockSecond: root.clockSecond
             style: Config.options.background.widgets.clock.cookie.secondHandStyle
             color: root.colSecondHand
+            animate: root.animate
         }
     }
 

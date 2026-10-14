@@ -767,6 +767,7 @@ Variants {
                         wallpaperScale: 1
                         wallpaperSafetyTriggered: bgRoot.wallpaperSafetyTriggered
                         wallpaperItem: wallpaper
+                        animate: bgRoot.visible && !bgRoot.desktopCovered && !GlobalStates.screenLocked && !(Config.options.windowsPort.gameMode.enable ?? false)
                     }
                 }
 

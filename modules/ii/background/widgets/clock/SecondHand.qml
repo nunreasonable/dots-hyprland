@@ -14,11 +14,12 @@ Item {
     property real dotSize: 20
     property string style: "hide"
     property color color: Appearance.colors.colSecondary
-    
+    property bool animate: true
+
     rotation: (360 / 60 * clockSecond) + 90
 
     Behavior on rotation {
-        enabled: Config.options.background.widgets.clock.cookie.constantlyRotate // Animating every second is expensive...
+        enabled: Config.options.background.widgets.clock.cookie.constantlyRotate && root.animate // Animating every second is expensive...
         animation: RotationAnimation {
             direction: RotationAnimation.Clockwise
             duration: 1000 // 1 second

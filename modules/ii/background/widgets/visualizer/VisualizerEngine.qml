@@ -74,6 +74,14 @@ Item {
     FrameAnimation {
         id: ticker
         running: false
-        onTriggered: root.step(Math.min(frameTime, 0.1))
+        property real sinceLastStep: 0
+        onTriggered: {
+            ticker.sinceLastStep += Math.min(frameTime, 0.1);
+            if (ticker.sinceLastStep < 1 / 60)
+                return;
+            const dt = ticker.sinceLastStep;
+            ticker.sinceLastStep = 0;
+            root.step(dt);
+        }
     }
 }
