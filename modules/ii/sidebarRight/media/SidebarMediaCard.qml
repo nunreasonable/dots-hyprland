@@ -123,7 +123,7 @@ Item {
             id: blurredArt
             anchors.fill: parent
             visible: root.blurredBackground && root.displayedArtFilePath !== ""
-            source: root.displayedArtFilePath
+            source: root.blurredBackground ? root.displayedArtFilePath : ""
             fillMode: Image.PreserveAspectCrop
             cache: false
             asynchronous: true

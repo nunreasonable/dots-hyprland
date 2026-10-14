@@ -169,6 +169,8 @@ Item {
         onLoaded: {
             page.wasLoaded = true;
             page.item.focus = Qt.binding(() => page.current);
+            if (page.item.pageActive !== undefined)
+                page.item.pageActive = Qt.binding(() => page.current);
         }
     }
 }

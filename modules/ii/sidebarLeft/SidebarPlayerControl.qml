@@ -38,6 +38,25 @@ Item {
     property real radius
     property int currentPlayerIndex: 0
     property bool blurredBackground: Config.options.sidebar.media.blurredBackground ?? false
+    property bool pageActive: true
+    readonly property bool blurWanted: root.blurredBackground && root.pageActive && (root.QsWindow.window?.visible ?? false)
+    property bool blurLoaded: false
+
+    onBlurWantedChanged: {
+        if (root.blurWanted) {
+            blurReleaseTimer.stop();
+            root.blurLoaded = true;
+        } else {
+            blurReleaseTimer.restart();
+        }
+    }
+    Component.onCompleted: root.blurLoaded = root.blurWanted
+
+    Timer {
+        id: blurReleaseTimer
+        interval: 1000
+        onTriggered: root.blurLoaded = false
+    }
     property bool shapeArt: Config.options.sidebar.media.shapeArt ?? false
     readonly property var artShapeOptions: ["Circle", "Square", "Pill", "Bun", "Cookie12Sided", "Clover4Leaf", "Heart", "Slanted", "Arch", "Arrow", "SemiCircle", "Oval", "Triangle", "Diamond", "ClamShell", "Pentagon", "Gem", "Sunny", "VerySunny", "Cookie4Sided", "Cookie6Sided", "Cookie7Sided", "Cookie9Sided", "Ghostish", "Clover8Leaf", "Burst", "SoftBurst", "Boom", "SoftBoom", "Flower", "Puffy", "PuffyDiamond"]
 
@@ -101,7 +120,11 @@ Item {
         Image {
             id: blurArtSource
             anchors.fill: parent
-            source: root.displayedArtFilePath
+            source: root.blurLoaded ? root.displayedArtFilePath : ""
+            sourceSize: {
+                const scale = 128 / Math.max(1, background.width, background.height);
+                return Qt.size(Math.ceil(background.width * scale), Math.ceil(background.height * scale));
+            }
             fillMode: Image.PreserveAspectCrop
             cache: false
             asynchronous: true
@@ -113,8 +136,11 @@ Item {
             anchors.fill: parent
             source: blurArtSource
             radius: 80
-            opacity: 0.5
-            visible: root.blurredBackground && root.displayedArtFilePath !== ""
+            opacity: blurArtSource.status === Image.Ready ? 0.5 : 0
+            visible: root.blurredBackground && opacity > 0
+            Behavior on opacity {
+                animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
+            }
 
             layer.enabled: blurArt.visible
             layer.effect: OpacityMask {
