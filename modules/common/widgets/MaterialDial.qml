@@ -33,7 +33,7 @@ Dial {
         to: 360
         duration: 2000
         loops: Animation.Infinite
-        running: true
+        running: control.visible && control.opacity > 0 && control.Window.visibility !== Window.Hidden
     }
 
     MouseArea {

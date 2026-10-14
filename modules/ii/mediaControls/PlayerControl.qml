@@ -344,8 +344,9 @@ Item { // Player instance
                                     right: parent.right
                                 }
                                 active: !(root.player?.canSeek ?? false)
-                                sourceComponent: StyledProgressBar { 
+                                sourceComponent: StyledProgressBar {
                                     wavy: root.player?.isPlaying
+                                    animateWave: !Platform.isWindows || (root.shown && (root.player?.isPlaying ?? false))
                                     highlightColor: blendedColors.colPrimary
                                     trackColor: blendedColors.colSecondaryContainer
                                     value: root.player?.position / root.player?.length

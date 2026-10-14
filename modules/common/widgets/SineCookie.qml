@@ -24,7 +24,7 @@ Item {
         sourceComponent: FrameAnimation {
             running: true
             onTriggered: {
-                shapeRotation += 0.05
+                shapeRotation += 3 * Math.min(frameTime, 0.1)
             }
         }
     }

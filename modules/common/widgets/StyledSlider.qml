@@ -156,18 +156,11 @@ Slider {
                         function onValueChanged() { wavyFill.requestPaint(); }
                         function onHighlightColorChanged() { wavyFill.requestPaint(); }
                     }
-                    FrameAnimation {
-                        property real sinceLastPaint: 0
+                    Timer {
+                        interval: Math.round(1000 / root.waveFps)
+                        repeat: true
                         running: root.animateWave && root.visible && root.Window.visibility !== Window.Hidden
-                        onTriggered: {
-                            if (root.waveFps < 60) {
-                                sinceLastPaint += frameTime;
-                                if (sinceLastPaint * root.waveFps < 0.9)
-                                    return;
-                                sinceLastPaint = 0;
-                            }
-                            wavyFill.requestPaint()
-                        }
+                        onTriggered: wavyFill.requestPaint()
                     }
                 }
             }

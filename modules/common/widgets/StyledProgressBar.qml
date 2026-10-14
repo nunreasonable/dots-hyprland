@@ -19,7 +19,7 @@ ProgressBar {
     property bool animateWave: true
     property real waveAmplitudeMultiplier: wavy ? 0.5 : 0
     property real waveFrequency: 6
-    property real waveFps: 60
+    property real waveFps: Platform.isWindows ? 30 : 60
 
     Behavior on waveAmplitudeMultiplier {
         animation: Appearance?.animation.elementMoveFast.numberAnimation.createObject(this)
@@ -58,11 +58,11 @@ ProgressBar {
                     function onValueChanged() { wavyFill.requestPaint(); }
                     function onHighlightColorChanged() { wavyFill.requestPaint(); }
                 }
-                FrameAnimation {
-                    running: root.animateWave
-                    onTriggered: {
-                        wavyFill.requestPaint()
-                    }
+                Timer {
+                    interval: Math.round(1000 / root.waveFps)
+                    repeat: true
+                    running: root.animateWave && root.visible && root.Window.visibility !== Window.Hidden
+                    onTriggered: wavyFill.requestPaint()
                 }
             }
         }

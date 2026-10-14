@@ -65,6 +65,31 @@ Scope {
         active: GlobalStates.mediaControlsOpen || (Platform.isWindows && mediaControlsLoader.kept)
         onLoaded: mediaControlsLoader.kept = true
 
+        Connections {
+            target: GlobalStates
+            function onMediaControlsOpenChanged() {
+                if (GlobalStates.mediaControlsOpen)
+                    releaseTimer.stop();
+                else if (Platform.isWindows && mediaControlsLoader.kept)
+                    releaseTimer.restart();
+            }
+        }
+
+        Timer {
+            id: releaseTimer
+            interval: 120000
+            onTriggered: {
+                mediaControlsLoader.kept = false;
+                gcTimer.restart();
+            }
+        }
+
+        Timer {
+            id: gcTimer
+            interval: 2000
+            onTriggered: gc()
+        }
+
         sourceComponent: PanelWindow {
             id: panelWindow
             visible: GlobalStates.mediaControlsOpen

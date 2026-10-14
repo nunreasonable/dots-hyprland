@@ -412,6 +412,7 @@ Item {
                                 active: !(progressBarLoader.player?.canSeek ?? false)
                                 sourceComponent: StyledProgressBar {
                                     wavy: progressBarLoader.player?.isPlaying ?? false
+                                    animateWave: progressBarLoader.player?.isPlaying ?? false
                                     highlightColor: blendedColors.colPrimary
                                     trackColor: blendedColors.colSecondaryContainer
                                     value: (progressBarLoader.player?.position ?? 0) / (progressBarLoader.player?.length ?? 1)
