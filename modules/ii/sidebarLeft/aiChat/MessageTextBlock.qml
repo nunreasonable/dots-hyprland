@@ -117,7 +117,7 @@ ColumnLayout {
             values: root.fadeChunkSplitting ? root.shownText.split(/\n\n(?= {0,2})|\n(?= {0,2}[-\*])/g).filter(line => line.trim() !== "") : [root.shownText]
             onValuesChanged: {
                 while (textLinesRepeater.textLineOpacities.length < values.length) {
-                    textLinesRepeater.textLineOpacities.push(root.messageData.done ? 1 : 0);
+                    textLinesRepeater.textLineOpacities.push((root.messageData?.done ?? true) ? 1 : 0);
                 }
             }
         }
@@ -128,11 +128,11 @@ ColumnLayout {
 
             // Fade in animation
             visible: opacity > 0
-            opacity: fadeChunkSplitting ? (textLinesRepeater.textLineOpacities[index] ?? (root.messageData.done ? 1 : 0)) : 1
+            opacity: fadeChunkSplitting ? (textLinesRepeater.textLineOpacities[index] ?? ((root.messageData?.done ?? true) ? 1 : 0)) : 1
             Connections {
                 target: root.messageData
                 function onDoneChanged() {
-                    if (root.messageData.done) {
+                    if (root.messageData?.done) {
                         textLinesRepeater.textLineOpacities[textArea.index] = 1
                     }
                 }

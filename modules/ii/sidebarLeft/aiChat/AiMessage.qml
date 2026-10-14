@@ -49,7 +49,8 @@ Rectangle {
         }).join("");
 
         root.editing = false
-        root.messageData.content = newContent;
+        if (root.messageData)
+            root.messageData.content = newContent;
     }
 
     Keys.onPressed: (event) => {
@@ -279,7 +280,7 @@ Rectangle {
                 FadeLoader {
                     id: loadingIndicatorLoader
                     anchors.centerIn: parent
-                    shown: (root.messageBlocks.length < 1) && (!root.messageData.done)
+                    shown: (root.messageBlocks.length < 1) && !(root.messageData?.done ?? true)
                     sourceComponent: MaterialLoadingIndicator {
                         loading: true
                     }

@@ -40,6 +40,7 @@ Singleton {
     // property var messages: []
     property var messageIDs: []
     property var messageByID: ({})
+    property var pendingRelease: []
     readonly property var apiKeys: KeyringStorage.keyringData?.apiKeys ?? {}
     readonly property var apiKeysLoaded: KeyringStorage.loaded
     readonly property bool currentModelHasApiKey: {
@@ -554,9 +555,33 @@ Singleton {
     function removeMessage(index) {
         if (index < 0 || index >= messageIDs.length) return;
         const id = root.messageIDs[index];
+        const message = root.messageByID[id];
         root.messageIDs.splice(index, 1);
         root.messageIDs = [...root.messageIDs];
         delete root.messageByID[id];
+        root.releaseMessage(message);
+    }
+
+    function messageBusy(message) {
+        return (message === requester.message && (requester.running || windowsUploader.running))
+            || (message === commandExecutionProc.message && commandExecutionProc.running);
+    }
+
+    function releaseMessage(message) {
+        if (!message || message.released) return;
+        message.released = true;
+        root.pendingRelease = [...root.pendingRelease, message];
+        Qt.callLater(root.flushReleases);
+    }
+
+    function flushReleases() {
+        const busy = [];
+        for (const message of root.pendingRelease) {
+            if (!message) continue;
+            if (root.messageBusy(message)) busy.push(message);
+            else message.destroy(2000);
+        }
+        root.pendingRelease = busy;
     }
 
     function addApiKeyAdvice(model) {
@@ -661,8 +686,10 @@ Singleton {
     }
 
     function clearMessages() {
+        const messages = root.messageIDs.map(id => root.messageByID[id]);
         root.messageIDs = [];
         root.messageByID = ({});
+        for (const message of messages) root.releaseMessage(message);
         root.tokenCount.input = -1;
         root.tokenCount.output = -1;
         root.tokenCount.total = -1;
@@ -819,7 +846,8 @@ Singleton {
 
                     if (result.functionCall) {
                         requester.message.functionCall = result.functionCall;
-                        root.handleFunctionCall(result.functionCall.name, result.functionCall.args, requester.message);
+                        if (!requester.message.released)
+                            root.handleFunctionCall(result.functionCall.name, result.functionCall.args, requester.message);
                     }
                     if (result.tokenUsage) {
                         root.tokenCount.input = result.tokenUsage.input;
@@ -848,9 +876,10 @@ Singleton {
             }
 
             // Handle error responses
-            if (requester.message.content.includes("API key not valid")) {
+            if (!requester.message.released && requester.message.content.includes("API key not valid")) {
                 root.addApiKeyAdvice(models[requester.message.model]);
             }
+            if (root.pendingRelease.length > 0) Qt.callLater(root.flushReleases);
         }
     }
 
@@ -883,6 +912,11 @@ Singleton {
                 const lines = windowsUploadOutput.text.trim().split("\n");
                 result = JSON.parse(lines[lines.length - 1]);
             } catch (e) {}
+            if (requester.message.released) {
+                requester.markDone();
+                Qt.callLater(root.flushReleases);
+                return;
+            }
             if (result.uri) {
                 requester.message.fileUri = result.uri;
                 requester.message.fileMimeType = result.mimeType;
@@ -941,13 +975,13 @@ Singleton {
     }
 
     function rejectCommand(message: AiMessageData) {
-        if (!message.functionPending) return;
+        if (!message || message.released || !message.functionPending) return;
         message.functionPending = false; // User decided, no more "thinking"
         addFunctionOutputMessage(message.functionName, Translation.tr("Command rejected by user"))
     }
 
     function approveCommand(message: AiMessageData) {
-        if (!message.functionPending) return;
+        if (!message || message.released || !message.functionPending) return;
         message.functionPending = false; // User decided, no more "thinking"
 
         const responseMessage = createFunctionOutputMessage(message.functionName, "", false);
@@ -979,6 +1013,10 @@ Singleton {
         }
         onExited: (exitCode, exitStatus) => {
             commandExecutionProc.message.functionResponse += `[[ Command exited with code ${exitCode} (${exitStatus}) ]]\n`;
+            if (commandExecutionProc.message.released) {
+                Qt.callLater(root.flushReleases);
+                return;
+            }
             requester.makeRequest(); // Continue
         }
     }

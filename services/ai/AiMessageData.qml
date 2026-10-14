@@ -21,4 +21,5 @@ QtObject {
     property string functionResponse
     property bool functionPending: false
     property bool visibleToUser: true
+    property bool released: false
 }

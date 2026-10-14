@@ -230,7 +230,7 @@ ColumnLayout {
                         selectedTextColor: Appearance.m3colors.m3onSecondaryContainer
                         selectionColor: Appearance.colors.colSecondaryContainer
                         // wrapMode: TextEdit.Wrap
-                        color: messageData.thinking ? Appearance.colors.colSubtext : Appearance.colors.colOnLayer1
+                        color: messageData?.thinking ? Appearance.colors.colSubtext : Appearance.colors.colOnLayer1
 
                         text: segmentContent
                         onTextChanged: {
@@ -260,7 +260,7 @@ ColumnLayout {
                     }
                 }
                 Loader {
-                    active: root.isCommandRequest && root.messageData.functionPending
+                    active: root.isCommandRequest && (root.messageData?.functionPending ?? false)
                     visible: active
                     Layout.fillWidth: true
                     Layout.margins: 6
