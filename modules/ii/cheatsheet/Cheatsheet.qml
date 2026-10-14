@@ -14,30 +14,27 @@ import Quickshell.Hyprland
 
 Scope { // Scope
     id: root
-    property var tabButtonList: Platform.isWindows ? [
+    readonly property bool aiUsageEnabled: Config.options.cheatsheet.aiUsage.enable
+    property var tabButtonList: [
         {
             "icon": "keyboard",
             "name": Translation.tr("Keybinds")
         },
-        {
+        ...(Platform.isWindows ? [{
             "icon": "monitor_heart",
             "name": Translation.tr("System")
-        },
-        {
-            "icon": "experiment",
-            "name": Translation.tr("Elements")
-        },
-    ] : [
-        {
-            "icon": "keyboard",
-            "name": Translation.tr("Keybinds")
-        },
+        }] : []),
+        ...(root.aiUsageEnabled ? [{
+            "icon": "data_usage",
+            "name": Translation.tr("AI usage")
+        }] : []),
         {
             "icon": "experiment",
             "name": Translation.tr("Elements")
         },
     ]
     readonly property int systemTabIndex: Platform.isWindows ? 1 : -1
+    readonly property int aiUsageTabIndex: root.aiUsageEnabled ? (Platform.isWindows ? 2 : 1) : -1
     property bool open: false
     function editKeybinds() {
         if (!Platform.isWindows) return;
@@ -236,14 +233,15 @@ Scope { // Scope
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         spacing: 10
-                        currentIndex: Platform.isWindows ? 0 : Persistent.states.cheatsheet.tabIndex
+                        property bool restored: false
                         onCurrentIndexChanged: {
-                            Persistent.states.cheatsheet.tabIndex = currentIndex;
+                            if (swipeView.restored)
+                                Persistent.states.cheatsheet.tabIndex = currentIndex;
                         }
-                        Component.onCompleted: {
-                            if (Platform.isWindows)
-                                currentIndex = Persistent.states.cheatsheet.tabIndex;
-                        }
+                        Component.onCompleted: Qt.callLater(() => {
+                            swipeView.currentIndex = Math.max(0, Math.min(Persistent.states.cheatsheet.tabIndex, swipeView.count - 1));
+                            swipeView.restored = true;
+                        })
 
                         implicitWidth: Math.min(Math.max.apply(null, contentChildren.map(child => child.implicitWidth || 0)), (cheatsheetRoot.screen?.width ?? 100000) - (Appearance.sizes.elevationMargin + cheatsheetBackground.padding) * 2 - 32)
                         implicitHeight: Math.min(Math.max.apply(null, contentChildren.map(child => child.implicitHeight || 0)), (cheatsheetRoot.screen?.height ?? 100000) - (Appearance.sizes.elevationMargin + cheatsheetBackground.padding) * 2 - 140)
@@ -267,6 +265,12 @@ Scope { // Scope
                                 loadAsync: Platform.isWindows && !root.open
                             }
                         }
+                        Repeater {
+                            model: root.aiUsageEnabled ? 1 : 0
+                            delegate: CheatsheetAiUsage {
+                                loadAsync: Platform.isWindows && !root.open
+                            }
+                        }
                         CheatsheetPeriodicTable {
                             loadAsync: Platform.isWindows && !root.open
                         }
@@ -281,6 +285,12 @@ Scope { // Scope
         target: WindowsNative.systemMonitor
         property: "active"
         value: root.open && Persistent.states.cheatsheet.tabIndex === root.systemTabIndex
+    }
+
+    Binding {
+        target: AiLimits
+        property: "active"
+        value: root.open && Persistent.states.cheatsheet.tabIndex === root.aiUsageTabIndex
     }
 
     IpcHandler {

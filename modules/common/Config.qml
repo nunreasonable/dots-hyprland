@@ -589,6 +589,10 @@ Singleton {
                     property int key: Appearance.font.pixelSize.smaller
                     property int comment: Appearance.font.pixelSize.smaller
                 }
+                property JsonObject aiUsage: JsonObject {
+                    property bool enable: true
+                    property int refreshSeconds: 60
+                }
             }
 
             property JsonObject conflictKiller: JsonObject {

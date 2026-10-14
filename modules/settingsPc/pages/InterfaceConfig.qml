@@ -1558,6 +1558,29 @@ ContentPage {
                         Config.options.cheatsheet.fontSize.comment = value;
                     }
                 }
+                ConfigSwitch {
+                    buttonIcon: "data_usage"
+                    text: Translation.tr("AI usage tab")
+                    checked: Config.options.cheatsheet.aiUsage.enable
+                    onCheckedChanged: {
+                        Config.options.cheatsheet.aiUsage.enable = checked;
+                    }
+                    W.StyledToolTip {
+                        text: Translation.tr("Shows your Claude and Codex plan limits, read from the local Claude Code and Codex logins, and how much Claude Code used on this PC this week")
+                    }
+                }
+                ConfigSpinBox {
+                    visible: Config.options.cheatsheet.aiUsage.enable
+                    icon: "update"
+                    text: Translation.tr("AI usage refresh (seconds)")
+                    value: Config.options.cheatsheet.aiUsage.refreshSeconds
+                    from: 30
+                    to: 900
+                    stepSize: 30
+                    onValueChanged: {
+                        Config.options.cheatsheet.aiUsage.refreshSeconds = value;
+                    }
+                }
             }
         }
 
