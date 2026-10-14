@@ -1087,6 +1087,7 @@ Singleton {
      * @param chatName name of the chat
      */
     function saveChat(chatName) {
+        chatSaveFile.chatName = ""
         chatSaveFile.chatName = chatName.trim()
         const saveContent = JSON.stringify(root.chatToJson())
         chatSaveFile.setText(saveContent)
