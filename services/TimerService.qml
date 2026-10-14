@@ -30,6 +30,11 @@ Singleton {
     property int stopwatchTime: 0
     property int stopwatchStart: Persistent.states.timer.stopwatch.start
     property var stopwatchLaps: Persistent.states.timer.stopwatch.laps
+    property int stopwatchCentisecondConsumers: 0
+    property int stopwatchSecondConsumers: 0
+
+    onStopwatchCentisecondConsumersChanged: if (root.stopwatchRunning) root.refreshStopwatch()
+    onStopwatchSecondConsumersChanged: if (root.stopwatchRunning) root.refreshStopwatch()
 
     property bool countdownRunning: Persistent.states.timer.countdown.running
     property int countdownDuration: Persistent.states.timer.countdown.duration
@@ -116,13 +121,18 @@ Singleton {
 
     // Stopwatch
     function refreshStopwatch() {  // Stopwatch stores time in 10ms
-        stopwatchTime = getCurrentTimeIn10ms() - stopwatchStart;
+        stopwatchTime = root.currentStopwatchTime();
+    }
+
+    function currentStopwatchTime() {
+        return root.stopwatchRunning ? (getCurrentTimeIn10ms() - stopwatchStart) | 0 : root.stopwatchTime;
     }
 
     Timer {
         id: stopwatchTimer
-        interval: 10
-        running: root.stopwatchRunning
+        interval: root.stopwatchCentisecondConsumers > 0 ? 10 : 1000
+        running: root.stopwatchRunning && (root.stopwatchCentisecondConsumers > 0 || root.stopwatchSecondConsumers > 0)
+        triggeredOnStart: true
         repeat: true
         onTriggered: refreshStopwatch()
     }
@@ -135,13 +145,14 @@ Singleton {
     }
 
     function stopwatchPause() {
+        root.refreshStopwatch();
         Persistent.states.timer.stopwatch.running = false;
     }
 
     function stopwatchResume() {
         if (stopwatchTime === 0) Persistent.states.timer.stopwatch.laps = [];
-        Persistent.states.timer.stopwatch.running = true;
         Persistent.states.timer.stopwatch.start = getCurrentTimeIn10ms() - stopwatchTime;
+        Persistent.states.timer.stopwatch.running = true;
     }
 
     function stopwatchReset() {
@@ -151,7 +162,8 @@ Singleton {
     }
 
     function stopwatchRecordLap() {
-        Persistent.states.timer.stopwatch.laps.push(stopwatchTime);
+        root.refreshStopwatch();
+        Persistent.states.timer.stopwatch.laps.push(root.stopwatchTime);
     }
 
     function refreshCountdown() {

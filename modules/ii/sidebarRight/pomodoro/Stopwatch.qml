@@ -1,6 +1,7 @@
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.utils
 import Qt5Compat.GraphicalEffects
 import QtQuick
 import QtQuick.Controls
@@ -11,6 +12,11 @@ Item {
     id: stopwatchTab
     Layout.fillWidth: true
     Layout.fillHeight: true
+
+    StopwatchConsumer {
+        active: stopwatchTab.visible && (Window.window?.visible ?? false)
+        centiseconds: true
+    }
 
     Item {
         anchors {

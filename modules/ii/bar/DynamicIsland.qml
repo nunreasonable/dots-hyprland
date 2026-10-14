@@ -79,6 +79,11 @@ Item {
     readonly property string engagedTimerKind: root.pomodoroEngaged ? "pomodoro" : root.stopwatchEngaged ? "stopwatch" : ""
     readonly property bool hasActiveTimer: root.engagedTimerKind !== ""
 
+    StopwatchConsumer {
+        active: root.visible && (QsWindow.window?.visible ?? false)
+            && root.activeContentId === "timer" && root.engagedTimerKind === "stopwatch"
+    }
+
     readonly property bool reallyShown: !root.vertical && (QsWindow.window?.visible ?? false)
         && !Config.options.bar.autoHide.enable
         && !(Hyprland.focusedWorkspace?.hasFullscreen ?? false)

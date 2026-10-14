@@ -4,6 +4,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.functions
+import qs.modules.common.utils
 import qs.modules.common.widgets
 import qs.modules.ii.background.widgets
 
@@ -11,6 +12,10 @@ AbstractBackgroundWidget {
     id: root
     configEntryName: "timers"
     hoverEnabled: true
+
+    StopwatchConsumer {
+        active: root.visible && (Window.window?.visible ?? false)
+    }
 
     property real widgetWidth: 420
     property real cardSpacing: 12
