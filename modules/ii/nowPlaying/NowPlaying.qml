@@ -333,7 +333,7 @@ Scope {
                     return Qt.rect(0, 0, screenWidth, screenHeight);
                 let left = pill.x;
                 let top = pill.y;
-                let right = pill.x + Math.max(pill.targetWidth, pill.width);
+                let right = pill.x + root.maxPillWidth;
                 let bottom = pill.y + root.pillHeight;
                 const source = root.flySource;
                 if (source) {
