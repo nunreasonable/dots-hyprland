@@ -16,8 +16,8 @@ NestableObject {
     readonly property int shownCount: C.Config.options.bar.workspaces.shown
     readonly property int group: Math.floor((activeWorkspace - 1) / shownCount)
     readonly property var specialWorkspace: liveMonitorData?.specialWorkspace
-    readonly property string specialWorkspaceName: specialWorkspace?.name.replace("special:", "") ?? "special"
-    readonly property bool specialWorkspaceActive: specialWorkspaceName !== ""
+    readonly property bool specialWorkspaceActive: (specialWorkspace?.name ?? "") !== ""
+    readonly property string specialWorkspaceName: specialWorkspaceActive ? (specialWorkspace.name.replace("special:", "") || "special") : ""
 
     property list<bool> occupied: []
     property list<var> biggestWindow: occupied.map((_, index) => {
