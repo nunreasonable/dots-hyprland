@@ -111,7 +111,7 @@ Singleton {
         }
         if (expire && notif.notification?.tracked)
             notif.notification.expire();
-        notif.destroy();
+        notif.destroy(2000);
     }
 
     function trimmedList(list) {
