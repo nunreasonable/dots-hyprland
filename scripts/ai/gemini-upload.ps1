@@ -49,13 +49,23 @@ try {
     Write-Result @{ uri = $file.uri; mimeType = $fileMime }
 } catch {
     $message = $_.Exception.Message
-    $response = $_.Exception.Response
-    if ($response) {
+    $details = $_.ErrorDetails.Message
+    if ($details) {
         try {
-            $reader = New-Object System.IO.StreamReader($response.GetResponseStream())
-            $body = $reader.ReadToEnd() | ConvertFrom-Json
+            $body = $details | ConvertFrom-Json
             if ($body.error.message) { $message = $body.error.message }
         } catch {}
+    } else {
+        $response = $_.Exception.Response
+        if ($response) {
+            try {
+                $stream = $response.GetResponseStream()
+                if ($stream.CanSeek) { $stream.Position = 0 }
+                $reader = New-Object System.IO.StreamReader($stream)
+                $body = $reader.ReadToEnd() | ConvertFrom-Json
+                if ($body.error.message) { $message = $body.error.message }
+            } catch {}
+        }
     }
     Write-Result @{ error = $message }
     exit 1

@@ -25,6 +25,15 @@ Singleton {
     property var claudeLocal: null
     property double lastLocalScan: 0
     property double now: Date.now()
+    property double lastClaudeAttempt: 0
+    property double lastCodexAttempt: 0
+    readonly property int attemptToleranceSeconds: 5
+
+    function recentlyAttempted(timestamp) {
+        if (timestamp <= 0)
+            return false;
+        return (Date.now() - timestamp) < (root.refreshSeconds - root.attemptToleranceSeconds) * 1000;
+    }
 
     Timer {
         interval: root.refreshSeconds * 1000
@@ -93,9 +102,7 @@ Singleton {
     }
 
     function keep(previous, next) {
-        return Object.assign({}, previous, next, {
-            "updatedAt": Date.now()
-        });
+        return Object.assign({}, previous, next);
     }
 
     function claudePlanName(type, tier) {
@@ -132,6 +139,9 @@ Singleton {
     }
 
     function refreshClaude() {
+        if (root.recentlyAttempted(root.lastClaudeAttempt))
+            return;
+        root.lastClaudeAttempt = Date.now();
         const credentials = root.readJson(`${root.claudeDir}/.credentials.json`);
         const oauth = credentials?.claudeAiOauth;
         if (!oauth || !oauth.accessToken) {
@@ -210,6 +220,9 @@ Singleton {
     }
 
     function refreshCodex() {
+        if (root.recentlyAttempted(root.lastCodexAttempt))
+            return;
+        root.lastCodexAttempt = Date.now();
         const auth = root.readJson(`${root.codexDir}/auth.json`);
         if (!auth) {
             root.codex = {
