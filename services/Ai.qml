@@ -1102,6 +1102,7 @@ Singleton {
         try {
             chatSaveFile.chatName = chatName.trim()
             chatSaveFile.reload()
+            chatSaveFile.waitForJob()
             const saveContent = chatSaveFile.text()
             // console.log(saveContent)
             const saveData = JSON.parse(saveContent)
