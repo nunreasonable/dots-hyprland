@@ -7,6 +7,7 @@ import "WorldCities.js" as WorldCities
 Item {
     id: root
     clip: true
+    readonly property bool animateMarker: root.hasMarker && root.visible && (Window.window?.visible ?? false)
 
     property real dotSize: 2.2
     property color dotColor: Appearance.colors.colLayer0Border 
@@ -118,10 +119,12 @@ Item {
             opacity: 0.8
 
             SequentialAnimation on scale {
+                running: root.animateMarker
                 loops: Animation.Infinite
                 NumberAnimation { from: 0.5; to: 2.2; duration: 1400; easing.type: Easing.OutCubic }
             }
             SequentialAnimation on opacity {
+                running: root.animateMarker
                 loops: Animation.Infinite
                 NumberAnimation { from: 0.7; to: 0.0; duration: 1400; easing.type: Easing.OutCubic }
             }
@@ -136,6 +139,7 @@ Item {
             color: root.markerColor
 
             SequentialAnimation on opacity {
+                running: root.animateMarker
                 loops: Animation.Infinite
                 NumberAnimation { from: 1.0; to: 0.4; duration: 900; easing.type: Easing.InOutSine }
                 NumberAnimation { from: 0.4; to: 1.0; duration: 900; easing.type: Easing.InOutSine }

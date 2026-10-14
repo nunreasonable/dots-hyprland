@@ -317,6 +317,7 @@ Item {
             anchors.centerIn: parent
             spacing: 10 * root.scaleFactor
             MaterialLoadingIndicator {
+                loading: root.loading && !root.error
                 anchors.horizontalCenter: parent.horizontalCenter
                 implicitSize: 100 * root.scaleFactor
                 scale: 1 + ((1 - loadingOverlay.opacity) * 0.5) * root.scaleFactor

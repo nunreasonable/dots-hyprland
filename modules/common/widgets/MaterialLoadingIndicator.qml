@@ -8,7 +8,10 @@ Rectangle {
     id: root
 
     property bool loading: true
+    readonly property bool animating: root.loading && root.visible && (Window.window?.visible ?? false)
     property double pullProgress: 0
+
+    onAnimatingChanged: if (!root.animating) leapAnimation.stop()
 
     // Size, color
     property double implicitSize: 48
@@ -38,7 +41,7 @@ Rectangle {
     rotation: pullRotation + continuousRotation + leapRotation
 
     RotationAnimation on continuousRotation {
-        running: root.loading
+        running: root.animating
         duration: 12000
         easing.type: Easing.Linear
         loops: Animation.Infinite
@@ -47,7 +50,7 @@ Rectangle {
     }
     Timer {
         interval: 800
-        running: root.loading
+        running: root.animating
         repeat: true
         onTriggered: leapAnimation.start()
     }
