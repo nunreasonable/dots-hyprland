@@ -1,4 +1,5 @@
 {
+  "userFile": "illogical-impulse/layerrules.json",
   "about": [
     "Blur behind ii's panels on Windows, converted from the blur and ignore_alpha layer rules in dots/.config/hypr/hyprland/rules.lua (same order: later matching rules override earlier ones).",
     "Copy to %LOCALAPPDATA%\\illogical-impulse\\layerrules.json to customize; that file wins over this one and is reloaded on save.",

@@ -1,4 +1,5 @@
 {
+  "userFile": "illogical-impulse/keybinds.json",
   "about": [
     "ii keybinds for Windows, ported from dots/.config/hypr/hyprland/keybinds.lua.",
     "Copy to %LOCALAPPDATA%\\illogical-impulse\\keybinds.json to customize (Ctrl+Super+/ or the pencil on the cheatsheet opens a keybind editor that writes it); that file wins over this one and is reloaded on save. Remove a bind to give its keys back to Windows.",
