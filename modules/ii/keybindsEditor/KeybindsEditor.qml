@@ -19,6 +19,9 @@ Scope {
     readonly property bool open: GlobalStates.keybindsEditorOpen
 
     property var doc: null
+    property var bases: []
+    property var defaultBinds: []
+    property var defaultIds: []
     property bool usingUserFile: false
     property string loadError: ""
     property string filter: ""
@@ -62,13 +65,9 @@ Scope {
         return WindowsNative.fsUtils?.classify(path) === "file";
     }
 
-    function load() {
-        root.editingIndex = -1;
-        root.recording = false;
-        root.loadError = "";
-        root.usingUserFile = root.exists(root.userPath);
+    function readJson(path) {
         const reader = readerComponent.createObject(root, {
-            "path": root.usingUserFile ? root.userPath : root.defaultPath
+            "path": path
         });
         let parsed = null;
         try {
@@ -77,11 +76,112 @@ Scope {
             parsed = null;
         }
         reader.destroy();
-        if (!parsed || !Array.isArray(parsed.binds)) {
+        return parsed;
+    }
+
+    function baseId(bind) {
+        switch (bind.action) {
+        case "global":
+            {
+                let name = bind.name ?? "";
+                let appid = bind.appid ?? "quickshell";
+                const colon = name.indexOf(":");
+                if (colon !== -1) {
+                    appid = name.slice(0, colon);
+                    name = name.slice(colon + 1);
+                }
+                return `global:${appid}:${name}`;
+            }
+        case "dispatch":
+            return `dispatch:${bind.dispatch ?? ""}`;
+        case "exec":
+            return `exec:${bind.command ?? ""}`;
+        case "key":
+            return `key:${bind.key ?? ""}`;
+        case "native":
+            return `native:${bind.keys ?? ""}`;
+        case "ipc":
+            return `ipc:${bind.target ?? ""}:${bind.function ?? ""}`;
+        default:
+            return bind.action ?? "";
+        }
+    }
+
+    function idsFor(binds) {
+        const counts = {};
+        const ids = binds.map(bind => root.baseId(bind));
+        for (const id of ids)
+            counts[id] = (counts[id] ?? 0) + 1;
+        return ids.map((id, i) => counts[id] > 1 ? `${id}@${binds[i].keys ?? ""}` : id);
+    }
+
+    function matchBases(binds) {
+        const used = new Set();
+        return binds.map(bind => {
+            const source = root.sourceOf(bind);
+            const id = root.baseId(source);
+            const candidates = [];
+            root.defaultBinds.forEach((def, i) => {
+                if (!used.has(i) && root.baseId(def) === id)
+                    candidates.push(i);
+            });
+            if (candidates.length === 0)
+                return "";
+            const sameKeys = candidates.find(i => root.normalizeKeys(root.defaultBinds[i].keys) === root.normalizeKeys(source.keys));
+            const index = candidates.length === 1 ? candidates[0] : sameKeys;
+            if (index === undefined)
+                return "";
+            used.add(index);
+            return root.defaultIds[index];
+        });
+    }
+
+    function load() {
+        root.editingIndex = -1;
+        root.recording = false;
+        root.loadError = "";
+        root.usingUserFile = root.exists(root.userPath);
+        const defaults = root.readJson(root.defaultPath);
+        root.defaultBinds = (defaults && Array.isArray(defaults.binds)) ? defaults.binds : [];
+        root.defaultIds = root.idsFor(root.defaultBinds);
+        const user = root.usingUserFile ? root.readJson(root.userPath) : null;
+        if (root.usingUserFile && (!user || !Array.isArray(user.binds))) {
             root.doc = null;
+            root.bases = [];
             root.loadError = Translation.tr("Your keybinds file has an error, so it can't be edited here. Fix it in the file or reset it to the defaults.");
+        } else if (!user) {
+            root.doc = {
+                "binds": JSON.parse(JSON.stringify(root.defaultBinds))
+            };
+            root.bases = root.defaultIds.slice();
+        } else if (user.extends === "defaults") {
+            const changes = {};
+            const added = [];
+            for (const entry of user.binds) {
+                if (typeof entry.base === "string" && entry.base.length > 0)
+                    changes[entry.base] = entry;
+                else
+                    added.push(entry);
+            }
+            const binds = [];
+            root.defaultBinds.forEach((def, i) => {
+                const bind = JSON.parse(JSON.stringify(def));
+                const change = changes[root.defaultIds[i]];
+                if (change && typeof change.keys === "string" && change.keys.length > 0)
+                    bind.keys = change.keys;
+                binds.push(change?.disabled === true ? {
+                    "keys": bind.keys,
+                    "action": "native",
+                    "disabled": bind
+                } : bind);
+            });
+            root.doc = {
+                "binds": [...binds, ...added]
+            };
+            root.bases = [...root.defaultIds, ...added.map(() => "")];
         } else {
-            root.doc = parsed;
+            root.doc = user;
+            root.bases = root.matchBases(user.binds);
         }
         root.rebuild();
     }
@@ -210,13 +310,51 @@ Scope {
         return lines.join("\n") + "\n";
     }
 
+    function sparseDoc() {
+        const binds = [];
+        const seen = new Set();
+        root.doc.binds.forEach((bind, i) => {
+            const base = root.bases[i] ?? "";
+            const index = base.length > 0 ? root.defaultIds.indexOf(base) : -1;
+            if (index < 0) {
+                binds.push(bind);
+                return;
+            }
+            seen.add(base);
+            const disabled = bind.disabled && typeof bind.disabled === "object";
+            const source = disabled ? bind.disabled : bind;
+            const change = {
+                "base": base
+            };
+            if (root.normalizeKeys(source.keys) !== root.normalizeKeys(root.defaultBinds[index].keys))
+                change.keys = source.keys;
+            if (disabled)
+                change.disabled = true;
+            if (Object.keys(change).length > 1)
+                binds.push(change);
+        });
+        root.defaultIds.forEach((id, i) => {
+            const def = root.defaultBinds[i];
+            if (!seen.has(id) && def.action !== "native" && def.since === undefined)
+                binds.push({
+                    "base": id,
+                    "disabled": true
+                });
+        });
+        return {
+            "about": ["Changes to ii's default keybinds (defaults/windows/keybinds.json in the config folder). {\"base\": id, \"keys\": ...} moves a default bind to other keys, {\"base\": id, \"disabled\": true} gives its keys back to Windows, and any bind without \"base\" is added. The id is the bind's action and argument (global:quickshell:name, dispatch:..., exec:..., ipc:target:function, key:...), followed by @keys when several defaults share it. Delete this file to go back to the defaults."],
+            "extends": "defaults",
+            "binds": binds
+        };
+    }
+
     function save(openAfter) {
         if (!root.doc) return;
         const writer = writerComponent.createObject(root, {
             "path": root.userPath,
             "openAfter": openAfter === true
         });
-        writer.setText(root.serialize(root.doc));
+        writer.setText(root.serialize(root.sparseDoc()));
         root.usingUserFile = true;
     }
 
