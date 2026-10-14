@@ -706,11 +706,6 @@ Singleton {
             requester.currentStrategy = root.currentApiStrategy;
             requester.currentStrategy.reset(); // Reset strategy state
 
-            if (Platform.isWindows && root.pendingFilePath && root.pendingFilePath.length > 0) {
-                root.addMessage(Translation.tr("Attaching files to online models doesn't work on Windows yet, so this message was sent without the file."), Ai.interfaceRole);
-                root.pendingFilePath = "";
-            }
-
             /* Put API key in environment variable */
             if (model.requires_key) requester.environment[`${root.apiKeyEnvVarName}`] = root.apiKeys ? (root.apiKeys[model.key_id] ?? "") : ""
 
@@ -758,15 +753,17 @@ Singleton {
                     if (value && value.length > 0) args.push("-H", `${name}: ${value}`);
                 }
                 if (authHeader && authHeader.length > 0) args.push("-H", `Authorization: Bearer ${key}`);
-                WindowsNative.fsUtils?.makePath(root.windowsRequestDir);
-                const bodyWriter = requestBodyWriter.createObject(root, {
-                    "path": root.windowsRequestBodyPath
-                });
-                bodyWriter.setText(JSON.stringify(data));
-                bodyWriter.destroy();
                 args.push("--data-binary", `@${root.windowsRequestBodyPath}`);
-                requester.command = args;
-                requester.running = true;
+                const body = JSON.stringify(data);
+                const filePath = root.pendingFilePath ?? "";
+                root.pendingFilePath = "";
+                if (filePath.length > 0) requester.message.localFilePath = filePath;
+                const uploadScript = filePath.length > 0 ? requester.currentStrategy.windowsFileUploadScript() : "";
+                if (uploadScript.length > 0) {
+                    windowsUploader.upload(uploadScript, filePath, key, body, args);
+                    return;
+                }
+                requester.startOnWindows(body, args);
                 return;
             }
             
@@ -796,6 +793,17 @@ Singleton {
             requesterScriptFile.setText(scriptContent)
             requester.command = baseCommand.concat([shellScriptPath]);
             requester.running = true
+        }
+
+        function startOnWindows(body, args) {
+            WindowsNative.fsUtils?.makePath(root.windowsRequestDir);
+            const bodyWriter = requestBodyWriter.createObject(root, {
+                "path": root.windowsRequestBodyPath
+            });
+            bodyWriter.setText(body);
+            bodyWriter.destroy();
+            requester.command = args;
+            requester.running = true;
         }
 
         stdout: SplitParser {
@@ -843,6 +851,50 @@ Singleton {
             if (requester.message.content.includes("API key not valid")) {
                 root.addApiKeyAdvice(models[requester.message.model]);
             }
+        }
+    }
+
+    Process {
+        id: windowsUploader
+        property string body
+        property list<string> curlArgs
+
+        function upload(script, filePath, key, body, curlArgs) {
+            windowsUploader.body = body;
+            windowsUploader.curlArgs = curlArgs;
+            windowsUploader.environment = {
+                "API_KEY": key
+            };
+            windowsUploader.command = ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", CF.FileUtils.trimFileProtocol(`${Directories.scriptPath}/ai/${script}`), filePath];
+            windowsUploader.running = true;
+        }
+
+        stdout: StdioCollector {
+            id: windowsUploadOutput
+        }
+
+        onExited: (exitCode, exitStatus) => {
+            const body = windowsUploader.body;
+            const curlArgs = windowsUploader.curlArgs;
+            windowsUploader.body = "";
+            windowsUploader.environment = {};
+            let result = {};
+            try {
+                const lines = windowsUploadOutput.text.trim().split("\n");
+                result = JSON.parse(lines[lines.length - 1]);
+            } catch (e) {}
+            if (result.uri) {
+                requester.message.fileUri = result.uri;
+                requester.message.fileMimeType = result.mimeType;
+                requester.startOnWindows(requester.currentStrategy.fillUploadedFile(body, result.uri, result.mimeType), curlArgs);
+                return;
+            }
+            const errorMsg = `**${Translation.tr("Couldn't upload the file")}**: ${result.error ?? Translation.tr("PowerShell exited with code %1").arg(exitCode)}`;
+            requester.message.thinking = false;
+            requester.message.rawContent += errorMsg;
+            requester.message.content += errorMsg;
+            requester.markDone();
+            if (errorMsg.includes("API key not valid")) root.addApiKeyAdvice(models[requester.message.model]);
         }
     }
 

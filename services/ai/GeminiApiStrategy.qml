@@ -242,6 +242,16 @@ ApiStrategy {
         return content
     }
 
+    function windowsFileUploadScript(): string {
+        return "gemini-upload.ps1";
+    }
+
+    function fillUploadedFile(body: string, uri: string, mimeType: string): string {
+        const escape = text => JSON.stringify(text).slice(1, -1);
+        return body.split(fileUriSubstitutionString).join(escape(uri))
+                   .split(fileMimeTypeSubstitutionString).join(escape(mimeType));
+    }
+
     function finalizeScriptContent(scriptContent: string): string {
         return scriptContent.replace(fileMimeTypeSubstitutionString, `'"\$${fileMimeTypeVarName}"'`)
                             .replace(fileUriSubstitutionString, `'"\$${fileUriVarName}"'`);

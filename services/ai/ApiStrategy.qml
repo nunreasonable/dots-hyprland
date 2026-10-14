@@ -9,4 +9,6 @@ QtObject {
     function reset() { } // Reset any internal state if needed
     function buildScriptFileSetup(filePath) { return "" } // Default: no setup
     function finalizeScriptContent(scriptContent: string): string { return scriptContent } // Optionally modify/finalize script
+    function windowsFileUploadScript(): string { return "" }
+    function fillUploadedFile(body: string, uri: string, mimeType: string): string { return body }
 }

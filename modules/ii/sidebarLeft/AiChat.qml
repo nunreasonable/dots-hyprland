@@ -229,6 +229,11 @@ Inline w/ backslash and round brackets \\(e^{i\\pi} + 1 = 0\\)
         property string imageDecodeFileName: "image"
         property string imageDecodeFilePath: `${imageDecodePath}/${imageDecodeFileName}`
         function handleEntry(entry: string) {
+            if (Platform.isWindows) {
+                const path = WindowsNative.clipboard?.imagePath(Cliphist.entryId(entry)) ?? "";
+                if (path.length > 0) Ai.attachFile(path);
+                return;
+            }
             imageDecodeFileName = parseInt(entry.match(/^(\d+)\t/)[1]);
             decodeImageAndAttachProc.exec(["bash", "-c", `[ -f ${imageDecodeFilePath} ] || echo '${StringUtils.shellSingleQuoteEscape(entry)}' | ${Cliphist.cliphistBinary} decode > '${imageDecodeFilePath}'`]);
         }
