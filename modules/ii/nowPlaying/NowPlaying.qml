@@ -45,6 +45,7 @@ Scope {
     property bool positioning: false
     property bool hovered: false
     property bool dragging: false
+    property bool touched: false
     property bool startupDone: false
     property string lastKey: ""
     property var targetScreen: null
@@ -149,6 +150,7 @@ Scope {
         root.positioning = false;
         root.hovered = false;
         root.dragging = false;
+        root.touched = false;
         GlobalStates.nowPlayingShown = false;
     }
 
@@ -228,6 +230,7 @@ Scope {
     }
 
     onHoveredChanged: {
+        if (root.hovered) root.touched = true;
         if (root.phase !== "open" && root.phase !== "closing") return;
         if (root.hovered) {
             holdTimer.stop();
@@ -321,12 +324,41 @@ Scope {
             WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
             color: "transparent"
 
+            readonly property bool fullArea: root.positioning || root.dragging || root.touched
+            readonly property int areaPadding: Appearance.sizes.elevationMargin * 3
+            readonly property rect area: {
+                const screenWidth = root.targetScreen?.width ?? 1920;
+                const screenHeight = root.targetScreen?.height ?? 1080;
+                if (pillWindow.fullArea)
+                    return Qt.rect(0, 0, screenWidth, screenHeight);
+                let left = pill.x;
+                let top = pill.y;
+                let right = pill.x + Math.max(pill.targetWidth, pill.width);
+                let bottom = pill.y + root.pillHeight;
+                const source = root.flySource;
+                if (source) {
+                    left = Math.min(left, source.x);
+                    top = Math.min(top, source.y);
+                    right = Math.max(right, source.x + source.size);
+                    bottom = Math.max(bottom, source.y + source.size);
+                }
+                left = Math.max(0, Math.floor(left - pillWindow.areaPadding));
+                top = Math.max(0, Math.floor(top - pillWindow.areaPadding));
+                right = Math.min(screenWidth, Math.ceil(right + pillWindow.areaPadding));
+                bottom = Math.min(screenHeight, Math.ceil(bottom + pillWindow.areaPadding));
+                return Qt.rect(left, top, Math.max(1, right - left), Math.max(1, bottom - top));
+            }
+
             anchors {
                 top: true
-                bottom: true
                 left: true
-                right: true
             }
+            margins {
+                top: pillWindow.area.y
+                left: pillWindow.area.x
+            }
+            implicitWidth: pillWindow.area.width
+            implicitHeight: pillWindow.area.height
 
             mask: Region {
                 item: pill
@@ -350,94 +382,201 @@ Scope {
             }
 
             Item {
-                id: pill
-                readonly property real targetWidth: Math.round(Math.min(root.maxPillWidth, Math.max(root.minPillWidth, textColumn.implicitWidth + root.pillHeight + 30 * root.sizeFactor)))
-                readonly property real areaWidth: root.targetScreen?.width ?? pillWindow.width
-                readonly property real areaHeight: root.targetScreen?.height ?? pillWindow.height
-                property bool placed: false
-
-                width: root.expanded ? targetWidth : root.pillHeight
-                height: root.pillHeight
-
-                function clampInside() {
-                    const maxX = pill.areaWidth - targetWidth - root.edgeGap;
-                    if (pill.x > maxX) pill.x = Math.max(root.edgeGap, maxX);
-                    pill.y = Math.max(0, Math.min(pill.y, pill.areaHeight - pill.height));
-                }
-
-                function place() {
-                    const state = Persistent.states.nowPlaying;
-                    if (state.x >= 0 && state.y >= 0) {
-                        pill.x = state.x;
-                        pill.y = state.y;
-                    } else {
-                        const barHeight = Appearance.sizes.barHeight;
-                        const atBottom = Config.options.bar.bottom && !Config.options.bar.vertical;
-                        pill.x = Math.round((pill.areaWidth - targetWidth) / 2);
-                        pill.y = atBottom ? pill.areaHeight - barHeight - root.pillHeight - root.edgeGap : barHeight + root.edgeGap;
-                    }
-                    pill.clampInside();
-                    pill.placed = true;
-                }
-
-                onTargetWidthChanged: if (pill.placed) pill.clampInside()
-                Component.onCompleted: {
-                    pill.place();
-                    beginTimer.start();
-                }
-
-                Behavior on width {
-                    NumberAnimation {
-                        duration: root.sizeAnimDuration
-                        easing.type: Easing.BezierSpline
-                        easing.bezierCurve: Appearance.animationCurves.expressiveDefaultSpatial
-                    }
-                }
-
-                HoverHandler {
-                    onHoveredChanged: root.hovered = hovered
-                }
-
-                DragHandler {
-                    id: dragHandler
-                    target: pill
-                    enabled: root.phase === "open" || root.phase === "closing"
-                    xAxis.minimum: 0
-                    xAxis.maximum: pill.areaWidth - pill.width
-                    yAxis.minimum: 0
-                    yAxis.maximum: pill.areaHeight - pill.height
-                    onActiveChanged: {
-                        root.dragging = active;
-                        if (active) {
-                            holdTimer.stop();
-                            return;
-                        }
-                        Persistent.states.nowPlaying.x = Math.round(pill.x);
-                        Persistent.states.nowPlaying.y = Math.round(pill.y);
-                        Persistent.states.nowPlaying.screen = root.targetScreen?.name ?? "";
-                        if (!root.hovered) root.holdFor(root.positioning ? 10000 : 1000);
-                    }
-                }
-
-                TapHandler {
-                    acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
-                    onTapped: (eventPoint, button) => {
-                        if (button === Qt.LeftButton) GlobalStates.mediaControlsOpen = !GlobalStates.mediaControlsOpen;
-                        else if (button === Qt.MiddleButton) root.player?.togglePlaying();
-                        else root.collapse();
-                    }
-                }
+                id: stage
+                x: -pillWindow.area.x
+                y: -pillWindow.area.y
+                width: root.targetScreen?.width ?? pillWindow.width
+                height: root.targetScreen?.height ?? pillWindow.height
 
                 Item {
-                    id: pillBody
-                    anchors.fill: parent
-                    opacity: root.revealed ? 1 : 0
-                    transform: Scale {
-                        origin.x: root.pillHeight / 2
-                        origin.y: root.pillHeight / 2
-                        xScale: root.revealed ? 1 : 0.5
-                        yScale: xScale
-                        Behavior on xScale {
+                    id: pill
+                    readonly property real targetWidth: Math.round(Math.min(root.maxPillWidth, Math.max(root.minPillWidth, textColumn.implicitWidth + root.pillHeight + 30 * root.sizeFactor)))
+                    readonly property real areaWidth: root.targetScreen?.width ?? pillWindow.width
+                    readonly property real areaHeight: root.targetScreen?.height ?? pillWindow.height
+                    property bool placed: false
+
+                    width: root.expanded ? targetWidth : root.pillHeight
+                    height: root.pillHeight
+
+                    function clampInside() {
+                        const maxX = pill.areaWidth - targetWidth - root.edgeGap;
+                        if (pill.x > maxX) pill.x = Math.max(root.edgeGap, maxX);
+                        pill.y = Math.max(0, Math.min(pill.y, pill.areaHeight - pill.height));
+                    }
+
+                    function place() {
+                        const state = Persistent.states.nowPlaying;
+                        if (state.x >= 0 && state.y >= 0) {
+                            pill.x = state.x;
+                            pill.y = state.y;
+                        } else {
+                            const barHeight = Appearance.sizes.barHeight;
+                            const atBottom = Config.options.bar.bottom && !Config.options.bar.vertical;
+                            pill.x = Math.round((pill.areaWidth - targetWidth) / 2);
+                            pill.y = atBottom ? pill.areaHeight - barHeight - root.pillHeight - root.edgeGap : barHeight + root.edgeGap;
+                        }
+                        pill.clampInside();
+                        pill.placed = true;
+                    }
+
+                    onTargetWidthChanged: if (pill.placed) pill.clampInside()
+                    Component.onCompleted: {
+                        pill.place();
+                        beginTimer.start();
+                    }
+
+                    Behavior on width {
+                        NumberAnimation {
+                            duration: root.sizeAnimDuration
+                            easing.type: Easing.BezierSpline
+                            easing.bezierCurve: Appearance.animationCurves.expressiveDefaultSpatial
+                        }
+                    }
+
+                    HoverHandler {
+                        onHoveredChanged: root.hovered = hovered
+                    }
+
+                    DragHandler {
+                        id: dragHandler
+                        target: pill
+                        enabled: (root.phase === "open" || root.phase === "closing") && pillWindow.fullArea
+                        xAxis.minimum: 0
+                        xAxis.maximum: pill.areaWidth - pill.width
+                        yAxis.minimum: 0
+                        yAxis.maximum: pill.areaHeight - pill.height
+                        onActiveChanged: {
+                            root.dragging = active;
+                            if (active) {
+                                holdTimer.stop();
+                                return;
+                            }
+                            Persistent.states.nowPlaying.x = Math.round(pill.x);
+                            Persistent.states.nowPlaying.y = Math.round(pill.y);
+                            Persistent.states.nowPlaying.screen = root.targetScreen?.name ?? "";
+                            if (!root.hovered) root.holdFor(root.positioning ? 10000 : 1000);
+                        }
+                    }
+
+                    TapHandler {
+                        acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
+                        onPressedChanged: if (pressed) root.touched = true
+                        onTapped: (eventPoint, button) => {
+                            if (button === Qt.LeftButton) GlobalStates.mediaControlsOpen = !GlobalStates.mediaControlsOpen;
+                            else if (button === Qt.MiddleButton) root.player?.togglePlaying();
+                            else root.collapse();
+                        }
+                    }
+
+                    Item {
+                        id: pillBody
+                        anchors.fill: parent
+                        opacity: root.revealed ? 1 : 0
+                        transform: Scale {
+                            origin.x: root.pillHeight / 2
+                            origin.y: root.pillHeight / 2
+                            xScale: root.revealed ? 1 : 0.5
+                            yScale: xScale
+                            Behavior on xScale {
+                                NumberAnimation {
+                                    duration: root.popAnimDuration + 100
+                                    easing.type: Easing.BezierSpline
+                                    easing.bezierCurve: Appearance.animationCurves.expressiveFastSpatial
+                                }
+                            }
+                        }
+
+                        Behavior on opacity {
+                            NumberAnimation {
+                                duration: root.popAnimDuration
+                                easing.type: Easing.OutCubic
+                            }
+                        }
+
+                        StyledRectangularShadow {
+                            target: pillBackground
+                        }
+
+                        Rectangle {
+                            id: pillBackground
+                            anchors.fill: parent
+                            radius: height / 2
+                            color: Appearance.colors.colLayer0
+                            border.width: 1
+                            border.color: Appearance.colors.colLayer0Border
+                            clip: true
+
+                            ColumnLayout {
+                                id: textColumn
+                                anchors {
+                                    left: parent.left
+                                    leftMargin: root.discMargin + root.discSize + Math.round(12 * root.sizeFactor)
+                                    right: parent.right
+                                    rightMargin: Math.round(24 * root.sizeFactor)
+                                    verticalCenter: parent.verticalCenter
+                                }
+                                spacing: Math.round(-2 * root.sizeFactor)
+                                opacity: root.expanded ? 1 : 0
+
+                                Behavior on opacity {
+                                    NumberAnimation {
+                                        duration: root.expanded ? 450 : 200
+                                        easing.type: Easing.OutCubic
+                                    }
+                                }
+
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: root.positioning ? Translation.tr("Drag to move") : Translation.tr("Now Playing")
+                                    font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * root.sizeFactor)
+                                    font.weight: Font.Medium
+                                    color: Appearance.colors.colPrimary
+                                    elide: Text.ElideRight
+                                    wrapMode: Text.NoWrap
+                                }
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: root.title || Translation.tr("No media")
+                                    font.pixelSize: Math.round(Appearance.font.pixelSize.large * root.sizeFactor)
+                                    font.weight: Font.DemiBold
+                                    color: Appearance.colors.colOnLayer0
+                                    elide: Text.ElideRight
+                                    wrapMode: Text.NoWrap
+                                }
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    visible: text.length > 0
+                                    text: [root.artist, root.album].filter(s => s.length > 0).join(" · ")
+                                    font.pixelSize: Math.round(Appearance.font.pixelSize.small * root.sizeFactor)
+                                    color: Appearance.colors.colSubtext
+                                    elide: Text.ElideRight
+                                    wrapMode: Text.NoWrap
+                                }
+                            }
+                        }
+                    }
+
+                    Disc {
+                        id: pillDisc
+                        x: root.discMargin
+                        y: root.discMargin
+                        width: root.discSize
+                        height: root.discSize
+                        artUrl: root.artUrl
+                        angle: root.discAngle
+                        sourceSize: root.discSize * 2
+                        opacity: root.flySource ? ((root.phase === "open" || root.phase === "closing") ? 1 : 0) : (root.revealed ? 1 : 0)
+                        scale: root.flySource || root.revealed ? 1 : 0.5
+
+                        Behavior on opacity {
+                            enabled: !root.flySource
+                            NumberAnimation {
+                                duration: root.popAnimDuration
+                                easing.type: Easing.OutCubic
+                            }
+                        }
+                        Behavior on scale {
+                            enabled: !root.flySource
                             NumberAnimation {
                                 duration: root.popAnimDuration + 100
                                 easing.type: Easing.BezierSpline
@@ -445,119 +584,21 @@ Scope {
                             }
                         }
                     }
-
-                    Behavior on opacity {
-                        NumberAnimation {
-                            duration: root.popAnimDuration
-                            easing.type: Easing.OutCubic
-                        }
-                    }
-
-                    StyledRectangularShadow {
-                        target: pillBackground
-                    }
-
-                    Rectangle {
-                        id: pillBackground
-                        anchors.fill: parent
-                        radius: height / 2
-                        color: Appearance.colors.colLayer0
-                        border.width: 1
-                        border.color: Appearance.colors.colLayer0Border
-                        clip: true
-
-                        ColumnLayout {
-                            id: textColumn
-                            anchors {
-                                left: parent.left
-                                leftMargin: root.discMargin + root.discSize + Math.round(12 * root.sizeFactor)
-                                right: parent.right
-                                rightMargin: Math.round(24 * root.sizeFactor)
-                                verticalCenter: parent.verticalCenter
-                            }
-                            spacing: Math.round(-2 * root.sizeFactor)
-                            opacity: root.expanded ? 1 : 0
-
-                            Behavior on opacity {
-                                NumberAnimation {
-                                    duration: root.expanded ? 450 : 200
-                                    easing.type: Easing.OutCubic
-                                }
-                            }
-
-                            StyledText {
-                                Layout.fillWidth: true
-                                text: root.positioning ? Translation.tr("Drag to move") : Translation.tr("Now Playing")
-                                font.pixelSize: Math.round(Appearance.font.pixelSize.smaller * root.sizeFactor)
-                                font.weight: Font.Medium
-                                color: Appearance.colors.colPrimary
-                                elide: Text.ElideRight
-                                wrapMode: Text.NoWrap
-                            }
-                            StyledText {
-                                Layout.fillWidth: true
-                                text: root.title || Translation.tr("No media")
-                                font.pixelSize: Math.round(Appearance.font.pixelSize.large * root.sizeFactor)
-                                font.weight: Font.DemiBold
-                                color: Appearance.colors.colOnLayer0
-                                elide: Text.ElideRight
-                                wrapMode: Text.NoWrap
-                            }
-                            StyledText {
-                                Layout.fillWidth: true
-                                visible: text.length > 0
-                                text: [root.artist, root.album].filter(s => s.length > 0).join(" · ")
-                                font.pixelSize: Math.round(Appearance.font.pixelSize.small * root.sizeFactor)
-                                color: Appearance.colors.colSubtext
-                                elide: Text.ElideRight
-                                wrapMode: Text.NoWrap
-                            }
-                        }
-                    }
                 }
 
                 Disc {
-                    id: pillDisc
-                    x: root.discMargin
-                    y: root.discMargin
-                    width: root.discSize
-                    height: root.discSize
+                    id: flyer
+                    visible: root.flying || root.phase === "finishing"
+                    opacity: root.phase === "finishing" ? 0 : 1
                     artUrl: root.artUrl
                     angle: root.discAngle
                     sourceSize: root.discSize * 2
-                    opacity: root.flySource ? ((root.phase === "open" || root.phase === "closing") ? 1 : 0) : (root.revealed ? 1 : 0)
-                    scale: root.flySource || root.revealed ? 1 : 0.5
 
                     Behavior on opacity {
-                        enabled: !root.flySource
                         NumberAnimation {
-                            duration: root.popAnimDuration
+                            duration: root.barFadeDuration
                             easing.type: Easing.OutCubic
                         }
-                    }
-                    Behavior on scale {
-                        enabled: !root.flySource
-                        NumberAnimation {
-                            duration: root.popAnimDuration + 100
-                            easing.type: Easing.BezierSpline
-                            easing.bezierCurve: Appearance.animationCurves.expressiveFastSpatial
-                        }
-                    }
-                }
-            }
-
-            Disc {
-                id: flyer
-                visible: root.flying || root.phase === "finishing"
-                opacity: root.phase === "finishing" ? 0 : 1
-                artUrl: root.artUrl
-                angle: root.discAngle
-                sourceSize: root.discSize * 2
-
-                Behavior on opacity {
-                    NumberAnimation {
-                        duration: root.barFadeDuration
-                        easing.type: Easing.OutCubic
                     }
                 }
             }
