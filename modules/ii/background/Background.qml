@@ -112,6 +112,8 @@ Variants {
         readonly property bool widgetsAboveIcons: Platform.isWindows && (WindowsNative.desktopLayer?.active ?? false) && !GlobalStates.screenLocked
         readonly property bool nativeWallpaper: Platform.isWindows && Config.options.windowsPort.backgroundBehindIcons && !Config.options.windowsPort.ownWallpaper
         readonly property Item widgetsSlot: widgetsWindowLoader.active ? (widgetsWindowLoader.item?.slot ?? null) : null
+        readonly property bool widgetsShown: (bgRoot.widgetsAboveIcons && bgRoot.widgetsSlot) ? (widgetsWindowLoader.item?.visible ?? false) : bgRoot.visible
+        readonly property bool widgetsAnimate: bgRoot.widgetsShown && !bgRoot.desktopCovered && !GlobalStates.screenLocked && !(Config.options.windowsPort.gameMode.enable ?? false)
 
         function rebuildCollageMask() {
             const region = widgetsWindowLoader.item?.collageRegion ?? null;
@@ -767,7 +769,7 @@ Variants {
                         wallpaperScale: 1
                         wallpaperSafetyTriggered: bgRoot.wallpaperSafetyTriggered
                         wallpaperItem: wallpaper
-                        animate: bgRoot.visible && !bgRoot.desktopCovered && !GlobalStates.screenLocked && !(Config.options.windowsPort.gameMode.enable ?? false)
+                        animate: bgRoot.widgetsAnimate
                     }
                 }
 
@@ -944,7 +946,7 @@ Variants {
                     asynchronous: Platform.isWindows
                     shown: Config.options.background.widgets.visualizer.enable && bgRoot.widgetsOnThisScreen
                     sourceComponent: VisualizerWidget {
-                        animate: bgRoot.visible && !bgRoot.desktopCovered && !GlobalStates.screenLocked && !(Config.options.windowsPort.gameMode.enable ?? false)
+                        animate: bgRoot.widgetsAnimate
                         screenWidth: bgRoot.screen.width
                         screenHeight: bgRoot.screen.height
                         scaledScreenWidth: bgRoot.screen.width
