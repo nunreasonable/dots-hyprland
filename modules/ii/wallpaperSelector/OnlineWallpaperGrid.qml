@@ -189,6 +189,9 @@ Item {
 
             cellWidth: width / root.columns
             cellHeight: cellWidth / root.previewCellAspectRatio
+            readonly property real thumbDpr: grid.QsWindow.window?.devicePixelRatio ?? 1
+            readonly property int thumbDecodeWidth: Math.max(64, Math.ceil(grid.cellWidth * grid.thumbDpr / 64) * 64)
+            readonly property int thumbDecodeHeight: Math.ceil(grid.thumbDecodeWidth / root.previewCellAspectRatio)
             interactive: true
             acceptedButtons: Qt.NoButton
             clip: true
@@ -209,6 +212,7 @@ Item {
                     anchors.fill: parent
                     anchors.margins: Appearance.sizes.wallpaperSelectorItemMargins
                     source: delegateItem.model.thumb
+                    sourceSize: Qt.size(grid.thumbDecodeWidth, grid.thumbDecodeHeight)
                     fillMode: Image.PreserveAspectCrop
                     asynchronous: true
                     cache: true
