@@ -133,7 +133,7 @@ Singleton {
 
     Timer {
         running: GlobalStates.sidebarRightOpen && (root.dialogOpen || root.toggleShown)
-        interval: 4000
+        interval: root.dialogOpen ? 4000 : 30000
         repeat: true
         triggeredOnStart: true
         onTriggered: root.refresh()

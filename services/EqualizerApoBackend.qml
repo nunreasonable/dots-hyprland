@@ -227,11 +227,21 @@ Singleton {
         });
     }
 
+    readonly property int maxCacheEntries: 300
+
+    function capCache(cache, maxEntries) {
+        const keys = Object.keys(cache);
+        if (keys.length <= maxEntries) return cache;
+        const result = {};
+        for (const k of keys.slice(keys.length - maxEntries)) result[k] = cache[k];
+        return result;
+    }
+
     function cacheGenreTags(key, tags) {
         const updated = Object.assign({}, root.genreCache);
         updated[key] = tags;
-        root.genreCache = updated;
-        adapter.genreCacheJson = JSON.stringify(updated);
+        root.genreCache = root.capCache(updated, root.maxCacheEntries);
+        adapter.genreCacheJson = JSON.stringify(root.genreCache);
     }
 
     function trackGenreTags(artist, title, callback) {
@@ -240,8 +250,8 @@ Singleton {
         root.lastfmLookup("track.gettoptags", { artist: artist, track: title }, (tags) => {
             const updated = Object.assign({}, root.trackGenreCache);
             updated[key] = tags;
-            root.trackGenreCache = updated;
-            adapter.trackGenreCacheJson = JSON.stringify(updated);
+            root.trackGenreCache = root.capCache(updated, root.maxCacheEntries);
+            adapter.trackGenreCacheJson = JSON.stringify(root.trackGenreCache);
             callback(tags);
         });
     }
