@@ -14,7 +14,7 @@ AbstractBackgroundWidget {
     hoverEnabled: true
 
     StopwatchConsumer {
-        active: root.visible && (Window.window?.visible ?? false)
+        active: root.visible && (root.Window.window?.visible ?? false)
     }
 
     property real widgetWidth: 420

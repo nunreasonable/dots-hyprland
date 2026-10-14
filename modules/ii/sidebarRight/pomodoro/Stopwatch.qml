@@ -14,7 +14,7 @@ Item {
     Layout.fillHeight: true
 
     StopwatchConsumer {
-        active: stopwatchTab.visible && (Window.window?.visible ?? false)
+        active: stopwatchTab.visible && stopwatchTab.SwipeView.isCurrentItem && (stopwatchTab.Window.window?.visible ?? false)
         centiseconds: true
     }
 
