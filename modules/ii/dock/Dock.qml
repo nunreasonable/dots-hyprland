@@ -24,6 +24,14 @@ Scope {
         return Appearance.colors["col" + name.charAt(0).toUpperCase() + name.slice(1)] ?? Appearance.colors.colLayer0;
     }
 
+    function screensForDock() {
+        const screens = Quickshell.screens;
+        const list = Config.options.dock.screenList;
+        if (!list || list.length === 0)
+            return screens;
+        return screens.filter(screen => list.includes(screen.name));
+    }
+
     Component.onCompleted: {
         barSettleTimer.start()
     }
@@ -55,7 +63,7 @@ Scope {
     }
 
     Variants {
-        model: !root.ready ? [] : Quickshell.screens.map(screen => ({
+        model: !root.ready ? [] : root.screensForDock().map(screen => ({
             screen: screen,
             position: Config.options.dock.position,
             layout: `${Config.options.dock.position}|${Config.options.dock.style}|${Config.options.dock.height}|${root.barState}`

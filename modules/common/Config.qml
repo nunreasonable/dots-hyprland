@@ -630,6 +630,7 @@ Singleton {
                 property bool showPinButton: true
                 property bool showAppsButton: true
                 property bool showMedia: false
+                property list<string> screenList: []
             }
 
             property JsonObject interactions: JsonObject {

@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import Quickshell
 import qs
 import qs.services
 import qs.modules.common
@@ -299,6 +300,45 @@ ContentPage {
                     const items = text.split(",").map(s => s.trim()).filter(s => s.length > 0);
                     if (items.join(", ") !== Config.options.dock.ignoredAppRegexes.join(", "))
                         Config.options.dock.ignoredAppRegexes = items;
+                }
+            }
+        }
+
+        ContentSubsection {
+            title: Translation.tr("Show dock on")
+            visible: Quickshell.screens.length > 1 || Config.options.dock.screenList.length > 0
+
+            Flow {
+                Layout.fillWidth: true
+                spacing: 2
+
+                SelectionGroupButton {
+                    leftmost: true
+                    rightmost: Quickshell.screens.length === 0
+                    buttonIcon: "tv_displays"
+                    buttonText: Translation.tr("All")
+                    toggled: Config.options.dock.screenList.length === 0
+                    onClicked: Config.options.dock.screenList = []
+                }
+
+                Repeater {
+                    model: Quickshell.screens
+                    delegate: SelectionGroupButton {
+                        id: dockScreenButton
+                        required property var modelData
+                        required property int index
+                        rightmost: index === Quickshell.screens.length - 1
+                        buttonIcon: "monitor"
+                        buttonText: dockScreenButton.modelData.name
+                        toggled: Config.options.dock.screenList.includes(dockScreenButton.modelData.name)
+                        onClicked: {
+                            const name = dockScreenButton.modelData.name;
+                            const current = Array.from(Config.options.dock.screenList);
+                            const next = current.includes(name) ? current.filter(s => s !== name) : current.concat([name]);
+                            const allNames = Quickshell.screens.map(s => s.name);
+                            Config.options.dock.screenList = allNames.every(n => next.includes(n)) ? [] : next;
+                        }
+                    }
                 }
             }
         }

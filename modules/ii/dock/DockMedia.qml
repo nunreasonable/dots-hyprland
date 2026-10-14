@@ -156,6 +156,8 @@ Item {
             cache: false
             antialiasing: true
             asynchronous: true
+            sourceSize.width: card.width
+            sourceSize.height: card.height
             z: 1
             layer.enabled: true
             layer.effect: StyledBlurEffect {
