@@ -33,6 +33,7 @@ Item {
     ]
     property int tabCount: swipeView.count
     property bool loadAsync: Platform.isWindows && !GlobalStates.sidebarLeftOpen
+    readonly property bool contentShown: GlobalStates.sidebarLeftOpen || (root.scopeRoot?.detach ?? false)
 
     onPageKeysChanged: root.syncPages()
     Component.onCompleted: root.syncPages()
@@ -159,18 +160,58 @@ Item {
         }
     }
 
+    Timer {
+        id: pageGcTimer
+        interval: 2000
+        onTriggered: gc()
+    }
+
     component SidebarLeftPage: Loader {
         id: page
         property string pageKey
-        property bool wasLoaded: false
+        property bool kept: false
+        property var savedState: null
         readonly property bool current: page.SwipeView.isCurrentItem
-        active: !Platform.isWindows || page.current || page.wasLoaded || root.loadAsync
+        readonly property bool neighbour: root.contentShown && (page.SwipeView.isNextItem || page.SwipeView.isPreviousItem)
+        active: !Platform.isWindows || page.current || page.kept || page.neighbour
         asynchronous: Platform.isWindows && (!page.current || root.loadAsync)
         onLoaded: {
-            page.wasLoaded = true;
+            page.kept = true;
             page.item.focus = Qt.binding(() => page.current);
             if (page.item.pageActive !== undefined)
                 page.item.pageActive = Qt.binding(() => page.current);
+            if (page.savedState && page.item.restorePageState)
+                page.item.restorePageState(page.savedState);
+            page.savedState = null;
+            if (Platform.isWindows && !page.current)
+                releaseTimer.restart();
+        }
+        onCurrentChanged: {
+            if (!Platform.isWindows)
+                return;
+            if (page.current)
+                releaseTimer.stop();
+            else if (page.item)
+                releaseTimer.restart();
+        }
+
+        function release() {
+            if (page.current || !page.item)
+                return;
+            if (page.neighbour || (page.item.pageBusy && page.item.pageBusy())) {
+                releaseTimer.restart();
+                return;
+            }
+            page.savedState = page.item.pageState ? page.item.pageState() : null;
+            page.kept = false;
+            pageGcTimer.restart();
+        }
+
+        Timer {
+            id: releaseTimer
+            interval: 120000
+            running: false
+            onTriggered: page.release()
         }
     }
 }

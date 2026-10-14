@@ -15,6 +15,24 @@ Item {
     property real padding: 4
 
     property var inputField: tagInputField
+
+    function pageState() {
+        return {
+            "draft": tagInputField.text,
+            "contentY": booruResponseListView.contentY,
+            "atEnd": booruResponseListView.atYEnd
+        };
+    }
+
+    function restorePageState(state) {
+        tagInputField.text = state.draft ?? "";
+        Qt.callLater(() => {
+            if (state.atEnd)
+                booruResponseListView.positionViewAtEnd();
+            else
+                booruResponseListView.contentY = state.contentY;
+        });
+    }
     readonly property var responses: Booru.responses
     property string previewDownloadPath: Directories.booruPreviews
     property string downloadPath: Directories.booruDownloads

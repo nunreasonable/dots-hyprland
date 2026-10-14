@@ -15,6 +15,24 @@ Item {
     id: root
     property real padding: 4
     property var inputField: messageInputField
+
+    function pageState() {
+        return {
+            "draft": messageInputField.text,
+            "contentY": messageListView.contentY,
+            "atEnd": messageListView.atYEnd
+        };
+    }
+
+    function restorePageState(state) {
+        messageInputField.text = state.draft ?? "";
+        Qt.callLater(() => {
+            if (state.atEnd)
+                messageListView.positionViewAtEnd();
+            else
+                messageListView.contentY = state.contentY;
+        });
+    }
     property string commandPrefix: "/"
 
     property var suggestionQuery: ""

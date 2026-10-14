@@ -67,6 +67,24 @@ Item {
 
     property var windowsRequest: null
 
+    function pageBusy() {
+        return translateTimer.running || translateProc.running
+            || (root.windowsRequest !== null && root.windowsRequest.readyState !== XMLHttpRequest.DONE);
+    }
+
+    function pageState() {
+        return {
+            "input": root.inputField.text,
+            "output": root.translatedText
+        };
+    }
+
+    function restorePageState(state) {
+        root.inputField.text = state.input ?? "";
+        translateTimer.stop();
+        root.translatedText = state.output ?? "";
+    }
+
     Process {
         id: translateProc
         command: ["bash", "-c", `trans -brief -no-bidi`
