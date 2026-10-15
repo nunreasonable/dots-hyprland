@@ -38,4 +38,9 @@ Item {
         if (!running || !Platform.isWindows) return;
         Qt.callLater(root.captureWindows);
     }
+
+    Component.onDestruction: {
+        if (Platform.isWindows && WindowsNative.ready)
+            WindowsNative.screenshot?.releaseCapture(root.screenshotPath);
+    }
 }
