@@ -9,6 +9,7 @@
 import QtQuick
 import QtQuick.Controls
 import Quickshell
+import Quickshell.Io
 import qs.modules.common
 import qs.modules.settings
 import qs.modules.settingsPc
@@ -20,8 +21,9 @@ ApplicationWindow {
     property bool pcLayout: false
     property bool layoutChosen: false
     readonly property bool pageShown: contentLoader.item?.pageShown ?? false
+    property bool handingOff: Platform.isWindows
 
-    visible: root.pageShown || root.forceShown
+    visible: (root.pageShown || root.forceShown) && !root.handingOff
     onClosing: Qt.quit()
     title: "illogical-impulse Settings"
 
@@ -37,6 +39,27 @@ ApplicationWindow {
             Quickshell.watchFiles = false;
         Config.readWriteDelay = 0;
         root.chooseLayout();
+        if (root.handingOff)
+            shellHandoff.running = true;
+    }
+
+    Process {
+        id: shellHandoff
+        command: ["qsw", "-p", Quickshell.shellPath(""), "ipc", "call", "settings", "open"]
+        onExited: (exitCode, exitStatus) => {
+            if (!root.handingOff)
+                return;
+            if (exitCode === 0)
+                Qt.quit();
+            else
+                root.handingOff = false;
+        }
+    }
+
+    Timer {
+        interval: 4000
+        running: root.handingOff
+        onTriggered: root.handingOff = false
     }
 
     onPageShownChanged: {
@@ -71,14 +94,14 @@ ApplicationWindow {
 
     Timer {
         interval: 3000
-        running: !root.pageShown && !root.forceShown
+        running: !root.pageShown && !root.forceShown && !root.handingOff
         onTriggered: root.forceShown = true
     }
 
     Loader {
         id: contentLoader
         anchors.fill: parent
-        active: root.layoutChosen
+        active: root.layoutChosen && !root.handingOff
         sourceComponent: root.pcLayout ? pcContentComponent : iiContentComponent
     }
 
