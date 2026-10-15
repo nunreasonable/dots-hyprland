@@ -1925,5 +1925,10 @@
   "Unlimited credits": "Créditos ilimitados",
   "Updated %1 ago": "Atualizado há %1",
   "Updated just now": "Atualizado agora",
-  "1 message · %1 out": "1 mensagem · %1 de saída"
+  "1 message · %1 out": "1 mensagem · %1 de saída",
+  "Report a problem": "Reportar um problema",
+  "Collecting the logs…": "Juntando os logs…",
+  "Couldn't create the report: %1": "Não foi possível criar o relatório: %1",
+  "Saved %1. Attach it to the issue that just opened.": "Salvo em %1. Anexe na issue que acabou de abrir.",
+  "Saves ii's logs and some system info (Windows build, GPU, screens, fonts) to a zip on your Desktop and opens a new issue on GitHub. Your user name is taken out of the paths; have a look at the files before you send them.": "Salva os logs do ii e algumas informações do sistema (build do Windows, GPU, telas, fontes) num zip na Área de Trabalho e abre uma issue nova no GitHub. O seu nome de usuário é tirado dos caminhos; dê uma olhada nos arquivos antes de enviar."
 }

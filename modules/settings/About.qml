@@ -154,6 +154,38 @@ ContentPage {
         }
     }
     ContentSection {
+        visible: Platform.isWindows
+        icon: "bug_report"
+        title: Translation.tr("Report a problem")
+
+        StyledText {
+            Layout.fillWidth: true
+            wrapMode: Text.WordWrap
+            color: Appearance.colors.colSubtext
+            text: ProblemReport.collecting
+                ? Translation.tr("Collecting the logs…")
+                : ProblemReport.lastError !== ""
+                    ? Translation.tr("Couldn't create the report: %1").arg(ProblemReport.lastError)
+                    : ProblemReport.zipPath !== ""
+                        ? Translation.tr("Saved %1. Attach it to the issue that just opened.").arg(ProblemReport.zipPath)
+                        : Translation.tr("Saves ii's logs and some system info (Windows build, GPU, screens, fonts) to a zip on your Desktop and opens a new issue on GitHub. Your user name is taken out of the paths; have a look at the files before you send them.")
+        }
+
+        Flow {
+            Layout.fillWidth: true
+            spacing: 5
+
+            RippleButtonWithIcon {
+                materialIcon: "bug_report"
+                mainText: Translation.tr("Report a problem")
+                enabled: !ProblemReport.collecting
+                onClicked: {
+                    ProblemReport.collect()
+                }
+            }
+        }
+    }
+    ContentSection {
         icon: "folder_managed"
         title: Translation.tr("Dotfiles")
 
