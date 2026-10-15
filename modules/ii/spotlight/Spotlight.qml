@@ -423,12 +423,24 @@ q="$1"; h="$2"
         WlrLayershell.layer: WlrLayer.Overlay
         WlrLayershell.keyboardFocus: GlobalStates.spotlightOpen ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
+        readonly property int areaPadding: Appearance.sizes.elevationMargin * 3
+        readonly property real screenWidth: panelWindow.screen?.width ?? 1920
+        readonly property real screenHeight: panelWindow.screen?.height ?? 1080
+        readonly property real areaWidth: Math.min(panelWindow.screenWidth,
+            Math.max(content.maxWidth, panel.pillWidth + 10 + idleRow.implicitWidth) + panelWindow.areaPadding * 2)
+        readonly property real areaHeight: Math.min(panelWindow.screenHeight,
+            content.headerHeight + content.bodyMaxHeight + 8 + panelWindow.areaPadding * 2)
+
         anchors {
             top: true
-            bottom: true
             left: true
-            right: true
         }
+        margins {
+            top: Math.max(0, Math.round(panelWindow.screenHeight * 0.18) - panelWindow.areaPadding)
+            left: Math.max(0, Math.round((panelWindow.screenWidth - panelWindow.areaWidth) / 2))
+        }
+        implicitWidth: panelWindow.areaWidth
+        implicitHeight: panelWindow.areaHeight
 
         mask: Region {
             item: content
@@ -464,10 +476,11 @@ q="$1"; h="$2"
 
         Item {
             id: content
-            readonly property real maxWidth: Math.min(880, panelWindow.width - 80)
-            readonly property real bodyMaxHeight: Math.min(500, panelWindow.height * 0.55)
+            readonly property real maxWidth: Math.min(880, panelWindow.screenWidth - 80)
+            readonly property real bodyMaxHeight: Math.min(500, panelWindow.screenHeight * 0.55)
+            readonly property real headerHeight: 52
             x: (panelWindow.width - width) / 2
-            y: Math.round(panelWindow.height * 0.18)
+            y: panelWindow.areaPadding
             width: root.expanded ? content.maxWidth : panel.pillWidth + 10 + idleRow.implicitWidth
             height: panel.height
             opacity: GlobalStates.spotlightOpen ? 1 : 0
@@ -511,7 +524,7 @@ q="$1"; h="$2"
                         leftMargin: 16
                         rightMargin: 12
                     }
-                    height: 52
+                    height: content.headerHeight
                     spacing: 8
 
                     MaterialSymbol {
