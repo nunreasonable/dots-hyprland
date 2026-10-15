@@ -13,6 +13,7 @@ Singleton {
     property bool collecting: false
     property string zipPath: ""
     property string lastError: ""
+    property bool includeCrashDump: false
     readonly property string newIssueUrl: "https://github.com/nunreasonable/ii-windows/issues/new"
 
     function collect() {
@@ -22,7 +23,10 @@ Singleton {
         root.zipPath = "";
         root.lastError = "";
         const screens = Quickshell.screens.map(s => `${s.name} ${s.width}x${s.height} x${s.devicePixelRatio}`).join("; ");
-        reportProc.command = ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", FileUtils.trimFileProtocol(`${Directories.scriptPath}/report/collect-report.ps1`), "-Version", SelfUpdate.installedVersion, "-Screens", screens, "-Style", Config.options.appearance.visualStyle, "-Family", Config.options.panelFamily];
+        const command = ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", FileUtils.trimFileProtocol(`${Directories.scriptPath}/report/collect-report.ps1`), "-Version", SelfUpdate.installedVersion, "-Screens", screens, "-Style", Config.options.appearance.visualStyle, "-Family", Config.options.panelFamily];
+        if (root.includeCrashDump)
+            command.push("-IncludeDump");
+        reportProc.command = command;
         reportProc.running = true;
     }
 

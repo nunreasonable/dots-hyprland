@@ -2,7 +2,8 @@ param(
     [string]$Version = '',
     [string]$Screens = '',
     [string]$Style = '',
-    [string]$Family = ''
+    [string]$Family = '',
+    [switch]$IncludeDump
 )
 
 $ErrorActionPreference = 'Continue'
@@ -42,9 +43,11 @@ foreach ($log in $logs) {
 $install = Join-Path $env:LOCALAPPDATA 'ii-windows'
 CopyText (Join-Path $install 'setup.log') 'setup-log.txt' 200 3000
 
-$dump = Get-ChildItem -Path (Join-Path $env:LOCALAPPDATA 'quickshell') -Recurse -Filter '*.dmp' -ErrorAction SilentlyContinue |
-    Where-Object { $_.LastWriteTime -gt (Get-Date).AddDays(-7) } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-if ($dump) { Copy-Item -LiteralPath $dump.FullName (Join-Path $work ('crash-' + $dump.Name)) }
+if ($IncludeDump) {
+    $dump = Get-ChildItem -Path (Join-Path $env:LOCALAPPDATA 'quickshell') -Recurse -Filter '*.dmp' -ErrorAction SilentlyContinue |
+        Where-Object { $_.LastWriteTime -gt (Get-Date).AddDays(-7) } | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+    if ($dump) { Copy-Item -LiteralPath $dump.FullName (Join-Path $work ('crash-' + $dump.Name)) }
+}
 
 $info = New-Object Collections.Generic.List[string]
 if (-not $Version -and (Test-Path (Join-Path $install 'VERSION'))) { $Version = (Get-Content (Join-Path $install 'VERSION') -Raw).Trim() }
