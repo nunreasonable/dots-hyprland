@@ -22,16 +22,32 @@ Item {
         }
     }
 
+    property int windowsRequestId: -1
+
     function captureWindows() {
         if (!root.running) return;
-        const ok = (WindowsNative.ready && WindowsNative.screenshot)
-            ? WindowsNative.screenshot.captureScreen(root.screen.name, root.screenshotPath)
-            : false;
+        const shot = WindowsNative.ready ? WindowsNative.screenshot : null;
+        if (shot && typeof shot.captureScreenAsync === "function") {
+            root.windowsRequestId = shot.captureScreenAsync(root.screen.name, root.screenshotPath);
+            if (root.windowsRequestId < 0) Qt.callLater(() => root.finishWindows(false));
+            return;
+        }
+        const ok = shot ? shot.captureScreen(root.screen.name, root.screenshotPath) : false;
+        Qt.callLater(() => root.finishWindows(ok));
+    }
+
+    function finishWindows(ok) {
+        root.windowsRequestId = -1;
         if (!ok) console.warn("[TempScreenshotProcess] Native capture failed for", root.screen.name);
-        Qt.callLater(() => {
-            root.running = false;
-            root.exited(ok ? 0 : 1, 0);
-        });
+        root.running = false;
+        root.exited(ok ? 0 : 1, 0);
+    }
+
+    Connections {
+        target: Platform.isWindows && WindowsNative.ready ? WindowsNative.screenshot : null
+        function onCaptureFinished(requestId, ok) {
+            if (requestId === root.windowsRequestId) root.finishWindows(ok);
+        }
     }
 
     onRunningChanged: {
@@ -40,7 +56,9 @@ Item {
     }
 
     Component.onDestruction: {
-        if (Platform.isWindows && WindowsNative.ready)
-            WindowsNative.screenshot?.releaseCapture(root.screenshotPath);
+        if (!Platform.isWindows || !WindowsNative.ready || !WindowsNative.screenshot) return;
+        if (root.windowsRequestId > 0 && typeof WindowsNative.screenshot.cancelCapture === "function")
+            WindowsNative.screenshot.cancelCapture(root.windowsRequestId);
+        WindowsNative.screenshot.releaseCapture(root.screenshotPath);
     }
 }
