@@ -259,6 +259,9 @@ Singleton {
         return `${Directories.videoFrames}/${Qt.md5(root.normalizedPath(path))}.png`;
     }
 
+    readonly property bool systemDrawsWallpaper: Config.options.panelFamily !== "waffle"
+        && Config.options.windowsPort.backgroundBehindIcons && !Config.options.windowsPort.ownWallpaper
+
     function _retheme(path, darkMode, applyToSystem = true, videoPath = "") {
         const wn = WindowsNative.wallpaper;
         if (!wn) return;
@@ -284,7 +287,7 @@ Singleton {
         if (hasPath) {
             const target = videoPath.length > 0 ? videoPath : path;
             const changed = root.normalizedPath(target) !== root.normalizedPath(Config.options.background.wallpaperPath);
-            if (applyToSystem) wn.setWallpaper(path);
+            if (applyToSystem) wn.setWallpaper(path, root.systemDrawsWallpaper);
             Config.options.background.wallpaperPath = target;
             if (videoPath.length > 0) Config.options.background.thumbnailPath = path;
             if (applyToSystem && changed) root._syncWindowsLockScreen(path);
