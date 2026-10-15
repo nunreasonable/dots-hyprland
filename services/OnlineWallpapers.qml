@@ -23,6 +23,22 @@ Singleton {
     property var _naiveFullResults: []
     property var _blapplesFullResults: []
     property int localPageSize: 24
+    property int consumers: 0
+
+    onConsumersChanged: {
+        if (root.consumers <= 0)
+            root.release();
+    }
+
+    function release() {
+        root.results = [];
+        root._naiveFullResults = [];
+        root._blapplesFullResults = [];
+        root.totalPages = 0;
+        fetchProc.buffer = "";
+        fullFetchProc.buffer = "";
+        streamProc.items = [];
+    }
 
     signal fetched()
     signal fetchError(string message)
@@ -326,15 +342,26 @@ Singleton {
     Process {
         id: fullFetchProc
         property string provider: ""
-        stdout: StdioCollector { id: fullFetchCollector }
+        property string buffer: ""
+        onRunningChanged: {
+            if (running) buffer = "";
+        }
+        stdout: SplitParser {
+            onRead: data => {
+                fullFetchProc.buffer += data + "\n";
+            }
+        }
         onExited: (exitCode) => {
             root.loading = false;
+            const text = fullFetchProc.buffer;
+            fullFetchProc.buffer = "";
+            if (root.consumers <= 0) return;
             if (exitCode !== 0) {
                 root.fetchError(`${fullFetchProc.provider} fetch exited with code ${exitCode}`);
                 return;
             }
             try {
-                const data = JSON.parse(fullFetchCollector.text);
+                const data = JSON.parse(text);
                 const items = [];
                 for (const raw of data) {
                     if (!root._matchesLocalFilters(raw)) continue;
@@ -364,14 +391,17 @@ Singleton {
 
         onExited: (exitCode) => {
             root.loading = false;
+            const text = fetchProc.buffer;
+            fetchProc.buffer = "";
+            if (root.consumers <= 0) return;
             if (exitCode !== 0) {
                 root.fetchError("curl exited with code " + exitCode);
                 return;
             }
             if (fetchProc.provider === "unsplash") {
-                root._parseUnsplash(fetchProc.buffer);
+                root._parseUnsplash(text);
             } else if (fetchProc.provider === "pexels") {
-                root._parsePexels(fetchProc.buffer);
+                root._parsePexels(text);
             }
         }
     }

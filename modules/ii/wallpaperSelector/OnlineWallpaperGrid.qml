@@ -70,7 +70,11 @@ Item {
         root.downloadItem(item, true)
     }
 
-    Component.onCompleted: _syncAndFetch()
+    Component.onCompleted: {
+        OnlineWallpapers.consumers++;
+        _syncAndFetch();
+    }
+    Component.onDestruction: OnlineWallpapers.consumers--
 
     ListModel { id: wallpaperModel }
 
