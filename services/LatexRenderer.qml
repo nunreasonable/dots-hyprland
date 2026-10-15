@@ -22,6 +22,26 @@ Singleton {
     property list<string> processedHashes: []
     property var processedExpressions: ({})
     property var renderedImagePaths: ({})
+    readonly property int maxEntries: 300
+
+    function _remember(hash, expression) {
+        const index = root.processedHashes.indexOf(hash)
+        if (index !== -1) root.processedHashes.splice(index, 1)
+        root.processedHashes.push(hash)
+        root.processedExpressions[hash] = expression
+        while (root.processedHashes.length > root.maxEntries) {
+            const evicted = root.processedHashes.shift()
+            delete root.processedExpressions[evicted]
+            delete root.renderedImagePaths[evicted]
+        }
+    }
+
+    function _forget(hash) {
+        const index = root.processedHashes.indexOf(hash)
+        if (index !== -1) root.processedHashes.splice(index, 1)
+        delete root.processedExpressions[hash]
+        delete root.renderedImagePaths[hash]
+    }
     property string microtexBinaryDir: "/opt/MicroTeX"
     property string microtexBinaryName: "LaTeX"
     property string latexOutputPath: Directories.latexOutput
@@ -34,18 +54,24 @@ Singleton {
     */
     function requestRender(expression) {
         // 1. Hash it and initialize necessary variables
-        const hash = Qt.md5(expression)
+        const hash = Qt.md5(`${expression}|${Appearance.colors.colOnLayer1}|${Appearance.font.pixelSize.normal}`)
         const imagePath = `${latexOutputPath}/${hash}.svg`
         
         // 2. Check if the hash is already processed
-        if (processedHashes.includes(hash)) {
+        if (root.processedExpressions[hash] !== undefined) {
             // console.log("Already processed: " + hash)
+            root._remember(hash, expression)
             renderFinished(hash, imagePath)
             return [hash, false]
         } else {
-            root.processedHashes.push(hash)
-            root.processedExpressions[hash] = expression
+            root._remember(hash, expression)
             // console.log("Rendering expression: " + expression)
+        }
+
+        if (Platform.isWindows && WindowsNative.fsUtils?.classify(imagePath) === "file") {
+            root.renderedImagePaths[hash] = imagePath
+            Qt.callLater(() => root.renderFinished(hash, imagePath))
+            return [hash, false]
         }
 
         if (Platform.isWindows) {
@@ -110,8 +136,7 @@ Singleton {
     function _requestRenderWindows(hash, expression, imagePath) {
         const matugenExe = WindowsNative.ready && WindowsNative.wallpaper ? WindowsNative.wallpaper.matugenPath() : ""
         if (!matugenExe) {
-            const idx = root.processedHashes.indexOf(hash)
-            if (idx !== -1) root.processedHashes.splice(idx, 1)
+            root._forget(hash)
             console.warn("[LatexRenderer] can't locate the install dir (matugenPath() empty); will retry")
             root.renderFinished(hash, imagePath)
             return
