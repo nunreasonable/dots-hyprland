@@ -82,6 +82,14 @@ Singleton {
         if (Platform.isWindows) root._applyWindowsLockScreen(clean.length > 0 ? clean : root.stillPath);
     }
 
+    function _syncWindowsLockScreen(path) {
+        const wn = WindowsNative.wallpaper;
+        if (!wn || typeof wn.lockScreenMode !== "function") return;
+        if ((Config.options.background.lockWall ?? "") !== "") return;
+        if (wn.lockScreenMode() !== "picture") return;
+        root._applyWindowsLockScreen(path);
+    }
+
     function _applyWindowsLockScreen(path) {
         const wn = WindowsNative.wallpaper;
         if (!wn || typeof wn.setLockScreenImage !== "function" || !path || path.length === 0) return;
@@ -274,9 +282,12 @@ Singleton {
         if (applyToSystem) wn.setDarkMode(darkMode);
 
         if (hasPath) {
+            const target = videoPath.length > 0 ? videoPath : path;
+            const changed = root.normalizedPath(target) !== root.normalizedPath(Config.options.background.wallpaperPath);
             if (applyToSystem) wn.setWallpaper(path);
-            Config.options.background.wallpaperPath = videoPath.length > 0 ? videoPath : path;
+            Config.options.background.wallpaperPath = target;
             if (videoPath.length > 0) Config.options.background.thumbnailPath = path;
+            if (applyToSystem && changed) root._syncWindowsLockScreen(path);
         }
 
         if (Config.options.appearance.wallpaperTheming.enableAppsAndShell === false) {

@@ -140,7 +140,7 @@ ContentPage {
                     }
                     W.StyledToolTip {
                         text: Platform.isWindows
-                            ? Translation.tr("Off: pick a different picture for the lock screen. Windows shows it on its own lock screen.")
+                            ? Translation.tr("On: Windows' lock screen follows your wallpaper, unless it's set to Windows spotlight or a slideshow. Off: pick a different picture for the lock screen.")
                             : Translation.tr("Off: pick a different picture for the lock screen")
                     }
                 }
