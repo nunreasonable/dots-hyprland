@@ -129,6 +129,31 @@ Scope {
                 anchors.horizontalCenter: parent.horizontalCenter
                 active: (GlobalStates.overviewOpen || (Platform.isWindows && overviewLoader.kept)) && (Config?.options.overview.enable ?? true)
                 onLoaded: overviewLoader.kept = true
+
+                Connections {
+                    target: GlobalStates
+                    function onOverviewOpenChanged() {
+                        if (GlobalStates.overviewOpen)
+                            overviewReleaseTimer.stop();
+                        else if (Platform.isWindows && overviewLoader.kept)
+                            overviewReleaseTimer.restart();
+                    }
+                }
+
+                Timer {
+                    id: overviewReleaseTimer
+                    interval: 120000
+                    onTriggered: {
+                        overviewLoader.kept = false;
+                        overviewGcTimer.restart();
+                    }
+                }
+
+                Timer {
+                    id: overviewGcTimer
+                    interval: 2000
+                    onTriggered: gc()
+                }
                 sourceComponent: (Config?.options.overview.style ?? "default") === "niri" ? niriComponent : defaultComponent
                 Component {
                     id: defaultComponent
