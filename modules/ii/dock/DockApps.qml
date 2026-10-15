@@ -81,6 +81,7 @@ Item {
             && appTopLevel && appTopLevel.toplevels && appTopLevel.toplevels.length > 0
 
         property bool show: false
+        readonly property bool hasContent: previewPopup.show || body.opacity > 0
         property real cachedCenter: 0
         readonly property real shiftX: DockStyle.position === "left" ? -12 : DockStyle.position === "right" ? 12 : 0
         readonly property real shiftY: DockStyle.vertical ? 0 : 12
@@ -283,7 +284,7 @@ Item {
                         anchors.centerIn: parent
                         Repeater {
                             model: ScriptModel {
-                                values: previewPopup.appTopLevel?.toplevels ?? []
+                                values: previewPopup.hasContent ? (previewPopup.appTopLevel?.toplevels ?? []) : []
                             }
                             RippleButton {
                                 id: windowButton
