@@ -18,9 +18,36 @@ function Scrub([string]$text) {
     return [regex]::Replace($text, $userPattern, '$1<user>')
 }
 
+function ReadShared([string]$path) {
+    try {
+        $share = [IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete
+        $stream = New-Object IO.FileStream($path, [IO.FileMode]::Open, [IO.FileAccess]::Read, $share)
+        $reader = New-Object IO.StreamReader($stream, [Text.Encoding]::UTF8)
+        $text = $reader.ReadToEnd()
+        $reader.Dispose()
+        return @($text -split "`r?`n")
+    } catch {
+        return $null
+    }
+}
+
+function ReadHead([string]$path, [int]$count) {
+    try {
+        $share = [IO.FileShare]::ReadWrite -bor [IO.FileShare]::Delete
+        $stream = New-Object IO.FileStream($path, [IO.FileMode]::Open, [IO.FileAccess]::Read, $share)
+        $reader = New-Object IO.StreamReader($stream, [Text.Encoding]::UTF8)
+        $lines = for ($i = 0; $i -lt $count -and -not $reader.EndOfStream; $i++) { $reader.ReadLine() }
+        $reader.Dispose()
+        return ($lines -join "`n")
+    } catch {
+        return ''
+    }
+}
+
 function CopyText([string]$source, [string]$name, [int]$head, [int]$tail) {
     if (-not (Test-Path -LiteralPath $source)) { return }
-    $lines = [IO.File]::ReadAllLines($source, [Text.Encoding]::UTF8)
+    $lines = ReadShared $source
+    if ($null -eq $lines) { return }
     if ($lines.Count -gt ($head + $tail)) {
         $omitted = $lines.Count - $head - $tail
         $lines = @($lines[0..($head - 1)]) + @("... $omitted lines omitted ...") + @($lines[($lines.Count - $tail)..($lines.Count - 1)])
@@ -31,8 +58,10 @@ function CopyText([string]$source, [string]$name, [int]$head, [int]$tail) {
 
 $runRoot = Join-Path $env:LOCALAPPDATA 'quickshell\run\by-id'
 $logs = @(Get-ChildItem -Path $runRoot -Directory -ErrorAction SilentlyContinue |
+    Sort-Object CreationTime -Descending |
     ForEach-Object { Get-Item -LiteralPath (Join-Path $_.FullName 'log.log') -ErrorAction SilentlyContinue } |
-    Where-Object { $_ } | Sort-Object LastWriteTime -Descending | Select-Object -First 2)
+    Where-Object { $_ -and $_.Length -gt 0 -and (ReadHead $_.FullName 5) -match 'shell\.qml' } |
+    Select-Object -First 2)
 $index = 0
 foreach ($log in $logs) {
     $index++
