@@ -9,12 +9,16 @@ Item {
     property int duration: 1000
     readonly property bool failed: effect.status === ShaderEffect.Error
 
+    signal snapshotTaken
+
     ShaderEffectSource {
         id: fromTexture
         anchors.fill: parent
         visible: false
         sourceItem: root.source
         live: false
+        onScheduledUpdateCompleted: root.snapshotTaken()
+        Component.onCompleted: scheduleUpdate()
     }
 
     ShaderEffectSource {

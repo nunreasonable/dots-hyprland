@@ -160,6 +160,9 @@ Variants {
         property bool transitionPending: false
         property real transitionProgress: 1
         property bool shownWallpaperIsVideo: false
+        property string pendingWallpaperPath: ""
+        property bool pendingIsVideo: false
+        property bool swappingWallpaper: false
         readonly property bool transitionFailed: transitionLoader.item?.failed ?? false
 
         // Layer props
@@ -245,17 +248,38 @@ Variants {
             const effective = bgRoot.currentEffectivePath();
             const toVideo = Wallpapers.isVideoPath(effective);
             const next = toVideo ? Config.options.background.thumbnailPath : effective;
-            if (next === bgRoot.wallpaperPath)
+            if (next === (bgRoot.pendingWallpaperPath !== "" ? bgRoot.pendingWallpaperPath : bgRoot.wallpaperPath))
                 return;
             bgRoot.finishTransition();
             if (bgRoot.canAnimateWallpaperChange()) {
                 bgRoot.transitionShader = bgRoot.pickTransitionShader(toVideo);
                 bgRoot.transitionProgress = 0;
                 bgRoot.transitionPending = true;
+                bgRoot.pendingWallpaperPath = next;
+                bgRoot.pendingIsVideo = toVideo;
                 bgRoot.transitionLive = true;
+                snapshotTimeout.restart();
+                return;
             }
-            bgRoot.shownWallpaperIsVideo = toVideo;
-            bgRoot.wallpaperPath = next;
+            bgRoot.showWallpaper(next, toVideo);
+        }
+
+        function showWallpaper(path, isVideo) {
+            bgRoot.swappingWallpaper = true;
+            if (Platform.isWindows)
+                bgRoot.updateZoomScale(path);
+            bgRoot.shownWallpaperIsVideo = isVideo;
+            bgRoot.wallpaperPath = path;
+            bgRoot.swappingWallpaper = false;
+        }
+
+        function applyPendingWallpaper() {
+            snapshotTimeout.stop();
+            if (bgRoot.pendingWallpaperPath === "")
+                return;
+            const path = bgRoot.pendingWallpaperPath;
+            bgRoot.pendingWallpaperPath = "";
+            bgRoot.showWallpaper(path, bgRoot.pendingIsVideo);
         }
 
         function finishTransition() {
@@ -263,6 +287,13 @@ Variants {
             bgRoot.transitionPending = false;
             bgRoot.transitionLive = false;
             bgRoot.transitionProgress = 1;
+            bgRoot.applyPendingWallpaper();
+        }
+
+        Timer {
+            id: snapshotTimeout
+            interval: 250
+            onTriggered: bgRoot.applyPendingWallpaper()
         }
 
         NumberAnimation {
@@ -283,9 +314,9 @@ Variants {
         }
 
         // Wallpaper zoom scale
-        function updateZoomScale() {
+        function updateZoomScale(path = bgRoot.wallpaperPath) {
             if (Platform.isWindows) {
-                const size = WindowsNative.imageTools?.imageSize(bgRoot.wallpaperPath);
+                const size = WindowsNative.imageTools?.imageSize(path);
                 if (size && size.width > 0 && size.height > 0) bgRoot.applyWallpaperSize(size.width, size.height);
                 return;
             }
@@ -530,12 +561,14 @@ Variants {
                     source: (bgRoot.wallpaperSafetyTriggered || !bgRoot.drawsWallpaper) ? "" : bgRoot.wallpaperPath
                     fillMode: Image.PreserveAspectCrop
                     Behavior on x {
+                        enabled: !bgRoot.swappingWallpaper
                         NumberAnimation {
                             duration: 600
                             easing.type: Easing.OutCubic
                         }
                     }
                     Behavior on y {
+                        enabled: !bgRoot.swappingWallpaper
                         NumberAnimation {
                             duration: 600
                             easing.type: Easing.OutCubic
@@ -645,6 +678,7 @@ Variants {
                     shader: bgRoot.transitionShader
                     progress: bgRoot.transitionProgress
                     duration: transitionAnim.duration
+                    onSnapshotTaken: bgRoot.applyPendingWallpaper()
                 }
             }
 
