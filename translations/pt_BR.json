@@ -1954,5 +1954,7 @@
   "Use the main one": "Usar o principal",
   "Only for %1": "Só para %1",
   "Use the main wallpaper on this desktop": "Usar o papel de parede principal nesta área de trabalho",
-  "This desktop": "Esta área de trabalho"
+  "This desktop": "Esta área de trabalho",
+  "Show the brightness indicator for changes made outside ii": "Mostrar o indicador de brilho para mudanças feitas fora do ii",
+  "Your display doesn't allow extra dimming": "Seu monitor não permite esse escurecimento extra"
 }

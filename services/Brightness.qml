@@ -212,6 +212,7 @@ Singleton {
                 monitor.applyingSystem = true;
                 monitor.brightness = systemBrightness;
                 monitor.applyingSystem = false;
+                monitor.maybeSignalOutsideChange(systemBrightness);
             }
         }
 
@@ -262,6 +263,23 @@ Singleton {
 
         function setBrightnessMultiplier(value: real): void {
             monitor.brightnessMultiplier = value;
+        }
+
+        property real _lastSignaledOutsideBrightness: -1
+        property double _lastSignaledOutsideTimeMs: 0
+
+        function maybeSignalOutsideChange(current: real): void {
+            if (!(Config.options?.osd?.showBrightnessOutsideChanges ?? false)) return;
+            if (monitor._lastSignaledOutsideBrightness < 0) {
+                monitor._lastSignaledOutsideBrightness = current;
+                return;
+            }
+            if (Math.abs(current - monitor._lastSignaledOutsideBrightness) < 0.02) return;
+            const now = Date.now();
+            if (now - monitor._lastSignaledOutsideTimeMs < 300) return;
+            monitor._lastSignaledOutsideBrightness = current;
+            monitor._lastSignaledOutsideTimeMs = now;
+            root.brightnessChanged();
         }
     }
 

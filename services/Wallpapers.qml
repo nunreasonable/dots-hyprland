@@ -415,7 +415,7 @@ Singleton {
             return;
         }
 
-        if (applyToSystem) wn.setDarkMode(darkMode);
+        if (applyToSystem && !AutoTheme.followingWindows) wn.setDarkMode(darkMode);
 
         if (hasPath) {
             const target = videoPath.length > 0 ? videoPath : path;
