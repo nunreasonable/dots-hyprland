@@ -1132,6 +1132,27 @@ ContentPage {
                         text: Translation.tr("Sidebars, the bar, the dock and other panels slide or fade in and out, like on Hyprland.\nOff while game mode is on or Menu and tooltip animations are off")
                     }
                 }
+                ConfigSelectionArray {
+                    visible: Config.options.windowsPort.panelAnimations
+                    text: Translation.tr("Animation style")
+                    icon: "auto_awesome"
+                    currentValue: Config.options.windowsPort.panelAnimationStyle
+                    onSelected: newValue => {
+                        Config.options.windowsPort.panelAnimationStyle = newValue;
+                    }
+                    options: [
+                        { displayName: Translation.tr("Standard"), icon: "animation", value: "standard" },
+                        { displayName: Translation.tr("Expressive"), icon: "auto_awesome", value: "expressive" }
+                    ]
+                    HoverHandler {
+                        id: animationStyleHover
+                    }
+                    W.StyledToolTip {
+                        extraVisibleCondition: false
+                        alternativeVisibleCondition: animationStyleHover.hovered
+                        text: Translation.tr("Expressive adds springy motion, content that arrives in a cascade, blur, dissolve and reveal effects.\nIt uses a little more of the graphics card while a panel opens or closes, and its effects are unloaded after 2 minutes without use.\nComputers without a graphics card always use Standard")
+                    }
+                }
                 ConfigSwitch {
                     buttonIcon: "check"
                     text: Translation.tr("Menu and tooltip animations")

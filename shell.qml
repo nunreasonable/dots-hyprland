@@ -231,6 +231,12 @@ ShellRoot {
         property: "panelAnimations"
         value: Config.options.windowsPort.panelAnimations && Appearance.animationsEnabled
     }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.blur
+        property: "panelAnimationStyle"
+        value: Config.options.windowsPort.panelAnimations ? Config.options.windowsPort.panelAnimationStyle : "standard"
+    }
 
     // Panel families
     property list<string> families: ["ii", "waffle"]

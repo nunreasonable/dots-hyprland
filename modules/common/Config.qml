@@ -726,6 +726,7 @@ Singleton {
                 property bool ownWallpaper: false
                 property bool superDrag: true
                 property bool panelAnimations: true
+                property string panelAnimationStyle: "standard"
                 property JsonObject tiling: JsonObject {
                     property bool enable: false
                     property int gapsIn: 4
