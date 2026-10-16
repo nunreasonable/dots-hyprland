@@ -146,6 +146,11 @@ Singleton {
                     property string namedSchemePrimary: ""
                     property string namedSchemeSecondary: ""
                 }
+                property JsonObject autoTheme: JsonObject {
+                    property string mode: "off"
+                    property string scheduleLightTime: "07:00"
+                    property string scheduleDarkTime: "19:00"
+                }
             }
 
             property JsonObject audio: JsonObject {

@@ -1931,5 +1931,10 @@
   "Couldn't create the report: %1": "Não foi possível criar o relatório: %1",
   "Saved %1. Attach it to the issue that just opened.": "Salvo em %1. Anexe na issue que acabou de abrir.",
   "Saves ii's logs and some system info (Windows build, GPU, screens, fonts) to a zip on your Desktop and opens a new issue on GitHub. Your user name is taken out of the paths; have a look at the files before you send them. A crash dump helps with crashes, but it can hold bits of what ii had in memory, like clipboard text or chats, so it only goes in if you turn it on.": "Salva os logs do ii e algumas informações do sistema (build do Windows, GPU, telas, fontes) num zip na Área de Trabalho e abre uma issue nova no GitHub. O seu nome de usuário é tirado dos caminhos; dê uma olhada nos arquivos antes de enviar. Um crash dump ajuda com travamentos, mas pode ter pedaços do que estava na memória do ii, como texto do clipboard ou conversas, então só vai junto se você ligar.",
-  "Include the latest crash dump": "Incluir o crash dump mais recente"
+  "Include the latest crash dump": "Incluir o crash dump mais recente",
+  "Automatic theme": "Tema automático",
+  "Switches between light and dark on its own. Using the Light/Dark buttons above switches this back to \"Off\".": "Alterna entre claro e escuro por conta própria. Usar os botões Claro/Escuro acima volta isso para \"Desligado\".",
+  "Follow Windows": "Seguir o Windows",
+  "Light at": "Claro às",
+  "Dark at": "Escuro às"
 }

@@ -35,6 +35,7 @@ ShellRoot {
             Updates.load()
         }
         Wallpapers.load()
+        AutoTheme.load()
         VisualStyle.load()
         PeripheralBattery.load()
         if (Platform.isWindows) {
