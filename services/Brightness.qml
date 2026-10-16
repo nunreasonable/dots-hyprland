@@ -4,6 +4,7 @@ pragma ComponentBehavior: Bound
 // From https://github.com/caelestia-dots/shell with modifications.
 // License: GPLv3
 
+import qs
 import qs.modules.common
 import qs.modules.common.functions
 import Quickshell
@@ -51,7 +52,7 @@ Singleton {
 
     function increaseBrightness(): void {
         // if gamma is not yet 100, first increase gamma
-        if (Hyprsunset.gamma !== 100) {
+        if (!Platform.isWindows && Hyprsunset.gamma !== 100) {
             Hyprsunset.setGamma(Hyprsunset.gamma + 5);
             return;
         }
@@ -68,8 +69,30 @@ Singleton {
         if (monitor && monitor.brightness > 0) 
             monitor.setBrightness(monitor.brightness - 0.05);
         // if brightness is 0, then decrease gamma
-        else {
+        else if (!Platform.isWindows) {
             Hyprsunset.setGamma(Hyprsunset.gamma - 5);
+        }
+    }
+
+    function refreshFromSystem(): void {
+        if (!Platform.isWindows || !WindowsNative.brightness)
+            return;
+        for (const monitor of root.monitors) {
+            if (monitor.ready)
+                WindowsNative.brightness.refresh(monitor.screen.name);
+        }
+    }
+
+    Connections {
+        target: GlobalStates
+        enabled: Platform.isWindows
+        function onSidebarRightOpenChanged() {
+            if (GlobalStates.sidebarRightOpen)
+                root.refreshFromSystem();
+        }
+        function onSidebarLeftOpenChanged() {
+            if (GlobalStates.sidebarLeftOpen)
+                root.refreshFromSystem();
         }
     }
 
@@ -129,14 +152,17 @@ Singleton {
         property real multipliedBrightness: Math.max(0, Math.min(1, brightness * (Config.options.light.antiFlashbang.enable ? brightnessMultiplier : 1)))
         property bool ready: false
         property bool animateChanges: !monitor.isDdc
+        property string method: ""
+        readonly property bool softwareDimming: monitor.method === "software"
+        property bool applyingSystem: false
 
         onBrightnessChanged: {
-            if (!monitor.ready) return;
+            if (!monitor.ready || monitor.applyingSystem) return;
             root.brightnessChanged();
         }
 
         Behavior on multipliedBrightness {
-            enabled: monitor.ready && monitor.animateChanges
+            enabled: monitor.ready && monitor.animateChanges && !monitor.applyingSystem
             NumberAnimation {
                 duration: 200
                 easing.type: Easing.BezierSpline
@@ -144,7 +170,7 @@ Singleton {
             }
         }
         onMultipliedBrightnessChanged: {
-            if (!monitor.ready) return;
+            if (!monitor.ready || monitor.applyingSystem) return;
             if (monitor.animationEnabled) syncBrightness();
             else setTimer.restart();
         }
@@ -175,6 +201,17 @@ Singleton {
                 monitor.brightness = available ? queriedBrightness : 1;
                 monitor.ready = true;
                 root.initializeMonitor(root.monitors.indexOf(monitor) + 1);
+            }
+            function onRouteChanged(screenName, method) {
+                if (screenName !== monitor.screen.name) return;
+                monitor.method = method;
+                monitor.isDdc = method === "ddc" || method === "software";
+            }
+            function onSystemBrightnessChanged(screenName, systemBrightness) {
+                if (screenName !== monitor.screen.name || !monitor.ready) return;
+                monitor.applyingSystem = true;
+                monitor.brightness = systemBrightness;
+                monitor.applyingSystem = false;
             }
         }
 

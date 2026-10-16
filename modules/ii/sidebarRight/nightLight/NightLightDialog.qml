@@ -156,14 +156,17 @@ WindowDialog {
             }
             value: root.brightnessMonitor.brightness
             onMoved: root.brightnessMonitor.setBrightness(value)
+            tooltipContent: root.brightnessMonitor?.softwareDimming ? Translation.tr("%1 (software dimming)").arg(`${Math.round(value * 100)}%`) : `${Math.round(value * 100)}%`
         }
     }
 
     WindowDialogSectionHeader {
+        visible: !Platform.isWindows
         text: Translation.tr("Gamma")
     }
 
     WindowDialogSeparator {
+        visible: !Platform.isWindows
         Layout.topMargin: -22
         Layout.leftMargin: 0
         Layout.rightMargin: 0
@@ -176,6 +179,7 @@ WindowDialog {
         Layout.fillHeight: true
 
         WindowDialogSlider {
+            visible: !Platform.isWindows
             anchors {
                 left: parent.left
                 right: parent.right
