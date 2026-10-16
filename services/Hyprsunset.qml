@@ -126,7 +126,8 @@ Singleton {
     }
 
     function setGamma(gamma) {
-        root.gamma = Math.max(root.gammaLowerLimit, Math.min(100, gamma));
+        const lowerLimit = Platform.isWindows ? 0 : root.gammaLowerLimit;
+        root.gamma = Math.max(lowerLimit, Math.min(100, gamma));
 
         root.gammaChangeAttempt();
 
