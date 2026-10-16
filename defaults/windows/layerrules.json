@@ -6,13 +6,15 @@
     "namespace: regex matched against the whole WlrLayershell.namespace, like Hyprland. blur: true/false. ignoreAlpha: blur only behind Rectangle items whose fill (opacity included) is more opaque than this (0-1; 1 = nothing); null = behind the whole surface.",
     "Windows approximates ignore_alpha with Rectangle fills instead of pixels, so text and images don't get blur of their own. Blur is off while Windows' Transparency effects setting is off, or high contrast or energy saver is on.",
     "animation: how the panel appears and disappears, in Hyprland's words. \"slide\" comes in from the nearest screen edge the panel is anchored to, \"slide top\"/\"slide bottom\"/\"slide left\"/\"slide right\" from that edge; \"popin N%\" grows from N% of its size; all of them fade too. \"fade\" only fades, \"noAnim\" (Hyprland's no_anim) or null doesn't animate. Timing follows the layersIn, layersOut and fadeLayers animations of dots/.config/hypr/hyprland/general.lua.",
-    "Panels no rule gives an animation don't animate. Hyprland pops every other layer in (layersIn \"popin 93%\"); a first rule {\"namespace\": \".*\", \"animation\": \"popin 93%\"} in the user file does the same here.",
+    "Like Hyprland's layersIn, the first rule pops every panel in from 93% unless a later rule says otherwise. The rules before quickshell:background turn it off for panels that animate themselves in QML (spotlight, settings, now playing, bar popups) or must appear at once (color picker, screen frame, drop target, desktop).",
     "Windows draws a panel only inside its own window, so a slide starts at the window's edge rather than off screen. Animations are off while the setting \"Animate panels when they open and close\", game mode or Windows' Animation effects setting is off, for panels inside the desktop (wallpaper, desktop widgets), and for windows with a background color.",
     "enable: false turns blur behind panels off (animations stay). layered: true adds WS_EX_LAYERED to the blur windows (only if clicks next to a blurred panel get stuck). blur_popups, xray and order have no Windows counterpart.",
     "quickshell:background has no blur, like upstream's rules.lua: ii's wallpaper covers the Windows desktop, so blur behind it would never show."
   ],
   "enable": true,
   "rules": [
+    {"namespace": ".*", "animation": "popin 93%"},
+
     {"namespace": "walker", "animation": "noAnim"},
     {"namespace": "selection", "animation": "noAnim"},
     {"namespace": "overview", "animation": "noAnim"},
@@ -44,7 +46,7 @@
     {"namespace": "quickshell:bar", "animation": "slide"},
     {"namespace": "quickshell:actionCenter", "animation": "noAnim"},
     {"namespace": "quickshell:cheatsheet", "animation": "slide bottom"},
-    {"namespace": "quickshell:dock", "animation": "slide bottom"},
+    {"namespace": "quickshell:dock", "animation": "slide"},
     {"namespace": "quickshell:screenCorners", "animation": "popin 120%"},
     {"namespace": "quickshell:lockWindowPusher", "animation": "noAnim"},
     {"namespace": "quickshell:notificationPopup", "animation": "fade"},
@@ -66,6 +68,8 @@
     {"namespace": "quickshell:wOnScreenDisplay", "animation": "noAnim"},
     {"namespace": "quickshell:wStartMenu", "animation": "noAnim"},
     {"namespace": "quickshell:wTaskView", "animation": "noAnim", "ignoreAlpha": 0},
+
+    {"namespace": "quickshell:(spotlight|settings|nowPlaying|popup|colorPicker|screenframe|dropover|background|backgroundWidgets)", "animation": "noAnim"},
 
     {"namespace": "quickshell:background", "blur": false},
 
