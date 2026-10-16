@@ -14,6 +14,10 @@ Rectangle {
 
     property var screen: root.QsWindow.window?.screen
     property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
+    readonly property string windowsBrightnessTooltip: {
+        const percent = `${Math.round((root.brightnessMonitor?.brightness ?? 0) * 100)}%`;
+        return root.brightnessMonitor?.softwareDimming ? Translation.tr("%1 (software dimming)").arg(percent) : percent;
+    }
 
     implicitWidth: contentItem.implicitWidth + root.horizontalPadding * 2
     implicitHeight: contentItem.implicitHeight + root.verticalPadding * 2
@@ -41,11 +45,15 @@ Rectangle {
             active: Config.options.sidebar.quickSliders.showBrightness
             sourceComponent: QuickSlider {
                 materialSymbol: "light_mode"
-                secondaryMaterialSymbol: "wb_twilight"
-                stopIndicatorValues: Hyprsunset.gamma !== 100 && root.brightnessMonitor?.brightness !== 0 ? [0.3 + root.brightnessMonitor?.brightness * 0.7] : []
-                value: Hyprsunset.gamma === 100? 0.3 + root.brightnessMonitor?.brightness * 0.7 : (Hyprsunset.gamma - Hyprsunset.gammaLowerLimit) / (100 - Hyprsunset.gammaLowerLimit) * 0.3
-                tooltipContent: Hyprsunset.gamma === 100 ? `${Math.round(root.brightnessMonitor?.brightness * 100)}%` : `${Translation.tr("Gamma")} ${Hyprsunset.gamma}%`
+                secondaryMaterialSymbol: Platform.isWindows ? "" : "wb_twilight"
+                stopIndicatorValues: !Platform.isWindows && Hyprsunset.gamma !== 100 && root.brightnessMonitor?.brightness !== 0 ? [0.3 + root.brightnessMonitor?.brightness * 0.7] : []
+                value: Platform.isWindows ? (root.brightnessMonitor?.brightness ?? 0) : Hyprsunset.gamma === 100? 0.3 + root.brightnessMonitor?.brightness * 0.7 : (Hyprsunset.gamma - Hyprsunset.gammaLowerLimit) / (100 - Hyprsunset.gammaLowerLimit) * 0.3
+                tooltipContent: Platform.isWindows ? root.windowsBrightnessTooltip : Hyprsunset.gamma === 100 ? `${Math.round(root.brightnessMonitor?.brightness * 100)}%` : `${Translation.tr("Gamma")} ${Hyprsunset.gamma}%`
                 onMoved: {
+                    if (Platform.isWindows) {
+                        root.brightnessMonitor?.setBrightness(value);
+                        return;
+                    }
                     if (value >= 0.3) {
                         // 0.3 - 1.0 brightness
                         root.brightnessMonitor.setBrightness((value - 0.3) / 0.7);

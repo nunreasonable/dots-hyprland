@@ -34,6 +34,7 @@ ColumnLayout {
             Layout.fillWidth: true
             value: root.brightnessMonitor?.brightness ?? 0
             scrollable: true
+            tooltipContent: root.brightnessMonitor?.softwareDimming ? Translation.tr("%1 (software dimming)").arg(Math.round(value * 100)) : `${Math.round(value * 100)}`
             onMoved: {
                 root.brightnessMonitor?.setBrightness(value)
             }

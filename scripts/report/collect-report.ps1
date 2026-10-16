@@ -101,6 +101,27 @@ foreach ($gpu in @(Get-CimInstance Win32_VideoController -ErrorAction SilentlyCo
 }
 $info.Add("screens: $Screens")
 
+function OneLine([string]$text) {
+    return ($text -replace '\s+', ' ').Trim()
+}
+
+try {
+    $panels = @(Get-CimInstance -Namespace root/wmi -ClassName WmiMonitorBrightness -OperationTimeoutSec 15 -ErrorAction Stop)
+    if ($panels.Count -eq 0) { $info.Add("brightness (wmi): no instances") }
+    foreach ($panel in $panels) {
+        $info.Add("brightness (wmi): $($panel.InstanceName) current $($panel.CurrentBrightness) active $($panel.Active) levels $($panel.Levels)")
+    }
+} catch {
+    $info.Add("brightness (wmi): " + (OneLine $_.Exception.Message))
+}
+try {
+    foreach ($link in @(Get-CimInstance -Namespace root/wmi -ClassName WmiMonitorConnectionParams -OperationTimeoutSec 15 -ErrorAction Stop)) {
+        $info.Add("monitor connection (wmi): $($link.InstanceName) output $($link.VideoOutputTechnology) active $($link.Active)")
+    }
+} catch {
+    $info.Add("monitor connection (wmi): " + (OneLine $_.Exception.Message))
+}
+
 $systemFonts = @(Get-ChildItem (Join-Path $env:WINDIR 'Fonts') -File -ErrorAction SilentlyContinue).Count
 $userFonts = @(Get-ChildItem (Join-Path $env:LOCALAPPDATA 'Microsoft\Windows\Fonts') -File -ErrorAction SilentlyContinue).Count
 $info.Add("fonts: $systemFonts for all users, $userFonts for this user")
