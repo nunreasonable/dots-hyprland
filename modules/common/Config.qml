@@ -761,6 +761,7 @@ Singleton {
                     property int lock: 0
                 }
                 property JsonObject selfUpdate: JsonObject {
+                    property bool enableCheck: true
                     property bool notify: true
                 }
             }

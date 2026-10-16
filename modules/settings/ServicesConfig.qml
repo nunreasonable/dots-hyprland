@@ -620,6 +620,30 @@ ContentPage {
     // }
 
     ContentSection {
+        visible: Platform.isWindows
+        icon: "deployed_code_update"
+        title: Translation.tr("App updates")
+
+        StyledText {
+            Layout.fillWidth: true
+            text: Translation.tr("Uses winget to count installed apps with available updates.")
+            font.pixelSize: Appearance.font.pixelSize.smaller
+            color: Appearance.colors.colSubtext
+            wrapMode: Text.Wrap
+        }
+
+        ConfigSwitch {
+            buttonIcon: "apps"
+            text: Translation.tr("Count apps with available updates")
+            checked: Config.options.updates.enableCheck
+            onCheckedChanged: {
+                if (checked !== Config.options.updates.enableCheck)
+                    Config.options.updates.enableCheck = checked;
+            }
+        }
+    }
+
+    ContentSection {
         icon: "weather_mix"
         title: Translation.tr("Weather")
 
