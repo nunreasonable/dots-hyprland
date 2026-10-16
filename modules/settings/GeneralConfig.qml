@@ -590,6 +590,15 @@ ContentPage {
                         }
                     ]
                 }
+
+                StyledText {
+                    text: Translation.tr("\"No\" removes the AI tab from the left sidebar entirely")
+                    font.pixelSize: Appearance.font.pixelSize.smaller
+                    color: Appearance.colors.colSubtext
+                    wrapMode: Text.WordWrap
+                    Layout.fillWidth: true
+                    Layout.maximumWidth: 260
+                }
             }
 
             // Weeb policy

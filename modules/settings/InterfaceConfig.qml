@@ -1501,7 +1501,7 @@ ContentPage {
 
         ContentSubsection {
             title: Translation.tr("Corner open")
-            tooltip: Translation.tr("Allows you to open sidebars by clicking or hovering screen corners regardless of bar position")
+            tooltip: Translation.tr("Allows you to open sidebars by clicking or hovering screen corners regardless of bar position. To require a click everywhere, turn off both \"Hover to trigger\" and \"Force hover open at absolute corner\" below")
             ConfigRow {
                 uniform: true
                 ConfigSwitch {
@@ -1522,7 +1522,7 @@ ContentPage {
                 }
 
                 StyledToolTip {
-                    text: Translation.tr("When this is off you'll have to click")
+                    text: Translation.tr("When this is off you'll have to click, except right at the corner's edge if \"Force hover open at absolute corner\" below is on")
                 }
             }
             Row {
@@ -1535,7 +1535,7 @@ ContentPage {
                     }
 
                     StyledToolTip {
-                        text: Translation.tr("When the previous option is off and this is on,\nyou can still hover the corner's end to open sidebar,\nand the remaining area can be used for volume/brightness scroll")
+                        text: Translation.tr("Opens on hover right at the corner's edge even when \"Hover to trigger\" above is off — this is usually what catches an accidental flick of the mouse into a corner. Turn this off too for click-only. The remaining area can still be used for volume/brightness scroll")
                     }
                 }
                 ConfigSpinBox {
