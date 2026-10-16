@@ -193,6 +193,13 @@ ContentPage {
                                 { displayName: Translation.tr("Local only"), icon: "sync_saved_locally", value: 2 }
                             ]
                         }
+                        W.StyledText {
+                            text: Translation.tr("\"No\" removes the AI tab from the left sidebar entirely")
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            color: Appearance.colors.colSubtext
+                            wrapMode: Text.WordWrap
+                            Layout.fillWidth: true
+                        }
                     }
                 }
 
@@ -468,7 +475,7 @@ ContentPage {
             icon: "screenshot_frame_2"
             shape: W.MaterialShape.Shape.Gem
             title: Translation.tr("Hot Corners")
-            hint: Translation.tr("Allows you to open sidebars by clicking or hovering screen corners regardless of bar position")
+            hint: Translation.tr("Allows you to open sidebars by clicking or hovering screen corners regardless of bar position. To require a click everywhere, turn off both \"Hover to trigger\" and \"Force hover open at absolute corner\" below")
 
             GroupedList {
                 ConfigSwitch {
@@ -483,7 +490,7 @@ ContentPage {
                     checked: Config.options.sidebar.cornerOpen.clickless
                     onCheckedChanged: { Config.options.sidebar.cornerOpen.clickless = checked }
                     W.StyledToolTip {
-                        text: Translation.tr("When this is off you'll have to click")
+                        text: Translation.tr("When this is off you'll have to click, except right at the corner's edge if \"Force hover open at absolute corner\" below is on")
                     }
                 }
                 ConfigSwitch {
@@ -493,7 +500,7 @@ ContentPage {
                     checked: Config.options.sidebar.cornerOpen.clicklessCornerEnd
                     onCheckedChanged: { Config.options.sidebar.cornerOpen.clicklessCornerEnd = checked }
                     W.StyledToolTip {
-                        text: Translation.tr("When the previous option is off and this is on,\nyou can still hover the corner's end to open sidebar,\nand the remaining area can be used for volume/brightness scroll")
+                        text: Translation.tr("Opens on hover right at the corner's edge even when \"Hover to trigger\" above is off — this is usually what catches an accidental flick of the mouse into a corner. Turn this off too for click-only. The remaining area can still be used for volume/brightness scroll")
                     }
                 }
                 ConfigSpinBox {
