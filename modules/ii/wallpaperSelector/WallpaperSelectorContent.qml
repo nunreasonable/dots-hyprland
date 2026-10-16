@@ -27,6 +27,8 @@ MouseArea {
     readonly property string targetDesktopId: Wallpapers.selectorDesktopId
     readonly property string targetDesktopWallpaper: Wallpapers.desktopWallpaperFor(root.targetDesktopId)
     readonly property string currentTargetPath: root.targetDesktopWallpaper || Config.options.background.wallpaperPath
+    readonly property bool targetShown: root.targetDesktopId === Wallpapers.currentDesktopId
+        || (root.targetDesktopId === "" && Wallpapers.currentDesktopWallpaper === "")
 
     property bool spicyRevealed: false
     readonly property bool inSpicyDir: Wallpapers.isInSpicyFolder(Wallpapers.effectiveDirectory)
@@ -168,7 +170,7 @@ MouseArea {
     function queuePreview() {
         if (!Config.options.background.enableWallpaperPreview || GlobalStates.wallpaperSelectorTarget === "lockWall"
             || root.source !== "local" || root.spicyBlurActive
-            || (root.targetDesktopId !== "" && root.targetDesktopId !== Wallpapers.currentDesktopId))
+            || !root.targetShown)
             return;
         previewTimer.restart();
     }

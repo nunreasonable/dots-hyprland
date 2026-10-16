@@ -159,6 +159,8 @@ Singleton {
             && normalized(current) === normalized(Config.options.background.thumbnailPath)) return;
         if (root._isDesktopWallpaper(current)) return;
         if (root.desktopWallpapersActive && root.currentDesktopId !== "" && !root.isVideoPath(current)) {
+            root._systemWallpaper = current;
+            root._systemShowsOwn = true;
             root.setDesktopWallpaper(root.currentDesktopId, current);
             return;
         }
@@ -482,8 +484,18 @@ Singleton {
     property string _systemWallpaper: ""
     property bool _systemShowsOwn: false
 
+    readonly property var _systemDesktopPaths: {
+        const paths = {};
+        if (!root.desktopWallpapersActive || !root.systemDrawsWallpaper) return paths;
+        for (const desktopId in root.desktopWallpaperPaths) {
+            const own = root.desktopWallpaperFor(desktopId);
+            if (own) paths[desktopId] = own;
+        }
+        return paths;
+    }
+
     readonly property string _desktopSyncState: (!Platform.isWindows || !root._shellProcess || !Config.ready || !WindowsNative.wallpaper) ? ""
-        : JSON.stringify([root.desktopWallpapersActive, root.systemDrawsWallpaper, root.desktopWallpaperPaths, root.stillPath,
+        : JSON.stringify([root.desktopWallpapersActive, root.systemDrawsWallpaper, root._systemDesktopPaths, root.stillPath,
             root.desktops.map(desktop => desktop.id)])
     on_DesktopSyncStateChanged: {
         if (root._desktopSyncState !== "") desktopSyncTimer.restart();
@@ -501,15 +513,8 @@ Singleton {
         const active = root.desktopWallpapersActive;
         if (!active && !root._desktopWallpapersSynced) return;
         const main = root.stillPath;
-        if (!main) return;
-        const paths = {};
-        if (active && root.systemDrawsWallpaper) {
-            for (const desktopId in root.desktopWallpaperPaths) {
-                const own = root.desktopWallpaperFor(desktopId);
-                if (own) paths[desktopId] = own;
-            }
-        }
-        root._nativeDesktopWallpapers = wn.setDesktopWallpapers(paths, main);
+        if (!main || root.isVideoPath(main)) return;
+        root._nativeDesktopWallpapers = wn.setDesktopWallpapers(root._systemDesktopPaths, main);
         root._desktopWallpapersSynced = active;
         root._desktopSyncChecked = true;
         root._syncSystemWallpaper();
@@ -519,11 +524,12 @@ Singleton {
         const wn = WindowsNative.wallpaper;
         if (!wn || !Config.ready || !root._shellProcess || !root._desktopSyncChecked || root._nativeDesktopWallpapers) return;
         const main = root.stillPath;
-        if (!main) return;
+        if (!main || root.isVideoPath(main)) return;
         if (root._systemWallpaper === "") {
-            root._systemWallpaper = wn.currentWallpaper() || main;
-            root._systemShowsOwn = root.normalizedPath(root._systemWallpaper) !== root.normalizedPath(main)
-                && root._isOwnDesktopWallpaper(root._systemWallpaper);
+            const shown = wn.currentWallpaper();
+            root._systemShowsOwn = !!shown && root.normalizedPath(shown) !== root.normalizedPath(main)
+                && root._isOwnDesktopWallpaper(shown);
+            root._systemWallpaper = root._systemShowsOwn ? shown : main;
         }
         const own = (root.desktopWallpapersActive && root.systemDrawsWallpaper) ? root.currentDesktopWallpaper : "";
         if (own === "" && !root._systemShowsOwn) return;
