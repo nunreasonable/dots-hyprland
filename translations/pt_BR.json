@@ -1941,5 +1941,6 @@
   "Switches between light and dark on its own. Using the Light/Dark buttons above switches this back to \"Off\".": "Alterna entre claro e escuro por conta própria. Usar os botões Claro/Escuro acima volta isso para \"Desligado\".",
   "Follow Windows": "Seguir o Windows",
   "Light at": "Claro às",
-  "Dark at": "Escuro às"
+  "Dark at": "Escuro às",
+  "Show the brightness indicator for changes made outside ii": "Mostrar o indicador de brilho para mudanças feitas fora do ii"
 }

@@ -1479,6 +1479,14 @@ ContentPage {
                         Config.options.osd.timeout = value;
                     }
                 }
+                ConfigSwitch {
+                    buttonIcon: "brightness_6"
+                    text: Translation.tr("Show the brightness indicator for changes made outside ii")
+                    checked: Config.options.osd.showBrightnessOutsideChanges
+                    onCheckedChanged: {
+                        Config.options.osd.showBrightnessOutsideChanges = checked;
+                    }
+                }
             }
         }
 

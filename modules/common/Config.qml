@@ -784,6 +784,7 @@ Singleton {
 
             property JsonObject osd: JsonObject {
                 property int timeout: 1000
+                property bool showBrightnessOutsideChanges: false
             }
 
             property JsonObject osk: JsonObject {
