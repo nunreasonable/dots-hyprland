@@ -1945,5 +1945,14 @@
   "Switches between light and dark on its own. Using the Light/Dark buttons above switches this back to \"Off\".": "Alterna entre claro e escuro por conta própria. Usar os botões Claro/Escuro acima volta isso para \"Desligado\".",
   "Follow Windows": "Seguir o Windows",
   "Light at": "Claro às",
-  "Dark at": "Escuro às"
+  "Dark at": "Escuro às",
+  "A different wallpaper for each desktop": "Um papel de parede diferente para cada área de trabalho",
+  "Picking a wallpaper changes only the desktop you're on. Desktops without their own use the main wallpaper, and the colors always come from the main one.": "Escolher um papel de parede muda só a área de trabalho em que você está. As áreas de trabalho sem um próprio usam o papel de parede principal, e as cores sempre vêm do principal.",
+  "The collage shows on every desktop while it's on.": "Enquanto a colagem estiver ligada, ela aparece em todas as áreas de trabalho.",
+  "Click a desktop to pick its wallpaper. Only pictures can be set per desktop: a live wallpaper always becomes the main wallpaper.": "Clique numa área de trabalho para escolher o papel de parede dela. Só imagens podem ser usadas por área de trabalho: um papel de parede animado sempre vira o papel de parede principal.",
+  "Main wallpaper": "Papel de parede principal",
+  "Use the main one": "Usar o principal",
+  "Only for %1": "Só para %1",
+  "Use the main wallpaper on this desktop": "Usar o papel de parede principal nesta área de trabalho",
+  "This desktop": "Esta área de trabalho"
 }

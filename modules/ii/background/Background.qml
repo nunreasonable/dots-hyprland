@@ -77,6 +77,8 @@ Variants {
         readonly property string targetWallpaperPath: wallpaperIsVideo ? Config.options.background.thumbnailPath : effectiveWallpaperPath
         property string wallpaperPath: ""
         readonly property bool videoLayerActive: Platform.isWindows && wallpaperIsVideo && !wallpaperSafetyTriggered
+        readonly property bool videoLayerParked: Platform.isWindows && !videoLayerActive && Wallpapers.currentDesktopWallpaper !== ""
+            && Wallpapers.isVideoPath(Config.options.background.wallpaperPath)
         readonly property bool showVideoFrame: videoLayerActive && !(videoWallpaperLoader.item?.ready ?? false)
         readonly property bool desktopCovered: HyprlandData.windowList.some(win => win.monitor == monitor?.id
             && win.workspace?.id === monitor?.activeWorkspace?.id && (win.fullscreen ?? 0) > 0 && !win.minimized)
@@ -159,6 +161,8 @@ Variants {
         property bool transitionLive: false
         property bool transitionPending: false
         property real transitionProgress: 1
+        property int transitionDuration: 1000
+        property string syncedDesktop: ""
         property bool shownWallpaperIsVideo: false
         property string pendingWallpaperPath: ""
         property bool pendingIsVideo: false
@@ -190,6 +194,13 @@ Variants {
         Component.onCompleted: bgRoot.syncWallpaperPath()
 
         onTargetWallpaperPathChanged: Qt.callLater(bgRoot.syncWallpaperPath)
+
+        Connections {
+            target: Wallpapers
+            function onCurrentDesktopIdChanged() {
+                Qt.callLater(bgRoot.syncWallpaperPath);
+            }
+        }
 
         onWallpaperPathChanged: {
             bgRoot.updateZoomScale();
@@ -233,7 +244,7 @@ Variants {
         function currentEffectivePath() {
             if (GlobalStates.screenLocked && Config.options.background.lockWall !== "")
                 return Config.options.background.lockWall;
-            return Wallpapers.previewPath || Wallpapers.confirmedPath || Config.options.background.wallpaperPath;
+            return Wallpapers.previewPath || Wallpapers.confirmedPath || Wallpapers.currentDesktopWallpaper || Config.options.background.wallpaperPath;
         }
 
         function pickTransitionShader(toVideo) {
@@ -248,11 +259,14 @@ Variants {
             const effective = bgRoot.currentEffectivePath();
             const toVideo = Wallpapers.isVideoPath(effective);
             const next = toVideo ? Config.options.background.thumbnailPath : effective;
+            const desktopSwitch = bgRoot.syncedDesktop !== Wallpapers.currentDesktopId;
+            bgRoot.syncedDesktop = Wallpapers.currentDesktopId;
             if (next === (bgRoot.pendingWallpaperPath !== "" ? bgRoot.pendingWallpaperPath : bgRoot.wallpaperPath))
                 return;
             bgRoot.finishTransition();
             if (bgRoot.canAnimateWallpaperChange()) {
-                bgRoot.transitionShader = bgRoot.pickTransitionShader(toVideo);
+                bgRoot.transitionShader = desktopSwitch ? "transition" : bgRoot.pickTransitionShader(toVideo);
+                bgRoot.transitionDuration = desktopSwitch ? 450 : 1000;
                 bgRoot.transitionProgress = 0;
                 bgRoot.transitionPending = true;
                 bgRoot.pendingWallpaperPath = next;
@@ -302,7 +316,7 @@ Variants {
             property: "transitionProgress"
             from: 0
             to: 1
-            duration: 1000
+            duration: bgRoot.transitionDuration
             easing.type: Easing.InOutQuad
             onFinished: bgRoot.finishTransition()
         }
@@ -640,7 +654,8 @@ Variants {
                 Loader {
                     id: videoWallpaperLoader
                     anchors.fill: parent
-                    active: bgRoot.videoLayerActive
+                    active: bgRoot.videoLayerActive || bgRoot.videoLayerParked
+                    visible: bgRoot.videoLayerActive
                     source: "VideoWallpaperLayer.qml"
                 }
 
@@ -658,7 +673,7 @@ Variants {
             Binding {
                 target: videoWallpaperLoader.item
                 property: "shown"
-                value: bgRoot.visible
+                value: bgRoot.visible && bgRoot.videoLayerActive
                 when: videoWallpaperLoader.item !== null
             }
 

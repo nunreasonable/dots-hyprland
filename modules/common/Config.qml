@@ -436,6 +436,10 @@ Singleton {
                 property string wallpaperAnimation: "magic"
                 property bool enableWallpaperPreview: false
                 property string thumbnailPath: ""
+                property JsonObject desktopWallpapers: JsonObject {
+                    property bool enable: false
+                    property var paths: ({})
+                }
                 property bool pauseVideoWhenCovered: true
                 property bool hideWhenFullscreen: true
                 property bool konachanSpicy: false

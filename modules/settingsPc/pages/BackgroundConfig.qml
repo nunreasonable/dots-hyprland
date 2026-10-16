@@ -49,9 +49,9 @@ ContentPage {
                 Repeater {
                     model: [
                         {
-                            target: "wallpaper",
+                            target: Wallpapers.perDesktop ? "main" : "wallpaper",
                             icon: "desktop_windows",
-                            label: Translation.tr("Desktop"),
+                            label: Wallpapers.perDesktop ? Translation.tr("Main wallpaper") : Translation.tr("Desktop"),
                             path: Wallpapers.stillFor(Config.options.background.wallpaperPath)
                         },
                         {
@@ -114,6 +114,35 @@ ContentPage {
                         }
                     }
                 }
+            }
+
+            GroupedList {
+                visible: Platform.isWindows
+                ConfigSwitch {
+                    buttonIcon: "view_carousel"
+                    text: Translation.tr("A different wallpaper for each desktop")
+                    checked: Config.options.background.desktopWallpapers.enable
+                    onCheckedChanged: {
+                        Config.options.background.desktopWallpapers.enable = checked;
+                    }
+                    W.StyledToolTip {
+                        text: Translation.tr("Picking a wallpaper changes only the desktop you're on. Desktops without their own use the main wallpaper, and the colors always come from the main one.")
+                    }
+                }
+            }
+
+            W.NoticeBox {
+                Layout.fillWidth: true
+                visible: Wallpapers.perDesktop
+                materialIcon: "info"
+                text: Wallpapers.collageShown
+                    ? Translation.tr("The collage shows on every desktop while it's on.")
+                    : Translation.tr("Click a desktop to pick its wallpaper. Only pictures can be set per desktop: a live wallpaper always becomes the main wallpaper.")
+            }
+
+            W.DesktopWallpaperCards {
+                Layout.fillWidth: true
+                visible: Wallpapers.desktopWallpapersActive
             }
 
             W.NoticeBox {
