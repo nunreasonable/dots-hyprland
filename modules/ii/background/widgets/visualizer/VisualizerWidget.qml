@@ -207,7 +207,8 @@ AbstractBackgroundWidget {
             return smoothed;
         }
 
-        property real activityOpacity: 0
+        readonly property real idleOpacity: 0.35
+        property real activityOpacity: bars.idleOpacity
         Behavior on activityOpacity {
             NumberAnimation { duration: 500; easing.type: Easing.OutCubic }
         }
@@ -215,7 +216,7 @@ AbstractBackgroundWidget {
         Timer {
             id: silenceTimer
             interval: 1000
-            onTriggered: bars.activityOpacity = 0
+            onTriggered: bars.activityOpacity = bars.idleOpacity
         }
 
         onPointsChanged: {

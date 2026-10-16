@@ -11,8 +11,9 @@ Item {
     property real maxValue: 1000
 
     readonly property int maxBands: 52
+    readonly property real idleFade: 0.18
     readonly property list<real> raw: AudioSpectrum.points
-    property int bandCount: 0
+    property int bandCount: root.maxBands
     property real time: 0
     property real bass: 0
     property real fade: 0
@@ -30,6 +31,14 @@ Item {
             ticker.running = false;
             ticker.sinceLastStep = 0;
         } else {
+            ticker.running = true;
+            root.acceptSample();
+        }
+    }
+
+    Component.onCompleted: {
+        if (root.active) {
+            ticker.running = true;
             root.acceptSample();
         }
     }
@@ -52,7 +61,7 @@ Item {
         const playing = Date.now() - root.lastSignal < 1000;
         const src = root.raw;
         root.time += dt;
-        root.fade += ((playing ? 1 : 0) - root.fade) * Math.min(1, dt * (playing ? 4 : 1.5));
+        root.fade += ((playing ? 1 : root.idleFade) - root.fade) * Math.min(1, dt * (playing ? 4 : 1.5));
 
         let bassNow = 0;
         for (let i = 0; i < root.maxBands; i++) {
@@ -76,8 +85,8 @@ Item {
         root.bass *= Math.exp(-dt * 5);
 
         root.frame();
-        if (!playing && root.fade < 0.002) {
-            root.fade = 0;
+        if (!playing && Math.abs(root.fade - root.idleFade) < 0.002) {
+            root.fade = root.idleFade;
             ticker.running = false;
         }
     }
