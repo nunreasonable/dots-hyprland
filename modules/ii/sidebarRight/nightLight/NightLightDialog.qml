@@ -173,7 +173,7 @@ WindowDialog {
     }
 
     WindowDialogSectionHeader {
-        text: Translation.tr("Gamma")
+        text: Platform.isWindows ? Translation.tr("Extra dimming") : Translation.tr("Gamma")
     }
 
     WindowDialogSeparator {

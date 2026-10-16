@@ -1,4 +1,5 @@
 import qs.services
+import qs.modules.common
 import QtQuick
 import Quickshell
 import Quickshell.Hyprland
@@ -8,7 +9,7 @@ OsdValueIndicator {
     id: rotateIcon
 
     icon: "wb_twilight"
-    name: Translation.tr("Gamma")
+    name: Platform.isWindows ? Translation.tr("Extra dimming") : Translation.tr("Gamma")
     from: Hyprsunset.gammaLowerLimit / 100
     value: Hyprsunset.gamma / 100 ?? 0.5
 }
