@@ -1936,5 +1936,10 @@
   "When this is off you'll have to click, except right at the corner's edge if \"Force hover open at absolute corner\" below is on": "Com isso desativado, você vai precisar clicar, exceto bem na borda do canto se \"Forçar canto absoluto\" abaixo estiver ativado",
   "Opens on hover right at the corner's edge even when \"Hover to trigger\" above is off — this is usually what catches an accidental flick of the mouse into a corner. Turn this off too for click-only. The remaining area can still be used for volume/brightness scroll": "Abre ao passar o mouse bem na borda do canto, mesmo com \"Passar mouse para ativar\" acima desativado — geralmente é isso que pega quando o mouse esbarra sem querer num canto. Desative isso também pra exigir clique sempre. O resto da área ainda pode ser usado pra scroll de volume/brilho",
   "\"No\" removes the AI tab from the left sidebar entirely": "\"Não\" remove completamente a aba de IA da sidebar esquerda",
-  "%1 (software dimming)": "%1 (escurecimento por software)"
+  "%1 (software dimming)": "%1 (escurecimento por software)",
+  "Automatic theme": "Tema automático",
+  "Switches between light and dark on its own. Using the Light/Dark buttons above switches this back to \"Off\".": "Alterna entre claro e escuro por conta própria. Usar os botões Claro/Escuro acima volta isso para \"Desligado\".",
+  "Follow Windows": "Seguir o Windows",
+  "Light at": "Claro às",
+  "Dark at": "Escuro às"
 }

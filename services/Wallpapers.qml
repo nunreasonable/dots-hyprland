@@ -219,8 +219,19 @@ Singleton {
     }
 
     function setMode(dark) {
+        if (Config.options.appearance.autoTheme.mode !== "off") {
+            Config.options.appearance.autoTheme.mode = "off";
+        }
         if (Platform.isWindows) {
             root._retheme(Config.options.background.wallpaperPath, dark);
+        } else {
+            Quickshell.execDetached(["bash", "-c", `${Directories.wallpaperSwitchScriptPath} --mode ${dark ? "dark" : "light"} --noswitch`]);
+        }
+    }
+
+    function applyAutomaticMode(dark, applyToSystem = true) {
+        if (Platform.isWindows) {
+            root._retheme(Config.options.background.wallpaperPath, dark, applyToSystem);
         } else {
             Quickshell.execDetached(["bash", "-c", `${Directories.wallpaperSwitchScriptPath} --mode ${dark ? "dark" : "light"} --noswitch`]);
         }

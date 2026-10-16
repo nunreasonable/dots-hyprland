@@ -556,6 +556,82 @@ ContentPage {
                 }
             }
 
+            ContentSubsection {
+                title: Translation.tr("Automatic theme")
+                tooltip: Translation.tr("Switches between light and dark on its own. Using the Light/Dark buttons above switches this back to \"Off\".")
+
+                GroupedList {
+                    ConfigSelectionArray {
+                        currentValue: Config.options.appearance.autoTheme.mode
+                        onSelected: newValue => {
+                            Config.options.appearance.autoTheme.mode = newValue;
+                        }
+                        options: Platform.isWindows ? [
+                            {
+                                displayName: Translation.tr("Off"),
+                                icon: "close",
+                                value: "off"
+                            },
+                            {
+                                displayName: Translation.tr("Follow Windows"),
+                                icon: "desktop_windows",
+                                value: "followWindows"
+                            },
+                            {
+                                displayName: Translation.tr("Schedule"),
+                                icon: "schedule",
+                                value: "schedule"
+                            }
+                        ] : [
+                            {
+                                displayName: Translation.tr("Off"),
+                                icon: "close",
+                                value: "off"
+                            },
+                            {
+                                displayName: Translation.tr("Schedule"),
+                                icon: "schedule",
+                                value: "schedule"
+                            }
+                        ]
+                    }
+                }
+            }
+
+            ContentSubsection {
+                title: Translation.tr("Schedule")
+                tooltip: Translation.tr("Format: \"HH:mm\", 24-hour time")
+                visible: Config.options.appearance.autoTheme.mode === "schedule"
+
+                GroupedList {
+                    ConfigRow {
+                        uniform: true
+                        ConfigTextArea {
+                            Layout.fillWidth: true
+                            buttonIcon: "light_mode"
+                            fieldWidth: 100
+                            text: Translation.tr("Light at")
+                            placeholderText: "07:00"
+                            value: Config.options.appearance.autoTheme.scheduleLightTime
+                            onValueChanged: {
+                                Config.options.appearance.autoTheme.scheduleLightTime = value;
+                            }
+                        }
+                        ConfigTextArea {
+                            Layout.fillWidth: true
+                            buttonIcon: "dark_mode"
+                            fieldWidth: 100
+                            text: Translation.tr("Dark at")
+                            placeholderText: "19:00"
+                            value: Config.options.appearance.autoTheme.scheduleDarkTime
+                            onValueChanged: {
+                                Config.options.appearance.autoTheme.scheduleDarkTime = value;
+                            }
+                        }
+                    }
+                }
+            }
+
             GroupedList {
                 Layout.topMargin: -2
 
