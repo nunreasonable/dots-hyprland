@@ -436,6 +436,10 @@ Singleton {
                 property string wallpaperAnimation: "magic"
                 property bool enableWallpaperPreview: false
                 property string thumbnailPath: ""
+                property JsonObject desktopWallpapers: JsonObject {
+                    property bool enable: false
+                    property var paths: ({})
+                }
                 property bool pauseVideoWhenCovered: true
                 property bool hideWhenFullscreen: true
                 property bool konachanSpicy: false
@@ -762,6 +766,7 @@ Singleton {
                     property int lock: 0
                 }
                 property JsonObject selfUpdate: JsonObject {
+                    property bool enableCheck: true
                     property bool notify: true
                 }
             }
@@ -785,6 +790,7 @@ Singleton {
 
             property JsonObject osd: JsonObject {
                 property int timeout: 1000
+                property bool showBrightnessOutsideChanges: false
             }
 
             property JsonObject osk: JsonObject {

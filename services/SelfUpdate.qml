@@ -164,9 +164,9 @@ Singleton {
     }
 
     function _startupCheck() {
-        if (!Platform.isWindows || root._startupChecked || !root._cacheDone || !root._versionDone) return;
+        if (!Platform.isWindows || root._startupChecked || !root._cacheDone || !root._versionDone || !Config.ready) return;
         root._startupChecked = true;
-        root.refresh();
+        if (Config.options.windowsPort.selfUpdate.enableCheck) root.refresh();
     }
 
     function startUpdate() {
@@ -230,12 +230,14 @@ Singleton {
     Connections {
         target: Config
         function onReadyChanged() {
-            if (Config.ready && !root.checking) root._maybeNotify();
+            if (!Config.ready) return;
+            root._startupCheck();
+            if (!root.checking) root._maybeNotify();
         }
     }
 
     Timer {
-        running: Platform.isWindows && root._startupChecked
+        running: Platform.isWindows && root._startupChecked && Config.ready && Config.options.windowsPort.selfUpdate.enableCheck
         interval: root.recheckIntervalMs
         repeat: true
         onTriggered: root.refresh()

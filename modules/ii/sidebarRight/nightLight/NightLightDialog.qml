@@ -15,7 +15,19 @@ WindowDialog {
     id: root
     property var screen: root.QsWindow.window?.screen
     property var brightnessMonitor: Brightness.getMonitorForScreen(screen)
+    property real windowsGammaFloor: 1.0
+    readonly property bool windowsGammaSupported: root.windowsGammaFloor < 0.999
     backgroundHeight: 700
+
+    function _refreshWindowsGammaFloor() {
+        if (!Platform.isWindows) return;
+        const screenName = root.screen?.name ?? "";
+        if (screenName.length === 0 || !WindowsNative.nightLight) return;
+        root.windowsGammaFloor = WindowsNative.nightLight.probeDimFloor(screenName);
+    }
+
+    Component.onCompleted: root._refreshWindowsGammaFloor()
+    onScreenChanged: root._refreshWindowsGammaFloor()
 
     WindowDialogTitle {
         text: Translation.tr("Eye protection")
@@ -161,12 +173,10 @@ WindowDialog {
     }
 
     WindowDialogSectionHeader {
-        visible: !Platform.isWindows
-        text: Translation.tr("Gamma")
+        text: Platform.isWindows ? Translation.tr("Extra dimming") : Translation.tr("Gamma")
     }
 
     WindowDialogSeparator {
-        visible: !Platform.isWindows
         Layout.topMargin: -22
         Layout.leftMargin: 0
         Layout.rightMargin: 0
@@ -178,18 +188,35 @@ WindowDialog {
         Layout.fillWidth: true
         Layout.fillHeight: true
 
-        WindowDialogSlider {
-            visible: !Platform.isWindows
+        Item {
+            id: gammaSliderArea
             anchors {
                 left: parent.left
                 right: parent.right
                 leftMargin: 4
                 rightMargin: 4
             }
-            from: Hyprsunset.gammaLowerLimit / 100
-            value: Hyprsunset.gamma / 100
-            onMoved: Hyprsunset.setGamma(value * 100)
-            tooltipContent: `${Math.round(value * 100)}%`
+            implicitHeight: gammaSlider.implicitHeight
+            implicitWidth: gammaSlider.implicitWidth
+
+            HoverHandler {
+                id: gammaHoverHandler
+            }
+
+            WindowDialogSlider {
+                id: gammaSlider
+                anchors.fill: parent
+                enabled: !Platform.isWindows || root.windowsGammaSupported
+                from: Platform.isWindows ? root.windowsGammaFloor : Hyprsunset.gammaLowerLimit / 100
+                value: Hyprsunset.gamma / 100
+                onMoved: Hyprsunset.setGamma(value * 100)
+                tooltipContent: `${Math.round(value * 100)}%`
+            }
+
+            StyledToolTip {
+                extraVisibleCondition: gammaHoverHandler.hovered && !gammaSlider.enabled
+                text: Translation.tr("Your display doesn't allow extra dimming")
+            }
         }
     }
     

@@ -126,11 +126,17 @@ Singleton {
     }
 
     function setGamma(gamma) {
-        root.gamma = Math.max(root.gammaLowerLimit, Math.min(100, gamma));
+        const lowerLimit = Platform.isWindows ? 0 : root.gammaLowerLimit;
+        root.gamma = Math.max(lowerLimit, Math.min(100, gamma));
 
         root.gammaChangeAttempt();
 
-        if (Platform.isWindows) return;
+        if (Platform.isWindows) {
+            if (!WindowsNative.nightLight) return;
+            for (const screen of Quickshell.screens)
+                WindowsNative.nightLight.setDim(screen.name, root.gamma / 100);
+            return;
+        }
         root.startHyprsunset();
         Quickshell.execDetached(["bash", "-c", `hyprctl hyprsunset gamma ${root.gamma}`]);
     }

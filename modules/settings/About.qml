@@ -144,6 +144,16 @@ ContentPage {
         }
 
         ConfigSwitch {
+            buttonIcon: "cloud_sync"
+            text: Translation.tr("Check for updates automatically")
+            checked: Config.options.windowsPort.selfUpdate.enableCheck
+            onCheckedChanged: {
+                if (checked !== Config.options.windowsPort.selfUpdate.enableCheck)
+                    Config.options.windowsPort.selfUpdate.enableCheck = checked;
+            }
+        }
+
+        ConfigSwitch {
             buttonIcon: "notifications"
             text: Translation.tr("Notify me when a new version is available")
             checked: Config.options.windowsPort.selfUpdate.notify

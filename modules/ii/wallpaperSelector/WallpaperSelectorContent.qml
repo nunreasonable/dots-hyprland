@@ -24,6 +24,11 @@ MouseArea {
     readonly property var onlineProviders: ["unsplash", "pexels", "blapples", "naive"]
     readonly property bool onlineSource: root.onlineProviders.includes(root.source)
     readonly property Item activeOnlineLoader: root.source === "wallhaven" ? wallhavenLoader : (root.onlineSource ? onlineLoader : null)
+    readonly property string targetDesktopId: Wallpapers.selectorDesktopId
+    readonly property string targetDesktopWallpaper: Wallpapers.desktopWallpaperFor(root.targetDesktopId)
+    readonly property string currentTargetPath: root.targetDesktopWallpaper || Config.options.background.wallpaperPath
+    readonly property bool targetShown: root.targetDesktopId === Wallpapers.currentDesktopId
+        || (root.targetDesktopId === "" && Wallpapers.currentDesktopWallpaper === "")
 
     property bool spicyRevealed: false
     readonly property bool inSpicyDir: Wallpapers.isInSpicyFolder(Wallpapers.effectiveDirectory)
@@ -164,7 +169,8 @@ MouseArea {
 
     function queuePreview() {
         if (!Config.options.background.enableWallpaperPreview || GlobalStates.wallpaperSelectorTarget === "lockWall"
-            || root.source !== "local" || root.spicyBlurActive)
+            || root.source !== "local" || root.spicyBlurActive
+            || !root.targetShown)
             return;
         previewTimer.restart();
     }
@@ -625,13 +631,13 @@ MouseArea {
                                     height: grid.cellHeight
                                     colBackground: (index === grid?.currentIndex || containsMouse)
                                                    ? Appearance.colors.colPrimary : (fileModelData.filePath
-                                                                                     === Config.options.background.wallpaperPath)
+                                                                                     === root.currentTargetPath)
                                                      ? Appearance.colors.colSecondaryContainer :
                                                        ColorUtils.transparentize(
                                                            Appearance.colors.colPrimaryContainer)
                                     colText: (index === grid.currentIndex || containsMouse)
                                              ? Appearance.colors.colOnPrimary : (fileModelData.filePath
-                                                                                 === Config.options.background.wallpaperPath)
+                                                                                 === root.currentTargetPath)
                                                ? Appearance.colors.colOnSecondaryContainer :
                                                  Appearance.colors.colOnLayer0
 
@@ -740,6 +746,34 @@ MouseArea {
                             bottomMargin: 8
                         }
                         spacing: 6
+
+                        Toolbar {
+                            visible: root.targetDesktopId !== ""
+
+                            MaterialSymbol {
+                                Layout.leftMargin: 8
+                                text: "desktop_windows"
+                                iconSize: 20
+                                color: Appearance.colors.colOnSurfaceVariant
+                            }
+
+                            StyledText {
+                                Layout.rightMargin: root.targetDesktopWallpaper !== "" ? 0 : 8
+                                text: Translation.tr("Only for %1").arg(Wallpapers.desktopLabel(root.targetDesktopId))
+                                font.pixelSize: Appearance.font.pixelSize.small
+                                color: Appearance.colors.colOnSurfaceVariant
+                            }
+
+                            IconToolbarButton {
+                                implicitWidth: height
+                                visible: root.targetDesktopWallpaper !== ""
+                                text: "layers_clear"
+                                onClicked: Wallpapers.clearDesktopWallpaper(root.targetDesktopId)
+                                StyledToolTip {
+                                    text: Translation.tr("Use the main wallpaper on this desktop")
+                                }
+                            }
+                        }
 
                         Toolbar {
                             visible: root.source === "local"

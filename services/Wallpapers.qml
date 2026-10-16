@@ -37,6 +37,23 @@ Singleton {
     property string previewPath: ""
     property string confirmedPath: ""
 
+    readonly property bool _shellProcess: {
+        const process = Quickshell.env("IIW_PROCESS") ?? "";
+        return process === "" || process === "shell";
+    }
+    readonly property bool perDesktop: Platform.isWindows && (Config.options.background.desktopWallpapers?.enable ?? false)
+    readonly property bool collageShown: (Config.options.background.collage?.enable ?? false)
+        && Config.options.panelFamily !== "waffle"
+        && !(Config.options.windowsPort.backgroundBehindIcons && !Config.options.windowsPort.ownWallpaper)
+    readonly property bool desktopWallpapersActive: root.perDesktop && !root.collageShown
+    readonly property var desktopWallpaperPaths: Config.options.background.desktopWallpapers?.paths ?? ({})
+    readonly property var desktops: root.perDesktop ? (WindowsNative.wallpaper?.desktops ?? []) : []
+    readonly property string currentDesktopId: root.perDesktop ? (WindowsNative.wallpaper?.currentDesktop ?? "") : ""
+    readonly property string currentDesktopWallpaper: root.desktopWallpaperFor(root.currentDesktopId)
+    readonly property string selectorDesktopId: root._desktopForTarget(GlobalStates.wallpaperSelectorTarget)
+
+    onCurrentDesktopWallpaperChanged: root._syncSystemWallpaper()
+
     signal changed()
     signal thumbnailGenerated(directory: string)
     signal thumbnailGeneratedFile(filePath: string)
@@ -58,6 +75,11 @@ Singleton {
         target: Config.options.background
         function onWallpaperPathChanged() {
             root.confirmedPath = "";
+            if (root._desktopToClear !== "") {
+                const desktopId = root._desktopToClear;
+                root._desktopToClear = "";
+                root.clearDesktopWallpaper(desktopId);
+            }
         }
     }
 
@@ -135,6 +157,13 @@ Singleton {
         if (normalized(current) === normalized(Config.options.background.wallpaperPath)) return;
         if (root.isVideoPath(Config.options.background.wallpaperPath)
             && normalized(current) === normalized(Config.options.background.thumbnailPath)) return;
+        if (root._isDesktopWallpaper(current)) return;
+        if (root.desktopWallpapersActive && root.currentDesktopId !== "" && !root.isVideoPath(current)) {
+            root._systemWallpaper = current;
+            root._systemShowsOwn = true;
+            root.setDesktopWallpaper(root.currentDesktopId, current);
+            return;
+        }
         root._retheme(current, wn.isDarkMode(), false);
     }
 
@@ -202,10 +231,103 @@ Singleton {
         return base.length > 0 && (target === base || target.startsWith(base + "/"));
     }
 
+    function desktopWallpaperFor(desktopId) {
+        if (!root.desktopWallpapersActive || !desktopId) return "";
+        const path = root.desktopWallpaperPaths[desktopId] ?? "";
+        if (!path || root.isVideoPath(path)) return "";
+        if (!SpicyStuff.allowed && root.isInSpicyFolder(path)) return "";
+        if (WindowsNative.fsUtils && WindowsNative.fsUtils.classify(path) !== "file") return "";
+        return path;
+    }
+
+    function wallpaperForDesktopIndex(index) {
+        const desktop = root.desktops[index];
+        return root.desktopWallpaperFor(desktop?.id ?? "") || Config.options.background.wallpaperPath;
+    }
+
+    function desktopLabel(desktopId) {
+        const index = root.desktops.findIndex(desktop => desktop.id === desktopId);
+        if (index === -1) return Translation.tr("This desktop");
+        return root.desktops[index].name || Translation.tr("Desktop %1").arg(index + 1);
+    }
+
+    function _desktopForTarget(target) {
+        if (!root.desktopWallpapersActive || target === "main" || target === "lockWall") return "";
+        if (target.startsWith("desktop:")) return target.slice(8);
+        return root.currentDesktopId;
+    }
+
+    function _targetDesktop() {
+        return root._desktopForTarget(GlobalStates.wallpaperSelectorOpen ? GlobalStates.wallpaperSelectorTarget : "wallpaper");
+    }
+
+    function _isOwnDesktopWallpaper(path) {
+        if (!root.perDesktop || !path) return false;
+        const target = root.normalizedPath(path);
+        return Object.values(root.desktopWallpaperPaths).some(own => root.normalizedPath(own) === target);
+    }
+
+    function _isDesktopWallpaper(path) {
+        if (!root.perDesktop || !path) return false;
+        return root.normalizedPath(path) === root.normalizedPath(root._systemWallpaper) || root._isOwnDesktopWallpaper(path);
+    }
+
+    function setDesktopWallpaper(desktopId, path) {
+        if (!Platform.isWindows || !Config.ready || !desktopId) return;
+        const clean = path ? FileUtils.trimFileProtocol(path.toString()) : "";
+        if (clean.length > 0 && root.isVideoPath(clean)) return;
+        if (clean.length > 0 && !SpicyStuff.allowed && root.isInSpicyFolder(clean)) {
+            console.warn("[Wallpapers] Not using a desktop wallpaper from the Spicy Stuff folder:", SpicyStuff.restriction);
+            return;
+        }
+        const next = Object.assign({}, root.desktopWallpaperPaths);
+        if (clean.length > 0 && root.normalizedPath(clean) !== root.normalizedPath(Config.options.background.wallpaperPath))
+            next[desktopId] = clean;
+        else
+            delete next[desktopId];
+        if (JSON.stringify(next) === JSON.stringify(root.desktopWallpaperPaths)) return;
+        Config.options.background.desktopWallpapers.paths = next;
+    }
+
+    function clearDesktopWallpaper(desktopId) {
+        root.setDesktopWallpaper(desktopId, "");
+    }
+
+    function openSelectorForDesktop(desktopId) {
+        root.openSelectorFor(desktopId ? `desktop:${desktopId}` : "main");
+    }
+
+    property string _desktopToClear: ""
+
+    function _applyToDesktop(desktopId, path, darkMode) {
+        if (root.isVideoPath(path)) {
+            if (root.normalizedPath(path) === root.normalizedPath(Config.options.background.wallpaperPath)) {
+                root.clearDesktopWallpaper(desktopId);
+                if (darkMode !== Appearance.m3colors.darkmode)
+                    root._retheme(Config.options.background.wallpaperPath, darkMode);
+                return;
+            }
+            root._desktopToClear = desktopId;
+            Config.options.appearance.palette.accentColor = "";
+            root._retheme(path, darkMode);
+            return;
+        }
+        root._desktopToClear = "";
+        root.setDesktopWallpaper(desktopId, path);
+        if (darkMode !== Appearance.m3colors.darkmode)
+            root._retheme(Config.options.background.wallpaperPath, darkMode);
+    }
+
     function apply(path, darkMode = Appearance.m3colors.darkmode) {
         if (!path || path.length === 0) return;
         if (!SpicyStuff.allowed && root.isInSpicyFolder(path)) {
             console.warn("[Wallpapers] Not applying a wallpaper from the Spicy Stuff folder:", SpicyStuff.restriction);
+            return;
+        }
+        const desktopId = root._targetDesktop();
+        if (desktopId !== "") {
+            root._applyToDesktop(desktopId, path, darkMode);
+            root.changed();
             return;
         }
         if (Platform.isWindows) {
@@ -293,12 +415,18 @@ Singleton {
             return;
         }
 
-        if (applyToSystem) wn.setDarkMode(darkMode);
+        if (applyToSystem && !AutoTheme.followingWindows) wn.setDarkMode(darkMode);
 
         if (hasPath) {
             const target = videoPath.length > 0 ? videoPath : path;
             const changed = root.normalizedPath(target) !== root.normalizedPath(Config.options.background.wallpaperPath);
-            if (applyToSystem) wn.setWallpaper(path, root.systemDrawsWallpaper);
+            const desktopKeepsOwn = root.desktopWallpapersActive && root.systemDrawsWallpaper && root.currentDesktopWallpaper !== "";
+            if (applyToSystem && !desktopKeepsOwn) {
+                wn.setWallpaper(path, root.systemDrawsWallpaper);
+                root._systemWallpaper = path;
+                root._systemShowsOwn = false;
+                if (root._desktopWallpapersSynced) desktopSyncTimer.restart();
+            }
             Config.options.background.wallpaperPath = target;
             if (videoPath.length > 0) Config.options.background.thumbnailPath = path;
             if (applyToSystem && changed) root._syncWindowsLockScreen(path);
@@ -348,6 +476,68 @@ Singleton {
             root._writingMatugenConfig = config;
             windowsMatugenConfig.setText(config);
         }
+    }
+
+    property bool _nativeDesktopWallpapers: false
+    property bool _desktopWallpapersSynced: false
+    property bool _desktopSyncChecked: false
+    property string _systemWallpaper: ""
+    property bool _systemShowsOwn: false
+
+    readonly property var _systemDesktopPaths: {
+        const paths = {};
+        if (!root.desktopWallpapersActive || !root.systemDrawsWallpaper) return paths;
+        for (const desktopId in root.desktopWallpaperPaths) {
+            const own = root.desktopWallpaperFor(desktopId);
+            if (own) paths[desktopId] = own;
+        }
+        return paths;
+    }
+
+    readonly property string _desktopSyncState: (!Platform.isWindows || !root._shellProcess || !Config.ready || !WindowsNative.wallpaper) ? ""
+        : JSON.stringify([root.desktopWallpapersActive, root.systemDrawsWallpaper, root._systemDesktopPaths, root.stillPath,
+            root.desktops.map(desktop => desktop.id)])
+    on_DesktopSyncStateChanged: {
+        if (root._desktopSyncState !== "") desktopSyncTimer.restart();
+    }
+
+    Timer {
+        id: desktopSyncTimer
+        interval: 100
+        onTriggered: root._syncDesktopWallpapers()
+    }
+
+    function _syncDesktopWallpapers() {
+        const wn = WindowsNative.wallpaper;
+        if (!wn || !Config.ready || !root._shellProcess) return;
+        const active = root.desktopWallpapersActive;
+        if (!active && !root._desktopWallpapersSynced) return;
+        const main = root.stillPath;
+        if (!main || root.isVideoPath(main)) return;
+        root._nativeDesktopWallpapers = wn.setDesktopWallpapers(root._systemDesktopPaths, main);
+        root._desktopWallpapersSynced = active;
+        root._desktopSyncChecked = true;
+        root._syncSystemWallpaper();
+    }
+
+    function _syncSystemWallpaper() {
+        const wn = WindowsNative.wallpaper;
+        if (!wn || !Config.ready || !root._shellProcess || !root._desktopSyncChecked || root._nativeDesktopWallpapers) return;
+        const main = root.stillPath;
+        if (!main || root.isVideoPath(main)) return;
+        if (root._systemWallpaper === "") {
+            const shown = wn.currentWallpaper();
+            root._systemShowsOwn = !!shown && root.normalizedPath(shown) !== root.normalizedPath(main)
+                && root._isOwnDesktopWallpaper(shown);
+            root._systemWallpaper = root._systemShowsOwn ? shown : main;
+        }
+        const own = (root.desktopWallpapersActive && root.systemDrawsWallpaper) ? root.currentDesktopWallpaper : "";
+        if (own === "" && !root._systemShowsOwn) return;
+        const target = own || main;
+        root._systemShowsOwn = own !== "";
+        if (root.normalizedPath(target) === root.normalizedPath(root._systemWallpaper)) return;
+        root._systemWallpaper = target;
+        wn.setWallpaperInBackground(target);
     }
 
     property var _pendingMatugen: null
