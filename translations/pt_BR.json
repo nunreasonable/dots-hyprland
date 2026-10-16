@@ -1522,6 +1522,8 @@
   "Cursor": "Cursor",
   "Menu and tooltip animations": "Animações de menus e dicas",
   "Minimize and maximize animations": "Animações de minimizar e maximizar",
+  "Animate panels when they open and close": "Animar os painéis ao abrir e fechar",
+  "Sidebars, the bar, the dock and other panels slide or fade in and out, like on Hyprland.\nOff while game mode is on or Menu and tooltip animations are off": "Barras laterais, a barra, a dock e outros painéis deslizam ou esmaecem ao entrar e sair, como no Hyprland.\nDesligado enquanto o modo de jogo estiver ligado ou as animações de menus e dicas estiverem desligadas",
   "Background Color": "Cor de fundo",
   "Blur Size": "Intensidade do desfoque",
   "Blur wall": "Desfocar o papel de parede",

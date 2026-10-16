@@ -1,19 +1,34 @@
 {
   "userFile": "illogical-impulse/layerrules.json",
   "about": [
-    "Blur behind ii's panels on Windows, converted from the blur and ignore_alpha layer rules in dots/.config/hypr/hyprland/rules.lua (same order: later matching rules override earlier ones).",
+    "Blur behind ii's panels and their open/close animations on Windows, converted from the blur, ignore_alpha, animation and no_anim layer rules in dots/.config/hypr/hyprland/rules.lua (same order: later matching rules override earlier ones, field by field).",
     "Copy to %LOCALAPPDATA%\\illogical-impulse\\layerrules.json to customize; that file wins over this one and is reloaded on save.",
     "namespace: regex matched against the whole WlrLayershell.namespace, like Hyprland. blur: true/false. ignoreAlpha: blur only behind Rectangle items whose fill (opacity included) is more opaque than this (0-1; 1 = nothing); null = behind the whole surface.",
     "Windows approximates ignore_alpha with Rectangle fills instead of pixels, so text and images don't get blur of their own. Blur is off while Windows' Transparency effects setting is off, or high contrast or energy saver is on.",
-    "enable: false turns blur behind panels off. layered: true adds WS_EX_LAYERED to the blur windows (only if clicks next to a blurred panel get stuck). blur_popups and xray have no Windows counterpart.",
+    "animation: how the panel appears and disappears, in Hyprland's words. \"slide\" comes in from the nearest screen edge the panel is anchored to, \"slide top\"/\"slide bottom\"/\"slide left\"/\"slide right\" from that edge; \"popin N%\" grows from N% of its size; all of them fade too. \"fade\" only fades, \"noAnim\" (Hyprland's no_anim) or null doesn't animate. Timing follows the layersIn, layersOut and fadeLayers animations of dots/.config/hypr/hyprland/general.lua.",
+    "Panels no rule gives an animation don't animate. Hyprland pops every other layer in (layersIn \"popin 93%\"); a first rule {\"namespace\": \".*\", \"animation\": \"popin 93%\"} in the user file does the same here.",
+    "Windows draws a panel only inside its own window, so a slide starts at the window's edge rather than off screen. Animations are off while the setting \"Animate panels when they open and close\", game mode or Windows' Animation effects setting is off, for panels inside the desktop (wallpaper, desktop widgets), and for windows with a background color.",
+    "enable: false turns blur behind panels off (animations stay). layered: true adds WS_EX_LAYERED to the blur windows (only if clicks next to a blurred panel get stuck). blur_popups, xray and order have no Windows counterpart.",
     "quickshell:background has no blur, like upstream's rules.lua: ii's wallpaper covers the Windows desktop, so blur behind it would never show."
   ],
   "enable": true,
   "rules": [
+    {"namespace": "walker", "animation": "noAnim"},
+    {"namespace": "selection", "animation": "noAnim"},
+    {"namespace": "overview", "animation": "noAnim"},
+    {"namespace": "anyrun", "animation": "noAnim"},
+    {"namespace": "indicator.*", "animation": "noAnim"},
+    {"namespace": "osk", "animation": "noAnim"},
+    {"namespace": "hyprpicker", "animation": "noAnim"},
+    {"namespace": "noanim", "animation": "noAnim"},
+
     {"namespace": "gtk-layer-shell", "blur": true, "ignoreAlpha": 0},
     {"namespace": "launcher", "blur": true, "ignoreAlpha": 0.5},
     {"namespace": "notifications", "blur": true, "ignoreAlpha": 0.69},
     {"namespace": "logout_dialog", "blur": true},
+
+    {"namespace": "sideleft.*", "animation": "slide left"},
+    {"namespace": "sideright.*", "animation": "slide right"},
     {"namespace": "session[0-9]*", "blur": true},
     {"namespace": "bar[0-9]*", "blur": true, "ignoreAlpha": 0.6},
     {"namespace": "barcorner.*", "blur": true, "ignoreAlpha": 0.6},
@@ -26,12 +41,34 @@
     {"namespace": "osk[0-9]*", "blur": true, "ignoreAlpha": 0.6},
 
     {"namespace": "quickshell:.*", "blur": true, "ignoreAlpha": 0.79},
-    {"namespace": "quickshell:overlay", "ignoreAlpha": 1},
+    {"namespace": "quickshell:bar", "animation": "slide"},
+    {"namespace": "quickshell:actionCenter", "animation": "noAnim"},
+    {"namespace": "quickshell:cheatsheet", "animation": "slide bottom"},
+    {"namespace": "quickshell:dock", "animation": "slide bottom"},
+    {"namespace": "quickshell:screenCorners", "animation": "popin 120%"},
+    {"namespace": "quickshell:lockWindowPusher", "animation": "noAnim"},
+    {"namespace": "quickshell:notificationPopup", "animation": "fade"},
+    {"namespace": "quickshell:overlay", "animation": "noAnim", "ignoreAlpha": 1},
+    {"namespace": "quickshell:overview", "animation": "noAnim"},
+    {"namespace": "quickshell:osk", "animation": "slide bottom"},
+    {"namespace": "quickshell:polkit", "animation": "noAnim"},
     {"namespace": "quickshell:popup", "ignoreAlpha": 1},
     {"namespace": "quickshell:mediaControls", "ignoreAlpha": 1},
-    {"namespace": "quickshell:session", "blur": true, "ignoreAlpha": 0},
-    {"namespace": "quickshell:wTaskView", "ignoreAlpha": 0},
+    {"namespace": "quickshell:reloadPopup", "animation": "slide"},
+    {"namespace": "quickshell:regionSelector", "animation": "noAnim"},
+    {"namespace": "quickshell:screenshot", "animation": "noAnim"},
+    {"namespace": "quickshell:session", "blur": true, "animation": "noAnim", "ignoreAlpha": 0},
+    {"namespace": "quickshell:sidebarRight", "animation": "slide right"},
+    {"namespace": "quickshell:sidebarLeft", "animation": "slide left"},
+    {"namespace": "quickshell:verticalBar", "animation": "slide"},
+    {"namespace": "quickshell:wallpaperSelector", "animation": "slide top"},
+    {"namespace": "quickshell:wNotificationCenter", "animation": "noAnim"},
+    {"namespace": "quickshell:wOnScreenDisplay", "animation": "noAnim"},
+    {"namespace": "quickshell:wStartMenu", "animation": "noAnim"},
+    {"namespace": "quickshell:wTaskView", "animation": "noAnim", "ignoreAlpha": 0},
 
-    {"namespace": "quickshell:background", "blur": false}
+    {"namespace": "quickshell:background", "blur": false},
+
+    {"namespace": "gtk4-layer-shell", "animation": "noAnim"}
   ]
 }

@@ -225,6 +225,12 @@ ShellRoot {
         property: "enabled"
         value: !Config.options.windowsPort.gameMode.enable
     }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.blur
+        property: "panelAnimations"
+        value: Config.options.windowsPort.panelAnimations && Appearance.animationsEnabled
+    }
 
     // Panel families
     property list<string> families: ["ii", "waffle"]

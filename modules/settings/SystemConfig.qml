@@ -1023,6 +1023,17 @@ ContentPage {
         title: Translation.tr("Animations")
 
         ConfigSwitch {
+            buttonIcon: "side_navigation"
+            text: Translation.tr("Animate panels when they open and close")
+            checked: Config.options.windowsPort.panelAnimations
+            onCheckedChanged: {
+                Config.options.windowsPort.panelAnimations = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Sidebars, the bar, the dock and other panels slide or fade in and out, like on Hyprland.\nOff while game mode is on or Menu and tooltip animations are off")
+            }
+        }
+        ConfigSwitch {
             buttonIcon: "check"
             text: Translation.tr("Menu and tooltip animations")
             checked: WindowsNative.inputSettings?.clientAreaAnimations ?? true
