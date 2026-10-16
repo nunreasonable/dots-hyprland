@@ -130,7 +130,12 @@ Singleton {
 
         root.gammaChangeAttempt();
 
-        if (Platform.isWindows) return;
+        if (Platform.isWindows) {
+            if (!WindowsNative.nightLight) return;
+            for (const screen of Quickshell.screens)
+                WindowsNative.nightLight.setDim(screen.name, root.gamma / 100);
+            return;
+        }
         root.startHyprsunset();
         Quickshell.execDetached(["bash", "-c", `hyprctl hyprsunset gamma ${root.gamma}`]);
     }
