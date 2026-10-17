@@ -31,8 +31,7 @@ PanelWindow {
     }
 
     readonly property string screenshotDir: Directories.screenshotTemp
-    readonly property string screenFileName: FileUtils.sanitizeFilename(root.screen?.name ?? "")
-    readonly property string screenshotPath: `${root.screenshotDir}/colorpicker-${root.screenFileName}`
+    readonly property string screenshotPath: screenshotProc.screenshotPath
     property bool screenshotReady: false
 
     readonly property real dpr: root.screen?.devicePixelRatio ?? 1
@@ -80,7 +79,6 @@ PanelWindow {
         id: screenshotProc
         screen: root.screen
         screenshotDir: root.screenshotDir
-        screenshotPath: root.screenshotPath
         onExited: (exitCode, exitStatus) => {
             if (exitCode !== 0) {
                 console.warn("[ColorPicker] Screen capture failed, closing the picker");

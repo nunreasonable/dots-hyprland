@@ -27,13 +27,21 @@ Singleton {
     property string fileUploadApiEndpoint: "https://uguu.se/upload"
 
     property var _pendingOcr: ({})
+    property string _editPath: ""
+
+    function removeWindowsTemp(path) {
+        if (!path) return;
+        const shot = WindowsNative.ready ? WindowsNative.screenshot : null;
+        if (typeof shot?.discardCapture === "function") shot.discardCapture(path);
+        else Quickshell.execDetached(["cmd", "/c", "del", "/f", "/q", path.replace(/\//g, "\\")]);
+    }
 
     Connections {
         target: (Platform.isWindows && WindowsNative.ready) ? WindowsNative.ocr : null
         function onRecognized(requestId, text, ok, error) {
             const path = root._pendingOcr[requestId];
             delete root._pendingOcr[requestId];
-            if (path) Quickshell.execDetached(["cmd", "/c", "del", "/f", "/q", path.replace(/\//g, "\\")]);
+            root.removeWindowsTemp(path);
 
             if (ok) {
                 WindowsNative.clipboard.copyText(text);
@@ -61,7 +69,6 @@ Singleton {
         const ry = Math.round(y);
         const rw = Math.round(width);
         const rh = Math.round(height);
-        const cleanupRaw = () => Quickshell.execDetached(["cmd", "/c", "del", "/f", "/q", screenshotPath.replace(/\//g, "\\")]);
 
         switch (action) {
             case ScreenshotAction.Action.Copy: {
@@ -70,37 +77,42 @@ Singleton {
                     : `${saveDir}/screenshot-${root.timestampForFilename()}.png`;
                 if (WindowsNative.screenshot.cropToFile(screenshotPath, rx, ry, rw, rh, savePath)) {
                     WindowsNative.clipboard.copyImageFile(savePath);
-                    if (saveDir === "") Quickshell.execDetached(["cmd", "/c", "del", "/f", "/q", savePath.replace(/\//g, "\\")]);
                 }
-                cleanupRaw();
+                if (saveDir === "") root.removeWindowsTemp(savePath);
                 break;
             }
             case ScreenshotAction.Action.Edit: {
-                const cropPath = `${screenshotPath}-crop.png`;
-                if (WindowsNative.screenshot.cropToFile(screenshotPath, rx, ry, rw, rh, cropPath)) {
-                    Quickshell.execDetached(["mspaint", cropPath]);
+                const editPath = `${screenshotPath}-edit.png`;
+                if (WindowsNative.screenshot.cropToFile(screenshotPath, rx, ry, rw, rh, editPath)) {
+                    root.removeWindowsTemp(root._editPath);
+                    root._editPath = editPath;
+                    Quickshell.execDetached(["mspaint", editPath]);
+                } else {
+                    root.removeWindowsTemp(editPath);
                 }
-                cleanupRaw();
                 break;
             }
             case ScreenshotAction.Action.Search: {
-                if (WindowsNative.screenshot.cropToFile(screenshotPath, rx, ry, rw, rh, screenshotPath)) {
-                    const psCommand = `$resp = curl.exe -s -F "files[]=@${screenshotPath}" ${root.fileUploadApiEndpoint} | ConvertFrom-Json; `
+                const searchPath = `${screenshotPath}-search.png`;
+                if (WindowsNative.screenshot.cropToFile(screenshotPath, rx, ry, rw, rh, searchPath)) {
+                    const psCommand = `$resp = curl.exe -s -F "files[]=@${searchPath}" ${root.fileUploadApiEndpoint} | ConvertFrom-Json; `
                         + `Start-Process ("${root.imageSearchEngineBaseUrl}" + $resp.files[0].url); `
-                        + `Remove-Item -Force '${screenshotPath}'`;
+                        + `Remove-Item -Force '${searchPath}'`;
                     Quickshell.execDetached(["powershell", "-NoProfile", "-WindowStyle", "Hidden", "-Command", psCommand]);
                 } else {
-                    cleanupRaw();
+                    root.removeWindowsTemp(searchPath);
                 }
                 break;
             }
             case ScreenshotAction.Action.CharRecognition: {
-                const cropPath = `${screenshotPath}-crop.png`;
-                if (WindowsNative.screenshot.cropToFile(screenshotPath, rx, ry, rw, rh, cropPath) && WindowsNative.ocr) {
+                if (!WindowsNative.ocr) break;
+                const cropPath = `${screenshotPath}-ocr.png`;
+                if (WindowsNative.screenshot.cropToFile(screenshotPath, rx, ry, rw, rh, cropPath)) {
                     const requestId = WindowsNative.ocr.recognizeText(cropPath);
                     root._pendingOcr[requestId] = cropPath;
+                } else {
+                    root.removeWindowsTemp(cropPath);
                 }
-                cleanupRaw();
                 break;
             }
             case ScreenshotAction.Action.Record:

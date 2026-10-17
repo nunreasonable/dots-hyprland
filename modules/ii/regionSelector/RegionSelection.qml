@@ -68,7 +68,7 @@ PanelWindow {
     readonly property real monitorOffsetX: hyprlandMonitor.x
     readonly property real monitorOffsetY: hyprlandMonitor.y
     property int activeWorkspaceId: hyprlandMonitor.activeWorkspace?.id ?? 0
-    property string screenshotPath: `${root.screenshotDir}/image-${FileUtils.sanitizeFilename(screen.name)}`
+    property string screenshotPath: screenshotProc.screenshotPath
     property real dragStartX: 0
     property real dragStartY: 0
     property real draggingX: 0
@@ -190,7 +190,6 @@ PanelWindow {
         running: true
         screen: root.screen
         screenshotDir: root.screenshotDir
-        screenshotPath: root.screenshotPath
         onExited: (exitCode, exitStatus) => {
             if (root.enableContentRegions) {
                 if (Platform.isWindows) {

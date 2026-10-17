@@ -9,7 +9,8 @@ Item {
     property bool running: false
     property string screenshotDir: Directories.screenshotTemp
     required property ShellScreen screen
-    property string screenshotPath: `${screenshotDir}/image-${FileUtils.sanitizeFilename(screen.name)}`
+    readonly property string requestTag: Platform.isWindows ? `-${Date.now().toString(36)}${Math.floor(Math.random() * 0xffffff).toString(36)}` : ""
+    property string screenshotPath: `${screenshotDir}/image-${FileUtils.sanitizeFilename(screen?.name ?? "")}${requestTag}`
     signal exited(int exitCode, int exitStatus)
 
     Process {
@@ -23,20 +24,41 @@ Item {
     }
 
     property int windowsRequestId: -1
+    property string windowsOwnedPath: ""
 
     function captureWindows() {
         if (!root.running) return;
+        root.releaseWindows();
         const shot = WindowsNative.ready ? WindowsNative.screenshot : null;
+        root.windowsOwnedPath = root.screenshotPath;
         if (shot && typeof shot.captureScreenAsync === "function") {
-            root.windowsRequestId = shot.captureScreenAsync(root.screen.name, root.screenshotPath);
-            if (root.windowsRequestId < 0) Qt.callLater(() => root.finishWindows(false));
+            const requestId = shot.captureScreenAsync(root.screen.name, root.windowsOwnedPath);
+            root.windowsRequestId = requestId;
+            if (requestId < 0) Qt.callLater(() => root.finishWindows(requestId, false));
             return;
         }
-        const ok = shot ? shot.captureScreen(root.screen.name, root.screenshotPath) : false;
-        Qt.callLater(() => root.finishWindows(ok));
+        const ok = shot ? shot.captureScreen(root.screen.name, root.windowsOwnedPath) : false;
+        Qt.callLater(() => root.finishWindows(-1, ok));
     }
 
-    function finishWindows(ok) {
+    function releaseWindows() {
+        const shot = WindowsNative.ready ? WindowsNative.screenshot : null;
+        if (root.windowsRequestId > 0 && typeof shot?.cancelCapture === "function")
+            shot.cancelCapture(root.windowsRequestId);
+        root.windowsRequestId = -1;
+        const path = root.windowsOwnedPath;
+        root.windowsOwnedPath = "";
+        if (path.length === 0 || !shot) return;
+        if (typeof shot.discardCapture === "function") {
+            shot.discardCapture(path);
+            return;
+        }
+        shot.releaseCapture(path);
+        WindowsNative.fsUtils?.removeFile(path);
+    }
+
+    function finishWindows(requestId, ok) {
+        if (requestId !== root.windowsRequestId) return;
         root.windowsRequestId = -1;
         if (!ok) console.warn("[TempScreenshotProcess] Native capture failed for", root.screen.name);
         root.running = false;
@@ -46,7 +68,7 @@ Item {
     Connections {
         target: Platform.isWindows && WindowsNative.ready ? WindowsNative.screenshot : null
         function onCaptureFinished(requestId, ok) {
-            if (requestId === root.windowsRequestId) root.finishWindows(ok);
+            root.finishWindows(requestId, ok);
         }
     }
 
@@ -56,9 +78,6 @@ Item {
     }
 
     Component.onDestruction: {
-        if (!Platform.isWindows || !WindowsNative.ready || !WindowsNative.screenshot) return;
-        if (root.windowsRequestId > 0 && typeof WindowsNative.screenshot.cancelCapture === "function")
-            WindowsNative.screenshot.cancelCapture(root.windowsRequestId);
-        WindowsNative.screenshot.releaseCapture(root.screenshotPath);
+        if (Platform.isWindows) root.releaseWindows();
     }
 }

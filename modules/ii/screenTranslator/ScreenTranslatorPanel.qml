@@ -34,7 +34,7 @@ PanelWindow {
 
     // Config
     readonly property string screenshotDir: Directories.screenshotTemp
-    readonly property string screenshotPath: `${root.screenshotDir}/image-${FileUtils.sanitizeFilename(screen.name)}`
+    readonly property string screenshotPath: screenshotProc.screenshotPath
 
     // Preparation
     property bool screenshotReady: false
@@ -48,7 +48,6 @@ PanelWindow {
         running: true
         screen: root.screen
         screenshotDir: root.screenshotDir
-        screenshotPath: root.screenshotPath
         onExited: (_, __) => {
             root.visible = true;
             root.performTranslation();
