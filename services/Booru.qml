@@ -19,7 +19,13 @@ Singleton {
     property string failMessage: Translation.tr("That didn't work. Tips:\n- Check your tags and Spicy Stuff settings\n- If you don't have a tag in mind, type a page number")
     property var responses: []
     property int runningRequests: 0
+    property string blockedMessage: Translation.tr("%1 blocked the request with a browser check. Try another provider for now.")
     property var defaultUserAgent: Config.options?.networking?.userAgent || "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36"
+    readonly property string apiUserAgent: "illogical-impulse (desktop shell booru sidebar)"
+
+    function isBrowserCheck(xhr) {
+        return (xhr.status === 403 || xhr.status === 503) && /Just a moment|challenge-platform|cf-chl/i.test(xhr.responseText ?? "");
+    }
     property var providerList: Object.keys(providers).filter(provider => provider !== "system" && providers[provider].api)
     property var providers: {
         "system": { "name": Translation.tr("System") },
@@ -397,7 +403,7 @@ Singleton {
             }
             else if (xhr.readyState === XMLHttpRequest.DONE) {
                 console.log("[Booru] Request failed with status: " + xhr.status)
-                newResponse.message = root.failMessage
+                newResponse.message = root.isBrowserCheck(xhr) ? root.blockedMessage.arg(providers[currentProvider].name) : root.failMessage
                 root.runningRequests--;
                 root.responses = [...root.responses, newResponse]
             }
@@ -405,8 +411,10 @@ Singleton {
         }
 
         try {
-            // Required for danbooru and konachan
-            if (["danbooru", "konachan"].includes(currentProvider)) {
+            if (currentProvider === "danbooru") {
+                xhr.setRequestHeader("User-Agent", root.apiUserAgent)
+            }
+            else if (currentProvider === "konachan") {
                 xhr.setRequestHeader("User-Agent", defaultUserAgent)
             }
             else if (currentProvider == "zerochan") {
@@ -457,8 +465,10 @@ Singleton {
         }
 
         try {
-            // Required for danbooru and konachan
-            if (["danbooru", "konachan"].includes(currentProvider)) {
+            if (currentProvider === "danbooru") {
+                xhr.setRequestHeader("User-Agent", root.apiUserAgent)
+            }
+            else if (currentProvider === "konachan") {
                 xhr.setRequestHeader("User-Agent", defaultUserAgent)
             }
             xhr.send()

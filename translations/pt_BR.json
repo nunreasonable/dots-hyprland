@@ -1962,5 +1962,6 @@
   "This desktop": "Esta área de trabalho",
   "Show the brightness indicator for changes made outside ii": "Mostrar o indicador de brilho para mudanças feitas fora do ii",
   "Your display doesn't allow extra dimming": "Seu monitor não permite esse escurecimento extra",
-  "Extra dimming": "Escurecimento extra"
+  "Extra dimming": "Escurecimento extra",
+  "%1 blocked the request with a browser check. Try another provider for now.": "%1 bloqueou a requisição com uma verificação de navegador. Por enquanto, tente outro provedor."
 }
