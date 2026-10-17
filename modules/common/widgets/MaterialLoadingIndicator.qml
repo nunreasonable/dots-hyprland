@@ -8,7 +8,7 @@ Rectangle {
     id: root
 
     property bool loading: true
-    readonly property bool animating: root.loading && root.visible && (Window.window?.visible ?? false)
+    readonly property bool animating: root.loading && root.visible && (Window.window?.visible ?? false) && (Window.window?.visibility !== Window.Minimized)
     property double pullProgress: 0
 
     onAnimatingChanged: if (!root.animating) leapAnimation.stop()
