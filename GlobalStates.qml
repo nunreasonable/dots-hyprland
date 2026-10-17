@@ -87,6 +87,21 @@ Singleton {
     function isFrameHovered(screenName, side) {
         return root.frameHover[`${screenName}:${side}`] ?? false;
     }
+
+    property var barContentShown: ({})
+
+    function setBarContentShown(screenName, shown) {
+        const key = screenName ?? "";
+        if ((root.barContentShown[key] ?? true) === shown)
+            return;
+        const next = Object.assign({}, root.barContentShown);
+        next[key] = shown;
+        root.barContentShown = next;
+    }
+
+    function isBarContentShown(screenName) {
+        return root.barContentShown[screenName ?? ""] ?? true;
+    }
     property bool desktopWidgetKeyboardFocus: false
 
     readonly property var centeredShapeOptions: [
