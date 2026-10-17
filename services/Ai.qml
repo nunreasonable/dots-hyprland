@@ -298,6 +298,8 @@ Singleton {
     }
     property var modelList: Object.keys(root.models)
     property var currentModelId: Persistent.states?.ai?.model || modelList[0]
+    property var ollamaModelKeys: []
+    property var vllmModelKeys: []
 
     property var apiStrategies: {
         "openai": openaiApiStrategy.createObject(this),
@@ -357,9 +359,28 @@ Singleton {
     }
 
     function addModel(modelName, data) {
-        root.models = Object.assign({}, root.models, {
-            [modelName]: aiModelComponent.createObject(this, data)
+        if (root.models[modelName]) {
+            const model = root.models[modelName];
+            for (const key in data) {
+                model[key] = data[key];
+            }
+        } else {
+            root.models = Object.assign({}, root.models, {
+                [modelName]: aiModelComponent.createObject(this, data)
+            });
+        }
+    }
+
+    function removeStaleModels(previousKeys, currentKeys) {
+        const stale = previousKeys.filter(key => !currentKeys.includes(key) && key !== root.currentModelId);
+        if (stale.length === 0) return;
+        const updatedModels = Object.assign({}, root.models);
+        stale.forEach(key => {
+            const model = updatedModels[key];
+            delete updatedModels[key];
+            if (model) model.destroy();
         });
+        root.models = updatedModels;
     }
 
     property string ollamaExe: ""
@@ -383,6 +404,7 @@ Singleton {
                         ? this.text.split("\n").slice(1).map(line => line.trim().split(/\s+/)[0]).filter(name => name && name.length > 0)
                         : JSON.parse(this.text);
                     root.modelList = [...root.modelList, ...dataJson];
+                    const newOllamaKeys = dataJson.map(model => root.safeModelName(model));
                     dataJson.forEach(model => {
                         const safeModelName = root.safeModelName(model);
                         root.addModel(safeModelName, {
@@ -395,6 +417,8 @@ Singleton {
                             "requires_key": false,
                         })
                     });
+                    root.removeStaleModels(root.ollamaModelKeys, newOllamaKeys);
+                    root.ollamaModelKeys = newOllamaKeys;
                     root.modelList = Object.keys(root.models);
                 } catch (e) {
                     console.log("Could not fetch Ollama models:", e);
@@ -427,6 +451,7 @@ Singleton {
                     const dataJson = Platform.isWindows
                         ? (JSON.parse(this.text).data ?? []).map(entry => entry.id)
                         : JSON.parse(this.text);
+                    const newVllmKeys = dataJson.map(model => root.safeModelName("vllm-" + model));
                     dataJson.forEach(model => {
                         const safeModelName = root.safeModelName("vllm-" + model);
                         const cleanModel = model.includes('/') ? model.split('/').pop() : model;
@@ -440,6 +465,8 @@ Singleton {
                             "requires_key": false,
                         });
                     });
+                    root.removeStaleModels(root.vllmModelKeys, newVllmKeys);
+                    root.vllmModelKeys = newVllmKeys;
                     root.modelList = Object.keys(root.models);
                 } catch (e) {
                     console.log("Could not fetch vLLM models:", e);
