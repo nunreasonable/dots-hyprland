@@ -40,7 +40,8 @@ Singleton {
     function _publishRendered(hash, imagePath) {
         const expression = root.pendingExpressions[hash]
         delete root.pendingExpressions[hash]
-        if (expression !== undefined) root._remember(hash, expression)
+        if (expression === undefined) return
+        root._remember(hash, expression)
         root.renderedImagePaths[hash] = imagePath
     }
 
