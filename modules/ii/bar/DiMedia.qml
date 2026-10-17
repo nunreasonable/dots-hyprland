@@ -16,6 +16,8 @@ Item {
 
     readonly property var player: diMediaRoot.di.activePlayer
     readonly property string artUrl: diMediaRoot.player?.trackArtUrl ?? ""
+    readonly property var screenName: diMediaRoot.QsWindow.window?.screen?.name
+    readonly property bool barContentShown: GlobalStates.isBarContentShown(diMediaRoot.screenName)
 
     Rectangle {
         id: artMask
@@ -134,7 +136,7 @@ Item {
         }
         width: diMediaRoot.di.isMaterial ? 60 : 50
         height: diMediaRoot.di.isMaterial ? diMediaRoot.di.pillHeight * 1.5 : diMediaRoot.di.pillHeight * 0.85
-        live: diMediaRoot.player?.isPlaying ?? false
+        live: (diMediaRoot.player?.isPlaying ?? false) && diMediaRoot.barContentShown
         points: AudioSpectrum.points
         maxVisualizerValue: 1000
         smoothing: 2
@@ -143,7 +145,7 @@ Item {
     }
 
     SpectrumConsumer {
-        active: visualizerCanvas.visible && (visualizerCanvas.QsWindow.window?.visible ?? false)
+        active: visualizerCanvas.visible && (visualizerCanvas.QsWindow.window?.visible ?? false) && diMediaRoot.barContentShown
     }
 
     Visualizer {

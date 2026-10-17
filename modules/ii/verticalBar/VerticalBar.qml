@@ -56,6 +56,23 @@ Scope {
                 property bool superShow: false
                 property bool mustShow: hoverRegion.containsMouse || superShow
                     || (Config.options.bar.autoHide.enable && GlobalStates.isFrameHovered(barRoot.screen?.name, Config.options.bar.bottom ? "right" : "left"))
+                readonly property bool barClosing: Config.options.bar.autoHide.enable && !barRoot.mustShow
+                property bool contentShown: true
+                onBarClosingChanged: {
+                    if (barRoot.barClosing) {
+                        contentHideTimer.restart();
+                    } else {
+                        contentHideTimer.stop();
+                        barRoot.contentShown = true;
+                    }
+                }
+                onContentShownChanged: GlobalStates.setBarContentShown(barRoot.screen?.name, barRoot.contentShown)
+                Timer {
+                    id: contentHideTimer
+                    interval: Appearance.animation.elementMoveFast.duration
+                    repeat: false
+                    onTriggered: barRoot.contentShown = false
+                }
                 readonly property real frameInset: BarLayouts.windowsFrameInset
                 readonly property int normalExclusiveZone: (Config?.options.bar.autoHide.enable && (!mustShow || !Config?.options.bar.autoHide.pushWindows)) ? 0 :
                     Appearance.sizes.baseVerticalBarWidth + BarLayouts.styleZone
@@ -97,9 +114,12 @@ Scope {
                 // Include in focus grab
                 Component.onCompleted: {
                     GlobalFocusGrab.addPersistent(barRoot);
+                    barRoot.contentShown = !barRoot.barClosing;
+                    GlobalStates.setBarContentShown(barRoot.screen?.name, barRoot.contentShown);
                 }
                 Component.onDestruction: {
                     GlobalFocusGrab.removePersistent(barRoot);
+                    GlobalStates.setBarContentShown(barRoot.screen?.name, true);
                 }
 
                 MouseArea  {

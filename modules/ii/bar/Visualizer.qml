@@ -24,6 +24,7 @@ Item {
     property real maxBarHeight: (vertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight) * 0.7
     property real maxVisualizerValue: 1000
     readonly property bool onScreen: root.visible && (QsWindow.window?.visible ?? false)
+        && GlobalStates.isBarContentShown(QsWindow.window?.screen?.name)
 
     SpectrumConsumer {
         active: root.onScreen
