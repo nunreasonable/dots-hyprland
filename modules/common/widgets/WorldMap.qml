@@ -7,7 +7,7 @@ import "WorldCities.js" as WorldCities
 Item {
     id: root
     clip: true
-    readonly property bool animateMarker: root.hasMarker && root.visible && (Window.window?.visible ?? false)
+    readonly property bool animateMarker: root.hasMarker && root.visible && (Window.window?.visible ?? false) && (Window.window?.visibility !== Window.Minimized)
 
     property real dotSize: 2.2
     property color dotColor: Appearance.colors.colLayer0Border 
