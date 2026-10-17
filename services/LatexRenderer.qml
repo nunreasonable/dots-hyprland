@@ -22,6 +22,7 @@ Singleton {
     property list<string> processedHashes: []
     property var processedExpressions: ({})
     property var renderedImagePaths: ({})
+    property var pendingExpressions: ({})
     readonly property int maxEntries: 300
 
     function _remember(hash, expression) {
@@ -36,11 +37,19 @@ Singleton {
         }
     }
 
+    function _publishRendered(hash, imagePath) {
+        const expression = root.pendingExpressions[hash]
+        delete root.pendingExpressions[hash]
+        if (expression !== undefined) root._remember(hash, expression)
+        root.renderedImagePaths[hash] = imagePath
+    }
+
     function _forget(hash) {
         const index = root.processedHashes.indexOf(hash)
         if (index !== -1) root.processedHashes.splice(index, 1)
         delete root.processedExpressions[hash]
         delete root.renderedImagePaths[hash]
+        delete root.pendingExpressions[hash]
     }
     property string microtexBinaryDir: "/opt/MicroTeX"
     property string microtexBinaryName: "LaTeX"
@@ -63,13 +72,17 @@ Singleton {
             root._remember(hash, expression)
             renderFinished(hash, imagePath)
             return [hash, false]
-        } else {
-            root._remember(hash, expression)
-            // console.log("Rendering expression: " + expression)
         }
 
+        if (root.pendingExpressions[hash] !== undefined) {
+            return [hash, true]
+        }
+
+        root.pendingExpressions[hash] = expression
+        // console.log("Rendering expression: " + expression)
+
         if (Platform.isWindows && WindowsNative.fsUtils?.classify(imagePath) === "file") {
-            root.renderedImagePaths[hash] = imagePath
+            root._publishRendered(hash, imagePath)
             Qt.callLater(() => root.renderFinished(hash, imagePath))
             return [hash, false]
         }
@@ -102,7 +115,7 @@ Singleton {
                 // }
                 onExited: (exitCode, exitStatus) => {
                     // console.log("[LatexRenderer] MicroTeX process exited with code: " + exitCode + ", status: " + exitStatus)
-                    renderedImagePaths["${hash}"] = "${imagePath}"
+                    root._publishRendered("${hash}", "${imagePath}")
                     root.renderFinished("${hash}", "${imagePath}")
                     microtexProcess${hash}.destroy()
                 }
@@ -163,7 +176,7 @@ Singleton {
         const finish = () => {
             if (_finished) return
             _finished = true
-            renderedImagePaths[hash] = imagePath
+            root._publishRendered(hash, imagePath)
             root.renderFinished(hash, imagePath)
             proc.destroy()
         }
