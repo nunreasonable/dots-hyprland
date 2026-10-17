@@ -39,6 +39,7 @@ Singleton {
     Connections {
         target: (Platform.isWindows && WindowsNative.ready) ? WindowsNative.ocr : null
         function onRecognized(requestId, text, ok, error) {
+            if (!(requestId in root._pendingOcr)) return;
             const path = root._pendingOcr[requestId];
             delete root._pendingOcr[requestId];
             root.removeWindowsTemp(path);
