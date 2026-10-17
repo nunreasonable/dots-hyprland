@@ -357,9 +357,16 @@ Singleton {
     }
 
     function addModel(modelName, data) {
-        root.models = Object.assign({}, root.models, {
-            [modelName]: aiModelComponent.createObject(this, data)
-        });
+        if (root.models[modelName]) {
+            const model = root.models[modelName];
+            for (const key in data) {
+                model[key] = data[key];
+            }
+        } else {
+            root.models = Object.assign({}, root.models, {
+                [modelName]: aiModelComponent.createObject(this, data)
+            });
+        }
     }
 
     property string ollamaExe: ""
