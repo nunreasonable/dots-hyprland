@@ -316,6 +316,7 @@ Item {
                     sourceComponent: Bar.Visualizer {
                         vertical: false
                         mirrored: false
+                        barAutoHideAware: false
                         barCount: 32
                         dotSize: 5
                         dotSpacing: 6

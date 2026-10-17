@@ -23,8 +23,9 @@ Item {
     property real dotSpacing: 3
     property real maxBarHeight: (vertical ? Appearance.sizes.verticalBarWidth : Appearance.sizes.barHeight) * 0.7
     property real maxVisualizerValue: 1000
+    property bool barAutoHideAware: true
     readonly property bool onScreen: root.visible && (QsWindow.window?.visible ?? false)
-        && GlobalStates.isBarContentShown(QsWindow.window?.screen?.name)
+        && (!root.barAutoHideAware || GlobalStates.isBarContentShown(QsWindow.window?.screen?.name))
 
     SpectrumConsumer {
         active: root.onScreen
