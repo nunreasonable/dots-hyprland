@@ -1621,7 +1621,6 @@
   "Add to startup": "Adicionar à inicialização",
   "Browse for a file": "Procurar um arquivo",
   "No startup apps found": "Nenhum app de inicialização encontrado",
-  "(ii-windows)": "(ii-windows)",
   "(all users)": "(todos os usuários)",
   "Remove \"%1\" from startup?": "Remover \"%1\" da inicialização?",
   "Blapples": "Blapples",
@@ -1968,5 +1967,12 @@
   "Region screenshots are copied to the clipboard and also saved as a file. When off, they are only copied.": "As capturas de região vão pra área de transferência e também são salvas como arquivo. Desligado, elas só são copiadas.",
   "Screenshot folder (leave empty for Pictures\\Screenshots)": "Pasta das capturas (vazio = Imagens\\Screenshots)",
   "Remove the Elements tab from the cheatsheet": "Remover a aba Elementos do cheatsheet",
-  "If you're wondering what this is: it's literally a periodic table that serves no purpose and comes built into ii and end4-pC": "Se você está se perguntando o que é: é literalmente uma tabela periódica que não serve pra nada e já vem no ii e no end4-pC"
+  "If you're wondering what this is: it's literally a periodic table that serves no purpose and comes built into ii and end4-pC": "Se você está se perguntando o que é: é literalmente uma tabela periódica que não serve pra nada e já vem no ii e no end4-pC",
+  "Start ii when you sign in": "Abrir o ii quando você entrar na conta",
+  "How ii starts": "Como o ii abre",
+  "Scheduled task (starts sooner)": "Tarefa agendada (abre mais cedo)",
+  "Startup registry entry": "Entrada de inicialização no Registro",
+  "The scheduled task starts ii a second or two after you sign in; the startup registry entry waits for Windows' startup delay, about 15 seconds. Task Manager's Startup tab doesn't list scheduled tasks, so turn the task off here.": "A tarefa agendada abre o ii um ou dois segundos depois que você entra na conta; a entrada de inicialização no Registro espera o atraso de inicialização do Windows, uns 15 segundos. A aba Inicializar do Gerenciador de Tarefas não lista tarefas agendadas, então desligue a tarefa por aqui.",
+  "Windows didn't let ii create the scheduled task (%1), so it starts from the startup registry entry instead.": "O Windows não deixou o ii criar a tarefa agendada (%1), então ele abre pela entrada de inicialização no Registro.",
+  "Windows didn't accept the last change to how ii starts (%1).": "O Windows não aceitou a última mudança no jeito como o ii abre (%1)."
 }

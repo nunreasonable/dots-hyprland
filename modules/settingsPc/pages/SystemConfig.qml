@@ -920,8 +920,65 @@ ContentPage {
                 wrapMode: Text.Wrap
             }
 
+            GroupedList {
+                Layout.topMargin: 6
+
+                ColumnLayout {
+                    spacing: 6
+                    ConfigSwitch {
+                        Layout.bottomMargin: 0
+                        buttonIcon: "power_settings_new"
+                        text: Translation.tr("Start ii when you sign in")
+                        checked: WindowsNative.autostart?.selfStartupEnabled ?? false
+                        onCheckedChanged: {
+                            const autostart = WindowsNative.autostart;
+                            if (!autostart || checked === autostart.selfStartupEnabled)
+                                return;
+                            autostart.setSelfStartup(checked, "task");
+                            checked = Qt.binding(() => WindowsNative.autostart?.selfStartupEnabled ?? false);
+                        }
+                    }
+                    ConfigSelectionArray {
+                        Layout.fillWidth: true
+                        visible: WindowsNative.autostart?.selfStartupEnabled ?? false
+                        text: Translation.tr("How ii starts")
+                        icon: "rocket_launch"
+                        currentValue: WindowsNative.autostart?.selfStartupMethod || "task"
+                        onSelected: newValue => {
+                            const autostart = WindowsNative.autostart;
+                            if (autostart && newValue !== autostart.selfStartupMethod)
+                                autostart.setSelfStartup(true, newValue);
+                        }
+                        options: [
+                            { displayName: Translation.tr("Scheduled task (starts sooner)"), icon: "bolt", value: "task" },
+                            { displayName: Translation.tr("Startup registry entry"), icon: "list_alt", value: "run" }
+                        ]
+                    }
+                }
+            }
+
+            W.StyledText {
+                Layout.fillWidth: true
+                Layout.topMargin: 4
+                visible: WindowsNative.autostart?.selfStartupEnabled ?? false
+                text: Translation.tr("The scheduled task starts ii a second or two after you sign in; the startup registry entry waits for Windows' startup delay, about 15 seconds. Task Manager's Startup tab doesn't list scheduled tasks, so turn the task off here.")
+                font.pixelSize: Appearance.font.pixelSize.smaller
+                color: Appearance.colors.colSubtext
+                wrapMode: Text.Wrap
+            }
+
+            W.NoticeBox {
+                Layout.fillWidth: true
+                Layout.topMargin: 6
+                visible: (WindowsNative.autostart?.selfStartupError ?? "") !== ""
+                text: (WindowsNative.autostart?.selfStartupFellBack ?? false)
+                    ? Translation.tr("Windows didn't let ii create the scheduled task (%1), so it starts from the startup registry entry instead.").arg(WindowsNative.autostart?.selfStartupError ?? "")
+                    : Translation.tr("Windows didn't accept the last change to how ii starts (%1).").arg(WindowsNative.autostart?.selfStartupError ?? "")
+            }
+
             RowLayout {
                 Layout.fillWidth: true
+                Layout.topMargin: 10
                 spacing: 8
 
                 StyledComboBoxSearch {
@@ -1013,12 +1070,6 @@ ContentPage {
                                 text: autostartRow.modelData.name
                                 color: Appearance.colors.colOnLayer1
                                 elide: Text.ElideRight
-                            }
-                            W.StyledText {
-                                visible: autostartRow.modelData.isSelf
-                                text: Translation.tr("(ii-windows)")
-                                color: Appearance.colors.colSubtext
-                                font.pixelSize: Appearance.font.pixelSize.smaller
                             }
                             W.StyledText {
                                 visible: autostartRow.modelData.scope === "machine"
