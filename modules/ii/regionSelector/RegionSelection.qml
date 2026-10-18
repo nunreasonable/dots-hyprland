@@ -315,8 +315,7 @@ PanelWindow {
             root.action = root.mouseButton === Qt.RightButton ? RegionSelection.SnipAction.Edit : RegionSelection.SnipAction.Copy;
         }
         
-        const screenshotDir = Config.options.screenSnip.savePath !== "" ? //
-            Config.options.screenSnip.savePath : "";
+        const screenshotDir = ScreenshotAction.saveDir();
         var screenshotAction = root.getScreenshotAction();
         if (Platform.isWindows) {
             ScreenshotAction.runWindows(

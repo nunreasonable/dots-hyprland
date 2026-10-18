@@ -334,14 +334,33 @@ ContentPage {
                     }
                 }
 
-                ConfigTextArea {
+                ColumnLayout {
                     Layout.fillWidth: true
-                    fieldWidth: 250
-                    buttonIcon: "screenshot_monitor"
-                    text: Translation.tr("Screenshot Path (leave empty to just copy)")
-                    value: Config.options.screenSnip.savePath
-                    onValueChanged: {
-                        Config.options.screenSnip.savePath = value;
+                    spacing: 4
+
+                    ConfigSwitch {
+                        visible: Platform.isWindows
+                        buttonIcon: "photo_library"
+                        text: Translation.tr("Save screenshots to a folder")
+                        checked: Config.options.screenSnip.saveToFolder
+                        onCheckedChanged: {
+                            Config.options.screenSnip.saveToFolder = checked;
+                        }
+                        W.StyledToolTip {
+                            text: Translation.tr("Region screenshots are copied to the clipboard and also saved as a file. When off, they are only copied.")
+                        }
+                    }
+
+                    ConfigTextArea {
+                        Layout.fillWidth: true
+                        fieldWidth: 250
+                        enabled: !Platform.isWindows || Config.options.screenSnip.saveToFolder
+                        buttonIcon: "screenshot_monitor"
+                        text: Platform.isWindows ? Translation.tr("Screenshot folder (leave empty for Pictures\\Screenshots)") : Translation.tr("Screenshot Path (leave empty to just copy)")
+                        value: Config.options.screenSnip.savePath
+                        onValueChanged: {
+                            Config.options.screenSnip.savePath = value;
+                        }
                     }
                 }
             }

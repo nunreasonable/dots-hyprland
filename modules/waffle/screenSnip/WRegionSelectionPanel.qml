@@ -159,7 +159,7 @@ PanelWindow {
                 if (selectionWidth === 0 || selectionHeight === 0) {
                     return;
                 }
-                const screenshotDir = Config.options.screenSnip.savePath !== "" ? Config.options.screenSnip.savePath : "";
+                const screenshotDir = ScreenshotAction.saveDir();
                 const screenshotAction = root.getScreenshotAction();
                 if (Platform.isWindows) {
                     ScreenshotAction.runWindows(dragArea.selectionX * root.monitorScale,

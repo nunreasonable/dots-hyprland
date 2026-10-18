@@ -14,6 +14,15 @@ import Quickshell.Io
 Singleton {
     id: root
 
+    readonly property string defaultScreenshotDir: `${FileUtils.trimFileProtocol(Directories.pictures)}/Screenshots`
+
+    function saveDir() {
+        const custom = Config.options.screenSnip.savePath;
+        if (!Platform.isWindows) return custom;
+        if (!Config.options.screenSnip.saveToFolder) return "";
+        return custom !== "" ? custom : root.defaultScreenshotDir;
+    }
+
     enum Action {
         Copy,
         Edit,
@@ -76,6 +85,7 @@ Singleton {
                 const savePath = saveDir === ""
                     ? `${screenshotPath}-crop.png`
                     : `${saveDir}/screenshot-${root.timestampForFilename()}.png`;
+                if (saveDir !== "" && WindowsNative.fsUtils) WindowsNative.fsUtils.makePath(saveDir);
                 if (WindowsNative.screenshot.cropToFile(screenshotPath, rx, ry, rw, rh, savePath)) {
                     WindowsNative.clipboard.copyImageFile(savePath);
                 }

@@ -322,9 +322,22 @@ ContentPage {
             }
         }
         
+        ConfigSwitch {
+            visible: Platform.isWindows
+            text: Translation.tr("Save screenshots to a folder")
+            checked: Config.options.screenSnip.saveToFolder
+            onCheckedChanged: {
+                Config.options.screenSnip.saveToFolder = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("Region screenshots are copied to the clipboard and also saved as a file. When off, they are only copied.")
+            }
+        }
+
         MaterialTextArea {
             Layout.fillWidth: true
-            placeholderText: Translation.tr("Screenshot Path (leave empty to just copy)")
+            enabled: !Platform.isWindows || Config.options.screenSnip.saveToFolder
+            placeholderText: Platform.isWindows ? Translation.tr("Screenshot folder (leave empty for Pictures\\Screenshots)") : Translation.tr("Screenshot Path (leave empty to just copy)")
             text: Config.options.screenSnip.savePath
             wrapMode: TextEdit.Wrap
             onTextChanged: {

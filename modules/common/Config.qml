@@ -970,6 +970,7 @@ Singleton {
 
             property JsonObject screenSnip: JsonObject {
                 property string savePath: "" // only copy to clipboard when empty
+                property bool saveToFolder: Platform.isWindows
             }
 
             property JsonObject sounds: JsonObject {
