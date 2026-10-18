@@ -1614,6 +1614,17 @@ ContentPage {
                     }
                 }
                 ConfigSwitch {
+                    buttonIcon: "experiment"
+                    text: Translation.tr("Remove the Elements tab from the cheatsheet")
+                    checked: Config.options.cheatsheet.hideElements
+                    onCheckedChanged: {
+                        Config.options.cheatsheet.hideElements = checked;
+                    }
+                    W.StyledToolTip {
+                        text: Translation.tr("If you're wondering what this is: it's literally a periodic table that serves no purpose and comes built into ii and end4-pC")
+                    }
+                }
+                ConfigSwitch {
                     buttonIcon: "data_usage"
                     text: Translation.tr("AI usage tab")
                     checked: Config.options.cheatsheet.aiUsage.enable

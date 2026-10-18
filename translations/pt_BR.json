@@ -1966,5 +1966,7 @@
   "%1 blocked the request with a browser check. Try another provider for now.": "%1 bloqueou a requisição com uma verificação de navegador. Por enquanto, tente outro provedor.",
   "Save screenshots to a folder": "Salvar capturas numa pasta",
   "Region screenshots are copied to the clipboard and also saved as a file. When off, they are only copied.": "As capturas de região vão pra área de transferência e também são salvas como arquivo. Desligado, elas só são copiadas.",
-  "Screenshot folder (leave empty for Pictures\\Screenshots)": "Pasta das capturas (vazio = Imagens\\Screenshots)"
+  "Screenshot folder (leave empty for Pictures\\Screenshots)": "Pasta das capturas (vazio = Imagens\\Screenshots)",
+  "Remove the Elements tab from the cheatsheet": "Remover a aba Elementos do cheatsheet",
+  "If you're wondering what this is: it's literally a periodic table that serves no purpose and comes built into ii and end4-pC": "Se você está se perguntando o que é: é literalmente uma tabela periódica que não serve pra nada e já vem no ii e no end4-pC"
 }

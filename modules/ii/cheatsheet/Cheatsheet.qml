@@ -15,6 +15,7 @@ import Quickshell.Hyprland
 Scope { // Scope
     id: root
     readonly property bool aiUsageEnabled: Config.options.cheatsheet.aiUsage.enable
+    readonly property bool elementsEnabled: !Config.options.cheatsheet.hideElements
     property var tabButtonList: [
         {
             "icon": "keyboard",
@@ -28,10 +29,10 @@ Scope { // Scope
             "icon": "data_usage",
             "name": Translation.tr("AI usage")
         }] : []),
-        {
+        ...(root.elementsEnabled ? [{
             "icon": "experiment",
             "name": Translation.tr("Elements")
-        },
+        }] : []),
     ]
     readonly property int systemTabIndex: Platform.isWindows ? 1 : -1
     readonly property int aiUsageTabIndex: root.aiUsageEnabled ? (Platform.isWindows ? 2 : 1) : -1
@@ -271,8 +272,11 @@ Scope { // Scope
                                 loadAsync: Platform.isWindows && !root.open
                             }
                         }
-                        CheatsheetPeriodicTable {
-                            loadAsync: Platform.isWindows && !root.open
+                        Repeater {
+                            model: root.elementsEnabled ? 1 : 0
+                            delegate: CheatsheetPeriodicTable {
+                                loadAsync: Platform.isWindows && !root.open
+                            }
                         }
                     }
                 }

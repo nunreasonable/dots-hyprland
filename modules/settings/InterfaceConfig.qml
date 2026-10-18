@@ -222,6 +222,17 @@ ContentPage {
                 Config.options.cheatsheet.aiUsage.refreshSeconds = value;
             }
         }
+        ConfigSwitch {
+            buttonIcon: "experiment"
+            text: Translation.tr("Remove the Elements tab from the cheatsheet")
+            checked: Config.options.cheatsheet.hideElements
+            onCheckedChanged: {
+                Config.options.cheatsheet.hideElements = checked;
+            }
+            StyledToolTip {
+                text: Translation.tr("If you're wondering what this is: it's literally a periodic table that serves no purpose and comes built into ii and end4-pC")
+            }
+        }
     }
     ContentSection {
         icon: "call_to_action"
