@@ -46,4 +46,5 @@ QtObject {
     readonly property QtObject accountAge: root.full || root.process === "settings" || root.process === "welcome" ? QSWin.AccountAge : null
     readonly property QtObject displays: (root.full || root.process === "settings") ? QSWin.Displays : null
     readonly property QtObject idlePower: (root.full || root.process === "settings") ? QSWin.IdlePower : null
+    readonly property QtObject calendarEvents: (root.full || root.process === "settings") ? QSWin.CalendarEvents : null
 }

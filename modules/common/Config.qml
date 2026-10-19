@@ -582,6 +582,11 @@ Singleton {
 
             property JsonObject calendar: JsonObject {
                 property string locale: "en-GB"
+                property JsonObject events: JsonObject {
+                    property bool enable: false
+                    property int refreshMinutes: 30
+                    property list<var> sources: []
+                }
             }
 
             property JsonObject cheatsheet: JsonObject {

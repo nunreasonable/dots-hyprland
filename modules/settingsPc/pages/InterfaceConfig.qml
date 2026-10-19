@@ -1932,6 +1932,218 @@ ContentPage {
         }
 
         ContentSection {
+            visible: Platform.isWindows
+            shape: W.MaterialShape.Shape.Gem
+            icon: "event"
+            title: Translation.tr("Calendar events")
+
+            Component.onCompleted: CalendarEvents.markOpened()
+
+            W.StyledText {
+                Layout.fillWidth: true
+                text: Translation.tr("Shows events and birthdays from a Google/Outlook iCal link in the sidebar, clock and notification center.")
+                font.pixelSize: Appearance.font.pixelSize.smaller
+                color: Appearance.colors.colSubtext
+                wrapMode: Text.Wrap
+            }
+
+            GroupedList {
+                ConfigSwitch {
+                    buttonIcon: "event"
+                    text: Translation.tr("Show calendar events")
+                    checked: Config.options.calendar.events.enable
+                    onCheckedChanged: {
+                        Config.options.calendar.events.enable = checked;
+                    }
+                }
+                ConfigSpinBox {
+                    icon: "update"
+                    text: Translation.tr("Refresh interval (minutes)")
+                    value: Config.options.calendar.events.refreshMinutes
+                    from: 5
+                    to: 180
+                    stepSize: 5
+                    onValueModified: {
+                        Config.options.calendar.events.refreshMinutes = value;
+                    }
+                }
+            }
+
+            W.StyledText {
+                Layout.fillWidth: true
+                Layout.topMargin: 4
+                visible: CalendarEvents.configSources.length === 0
+                text: Translation.tr("No calendars yet")
+                color: Appearance.colors.colSubtext
+                font.pixelSize: Appearance.font.pixelSize.small
+            }
+
+            Repeater {
+                model: CalendarEvents.configSources
+
+                delegate: RowLayout {
+                    id: calendarSourceRow
+                    required property var modelData
+                    Layout.fillWidth: true
+                    Layout.topMargin: 4
+                    spacing: 10
+
+                    Rectangle {
+                        Layout.preferredWidth: 12
+                        Layout.preferredHeight: 12
+                        radius: 6
+                        color: CalendarEvents.colorFor(calendarSourceRow.modelData.id)
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 0
+
+                        W.StyledText {
+                            Layout.fillWidth: true
+                            text: calendarSourceRow.modelData.name
+                            color: Appearance.colors.colOnLayer1
+                            elide: Text.ElideRight
+                        }
+                        W.StyledText {
+                            Layout.fillWidth: true
+                            property var sourceStatus: CalendarEvents.statusFor(calendarSourceRow.modelData.id)
+                            text: sourceStatus
+                                ? (sourceStatus.ok
+                                    ? Translation.tr("%1 events · updated %2").arg(sourceStatus.events).arg(Qt.locale().toString(sourceStatus.updated, "hh:mm"))
+                                    : (sourceStatus.error || Translation.tr("Could not fetch")))
+                                : Translation.tr("Not fetched yet")
+                            font.pixelSize: Appearance.font.pixelSize.smaller
+                            color: (sourceStatus && !sourceStatus.ok) ? Appearance.colors.colError : Appearance.colors.colSubtext
+                            elide: Text.ElideRight
+                        }
+                    }
+
+                    W.StyledSwitch {
+                        scale: 0.65
+                        checked: calendarSourceRow.modelData.enabled !== false
+                        onToggled: CalendarEvents.setSourceEnabled(calendarSourceRow.modelData.id, checked)
+                    }
+
+                    W.RippleButton {
+                        implicitWidth: 36
+                        implicitHeight: 36
+                        buttonRadius: 18
+                        colBackground: "transparent"
+                        colBackgroundHover: Qt.rgba(1, 1, 1, 0.12)
+                        colRipple: Qt.rgba(1, 1, 1, 0.2)
+                        onClicked: CalendarEvents.removeSource(calendarSourceRow.modelData.id)
+                        contentItem: W.MaterialSymbol {
+                            horizontalAlignment: Text.AlignHCenter
+                            verticalAlignment: Text.AlignVCenter
+                            text: "delete"
+                            iconSize: 20
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledToolTip {
+                            text: Translation.tr("Remove")
+                        }
+                    }
+                }
+            }
+
+            W.ContentSubsectionLabel {
+                Layout.topMargin: 4
+                text: Translation.tr("Add calendar")
+            }
+
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.leftMargin: 8
+                Layout.rightMargin: 8
+                spacing: 8
+
+                TextField {
+                    id: calendarNameInput
+                    Layout.preferredWidth: 140
+                    placeholderText: Translation.tr("Name")
+                    color: Appearance.colors.colOnLayer1
+                    background: Rectangle {
+                        color: Appearance.colors.colLayer1
+                        radius: Appearance.rounding.small
+                        border.width: 1
+                        border.color: calendarNameInput.activeFocus ? Appearance.colors.colPrimary : Appearance.colors.colLayer0Border
+                    }
+                }
+
+                TextField {
+                    id: calendarUrlInput
+                    Layout.fillWidth: true
+                    echoMode: TextInput.Password
+                    placeholderText: Translation.tr("Secret iCal/ICS URL")
+                    color: Appearance.colors.colOnLayer1
+                    background: Rectangle {
+                        color: Appearance.colors.colLayer1
+                        radius: Appearance.rounding.small
+                        border.width: 1
+                        border.color: calendarUrlInput.activeFocus ? Appearance.colors.colPrimary : Appearance.colors.colLayer0Border
+                    }
+                }
+
+                W.RippleButton {
+                    implicitWidth: 64
+                    implicitHeight: 36
+                    buttonRadius: Appearance.rounding.normal
+                    enabled: calendarNameInput.text.trim() !== "" && calendarUrlInput.text.trim() !== ""
+                    colBackground: Appearance.colors.colSecondaryContainer
+                    colBackgroundHover: Appearance.colors.colSecondaryContainerHover
+                    colRipple: Appearance.colors.colSecondaryContainerActive
+                    onClicked: {
+                        CalendarEvents.addSource(calendarNameInput.text.trim(), calendarUrlInput.text.trim());
+                        calendarNameInput.text = "";
+                        calendarUrlInput.text = "";
+                    }
+                    contentItem: W.MaterialSymbol {
+                        horizontalAlignment: Text.AlignHCenter
+                        verticalAlignment: Text.AlignVCenter
+                        text: "add"
+                        fill: 1
+                        iconSize: 20
+                        color: Appearance.colors.colOnSecondaryContainer
+                    }
+                }
+            }
+
+            W.StyledText {
+                Layout.fillWidth: true
+                wrapMode: Text.Wrap
+                font.pixelSize: Appearance.font.pixelSize.smaller
+                color: Appearance.colors.colSubtext
+                text: Translation.tr("Google Calendar: Settings → your calendar → Integrate calendar → Secret address in iCal format. Outlook: Settings → Calendar → Shared calendars → Publish a calendar → ICS link. Anyone with the link can read the calendar, so ii keeps it in Windows Credential Manager.")
+            }
+
+            W.RippleButton {
+                Layout.topMargin: 4
+                implicitWidth: 140
+                implicitHeight: 36
+                buttonRadius: Appearance.rounding.normal
+                colBackground: Appearance.colors.colSecondaryContainer
+                colBackgroundHover: Appearance.colors.colSecondaryContainerHover
+                colRipple: Appearance.colors.colSecondaryContainerActive
+                onClicked: CalendarEvents.refresh()
+                contentItem: RowLayout {
+                    spacing: 6
+                    Item { Layout.fillWidth: true }
+                    W.MaterialSymbol {
+                        text: "refresh"
+                        iconSize: 18
+                        color: Appearance.colors.colOnSecondaryContainer
+                    }
+                    W.StyledText {
+                        text: Translation.tr("Refresh now")
+                        color: Appearance.colors.colOnSecondaryContainer
+                    }
+                    Item { Layout.fillWidth: true }
+                }
+            }
+        }
+
+        ContentSection {
             shape: W.MaterialShape.Shape.Puffy
             icon: "wallpaper_slideshow"
             title: Translation.tr("Wallpaper selector")

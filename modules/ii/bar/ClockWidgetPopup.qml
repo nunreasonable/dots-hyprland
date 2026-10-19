@@ -12,6 +12,16 @@ StyledPopup {
         property string formattedDate: Qt.locale().toString(DateTime.clock.date, "dddd, MMMM dd, yyyy")
         property string formattedUptime: DateTime.uptime
         property string todosSection: getUpcomingTodos()
+        property var todaysEvents: {
+            const _r = CalendarEvents.revision;
+            return CalendarEvents.available ? CalendarEvents.eventsForDay(new Date()) : [];
+        }
+        property var remainingEvents: todaysEvents.filter(ev => ev.allDay || ev.end > new Date())
+
+        function formatEventLine(ev) {
+            if (ev.allDay) return `  • ${Translation.tr("All day")} · ${ev.title}`;
+            return `  • ${Qt.locale().toString(ev.start, Config.options?.time.format ?? "hh:mm")} · ${ev.title}`;
+        }
 
         function getUpcomingTodos() {
             const unfinishedTodos = Todo.list.filter(function (item) {
@@ -36,6 +46,10 @@ StyledPopup {
 
         anchors.centerIn: parent
         spacing: 4
+
+        Component.onCompleted: {
+            if (CalendarEvents.available) CalendarEvents.markOpened();
+        }
 
         StyledPopupHeaderRow {
             icon: "calendar_month"
@@ -64,6 +78,28 @@ StyledPopup {
                 wrapMode: Text.Wrap
                 color: Appearance.colors.colOnSurfaceVariant
                 text: columnLayout.todosSection
+            }
+        }
+
+        Column {
+            spacing: 0
+            Layout.fillWidth: true
+            visible: CalendarEvents.available && columnLayout.remainingEvents.length > 0
+
+            StyledPopupValueRow {
+                icon: "event"
+                label: Translation.tr("Today:")
+                value: ""
+            }
+
+            StyledText {
+                horizontalAlignment: Text.AlignLeft
+                wrapMode: Text.Wrap
+                color: Appearance.colors.colOnSurfaceVariant
+                text: columnLayout.remainingEvents.slice(0, 3).map(columnLayout.formatEventLine).join('\n')
+                    + (columnLayout.remainingEvents.length > 3
+                        ? `\n  ${Translation.tr("... and %1 more").arg(columnLayout.remainingEvents.length - 3)}`
+                        : "")
             }
         }
     }

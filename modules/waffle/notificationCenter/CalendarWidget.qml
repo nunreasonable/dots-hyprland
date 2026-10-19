@@ -20,6 +20,10 @@ BodyRectangle {
     // Locale
     property var locale: Qt.locale(Config.options.calendar.locale)
 
+    Component.onCompleted: {
+        if (CalendarEvents.available) CalendarEvents.markOpened();
+    }
+
     implicitHeight: collapsed ? 0 : contentColumn.implicitHeight
     implicitWidth: contentColumn.implicitWidth
 
@@ -86,12 +90,37 @@ BodyRectangle {
 
         required property int index
 
+        property var eventDotColors: {
+            const _r = CalendarEvents.revision;
+            if (!CalendarEvents.available) return [];
+            const entry = CalendarEvents.dayMarkers(dayButton.model.year, dayButton.model.month).find(m => m.day === dayButton.model.day);
+            return entry ? entry.sourceIds.slice(0, 3).map(id => CalendarEvents.colorFor(id)) : [];
+        }
+
         contentItem: Item {
             WText {
                 anchors.centerIn: parent
                 text: dayButton.model.day
                 color: dayButton.fgColor
                 font.pixelSize: Looks.font.pixelSize.larger
+            }
+            Row {
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 4
+                anchors.horizontalCenter: parent.horizontalCenter
+                spacing: 2
+                visible: dayButton.eventDotColors.length > 0
+
+                Repeater {
+                    model: dayButton.eventDotColors
+                    delegate: Rectangle {
+                        required property var modelData
+                        width: 4
+                        height: 4
+                        radius: 2
+                        color: modelData
+                    }
+                }
             }
         }
     }

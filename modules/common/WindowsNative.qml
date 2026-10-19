@@ -49,6 +49,7 @@ Singleton {
     readonly property QtObject accountAge: _impl ? _impl.accountAge : null
     readonly property QtObject displays: _impl ? _impl.displays : null
     readonly property QtObject idlePower: _impl ? _impl.idlePower : null
+    readonly property QtObject calendarEvents: _impl ? _impl.calendarEvents : null
 
     Component.onCompleted: {
         if (!Platform.isWindows) return;
