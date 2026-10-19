@@ -1,4 +1,5 @@
 import qs.modules.common
+import qs.modules.common.functions
 import qs.modules.common.widgets
 import QtQuick
 import QtQuick.Layouts
@@ -20,6 +21,7 @@ RippleButton {
     rightInset: DockStyle.mRight(innerInset, outerInset)
     implicitWidth: naturalWidth
     buttonRadius: Appearance.rounding.normal
+    colBackgroundHover: ColorUtils.transparentize(Appearance.colors.colOnLayer0, 0.88)
 
     background.implicitHeight: DockStyle.buttonBase
     background.implicitWidth: DockStyle.buttonBase
