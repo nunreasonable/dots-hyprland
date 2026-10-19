@@ -8,7 +8,6 @@ RippleButton {
     property string day
     property int isToday
     property bool bold
-    property bool selected: false
     property var eventDotColors: []
 
     Layout.fillWidth: false
@@ -16,7 +15,7 @@ RippleButton {
     implicitWidth: 38;
     implicitHeight: 38;
 
-    toggled: (isToday == 1) || button.selected
+    toggled: (isToday == 1)
     buttonRadius: Appearance.rounding.small
 
     contentItem: Item {

@@ -12,6 +12,12 @@ Item {
     property var viewingDate: CalendarLayout.getDateInXMonthsTime(monthShift)
     property var calendarLayout: CalendarLayout.getCalendarLayout(viewingDate, monthShift === 0)
     property var selectedDate: null
+    readonly property bool agendaMode: CalendarEvents.available && selectedDate !== null
+    readonly property real cellSize: 38
+    readonly property real gridSpacing: 5
+    readonly property real gridWidth: cellSize * 7 + gridSpacing * 6
+    readonly property real gridHeight: cellSize * 7 + gridSpacing * 6
+    readonly property string timeFormat: Config.options?.time.format ?? "hh:mm"
     property var eventMarkers: {
         const _r = CalendarEvents.revision;
         if (!CalendarEvents.available) return [];
@@ -32,9 +38,22 @@ Item {
     }
 
     function selectDay(day, today) {
-        if (today < 0) return;
-        const clicked = new Date(viewingDate.getFullYear(), viewingDate.getMonth(), day);
-        selectedDate = (selectedDate && selectedDate.getTime() === clicked.getTime()) ? null : clicked;
+        if (today < 0 || !CalendarEvents.available) return;
+        selectedDate = new Date(viewingDate.getFullYear(), viewingDate.getMonth(), day);
+    }
+
+    function shiftDay(days) {
+        const next = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate() + days);
+        const now = new Date();
+        monthShift = (next.getFullYear() - now.getFullYear()) * 12 + next.getMonth() - now.getMonth();
+        selectedDate = next;
+    }
+
+    function eventTimeText(event) {
+        if (event.allDay) return Translation.tr("All day");
+        const start = Qt.locale().toString(event.start, timeFormat);
+        const end = Qt.locale().toString(event.end, timeFormat);
+        return start === end ? start : `${start} – ${end}`;
     }
 
     Component.onCompleted: {
@@ -42,24 +61,24 @@ Item {
     }
 
     Keys.onPressed: (event) => {
-        if ((event.key === Qt.Key_PageDown || event.key === Qt.Key_PageUp)
+        if (event.key === Qt.Key_Escape && agendaMode) {
+            selectedDate = null;
+            event.accepted = true;
+        } else if ((event.key === Qt.Key_PageDown || event.key === Qt.Key_PageUp)
             && event.modifiers === Qt.NoModifier) {
-            if (event.key === Qt.Key_PageDown) {
-                monthShift++;
-            } else if (event.key === Qt.Key_PageUp) {
-                monthShift--;
-            }
+            const step = event.key === Qt.Key_PageDown ? 1 : -1;
+            if (agendaMode) shiftDay(step);
+            else monthShift += step;
             event.accepted = true;
         }
     }
     MouseArea {
         anchors.fill: parent
         onWheel: (event) => {
-            if (event.angleDelta.y > 0) {
-                monthShift--;
-            } else if (event.angleDelta.y < 0) {
-                monthShift++;
-            }
+            const step = event.angleDelta.y > 0 ? -1 : event.angleDelta.y < 0 ? 1 : 0;
+            if (step === 0) return;
+            if (agendaMode) shiftDay(step);
+            else monthShift += step;
         }
     }
 
@@ -75,10 +94,14 @@ Item {
             spacing: 5
             CalendarHeaderButton {
                 clip: true
-                buttonText: `${monthShift != 0 ? "• " : ""}${viewingDate.toLocaleDateString(Qt.locale(), "MMMM yyyy")}`
-                tooltipText: (monthShift === 0) ? "" : Translation.tr("Jump to current month")
+                buttonText: agendaMode
+                    ? Qt.locale().toString(selectedDate, "dddd, d MMMM")
+                    : `${monthShift != 0 ? "• " : ""}${viewingDate.toLocaleDateString(Qt.locale(), "MMMM yyyy")}`
+                tooltipText: agendaMode ? Translation.tr("Back to the month")
+                    : (monthShift === 0) ? "" : Translation.tr("Jump to current month")
                 downAction: () => {
-                    monthShift = 0;
+                    if (agendaMode) selectedDate = null;
+                    else monthShift = 0;
                 }
             }
             Item {
@@ -88,7 +111,8 @@ Item {
             CalendarHeaderButton {
                 forceCircle: true
                 downAction: () => {
-                    monthShift--;
+                    if (agendaMode) shiftDay(-1);
+                    else monthShift--;
                 }
                 contentItem: MaterialSymbol {
                     text: "chevron_left"
@@ -100,7 +124,8 @@ Item {
             CalendarHeaderButton {
                 forceCircle: true
                 downAction: () => {
-                    monthShift++;
+                    if (agendaMode) shiftDay(1);
+                    else monthShift++;
                 }
                 contentItem: MaterialSymbol {
                     text: "chevron_right"
@@ -114,6 +139,7 @@ Item {
         // Week days row
         RowLayout {
             id: weekDaysRow
+            visible: !agendaMode
             Layout.alignment: Qt.AlignHCenter
             Layout.fillHeight: false
             spacing: 5
@@ -134,6 +160,7 @@ Item {
             // model: calendarLayout
             model: 6
             delegate: RowLayout {
+                visible: !agendaMode
                 Layout.alignment: Qt.AlignHCenter
                 Layout.fillHeight: false
                 spacing: 5
@@ -142,11 +169,6 @@ Item {
                     delegate: CalendarDayButton {
                         day: calendarLayout[modelData][index].day
                         isToday: calendarLayout[modelData][index].today
-                        selected: selectedDate !== null
-                            && calendarLayout[modelData][index].today >= 0
-                            && selectedDate.getDate() === calendarLayout[modelData][index].day
-                            && selectedDate.getMonth() === viewingDate.getMonth()
-                            && selectedDate.getFullYear() === viewingDate.getFullYear()
                         eventDotColors: dotColorsFor(calendarLayout[modelData][index].day, calendarLayout[modelData][index].today)
                         onClicked: selectDay(calendarLayout[modelData][index].day, calendarLayout[modelData][index].today)
                     }
@@ -154,48 +176,62 @@ Item {
             }
         }
 
-        Column {
-            Layout.fillWidth: true
-            Layout.topMargin: 4
-            Layout.maximumHeight: 90
-            clip: true
-            spacing: 2
-            visible: CalendarEvents.available && selectedDate !== null
+        Item {
+            visible: agendaMode
+            Layout.preferredWidth: gridWidth
+            Layout.preferredHeight: gridHeight
 
             StyledText {
-                text: selectedDate ? Qt.locale().toString(selectedDate, "dddd, MMMM d") : ""
-                font.weight: Font.DemiBold
-                color: Appearance.colors.colOnLayer1
-            }
-
-            StyledText {
+                anchors.centerIn: parent
                 visible: selectedDayEvents.length === 0
                 text: Translation.tr("No events")
                 color: Appearance.colors.colSubtext
-                font.pixelSize: Appearance.font.pixelSize.smaller
             }
 
-            Repeater {
-                model: selectedDayEvents
-                delegate: RowLayout {
+            StyledListView {
+                id: agendaList
+                anchors.fill: parent
+                clip: true
+                spacing: 4
+                model: agendaMode ? selectedDayEvents : []
+                delegate: Rectangle {
                     required property var modelData
-                    width: calendarColumn.width
-                    spacing: 6
+                    width: agendaList.width
+                    implicitHeight: agendaRow.implicitHeight + 12
+                    radius: Appearance.rounding.small
+                    color: Appearance.colors.colLayer2
 
-                    Rectangle {
-                        Layout.preferredWidth: 6
-                        Layout.preferredHeight: 6
-                        radius: 3
-                        color: CalendarEvents.colorFor(modelData.sourceId)
-                    }
-                    StyledText {
-                        Layout.fillWidth: true
-                        elide: Text.ElideRight
-                        font.pixelSize: Appearance.font.pixelSize.smaller
-                        color: Appearance.colors.colOnLayer1
-                        text: modelData.allDay
-                            ? Translation.tr("All day · %1").arg(modelData.title)
-                            : `${Qt.locale().toString(modelData.start, Config.options?.time.format ?? "hh:mm")} · ${modelData.title}`
+                    RowLayout {
+                        id: agendaRow
+                        anchors.fill: parent
+                        anchors.margins: 6
+                        spacing: 8
+
+                        Rectangle {
+                            Layout.fillHeight: true
+                            Layout.preferredWidth: 4
+                            radius: 2
+                            color: CalendarEvents.colorFor(modelData.sourceId)
+                        }
+                        ColumnLayout {
+                            Layout.fillWidth: true
+                            spacing: 0
+                            StyledText {
+                                Layout.fillWidth: true
+                                elide: Text.ElideRight
+                                color: Appearance.colors.colOnLayer2
+                                text: modelData.title
+                            }
+                            StyledText {
+                                Layout.fillWidth: true
+                                elide: Text.ElideRight
+                                font.pixelSize: Appearance.font.pixelSize.smaller
+                                color: Appearance.colors.colSubtext
+                                text: modelData.location
+                                    ? `${eventTimeText(modelData)} · ${modelData.location}`
+                                    : eventTimeText(modelData)
+                            }
+                        }
                     }
                 }
             }
