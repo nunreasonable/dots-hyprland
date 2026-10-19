@@ -23,6 +23,11 @@ Singleton {
     property real dropoverX: 0
     property real dropoverY: 0
     property bool sidebarLeftOpen: false
+    readonly property bool sidebarLeftHasContent: Config.options.policies.ai !== 0
+        || Config.options.policies.weeb !== 0
+        || Config.options.sidebar.translator.enable
+        || Config.options.sidebar.media.enable
+    onSidebarLeftOpenChanged: if (sidebarLeftOpen && !sidebarLeftHasContent) sidebarLeftOpen = false
     property bool sidebarRightOpen: false
     property bool mediaControlsOpen: false
     property bool keybindsEditorOpen: false
