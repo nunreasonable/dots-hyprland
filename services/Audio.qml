@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import qs.modules.common
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Services.Pipewire
 
 /**
@@ -80,7 +81,7 @@ Singleton {
     function decrementVolume() {
         const currentVolume = Audio.value;
         const step = currentVolume < 0.1 ? 0.01 : 0.02 || 0.2;
-        Audio.sink.audio.volume -= step;
+        Audio.sink.audio.volume = Math.max(0, Audio.sink.audio.volume - step);
     }
 
     function setDefaultSink(node) {
@@ -153,5 +154,25 @@ Singleton {
             oggPath
         ];
         Quickshell.execDetached(command);
+    }
+
+    IpcHandler {
+        target: "audio"
+
+        function volumeUp(): void {
+            root.incrementVolume();
+        }
+
+        function volumeDown(): void {
+            root.decrementVolume();
+        }
+
+        function toggleMute(): void {
+            root.toggleMute();
+        }
+
+        function toggleMicMute(): void {
+            root.toggleMicMute();
+        }
     }
 }

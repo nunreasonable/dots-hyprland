@@ -45,6 +45,8 @@
     {"keys": "Shift+Super+B", "action": "ipc", "target": "mpris", "function": "previous", "description": "Media: Previous track"},
     {"keys": "Shift+Super+P", "action": "ipc", "target": "mpris", "function": "playPause", "description": "Media: Play/pause media"},
     {"keys": "Shift+Super+M", "action": "key", "key": "VolumeMute", "description": "Media: Toggle mute"},
+    {"keys": "Alt+Super+Up", "action": "ipc", "target": "audio", "function": "volumeUp", "repeat": true, "description": "Media: Volume up"},
+    {"keys": "Alt+Super+Down", "action": "ipc", "target": "audio", "function": "volumeDown", "repeat": true, "description": "Media: Volume down"},
     {"keys": "Super+Left", "action": "dispatch", "dispatch": "movefocus l", "description": "Window: Focus Left"},
     {"keys": "Super+Right", "action": "dispatch", "dispatch": "movefocus r", "description": "Window: Focus Right"},
     {"keys": "Super+Up", "action": "dispatch", "dispatch": "movefocus u", "description": "Window: Focus Up"},
