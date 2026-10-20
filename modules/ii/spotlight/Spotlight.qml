@@ -198,6 +198,14 @@ Scope {
             Quickshell.execDetached(["bash", "-c", `${Config.options.apps.terminal} -e '${StringUtils.shellSingleQuoteEscape(entry.command.join(' '))}'`]);
     }
 
+    function openAppMenu(entry, item) {
+        if (!entry || !item) return;
+        spotlightAppContextMenu.open(item, entry, {
+            executeApp: () => root.launchApp(entry),
+            onLaunched: () => root.close()
+        });
+    }
+
     function fileUrl(path) {
         return /^[A-Za-z]:/.test(path) ? "file:///" + path : "file://" + path;
     }
@@ -474,6 +482,10 @@ q="$1"; h="$2"
             }
         }
 
+        AppContextMenu {
+            id: spotlightAppContextMenu
+        }
+
         Item {
             id: content
             readonly property real maxWidth: Math.min(880, panelWindow.screenWidth - 80)
@@ -645,6 +657,10 @@ q="$1"; h="$2"
                             } else if (event.key === Qt.Key_Backtab) {
                                 root.cycleMode(-1);
                             } else if (event.key === Qt.Key_Backspace && searchInput.text === "" && root.goUp()) {
+                            } else if (root.mode === "apps" && (event.key === Qt.Key_Menu || (event.key === Qt.Key_F10 && (event.modifiers & Qt.ShiftModifier)))) {
+                                const view = root.gridLayout ? tileGrid : rowList;
+                                const menuItem = view.itemAtIndex(root.currentIndex);
+                                root.openAppMenu(root.items[root.currentIndex], menuItem);
                             } else {
                                 return;
                             }
@@ -767,6 +783,8 @@ q="$1"; h="$2"
                                 query: root.mode === "clipboard" ? "" : root.query
                                 focus: index === root.currentIndex
                                 horizontalMargin: 0
+                                appContextMenu: spotlightAppContextMenu
+                                closeHost: root.close
                                 onClicked: root.close()
                             }
                         }
@@ -808,6 +826,7 @@ q="$1"; h="$2"
                                 height: GridView.view.cellHeight
 
                                 SpotlightTile {
+                                    id: tile
                                     anchors.fill: parent
                                     anchors.margins: 3
                                     selected: tileCell.index === root.currentIndex
@@ -817,6 +836,7 @@ q="$1"; h="$2"
                                     iconSource: root.mode === "apps" && tileCell.entry ? Quickshell.iconPath(tileCell.entry.icon, "image-missing") : ""
                                     onClicked: root.activate(tileCell.index)
                                     onHoveredChanged: if (hovered && root.mode === "emoji") root.currentIndex = tileCell.index
+                                    altAction: root.mode === "apps" ? () => root.openAppMenu(tileCell.entry, tile) : null
                                 }
                             }
                         }
@@ -881,6 +901,7 @@ q="$1"; h="$2"
                                     Qt.openUrlExternally(root.fileUrl(row.entry.path));
                                 }
                                 onClicked: root.activate(row.index)
+                                altAction: root.mode === "apps" ? () => root.openAppMenu(row.entry, row) : null
                             }
                         }
 

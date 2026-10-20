@@ -204,6 +204,7 @@ RowLayout {
                     const appId = isAppEntry ? resultPreview.entry.id : "";
                     const pinned = isAppEntry ? (Config.options.dock.pinnedApps.includes(appId)) : false;
                     const startPinned = isAppEntry ? (Config.options.launcher.pinnedApps.includes(appId)) : false;
+                    const appInfo = (isAppEntry && Platform.isWindows && WindowsNative.appActions) ? WindowsNative.appActions.info(appId) : null;
                     var result = [
                         searchResultComp.createObject(null, {
                             name: resultPreview.entry.verb,
@@ -213,6 +214,26 @@ RowLayout {
                                 resultPreview.entry.execute();
                             }
                         }),
+                        ...((appInfo?.canRunAsAdmin ?? false) ? [
+                            searchResultComp.createObject(null, {
+                                name: Translation.tr("Run as administrator"),
+                                iconName: "admin_panel_settings",
+                                iconType: LauncherSearchResult.IconType.Material,
+                                execute: () => {
+                                    WindowsNative.appActions?.runAsAdmin(appId);
+                                }
+                            })
+                        ] : []),
+                        ...((appInfo?.canOpenLocation ?? false) ? [
+                            searchResultComp.createObject(null, {
+                                name: Translation.tr("Open file location"),
+                                iconName: "folder_open",
+                                iconType: LauncherSearchResult.IconType.Material,
+                                execute: () => {
+                                    WindowsNative.appActions?.openFileLocation(appId);
+                                }
+                            })
+                        ] : []),
                         ...(isAppEntry ? [
                             searchResultComp.createObject(null, {
                                 name: startPinned ? Translation.tr("Unpin from Start") : Translation.tr("Pin to Start"),
@@ -230,6 +251,26 @@ RowLayout {
                                 iconType: LauncherSearchResult.IconType.Material,
                                 execute: () => {
                                     TaskbarApps.togglePin(appId);
+                                }
+                            })
+                        ] : []),
+                        ...((appInfo?.packaged ?? false) ? [
+                            searchResultComp.createObject(null, {
+                                name: Translation.tr("App settings"),
+                                iconName: "settings",
+                                iconType: LauncherSearchResult.IconType.Material,
+                                execute: () => {
+                                    WindowsNative.appActions?.openAppSettings(appId);
+                                }
+                            })
+                        ] : []),
+                        ...((appInfo?.canUninstall ?? false) ? [
+                            searchResultComp.createObject(null, {
+                                name: Translation.tr("Uninstall"),
+                                iconName: "delete",
+                                iconType: LauncherSearchResult.IconType.Material,
+                                execute: () => {
+                                    WindowsNative.appActions?.uninstall(appId);
                                 }
                             })
                         ] : []),

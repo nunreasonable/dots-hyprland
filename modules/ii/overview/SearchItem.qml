@@ -36,7 +36,10 @@ RippleButton {
     property bool blurImage: entry?.blurImage ?? false
     property bool pinned: entry?.pinned ?? false
     property bool suppressInlinePreview: false
-    
+    property var appContextMenu: null
+    property var closeHost: null
+    readonly property bool isAppEntry: root.itemType === Translation.tr("App") && (root.entry?.id ?? "") !== ""
+
     visible: root.entryShown
     property int horizontalMargin: 10
     property int buttonHorizontalPadding: 10
@@ -109,6 +112,14 @@ RippleButton {
         GlobalStates.overviewOpen = false
         root.itemExecute()
     }
+    altAction: root.isAppEntry && root.appContextMenu ? () => root.appContextMenu.open(root, null, {
+        appId: root.entry.id,
+        executeApp: () => {
+            root.closeHost?.();
+            root.itemExecute();
+        },
+        onLaunched: () => root.closeHost?.()
+    }) : null
     Keys.onPressed: (event) => {
         if (event.key === Qt.Key_Delete && event.modifiers === Qt.ShiftModifier) {
             const deleteAction = (root.entry?.actions ?? []).find(action => action.name == Translation.tr("Delete"));

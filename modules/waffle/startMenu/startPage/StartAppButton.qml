@@ -17,6 +17,8 @@ WButton {
 
     property bool pinnedStart: LauncherApps.isPinned(root.desktopEntry.id);
     property bool pinnedTaskbar: TaskbarApps.isPinned(root.desktopEntry.id);
+    readonly property var appInfo: (appMenu.visible && Platform.isWindows && WindowsNative.appActions)
+        ? WindowsNative.appActions.info(root.desktopEntry.id) : null
 
     implicitWidth: 96
     implicitHeight: 84
@@ -55,7 +57,30 @@ WButton {
     WMenu {
         id: appMenu
         downDirection: true
-        
+
+        WMenuItem {
+            icon.name: "open"
+            text: Translation.tr("Open")
+            onTriggered: {
+                root.desktopEntry.execute();
+            }
+        }
+        WMenuItem {
+            visible: Platform.isWindows && (root.appInfo?.canRunAsAdmin ?? false)
+            icon.name: "shield"
+            text: Translation.tr("Run as administrator")
+            onTriggered: {
+                WindowsNative.appActions?.runAsAdmin(root.desktopEntry.id);
+            }
+        }
+        WMenuItem {
+            visible: Platform.isWindows && (root.appInfo?.canOpenLocation ?? false)
+            icon.name: "folder-open"
+            text: Translation.tr("Open file location")
+            onTriggered: {
+                WindowsNative.appActions?.openFileLocation(root.desktopEntry.id);
+            }
+        }
         WMenuItem {
             visible: root.pinnedStart
             icon.name: "arrow-up-left"
@@ -92,6 +117,22 @@ WButton {
             text: root.pinnedTaskbar ? Translation.tr("Unpin from taskbar") : Translation.tr("Pin to taskbar")
             onTriggered: {
                 TaskbarApps.togglePin(root.desktopEntry.id);
+            }
+        }
+        WMenuItem {
+            visible: Platform.isWindows && (root.appInfo?.packaged ?? false)
+            icon.name: "settings"
+            text: Translation.tr("App settings")
+            onTriggered: {
+                WindowsNative.appActions?.openAppSettings(root.desktopEntry.id);
+            }
+        }
+        WMenuItem {
+            visible: Platform.isWindows && (root.appInfo?.canUninstall ?? false)
+            icon.name: "delete"
+            text: Translation.tr("Uninstall")
+            onTriggered: {
+                WindowsNative.appActions?.uninstall(root.desktopEntry.id);
             }
         }
     }

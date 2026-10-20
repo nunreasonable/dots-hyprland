@@ -26,6 +26,10 @@ Item {
     property var desktopEntry: null
     readonly property bool hasDesktopActions: (desktopEntry?.actions.length ?? 0) > 0
 
+    readonly property string entryId: root.desktopEntry?.id ?? ""
+    readonly property var appInfo: (root.isOpen && Platform.isWindows && root.entryId !== "" && WindowsNative.appActions)
+        ? WindowsNative.appActions.info(root.entryId) : null
+
     Connections {
         target: DesktopEntries
         enabled: root.isOpen
@@ -187,6 +191,26 @@ Item {
                         enabled: root.desktopEntry !== null
                         onClicked: {
                             root.desktopEntry?.execute();
+                            root.close();
+                        }
+                    }
+
+                    ContextMenuItem {
+                        visible: Platform.isWindows && (root.appInfo?.canRunAsAdmin ?? false)
+                        iconName: "admin_panel_settings"
+                        label: Translation.tr("Run as administrator")
+                        onClicked: {
+                            WindowsNative.appActions?.runAsAdmin(root.entryId);
+                            root.close();
+                        }
+                    }
+
+                    ContextMenuItem {
+                        visible: Platform.isWindows && (root.appInfo?.canOpenLocation ?? false)
+                        iconName: "folder_open"
+                        label: Translation.tr("Open file location")
+                        onClicked: {
+                            WindowsNative.appActions?.openFileLocation(root.entryId);
                             root.close();
                         }
                     }

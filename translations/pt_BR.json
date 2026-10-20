@@ -1992,5 +1992,9 @@
   "No events": "Nenhum evento",
   "All day": "Dia todo",
   "Back to the month": "Voltar ao mês",
-  "Today:": "Hoje:"
+  "Today:": "Hoje:",
+  "Run as administrator": "Executar como administrador",
+  "Open file location": "Abrir local do arquivo",
+  "App settings": "Configurações do app",
+  "Uninstall": "Desinstalar"
 }

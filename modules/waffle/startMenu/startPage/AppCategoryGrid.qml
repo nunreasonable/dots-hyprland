@@ -276,6 +276,8 @@ Rectangle {
 
         property bool pinnedStart: LauncherApps.isPinned(smallGridAppButton.desktopEntry.id);
         property bool pinnedTaskbar: TaskbarApps.isPinned(smallGridAppButton.desktopEntry.id);
+        readonly property var appInfo: (appMenu.visible && Platform.isWindows && WindowsNative.appActions)
+            ? WindowsNative.appActions.info(smallGridAppButton.desktopEntry.id) : null
 
         onClicked: {
             GlobalStates.searchOpen = false;
@@ -311,6 +313,29 @@ Rectangle {
             downDirection: true
 
             WMenuItem {
+                icon.name: "open"
+                text: Translation.tr("Open")
+                onTriggered: {
+                    smallGridAppButton.desktopEntry.execute();
+                }
+            }
+            WMenuItem {
+                visible: Platform.isWindows && (smallGridAppButton.appInfo?.canRunAsAdmin ?? false)
+                icon.name: "shield"
+                text: Translation.tr("Run as administrator")
+                onTriggered: {
+                    WindowsNative.appActions?.runAsAdmin(smallGridAppButton.desktopEntry.id);
+                }
+            }
+            WMenuItem {
+                visible: Platform.isWindows && (smallGridAppButton.appInfo?.canOpenLocation ?? false)
+                icon.name: "folder-open"
+                text: Translation.tr("Open file location")
+                onTriggered: {
+                    WindowsNative.appActions?.openFileLocation(smallGridAppButton.desktopEntry.id);
+                }
+            }
+            WMenuItem {
                 icon.name: smallGridAppButton.pinnedStart ? "pin-off" : "pin"
                 text: smallGridAppButton.pinnedStart ? Translation.tr("Unpin from Start") : Translation.tr("Pin to Start")
                 onTriggered: {
@@ -322,6 +347,22 @@ Rectangle {
                 text: smallGridAppButton.pinnedTaskbar ? Translation.tr("Unpin from taskbar") : Translation.tr("Pin to taskbar")
                 onTriggered: {
                     TaskbarApps.togglePin(smallGridAppButton.desktopEntry.id);
+                }
+            }
+            WMenuItem {
+                visible: Platform.isWindows && (smallGridAppButton.appInfo?.packaged ?? false)
+                icon.name: "settings"
+                text: Translation.tr("App settings")
+                onTriggered: {
+                    WindowsNative.appActions?.openAppSettings(smallGridAppButton.desktopEntry.id);
+                }
+            }
+            WMenuItem {
+                visible: Platform.isWindows && (smallGridAppButton.appInfo?.canUninstall ?? false)
+                icon.name: "delete"
+                text: Translation.tr("Uninstall")
+                onTriggered: {
+                    WindowsNative.appActions?.uninstall(smallGridAppButton.desktopEntry.id);
                 }
             }
         }
