@@ -38,24 +38,13 @@ DockButton {
         sourceComponent: DockSeparator {}
     }
 
-    Loader {
-        anchors.fill: parent
-        active: appToplevel.toplevels.length > 0
-        sourceComponent: MouseArea {
-            id: mouseArea
-            anchors.fill: parent
-            hoverEnabled: true
-            acceptedButtons: Qt.NoButton
-            onEntered: {
-                appListRoot.lastHoveredButton = root
-                appListRoot.buttonHovered = true
-                lastFocused = appToplevel.toplevels.length - 1
-            }
-            onExited: {
-                if (appListRoot.lastHoveredButton === root) {
-                    appListRoot.buttonHovered = false
-                }
-            }
+    onHoveredChanged: {
+        if (hovered && appToplevel.toplevels.length > 0) {
+            appListRoot.lastHoveredButton = root
+            appListRoot.buttonHovered = true
+            lastFocused = appToplevel.toplevels.length - 1
+        } else if (!hovered && appListRoot.lastHoveredButton === root) {
+            appListRoot.buttonHovered = false
         }
     }
 
