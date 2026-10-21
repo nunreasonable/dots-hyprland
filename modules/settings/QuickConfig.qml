@@ -365,7 +365,7 @@ ContentPage {
                         },
                         {
                             displayName: "NabyScape",
-                            icon: "pill",
+                            icon: "toolbar",
                             value: "nabyscape"
                         }
                     ]

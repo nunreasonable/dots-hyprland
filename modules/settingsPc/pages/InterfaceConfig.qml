@@ -951,7 +951,7 @@ ContentPage {
 
         ContentSection {
             visible: Config.options.appearance.visualStyle === "nabyscape" || Config.options.nabyIsland.enable
-            icon: "pill"
+            icon: "toolbar"
             title: Translation.tr("NabyScape island")
             shape: W.MaterialShape.Shape.Pill
 
