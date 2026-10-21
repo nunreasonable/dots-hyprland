@@ -350,14 +350,6 @@ Rectangle {
                 }
             }
             WMenuItem {
-                visible: Platform.isWindows && (smallGridAppButton.appInfo?.packaged ?? false)
-                icon.name: "settings"
-                text: Translation.tr("App settings")
-                onTriggered: {
-                    WindowsNative.appActions?.openAppSettings(smallGridAppButton.desktopEntry.id);
-                }
-            }
-            WMenuItem {
                 visible: Platform.isWindows && (smallGridAppButton.appInfo?.canUninstall ?? false)
                 icon.name: "delete"
                 text: Translation.tr("Uninstall")

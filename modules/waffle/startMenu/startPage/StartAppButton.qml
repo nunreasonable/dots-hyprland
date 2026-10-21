@@ -120,14 +120,6 @@ WButton {
             }
         }
         WMenuItem {
-            visible: Platform.isWindows && (root.appInfo?.packaged ?? false)
-            icon.name: "settings"
-            text: Translation.tr("App settings")
-            onTriggered: {
-                WindowsNative.appActions?.openAppSettings(root.desktopEntry.id);
-            }
-        }
-        WMenuItem {
             visible: Platform.isWindows && (root.appInfo?.canUninstall ?? false)
             icon.name: "delete"
             text: Translation.tr("Uninstall")

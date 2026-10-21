@@ -254,16 +254,6 @@ RowLayout {
                                 }
                             })
                         ] : []),
-                        ...((appInfo?.packaged ?? false) ? [
-                            searchResultComp.createObject(null, {
-                                name: Translation.tr("App settings"),
-                                iconName: "settings",
-                                iconType: LauncherSearchResult.IconType.Material,
-                                execute: () => {
-                                    WindowsNative.appActions?.openAppSettings(appId);
-                                }
-                            })
-                        ] : []),
                         ...((appInfo?.canUninstall ?? false) ? [
                             searchResultComp.createObject(null, {
                                 name: Translation.tr("Uninstall"),

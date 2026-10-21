@@ -68,11 +68,6 @@ Item {
         root.close();
     }
 
-    function _openAppSettings() {
-        WindowsNative.appActions?.openAppSettings(root.entryId);
-        root.close();
-    }
-
     function _uninstall() {
         WindowsNative.appActions?.uninstall(root.entryId);
         root.close();
@@ -213,14 +208,7 @@ Item {
                     }
 
                     ContextMenuSeparator {
-                        visible: Platform.isWindows && ((root.appInfo?.packaged ?? false) || (root.appInfo?.canUninstall ?? false))
-                    }
-
-                    ContextMenuItem {
-                        visible: Platform.isWindows && (root.appInfo?.packaged ?? false)
-                        iconName: "settings"
-                        label: Translation.tr("App settings")
-                        onClicked: root._openAppSettings()
+                        visible: Platform.isWindows && (root.appInfo?.canUninstall ?? false)
                     }
 
                     ContextMenuItem {
