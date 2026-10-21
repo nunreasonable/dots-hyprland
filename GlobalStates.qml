@@ -80,6 +80,18 @@ Singleton {
         return root.islandsAllowed && (root.islandScreens[screenName ?? ""] ?? 0) > 0;
     }
 
+    property string nabyIslandScreen: ""
+    property bool nabyIslandOsd: false
+    property bool nabyIslandNotifications: false
+
+    function nabyIslandTakes(kind, screenName) {
+        if (root.nabyIslandScreen === "")
+            return false;
+        if (kind === "osd" ? !root.nabyIslandOsd : kind === "notifications" ? !root.nabyIslandNotifications : true)
+            return false;
+        return !screenName || screenName === root.nabyIslandScreen;
+    }
+
     function setFrameHover(screenName, side, hovered) {
         const key = `${screenName}:${side}`;
         if ((root.frameHover[key] ?? false) === hovered)

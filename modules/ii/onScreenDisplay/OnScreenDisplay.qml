@@ -14,6 +14,7 @@ Scope {
     id: root
     property string protectionMessage: ""
     property var focusedScreen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name)
+    readonly property bool shownInIsland: GlobalStates.islandShownOn(root.focusedScreen?.name) || GlobalStates.nabyIslandTakes("osd", root.focusedScreen?.name)
 
     property string currentIndicator: "volume"
     onCurrentIndicatorChanged: GlobalStates.osdIndicatorType = currentIndicator
@@ -96,7 +97,7 @@ Scope {
     Loader {
         id: osdLoader
         property bool kept: false
-        active: (GlobalStates.osdVolumeOpen && (!GlobalStates.islandShownOn(root.focusedScreen?.name) || root.protectionMessage.length > 0)) || (Platform.isWindows && osdLoader.kept)
+        active: (GlobalStates.osdVolumeOpen && (!root.shownInIsland || root.protectionMessage.length > 0)) || (Platform.isWindows && osdLoader.kept)
         onLoaded: osdLoader.kept = true
 
         sourceComponent: PanelWindow {
@@ -129,7 +130,7 @@ Scope {
 
             implicitWidth: columnLayout.implicitWidth
             implicitHeight: columnLayout.implicitHeight
-            visible: GlobalStates.osdVolumeOpen && (!GlobalStates.islandShownOn(root.focusedScreen?.name) || root.protectionMessage.length > 0)
+            visible: GlobalStates.osdVolumeOpen && (!root.shownInIsland || root.protectionMessage.length > 0)
 
             ColumnLayout {
                 id: columnLayout

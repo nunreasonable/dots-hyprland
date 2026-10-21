@@ -2046,5 +2046,16 @@
   "Keeping the system awake": "Mantendo o sistema acordado",
   "Keep awake is off": "Manter acordado está desligado",
   "It won't go idle or sleep on its own": "Ele não vai ficar ocioso nem dormir sozinho",
-  "Click the cup to keep the system awake": "Clique na xícara para manter o sistema acordado"
+  "Click the cup to keep the system awake": "Clique na xícara para manter o sistema acordado",
+  "NabyScape island": "Ilha do NabyScape",
+  "Show the island on": "Mostrar a ilha em",
+  "Primary": "Principal",
+  "Follow the cursor's monitor": "Seguir o monitor do cursor",
+  "Moves the island to the monitor the cursor is on once it stays there for a moment. It starts on the monitor chosen above": "Leva a ilha para o monitor onde o cursor está depois que ele fica lá por um instante. Ela começa no monitor escolhido acima",
+  "Show in the island": "Mostrar na ilha",
+  "Volume and brightness": "Volume e brilho",
+  "Volume and brightness changes show in the island instead of the on-screen display": "Mudanças de volume e brilho aparecem na ilha em vez da exibição na tela",
+  "New notifications show in the island for a few seconds instead of popping up. Click one to open the notification center": "Notificações novas aparecem na ilha por alguns segundos em vez dos pop-ups. Clique numa para abrir a central de notificações",
+  "A pomodoro, timer or stopwatch in progress replaces the clock. Click it to open the Focus tab": "Um pomodoro, timer ou cronômetro em andamento aparece no lugar do relógio. Clique nele para abrir a aba Foco",
+  "Music waveform": "Onda da música"
 }

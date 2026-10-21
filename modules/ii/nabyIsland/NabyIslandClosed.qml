@@ -11,6 +11,11 @@ Item {
     id: root
 
     property MprisPlayer player: null
+    property bool showWaveform: true
+    property string indicatorKind: ""
+    property real recordingSince: 0
+
+    signal indicatorActivated
 
     NabyIslandCover {
         id: cover
@@ -25,6 +30,8 @@ Item {
 
     NabyIslandWaveform {
         anchors.centerIn: parent
+        anchors.horizontalCenterOffset: root.indicatorKind !== "" ? -14 : 0
+        visible: root.showWaveform
         playing: root.player?.isPlaying ?? false
         barCount: 18
         maxBarHeight: 20
@@ -34,10 +41,23 @@ Item {
         anchors.right: parent.right
         anchors.rightMargin: 16
         anchors.verticalCenter: parent.verticalCenter
+        visible: root.indicatorKind === ""
         text: DateTime.time
         color: "#ffffff"
         font.pixelSize: 14
         font.weight: Font.DemiBold
         font.variableAxes: ({ "wght": 650 })
+    }
+
+    Loader {
+        anchors.right: parent.right
+        anchors.rightMargin: 16
+        anchors.verticalCenter: parent.verticalCenter
+        active: root.indicatorKind !== ""
+        sourceComponent: NabyIslandIndicator {
+            kind: root.indicatorKind
+            recordingSince: root.recordingSince
+            onActivated: root.indicatorActivated()
+        }
     }
 }

@@ -8,10 +8,16 @@ Item {
     id: root
 
     property bool compact: true
+    property string indicatorKind: ""
+    property real recordingSince: 0
+    readonly property bool showIndicator: root.compact && root.indicatorKind !== ""
+
+    signal indicatorActivated
 
     Column {
         anchors.centerIn: parent
         anchors.verticalCenterOffset: root.compact ? 0 : -2
+        visible: !root.showIndicator
         spacing: 0
 
         StyledText {
@@ -30,6 +36,17 @@ Item {
             color: "#ffffff"
             opacity: 0.65
             font.pixelSize: 13
+        }
+    }
+
+    Loader {
+        anchors.centerIn: parent
+        active: root.showIndicator
+        sourceComponent: NabyIslandIndicator {
+            kind: root.indicatorKind
+            recordingSince: root.recordingSince
+            textSize: 15
+            onActivated: root.indicatorActivated()
         }
     }
 }

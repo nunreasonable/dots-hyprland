@@ -950,6 +950,106 @@ ContentPage {
         }
 
         ContentSection {
+            visible: Config.options.appearance.visualStyle === "nabyscape" || Config.options.nabyIsland.enable
+            icon: "pill"
+            title: Translation.tr("NabyScape island")
+            shape: W.MaterialShape.Shape.Pill
+
+            GroupedList {
+                ConfigSwitch {
+                    buttonIcon: "check"
+                    text: Translation.tr("Enable")
+                    checked: Config.options.nabyIsland.enable
+                    onCheckedChanged: { Config.options.nabyIsland.enable = checked }
+                }
+            }
+
+            ContentSubsection {
+                title: Translation.tr("Show the island on")
+                visible: Quickshell.screens.length > 1 || Config.options.nabyIsland.screen !== "" || Config.options.nabyIsland.followCursor
+
+                Flow {
+                    Layout.fillWidth: true
+                    spacing: 2
+
+                    W.SelectionGroupButton {
+                        leftmost: true
+                        rightmost: Quickshell.screens.length === 0
+                        buttonIcon: "star"
+                        buttonText: Translation.tr("Primary")
+                        toggled: Config.options.nabyIsland.screen === ""
+                        onClicked: Config.options.nabyIsland.screen = ""
+                    }
+
+                    Repeater {
+                        model: Quickshell.screens
+                        delegate: W.SelectionGroupButton {
+                            id: islandScreenButton
+                            required property var modelData
+                            required property int index
+                            rightmost: index === Quickshell.screens.length - 1
+                            buttonIcon: "monitor"
+                            buttonText: islandScreenButton.modelData.name
+                            toggled: Config.options.nabyIsland.screen === islandScreenButton.modelData.name
+                            onClicked: Config.options.nabyIsland.screen = islandScreenButton.modelData.name
+                        }
+                    }
+                }
+
+                GroupedList {
+                    ConfigSwitch {
+                        buttonIcon: "arrow_selector_tool"
+                        text: Translation.tr("Follow the cursor's monitor")
+                        checked: Config.options.nabyIsland.followCursor
+                        onCheckedChanged: { Config.options.nabyIsland.followCursor = checked }
+                        W.StyledToolTip {
+                            text: Translation.tr("Moves the island to the monitor the cursor is on once it stays there for a moment. It starts on the monitor chosen above")
+                        }
+                    }
+                }
+            }
+
+            ContentSubsection {
+                title: Translation.tr("Show in the island")
+                GroupedList {
+                    ConfigSwitch {
+                        buttonIcon: "volume_up"
+                        text: Translation.tr("Volume and brightness")
+                        checked: Config.options.nabyIsland.showOsd
+                        onCheckedChanged: { Config.options.nabyIsland.showOsd = checked }
+                        W.StyledToolTip {
+                            text: Translation.tr("Volume and brightness changes show in the island instead of the on-screen display")
+                        }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "notifications"
+                        text: Translation.tr("Notifications")
+                        checked: Config.options.nabyIsland.showNotifications
+                        onCheckedChanged: { Config.options.nabyIsland.showNotifications = checked }
+                        W.StyledToolTip {
+                            text: Translation.tr("New notifications show in the island for a few seconds instead of popping up. Click one to open the notification center")
+                        }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "timer"
+                        text: Translation.tr("Timers")
+                        checked: Config.options.nabyIsland.showTimers
+                        onCheckedChanged: { Config.options.nabyIsland.showTimers = checked }
+                        W.StyledToolTip {
+                            text: Translation.tr("A pomodoro, timer or stopwatch in progress replaces the clock. Click it to open the Focus tab")
+                        }
+                    }
+                    ConfigSwitch {
+                        buttonIcon: "graphic_eq"
+                        text: Translation.tr("Music waveform")
+                        checked: Config.options.nabyIsland.showWaveform
+                        onCheckedChanged: { Config.options.nabyIsland.showWaveform = checked }
+                    }
+                }
+            }
+        }
+
+        ContentSection {
             visible: Platform.isWindows
             icon: "toolbar"
             shape: W.MaterialShape.Shape.Square
