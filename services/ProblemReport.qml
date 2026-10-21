@@ -15,6 +15,24 @@ Singleton {
     property string lastError: ""
     property bool includeCrashDump: false
     readonly property string newIssueUrl: "https://github.com/nunreasonable/ii-windows/issues/new"
+    readonly property var styleNames: ({
+            "ii": "illogical-impulse (ii)",
+            "end4pc": "end4-pC",
+            "nabyscape": "NabyScape"
+        })
+
+    function bugReportUrl(zip) {
+        const fields = {
+            "template": "bug_report.yml",
+            "version": SelfUpdate.installedVersion,
+            "windows": `${SystemInfo.distroName}, build ${SystemInfo.windowsBuild}`,
+            "style": root.styleNames[Config.options.appearance.visualStyle] ?? "",
+            "family": Config.options.panelFamily,
+            "logs": `Problem report: ${zip.split(/[\\/]/).pop()} (drag the zip here)`
+        };
+        const query = Object.keys(fields).filter(key => fields[key]).map(key => `${key}=${encodeURIComponent(fields[key])}`).join("&");
+        return `${root.newIssueUrl}?${query}`;
+    }
 
     function collect() {
         if (!Platform.isWindows || root.collecting)
@@ -45,7 +63,7 @@ Singleton {
             if (exitCode === 0 && last.toLowerCase().endsWith(".zip")) {
                 root.zipPath = last;
                 Quickshell.execDetached(["explorer.exe", `/select,${last}`]);
-                Qt.openUrlExternally(root.newIssueUrl);
+                Qt.openUrlExternally(root.bugReportUrl(last));
                 return;
             }
             const error = reportErr.text.trim().split("\n")[0] ?? "";
