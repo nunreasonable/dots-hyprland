@@ -724,6 +724,12 @@ Singleton {
                 }
             }
 
+            property JsonObject nabyIsland: JsonObject {
+                property bool enable: false
+                property string screen: ""
+                property bool keptNativeTaskbar: false
+            }
+
             property JsonObject windowsPort: JsonObject {
                 property int pinsVersion: 0
                 property bool taskbarHoverOnly: true

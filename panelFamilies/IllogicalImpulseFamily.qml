@@ -16,6 +16,7 @@ Scope {
     PanelLoader { deferred: Platform.isWindows && !Config.options.lock.launchOnStartup; panelSource: "../modules/ii/lock/Lock.qml" }
     PanelLoader { panelSource: "../modules/ii/equalizer/EqualizerPopup.qml" }
     PanelLoader { panelSource: "../modules/ii/mediaControls/MediaControls.qml" }
+    PanelLoader { extraCondition: Config.options.nabyIsland.enable; panelSource: "../modules/ii/nabyIsland/NabyIsland.qml" }
     PanelLoader { panelSource: "../modules/ii/notificationPopup/NotificationPopup.qml" }
     PanelLoader { panelSource: "../modules/ii/nowPlaying/NowPlaying.qml" }
     PanelLoader { panelSource: "../modules/ii/onScreenDisplay/OnScreenDisplay.qml" }

@@ -6,7 +6,8 @@ import Quickshell
 Singleton {
     id: root
 
-    readonly property list<string> styles: ["ii", "end4pc"]
+    readonly property list<string> styles: ["ii", "end4pc", "nabyscape"]
+    readonly property list<string> layoutStyles: ["ii", "end4pc"]
     readonly property string selected: Config.options.appearance.visualStyle
     readonly property string applied: Config.options.appearance.visualStyleApplied
 
@@ -34,6 +35,10 @@ Singleton {
         Config.options.appearance.visualStylePresetVersion = root.presetVersion;
     }
 
+    function layoutStyle(style) {
+        return style === "nabyscape" ? "ii" : style;
+    }
+
     function defaultLayout(style) {
         const pc = style === "end4pc";
         return {
@@ -54,8 +59,8 @@ Singleton {
     function switchLayout(from, to) {
         const layouts = Config.options.bar.layouts;
         const kept = layouts.kept;
-        const custom = !root.styles.some(style => root.isDefaultLayout(style));
-        if (custom && !root.styles.includes(from))
+        const custom = !root.layoutStyles.some(style => root.isDefaultLayout(style));
+        if (custom && !root.layoutStyles.includes(from))
             return;
         if (custom && from !== to) {
             kept[from + "Left"] = [...layouts.leftLayout];
@@ -81,9 +86,22 @@ Singleton {
     function applyNewKeys(pc, from) {
         Config.options.bar.resources.showValue = !pc;
         Config.options.bar.utilButtons.showWallpaperToggle = pc;
-        root.switchLayout(from, pc ? "end4pc" : "ii");
+        root.switchLayout(root.layoutStyle(from), pc ? "end4pc" : "ii");
         Config.options.sidebar.banner = pc;
         Config.options.sidebar.sectionOrder = pc ? ["banner", "quickToggles", "sliders", "media", "notifications", "bottom"] : ["banner", "sliders", "quickToggles", "media", "notifications", "bottom"];
+    }
+
+    function applyIsland(naby) {
+        const was = root.applied === "nabyscape";
+        Config.options.nabyIsland.enable = naby;
+        if (!Platform.isWindows || naby === was)
+            return;
+        if (naby) {
+            Config.options.nabyIsland.keptNativeTaskbar = Config.options.windowsPort.nativeTaskbar;
+            Config.options.windowsPort.nativeTaskbar = true;
+        } else {
+            Config.options.windowsPort.nativeTaskbar = Config.options.nabyIsland.keptNativeTaskbar;
+        }
     }
 
     function applyPreset(style) {
@@ -95,7 +113,8 @@ Singleton {
         Config.options.bar.workspaces.showAppIcons = !pc;
         Config.options.bar.resources.alwaysShowSwap = !pc;
         Config.options.sidebar.quickSliders.enable = pc;
-        Config.options.appearance.settingsLayout = style;
+        Config.options.appearance.settingsLayout = style === "nabyscape" ? "end4pc" : style;
+        root.applyIsland(style === "nabyscape");
         root.applyNewKeys(pc, root.applied);
         Config.options.appearance.visualStylePresetVersion = root.presetVersion;
         Config.options.appearance.visualStyleApplied = style;

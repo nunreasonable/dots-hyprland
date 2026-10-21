@@ -171,7 +171,7 @@ Scope {
             const key = root.trackKey();
             if (!root.startupDone || root.title.length === 0 || key === root.lastKey) return;
             root.lastKey = key;
-            if (!Config.options.media.nowPlaying.enable) return;
+            if (!Config.options.media.nowPlaying.enable || Config.options.nabyIsland.enable) return;
             root.show();
         }
     }
