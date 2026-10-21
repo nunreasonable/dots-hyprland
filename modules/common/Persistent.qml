@@ -89,6 +89,13 @@ Singleton {
                 property string screen: ""
             }
 
+            property JsonObject nabyIsland: JsonObject {
+                property string tab: "media"
+                property string tool: ""
+                property string focusMode: "pomodoro"
+                property string statusPage: "overview"
+            }
+
             property JsonObject overlay: JsonObject {
                 property list<string> open: ["crosshair", "recorder", "volumeMixer", "resources"]
                 property JsonObject crosshair: JsonObject {

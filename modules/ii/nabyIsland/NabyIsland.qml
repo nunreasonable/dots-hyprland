@@ -5,6 +5,7 @@ import qs.modules.common
 import qs.modules.common.widgets
 import QtQuick
 import Quickshell
+import Quickshell.Io
 import Quickshell.Wayland
 import Quickshell.Hyprland
 import Quickshell.Services.Mpris
@@ -28,6 +29,7 @@ Scope {
 
     property bool hoverShown: false
     property bool open: false
+    property bool windowLarge: false
     readonly property string mode: root.open ? "open" : root.hoverShown ? "hover" : "closed"
 
     readonly property int flare: 10
@@ -36,14 +38,20 @@ Scope {
     readonly property int closedIdleWidth: 200
     readonly property size mediaCardSize: Qt.size(380, 150)
     readonly property size clockCardSize: Qt.size(240, 84)
+    readonly property int openWidth: 460
+    readonly property int openMinHeight: 170
+    readonly property int openMaxHeight: 456
+    readonly property real openHeight: Math.max(root.openMinHeight, Math.min(root.openMaxHeight, panelLoader.item?.implicitHeight ?? 320))
     readonly property size bodySize: {
         if (root.mode === "closed")
             return Qt.size(root.hasMedia ? root.closedMediaWidth : root.closedIdleWidth, root.closedHeight);
+        if (root.mode === "open")
+            return Qt.size(root.openWidth, root.openHeight);
         return root.hasMedia ? root.mediaCardSize : root.clockCardSize;
     }
-    readonly property real bodyRadius: root.mode === "closed" ? 18 : 24
-    readonly property int windowWidth: 2 * Math.ceil((root.mediaCardSize.width * 1.12) / 2) + 2 * root.flare
-    readonly property int windowHeight: Math.ceil(root.mediaCardSize.height * 1.12)
+    readonly property real bodyRadius: root.mode === "closed" ? 18 : root.mode === "open" ? 26 : 24
+    readonly property int windowWidth: 2 * Math.ceil(Math.max(root.mediaCardSize.width * 1.12, root.openWidth + 16) / 2) + 2 * root.flare
+    readonly property int windowHeight: root.windowLarge ? root.openMaxHeight + 16 : Math.ceil(root.mediaCardSize.height * 1.12)
 
     component QuickFadeLoader: Loader {
         property bool shown: true
@@ -71,12 +79,57 @@ Scope {
         }
     }
 
+    function openPanel() {
+        if (!root.shown || root.open)
+            return;
+        shrinkTimer.stop();
+        root.windowLarge = true;
+        root.open = true;
+    }
+
+    function closePanel() {
+        if (!root.open)
+            return;
+        root.open = false;
+        shrinkTimer.restart();
+    }
+
+    function togglePanel() {
+        if (root.open)
+            root.closePanel();
+        else
+            root.openPanel();
+    }
+
+    onOpenChanged: {
+        if (!root.open) {
+            GlobalFocusGrab.removeDismissable(islandWindow);
+            return;
+        }
+        Qt.callLater(() => {
+            if (!root.open)
+                return;
+            GlobalFocusGrab.addDismissable(islandWindow);
+            panelLoader.forceActiveFocus();
+        });
+    }
+
     onShownChanged: {
         if (root.shown)
             return;
         enterTimer.stop();
         leaveTimer.stop();
         root.hoverShown = false;
+        root.closePanel();
+        shrinkTimer.stop();
+        root.windowLarge = false;
+    }
+
+    Connections {
+        target: GlobalFocusGrab
+        function onDismissed() {
+            root.closePanel();
+        }
     }
 
     Timer {
@@ -97,6 +150,15 @@ Scope {
         }
     }
 
+    Timer {
+        id: shrinkTimer
+        interval: Appearance.animation.elementMove.duration + 150
+        onTriggered: {
+            if (!root.open)
+                root.windowLarge = false;
+        }
+    }
+
     PanelWindow {
         id: islandWindow
         screen: root.targetScreen
@@ -105,7 +167,7 @@ Scope {
         exclusiveZone: 0
         WlrLayershell.namespace: "quickshell:nabyIsland"
         WlrLayershell.layer: WlrLayer.Top
-        WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+        WlrLayershell.keyboardFocus: root.open ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
         color: "transparent"
 
         readonly property bool busy: mediaCard.item?.busy ?? false
@@ -160,6 +222,12 @@ Scope {
                 onHoveredChanged: root.setHovered(hovered)
             }
 
+            MouseArea {
+                anchors.fill: parent
+                enabled: root.mode !== "open"
+                onClicked: root.openPanel()
+            }
+
             QuickFadeLoader {
                 anchors.top: parent.top
                 anchors.horizontalCenter: parent.horizontalCenter
@@ -188,7 +256,7 @@ Scope {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: root.mediaCardSize.width
                 height: root.mediaCardSize.height
-                shown: root.mode !== "closed" && root.hasMedia
+                shown: root.mode === "hover" && root.hasMedia
                 sourceComponent: NabyIslandMediaCard {
                     player: root.player
                 }
@@ -199,11 +267,47 @@ Scope {
                 anchors.horizontalCenter: parent.horizontalCenter
                 width: root.clockCardSize.width
                 height: root.clockCardSize.height
-                shown: root.mode !== "closed" && !root.hasMedia
+                shown: root.mode === "hover" && !root.hasMedia
                 sourceComponent: NabyIslandClock {
                     compact: false
                 }
             }
+
+            FadeLoader {
+                id: panelLoader
+                anchors.top: parent.top
+                anchors.bottom: parent.bottom
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: root.openWidth
+                shown: root.mode === "open"
+                focus: root.open
+                Keys.onPressed: event => {
+                    if (event.key === Qt.Key_Escape) {
+                        root.closePanel();
+                        event.accepted = true;
+                    }
+                }
+                sourceComponent: NabyIslandPanel {
+                    player: root.player
+                    hasMedia: root.hasMedia
+                    cornerRadius: body.radius
+                    onCloseRequested: root.closePanel()
+                }
+            }
+        }
+    }
+
+    IpcHandler {
+        target: "nabyIsland"
+
+        function toggle(): void {
+            root.togglePanel();
+        }
+        function open(): void {
+            root.openPanel();
+        }
+        function close(): void {
+            root.closePanel();
         }
     }
 }
