@@ -78,6 +78,17 @@ if ($IncludeDump) {
     if ($dump) { Copy-Item -LiteralPath $dump.FullName (Join-Path $work ('crash-' + $dump.Name)) }
 }
 
+$crashes = @(Get-ChildItem -Path (Join-Path $env:LOCALAPPDATA 'quickshell\cache\crashes') -Recurse -Filter 'report.txt' -ErrorAction SilentlyContinue |
+    Where-Object { $_.LastWriteTime -gt (Get-Date).AddDays(-7) } | Sort-Object LastWriteTime -Descending)
+if ($crashes.Count -gt 0) { CopyText $crashes[0].FullName 'crash-report.txt' 400 400 }
+
+$faults = @(Get-WinEvent -FilterHashtable @{ LogName = 'Application'; ProviderName = 'Application Error', 'Application Hang'; StartTime = (Get-Date).AddDays(-7) } -MaxEvents 300 -ErrorAction SilentlyContinue |
+    Where-Object { $_.Message -match '(?i)\bqsw?\.exe\b' } | Select-Object -First 10)
+if ($faults.Count -gt 0) {
+    $text = ($faults | ForEach-Object { '== ' + $_.TimeCreated.ToString('yyyy-MM-dd HH:mm:ss') + ' ' + $_.ProviderName + "`r`n" + $_.Message }) -join "`r`n`r`n"
+    [IO.File]::WriteAllText((Join-Path $work 'windows-errors.txt'), (Scrub $text), $utf8)
+}
+
 $info = New-Object Collections.Generic.List[string]
 if (-not $Version -and (Test-Path (Join-Path $install 'VERSION'))) { $Version = (Get-Content (Join-Path $install 'VERSION') -Raw).Trim() }
 $info.Add("ii-windows: $Version")
@@ -135,6 +146,12 @@ foreach ($family in 'Google Sans Flex', 'Material Symbols', 'JetBrainsMono', 'Re
     $info.Add("installed '$family' entries: $hits")
 }
 $info.Add("ii processes: " + @(Get-Process qsw -ErrorAction SilentlyContinue).Count)
+$info.Add("crashes in the last 7 days: " + $crashes.Count)
+foreach ($crash in @($crashes | Select-Object -First 10)) {
+    $reason = (Select-String -LiteralPath $crash.FullName -Pattern '^Reason: ' -ErrorAction SilentlyContinue | Select-Object -First 1).Line
+    $info.Add("crash " + $crash.LastWriteTime.ToString('yyyy-MM-dd HH:mm') + ": " + $reason)
+}
+$info.Add("windows error events for ii in the last 7 days: " + $faults.Count)
 [IO.File]::WriteAllText((Join-Path $work 'system-info.txt'), (Scrub ($info -join "`r`n")), $utf8)
 
 $desktop = [Environment]::GetFolderPath('Desktop')
