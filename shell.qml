@@ -167,6 +167,18 @@ ShellRoot {
     }
     Binding {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
+        property: "scrollingColumnWidth"
+        value: Config.options.windowsPort.tiling.scrolling.columnWidth
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
+        property: "scrollingCenter"
+        value: Config.options.windowsPort.tiling.scrolling.center
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.windowManager
         property: "borders"
         value: Config.options.hyprland.general.borderSize <= 0 ? "none" : Config.options.hyprland.general.borderColor.enable ? "colors" : "system"

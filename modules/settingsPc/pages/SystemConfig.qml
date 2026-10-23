@@ -272,20 +272,21 @@ ContentPage {
                 ConfigSelectionArray {
                     text: Translation.tr("Tiling Layout")
                     icon: "responsive_layout"
-                    currentValue: Config.options.hyprland.general.layout === "master" ? "master" : "dwindle"
+                    currentValue: ["master", "scrolling"].includes(Config.options.hyprland.general.layout) ? Config.options.hyprland.general.layout : "dwindle"
                     onSelected: newValue => {
                         Config.options.hyprland.general.layout = newValue;
                     }
                     options: [
                         { displayName: Translation.tr("Dwindle"), icon: "browse", value: "dwindle" },
-                        { displayName: Translation.tr("Master"), icon: "auto_awesome_mosaic", value: "master" }
+                        { displayName: Translation.tr("Master"), icon: "auto_awesome_mosaic", value: "master" },
+                        { displayName: Translation.tr("Scrolling"), icon: "view_carousel", value: "scrolling" }
                     ]
                 }
             }
 
             ContentSubsection {
                 Layout.topMargin: 10
-                visible: Config.options.hyprland.general.layout !== "master"
+                visible: !["master", "scrolling"].includes(Config.options.hyprland.general.layout)
                 title: Translation.tr("Dwindle")
 
                 GroupedList {
@@ -395,6 +396,47 @@ ContentPage {
                             if (value !== Math.round(Config.options.windowsPort.tiling.master.mfact * 100))
                                 Config.options.windowsPort.tiling.master.mfact = value / 100;
                         }
+                    }
+                }
+            }
+
+            ContentSubsection {
+                Layout.topMargin: 10
+                visible: Config.options.hyprland.general.layout === "scrolling"
+                title: Translation.tr("Scrolling")
+
+                W.NoticeBox {
+                    Layout.fillWidth: true
+                    text: Translation.tr("Each window opens as a column to the right of the focused one, on a strip that scrolls sideways (like Niri). Focusing a column scrolls it into view; columns that don't fit wait off screen.")
+                }
+
+                GroupedList {
+                    ConfigSelectionArray {
+                        text: Translation.tr("New column width")
+                        icon: "view_column"
+                        currentValue: Config.options.windowsPort.tiling.scrolling.columnWidth
+                        onSelected: newValue => {
+                            Config.options.windowsPort.tiling.scrolling.columnWidth = newValue;
+                        }
+                        options: [
+                            { displayName: "1/3", icon: "view_week", value: 1 / 3 },
+                            { displayName: "1/2", icon: "width_normal", value: 0.5 },
+                            { displayName: "2/3", icon: "width_wide", value: 2 / 3 },
+                            { displayName: Translation.tr("Full width"), icon: "width_full", value: 1 }
+                        ]
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("Center the focused column")
+                        icon: "center_focus_strong"
+                        currentValue: Config.options.windowsPort.tiling.scrolling.center
+                        onSelected: newValue => {
+                            Config.options.windowsPort.tiling.scrolling.center = newValue;
+                        }
+                        options: [
+                            { displayName: Translation.tr("When it doesn't fit"), icon: "fit_screen", value: "overflow" },
+                            { displayName: Translation.tr("Always"), icon: "align_horizontal_center", value: "always" },
+                            { displayName: Translation.tr("Never"), icon: "align_horizontal_left", value: "never" }
+                        ]
                     }
                 }
             }

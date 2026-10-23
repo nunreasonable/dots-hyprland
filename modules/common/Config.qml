@@ -764,6 +764,10 @@ Singleton {
                         property string orientation: "left"
                         property real mfact: 0.55
                     }
+                    property JsonObject scrolling: JsonObject {
+                        property real columnWidth: 0.5
+                        property string center: "overflow"
+                    }
                 }
                 property JsonObject decoration: JsonObject {
                     property string corners: "default"
