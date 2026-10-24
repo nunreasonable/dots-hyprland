@@ -89,13 +89,19 @@ Singleton {
     }
 
     property var _winThumbQueue: []
+    property var _winThumbFailed: ({})
 
     function _downloadNextThumbWindows() {
-        if (root._winThumbQueue.length === 0) return;
-        const entry = root._winThumbQueue.shift();
+        if (winThumbSrcProc.running) return;
+        let entry = null;
+        while (root._winThumbQueue.length > 0 && entry === null) {
+            const next = root._winThumbQueue.shift();
+            if (!root._winThumbFailed[next.name] && !root.thumbSet.has(next.name + ".jpg")) entry = next;
+        }
+        if (entry === null) return;
         winThumbSrcProc.entryName = entry.name;
         winThumbSrcProc.srcPath = `${root.thumbsDir}/.${entry.name}.src`;
-        winThumbSrcProc.command = [root.curlBin, "-sSL", "-m", "40", "-o", winThumbSrcProc.srcPath, entry.screenshot];
+        winThumbSrcProc.command = [root.curlBin, "-fsSL", "-m", "40", "-o", winThumbSrcProc.srcPath, entry.screenshot];
         winThumbSrcProc.running = true;
     }
 
@@ -104,8 +110,11 @@ Singleton {
         property string entryName: ""
         property string srcPath: ""
         onExited: code => {
-            if (code === 0 && WindowsNative.thumbnailer) {
+            const downloaded = code === 0 && (WindowsNative.fsUtils?.classify(winThumbSrcProc.srcPath) ?? "file") === "file";
+            if (downloaded && WindowsNative.thumbnailer) {
                 WindowsNative.thumbnailer.generate(winThumbSrcProc.srcPath, `${root.thumbsDir}/${winThumbSrcProc.entryName}.jpg`, 720);
+            } else {
+                root._winThumbFailed[winThumbSrcProc.entryName] = true;
             }
             Qt.callLater(root._downloadNextThumbWindows);
         }
@@ -114,8 +123,9 @@ Singleton {
     Connections {
         target: Platform.isWindows ? WindowsNative.thumbnailer : null
         function onFinished(sourcePath, outputPath, ok) {
-            if (!sourcePath.endsWith(".src")) return;
+            if (!sourcePath.endsWith(".src") || !sourcePath.startsWith(root.thumbsDir)) return;
             if (ok) root.refreshThumbs();
+            else root._winThumbFailed[FileUtils.fileNameForPath(outputPath).replace(/\.jpg$/, "")] = true;
             WindowsNative.fsUtils?.removeFile(sourcePath);
         }
     }

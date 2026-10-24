@@ -117,7 +117,7 @@ Singleton {
     Connections {
         target: Platform.isWindows ? WindowsNative.thumbnailer : null
         function onFinished(sourcePath, outputPath, ok) {
-            if (ok) root.refreshThumbs();
+            if (ok && outputPath.startsWith(root.thumbsDir)) root.refreshThumbs();
         }
     }
 
