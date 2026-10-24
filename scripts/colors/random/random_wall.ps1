@@ -11,6 +11,26 @@ $ErrorActionPreference = "Stop"
 $ProgressPreference = "SilentlyContinue"
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 
+function Test-Challenge($record) {
+    $response = $record.Exception.Response
+    $mitigated = ""
+    $server = ""
+    $status = 0
+    if ($response) {
+        try { $mitigated = "$($response.Headers['cf-mitigated'])" } catch {}
+        try { $server = "$($response.Headers['Server'])" } catch {}
+        try { $status = [int]$response.StatusCode } catch {}
+    }
+    $text = "$($record.ErrorDetails.Message) $($record.Exception.Message)"
+    return $mitigated -eq "challenge" -or $text -match "Just a moment|cf-chl|challenge-platform" -or ($server -match "cloudflare" -and $status -in 403, 503)
+}
+
+trap {
+    $message = if (Test-Challenge $_) { "IIW-ERROR:challenge:$Source" } else { "IIW-ERROR:" + (("$($_.Exception.Message)" -split "`r?`n")[0]) }
+    [Console]::Error.WriteLine($message.Substring(0, [Math]::Min(300, $message.Length)))
+    exit 1
+}
+
 $dir = Join-Path ([Environment]::GetFolderPath("MyPictures")) "Wallpapers"
 New-Item -ItemType Directory -Force -Path $dir | Out-Null
 
@@ -34,7 +54,18 @@ if ($Source -eq "konachan") {
     $tags += "order:random"
 
     $query = [Uri]::EscapeDataString($tags -join " ")
-    $response = Invoke-RestMethod @web "$site/post.json?limit=20&tags=$query"
+    try {
+        $response = Invoke-RestMethod @web "$site/post.json?limit=20&tags=$query"
+    } catch {
+        if (-not ($Spicy -and (Test-Challenge $_))) { throw }
+        Write-Output "IIW-NOTE:konachan-fallback"
+        $site = "https://konachan.net"
+        $tags = @("width:>=1600", "height:>=900", "score:>=30", "rating:safe")
+        if ($OnlyYuri) { $tags += "yuri" }
+        $tags += "order:random"
+        $query = [Uri]::EscapeDataString($tags -join " ")
+        $response = Invoke-RestMethod @web "$site/post.json?limit=20&tags=$query"
+    }
     $posts = @($response)
     if ($posts.Count -eq 0) { throw "Konachan returned no posts for: $($tags -join ' ')" }
     $post = $posts | Where-Object { $_.height -gt 0 -and ($_.width / $_.height) -ge 1.5 -and ($_.width / $_.height) -le 2.4 } | Select-Object -First 1
