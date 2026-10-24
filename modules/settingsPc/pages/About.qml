@@ -175,6 +175,23 @@ ContentPage {
 
         W.NoticeBox {
             Layout.fillWidth: true
+            visible: SelfUpdate.canGoBackToStable
+            materialIcon: "science"
+            text: Translation.tr("You're on a preview (%1). If something doesn't work, you can go back to the stable version. Your settings stay.").arg(SelfUpdate.installedVersion)
+
+            W.RippleButtonWithIcon {
+                materialIcon: "history"
+                mainText: SelfUpdate.stableVersion !== ""
+                    ? Translation.tr("Go back to %1 (stable)").arg(SelfUpdate.stableVersion)
+                    : Translation.tr("Go back to stable")
+                onClicked: {
+                    SelfUpdate.goBackToStable()
+                }
+            }
+        }
+
+        W.NoticeBox {
+            Layout.fillWidth: true
             visible: SelfUpdate.updateAvailable
             materialIcon: "new_releases"
             text: Translation.tr("Update available: %1 \"%2\"").arg(SelfUpdate.latestVersion).arg(SelfUpdate.releaseName)

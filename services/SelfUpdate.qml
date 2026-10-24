@@ -35,6 +35,8 @@ Singleton {
     property string setupUrl: ""
     property int setupSize: 0
     property double lastCheckedAt: 0
+    property string stableVersion: ""
+    readonly property bool canGoBackToStable: Platform.isWindows && root.installedIsPrerelease
 
     property bool _cacheDone: false
     property bool _versionDone: root.installedVersionOverride !== ""
@@ -129,6 +131,25 @@ Singleton {
             return trimmedName;
         }
         return (tag || "").replace(/^v/i, "");
+    }
+
+    function _pickStable(json) {
+        if (!Array.isArray(json)) return "";
+        let best = null;
+        for (const release of json) {
+            if (release.draft || release.prerelease) continue;
+            const version = root._parseVersion(release.tag_name ?? "");
+            if (!version || root._preRank(version.pre) < 0) continue;
+            if (best === null || root._compareVersions(version, best.version) > 0)
+                best = { version: version, tag: release.tag_name };
+        }
+        return best ? best.tag.replace(/^v/i, "") : "";
+    }
+
+    function goBackToStable() {
+        if (!root.canGoBackToStable) return;
+        const setup = `${Directories.installDir}/ii-windows-setup.exe`.replace(/\//g, "\\");
+        Quickshell.execDetached([setup, "--update", "--stable"]);
     }
 
     function _pickRelease(json) {
@@ -320,7 +341,10 @@ Singleton {
                 return;
             }
             try {
-                const release = root._pickRelease(JSON.parse(body));
+                const parsed = JSON.parse(body);
+                const stable = root._pickStable(parsed);
+                if (stable !== "") root.stableVersion = stable;
+                const release = root._pickRelease(parsed);
                 if (release) {
                     const tag = release.tag_name ?? "";
                     root.latestVersion = tag.replace(/^v/i, "");
