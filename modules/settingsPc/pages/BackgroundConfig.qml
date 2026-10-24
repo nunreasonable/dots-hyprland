@@ -518,6 +518,18 @@ ContentPage {
                     visible: !SpicyStuff.allowed
                     materialIcon: SpicyStuff.checking ? "hourglass_top" : "lock"
                     text: SpicyStuff.restriction
+
+                    Item {
+                        Layout.fillWidth: true
+                    }
+                    W.RippleButtonWithIcon {
+                        Layout.fillWidth: false
+                        visible: SpicyStuff.needsAgeConfirmation
+                        buttonRadius: Appearance.rounding.small
+                        materialIcon: "verified_user"
+                        mainText: Translation.tr("I'm 18 or older")
+                        onClicked: SpicyStuff.confirmAge()
+                    }
                 }
             }
         }
