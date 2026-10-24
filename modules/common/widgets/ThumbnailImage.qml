@@ -32,10 +32,10 @@ StyledImage {
 
     Connections {
         target: Platform.isWindows ? WindowsNative : null
-        function onReadyChanged() { if (WindowsNative.ready) root.requestThumbnail() }
+        function onReadyChanged() { if (WindowsNative.ready) Qt.callLater(root.requestThumbnail) }
     }
-    onSourceSizeChanged: root.requestThumbnail()
-    onThumbnailPathChanged: if (Platform.isWindows) root.requestThumbnail()
+    onSourceSizeChanged: Qt.callLater(root.requestThumbnail)
+    onThumbnailPathChanged: if (Platform.isWindows) Qt.callLater(root.requestThumbnail)
 
     function requestThumbnail() {
         if (!root.generateThumbnail) return;
@@ -56,6 +56,7 @@ StyledImage {
         target: WindowsNative.thumbnailer
         function onFinished(sourcePath, outputPath, ok) {
             if (!ok || outputPath !== FileUtils.trimFileProtocol(root.thumbnailPath)) return;
+            if (root.status === Image.Ready && String(root.source) === String(Qt.resolvedUrl(root.thumbnailPath))) return;
             root.source = "";
             root.source = root.thumbnailPath;
         }
