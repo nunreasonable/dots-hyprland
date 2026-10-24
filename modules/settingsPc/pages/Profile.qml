@@ -71,6 +71,7 @@ ContentPage {
     }
 
     Loader {
+        parent: page
         anchors.fill: parent
         z: 10
         active: Presets.uploadGuideOpen
