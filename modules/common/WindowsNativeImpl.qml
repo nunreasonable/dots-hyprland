@@ -48,4 +48,5 @@ QtObject {
     readonly property QtObject idlePower: (root.full || root.process === "settings") ? QSWin.IdlePower : null
     readonly property QtObject calendarEvents: (root.full || root.process === "settings") ? QSWin.CalendarEvents : null
     readonly property QtObject appActions: root.full ? QSWin.AppActions : null
+    readonly property QtObject windowFrame: (root.full || root.process === "settings") ? QSWin.WindowFrame : null
 }
