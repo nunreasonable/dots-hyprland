@@ -298,8 +298,8 @@ Item {
                                     windowButton.modelData?.activate();
                                 }
                                 contentItem: ColumnLayout {
-                                    implicitWidth: screencopyView.implicitWidth
-                                    implicitHeight: screencopyView.implicitHeight
+                                    implicitWidth: previewHolder.preview?.implicitWidth ?? 0
+                                    implicitHeight: previewHolder.preview?.implicitHeight ?? 0
 
                                     ButtonGroup {
                                         contentWidth: parent.width - anchors.margins * 2
@@ -330,24 +330,40 @@ Item {
                                         }
                                     }
                                     Item {
+                                        id: previewHolder
+                                        readonly property Item preview: Platform.isWindows ? windowsPreview.item : screencopyLoader.item
                                         Layout.fillWidth: true
                                         Layout.fillHeight: true
-                                        implicitHeight: screencopyView.height
-                                        implicitWidth: screencopyView.width
-                                        ScreencopyView {
-                                            id: screencopyView
+                                        implicitHeight: previewHolder.preview?.height ?? 0
+                                        implicitWidth: previewHolder.preview?.width ?? 0
+                                        Loader {
+                                            id: screencopyLoader
                                             anchors.centerIn: parent
-                                            captureSource: windowButton.modelData
-                                            live: true
-                                            paintCursor: true
-                                            constraintSize: Qt.size(root.maxWindowPreviewWidth, root.maxWindowPreviewHeight)
-                                            layer.enabled: !Platform.isWindows
-                                            layer.effect: OpacityMask {
-                                                maskSource: Rectangle {
-                                                    width: screencopyView.width
-                                                    height: screencopyView.height
-                                                    radius: Appearance.rounding.small
+                                            active: !Platform.isWindows
+                                            sourceComponent: ScreencopyView {
+                                                id: screencopyView
+                                                captureSource: windowButton.modelData
+                                                live: true
+                                                paintCursor: true
+                                                constraintSize: Qt.size(root.maxWindowPreviewWidth, root.maxWindowPreviewHeight)
+                                                layer.enabled: true
+                                                layer.effect: OpacityMask {
+                                                    maskSource: Rectangle {
+                                                        width: screencopyView.width
+                                                        height: screencopyView.height
+                                                        radius: Appearance.rounding.small
+                                                    }
                                                 }
+                                            }
+                                        }
+                                        Loader {
+                                            id: windowsPreview
+                                            anchors.centerIn: parent
+                                            active: Platform.isWindows
+                                            source: "DockWindowThumbnail.qml"
+                                            onLoaded: {
+                                                item.captureSource = Qt.binding(() => windowButton.modelData);
+                                                item.constraintSize = Qt.binding(() => Qt.size(root.maxWindowPreviewWidth, root.maxWindowPreviewHeight));
                                             }
                                         }
                                     }
