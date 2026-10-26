@@ -16,6 +16,7 @@ BarWidgetSwitcherArea {
     readonly property var optional: (root.showCpuTemp ? ["temp"] : []).concat(root.showDisk ? ["disk"] : [])
     readonly property var order: root.classic ? ["ram", "swap", "cpu"].concat(root.optional) : ["ram", "cpu"].concat(root.optional, ["swap"])
     readonly property real horizontalPadding: root.classic ? 4 : 6
+    readonly property bool hasContent: root.order.some(key => root.shownFor(key))
 
     horizontalExtraPadding: root.horizontalPadding * 2
     rowDefault: rowContent

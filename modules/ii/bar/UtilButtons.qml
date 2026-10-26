@@ -21,6 +21,7 @@ Item {
     readonly property bool recording: Platform.isWindows && ScreenshotAction.windowsNativeRecording
     property int recordingSeconds: 0
 
+    readonly property bool hasContent: rowLayout.visibleChildren.length > 0
     implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth - 14 : root.classic ? rowLayout.implicitWidth + rowLayout.columnSpacing * 2 : rowLayout.implicitWidth + 4
     implicitHeight: root.vertical ? rowLayout.implicitHeight + 4 : root.classic ? rowLayout.implicitHeight : Appearance.sizes.barHeight
 

@@ -122,6 +122,7 @@ Item {
         property var sectionLayout: []
 
         Layout.fillHeight: true
+        visible: widgetLoader.item?.hasContent ?? true
         currentIndex: group.index
         widgetName: group.modelData
         totalCount: group.sectionLayout.length
@@ -130,6 +131,7 @@ Item {
         bgColor: root.materialPillColor(group.modelData)
 
         Loader {
+            id: widgetLoader
             Layout.fillHeight: true
             source: root.widgetUrl(group.modelData)
             onLoaded: {
