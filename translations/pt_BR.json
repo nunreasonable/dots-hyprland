@@ -2072,5 +2072,8 @@
   "Volume and brightness changes show in the island instead of the on-screen display": "Mudanças de volume e brilho aparecem na ilha em vez da exibição na tela",
   "New notifications show in the island for a few seconds instead of popping up. Click one to open the notification center": "Notificações novas aparecem na ilha por alguns segundos em vez dos pop-ups. Clique numa para abrir a central de notificações",
   "A pomodoro, timer or stopwatch in progress replaces the clock. Click it to open the Focus tab": "Um pomodoro, timer ou cronômetro em andamento aparece no lugar do relógio. Clique nele para abrir a aba Foco",
-  "Music waveform": "Onda da música"
+  "Music waveform": "Onda da música",
+  "Lock the order of pinned apps": "Travar a ordem dos apps fixados",
+  "Lock pinned apps": "Travar apps fixados",
+  "Unlock pinned apps": "Destravar apps fixados"
 }

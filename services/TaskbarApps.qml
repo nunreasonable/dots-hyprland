@@ -9,15 +9,33 @@ Singleton {
     id: root
 
     function isPinned(appId) {
-        return Config.options.dock.pinnedApps.indexOf(appId) !== -1;
+        const key = appId.toLowerCase();
+        return Config.options.dock.pinnedApps.some(id => id.toLowerCase() === key);
     }
 
     function togglePin(appId) {
         if (root.isPinned(appId)) {
-            Config.options.dock.pinnedApps = Config.options.dock.pinnedApps.filter(id => id !== appId)
+            const key = appId.toLowerCase();
+            Config.options.dock.pinnedApps = Config.options.dock.pinnedApps.filter(id => id.toLowerCase() !== key)
         } else {
             Config.options.dock.pinnedApps = Config.options.dock.pinnedApps.concat([appId])
         }
+    }
+
+    function movePin(from, to) {
+        const order = [];
+        const seen = new Set();
+        for (const id of Config.options.dock.pinnedApps) {
+            if (seen.has(id.toLowerCase()))
+                continue;
+            seen.add(id.toLowerCase());
+            order.push(id);
+        }
+        if (from === to || from < 0 || to < 0 || from >= order.length || to >= order.length)
+            return;
+        const moved = order.splice(from, 1)[0];
+        order.splice(to, 0, moved);
+        Config.options.dock.pinnedApps = order;
     }
 
     property list<var> apps: []

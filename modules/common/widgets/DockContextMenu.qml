@@ -267,6 +267,17 @@ Item {
                         }
                     }
 
+                    ContextMenuItem {
+                        readonly property bool locked: Config.options.dock.lockPinnedApps
+                        visible: TaskbarApps.isPinned(root.appId)
+                        iconName: locked ? "lock_open" : "lock"
+                        label: locked ? Translation.tr("Unlock pinned apps") : Translation.tr("Lock pinned apps")
+                        onClicked: {
+                            Config.options.dock.lockPinnedApps = !locked;
+                            root.close();
+                        }
+                    }
+
                     ContextMenuSeparator {
                         visible: root.hasWindows
                     }

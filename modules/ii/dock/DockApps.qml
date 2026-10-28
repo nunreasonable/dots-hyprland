@@ -21,7 +21,57 @@ Item {
 
     property Item lastHoveredButton: null
     property bool buttonHovered: false
-    property bool requestDockShow: previewPopup.show
+    property bool requestDockShow: previewPopup.show || root.reorderFrom !== -1
+
+    readonly property int pinnedCount: TaskbarApps.apps.filter(app => app.pinned).length
+    readonly property bool reorderLocked: Config.options.dock.lockPinnedApps
+    property int reorderFrom: -1
+    property int reorderTo: -1
+    property real reorderOffset: 0
+    property real reorderSlot: 0
+    property bool reorderSettling: false
+
+    function beginReorder(index, slot) {
+        root.reorderSettling = false;
+        root.reorderSlot = slot;
+        root.reorderOffset = 0;
+        root.reorderTo = index;
+        root.reorderFrom = index;
+    }
+
+    function updateReorder(offset) {
+        if (root.reorderFrom === -1)
+            return;
+        const from = root.reorderFrom;
+        const slot = root.reorderSlot;
+        root.reorderOffset = Math.max(-from * slot, Math.min((root.pinnedCount - 1 - from) * slot, offset));
+        root.reorderTo = Math.max(0, Math.min(root.pinnedCount - 1, from + Math.round(root.reorderOffset / slot)));
+    }
+
+    function endReorder() {
+        const from = root.reorderFrom;
+        const to = root.reorderTo;
+        root.reorderSettling = true;
+        root.reorderFrom = -1;
+        root.reorderTo = -1;
+        root.reorderOffset = 0;
+        TaskbarApps.movePin(from, to);
+        Qt.callLater(() => root.reorderSettling = false);
+    }
+
+    function reorderShift(index) {
+        const from = root.reorderFrom;
+        const to = root.reorderTo;
+        if (from === -1 || index < 0)
+            return 0;
+        if (index === from)
+            return root.reorderOffset;
+        if (from < to && index > from && index <= to)
+            return -root.reorderSlot;
+        if (from > to && index >= to && index < from)
+            return root.reorderSlot;
+        return 0;
+    }
 
     Layout.fillHeight: !DockStyle.vertical
     Layout.fillWidth: DockStyle.vertical
@@ -77,6 +127,7 @@ Item {
 
         property bool shouldShow: Config.options.dock.showPreviews
             && !(root.contextMenu?.isOpen ?? false)
+            && root.reorderFrom === -1
             && (popupMouseArea.containsMouse || root.buttonHovered)
             && appTopLevel && appTopLevel.toplevels && appTopLevel.toplevels.length > 0
 
