@@ -13,7 +13,7 @@ Singleton {
     readonly property var classicRight: ["sysTray", "systemIcons"]
     readonly property var end4pcLeft: ["launcherButton", "workspaces", "activeWindow"]
     readonly property var end4pcMiddle: ["clockWidget"]
-    readonly property var end4pcRight: ["sysTray", "utilButtons", "systemIcons", "powerButton"]
+    readonly property var end4pcRight: ["sysTray", "utilButtons", "systemIcons", "batteryIndicator", "powerButton"]
 
     readonly property var multipleAllowed: ["visualizer", "divisor"]
     readonly property var middleOnly: ["dynamicIsland"]

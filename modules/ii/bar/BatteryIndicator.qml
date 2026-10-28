@@ -15,6 +15,7 @@ MouseArea {
     readonly property bool isPluggedIn: Battery.isPluggedIn
     readonly property real percentage: Battery.percentage
     readonly property bool isLow: percentage <= Config.options.battery.low / 100
+    readonly property bool hasContent: Battery.available
 
     implicitWidth: root.vertical ? Appearance.sizes.verticalBarWidth : batteryProgress.implicitWidth
     implicitHeight: root.vertical ? batteryProgress.valueBarWidth + 8 : Appearance.sizes.barHeight

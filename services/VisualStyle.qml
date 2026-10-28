@@ -15,7 +15,7 @@ Singleton {
         syncTimer.restart();
     }
 
-    readonly property int presetVersion: 1
+    readonly property int presetVersion: 2
 
     function sync() {
         if (!Config.ready || !root.styles.includes(root.selected))
@@ -30,9 +30,19 @@ Singleton {
 
     function upgradePreset(style) {
         const pc = style === "end4pc";
-        if (pc)
+        const version = Config.options.appearance.visualStylePresetVersion ?? 0;
+        if (pc && version < 1)
             root.applyNewKeys(pc, style);
+        if (version < 2)
+            root.addBattery();
         Config.options.appearance.visualStylePresetVersion = root.presetVersion;
+    }
+
+    function addBattery() {
+        const layouts = Config.options.bar.layouts;
+        const right = BarLayouts.end4pcRight.filter(name => name !== "batteryIndicator");
+        if (BarLayouts.sameList(layouts.leftLayout, BarLayouts.end4pcLeft) && BarLayouts.sameList(layouts.middleLayout, BarLayouts.end4pcMiddle) && BarLayouts.sameList(layouts.rightLayout, right))
+            layouts.rightLayout = BarLayouts.end4pcRight;
     }
 
     function layoutStyle(style) {
