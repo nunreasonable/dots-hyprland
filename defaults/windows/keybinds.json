@@ -59,6 +59,8 @@
     {"keys": "Shift+Super+Down", "action": "dispatch", "dispatch": "movewindow d", "description": "Window: Move Down"},
     {"keys": "Super+mouse:272", "action": "native", "description": "Window: Drag to move"},
     {"keys": "Super+mouse:273", "action": "native", "description": "Window: Drag to resize"},
+    {"keys": "Super+mouse_right", "action": "native", "description": "Window: Focus the next column (scrolling; Shift+Super+scroll works too)"},
+    {"keys": "Super+mouse_left", "action": "native", "description": "Window: Focus the previous column (scrolling; Shift+Super+scroll works too)"},
     {"keys": "Super+Q", "action": "dispatch", "dispatch": "killactive", "description": "Window: Close"},
     {"keys": "Super+D", "action": "dispatch", "dispatch": "fullscreen 1", "description": "Window: Maximize"},
     {"keys": "Super+F", "action": "dispatch", "dispatch": "fullscreen 0", "description": "Window: Fullscreen"},

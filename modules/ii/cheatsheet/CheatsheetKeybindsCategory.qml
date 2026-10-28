@@ -65,6 +65,8 @@ Column {
         "Super": "",
         "mouse_up": "Scroll ↓",    // ikr, weird
         "mouse_down": "Scroll ↑",  // trust me bro
+        "mouse_left": "Scroll ←",
+        "mouse_right": "Scroll →",
         "mouse:272": "LMB",
         "mouse:273": "RMB",
         "mouse:275": "MouseBack",
