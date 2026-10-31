@@ -871,7 +871,7 @@
   "App IDs to hide from the dock, as regexes, comma-separated (e.g. explorer.exe, ^Shell_)": "IDs de apps a esconder do dock, como regex, separados por vírgula (ex.: explorer.exe, ^Shell_)",
   "Windows taskbar": "Barra de tarefas do Windows",
   "Show only when the cursor touches its screen edge": "Mostrar só quando o cursor encostar na borda dela",
-  "Keeps Windows from bringing the taskbar up when an app flashes or nothing else is focused.\nTurns on the taskbar's auto-hide while enabled.": "Impede o Windows de mostrar a barra de tarefas quando um app pisca ou nada mais está em foco.\nLiga a ocultação automática da barra de tarefas enquanto estiver ativo.",
+  "Keeps Windows from bringing the taskbar up when an app flashes or nothing else is focused.\nTurns on the taskbar's auto-hide while enabled. Turn it off to keep the taskbar on screen together with ii's bar.": "Impede o Windows de mostrar a barra de tarefas quando um app pisca ou nada mais está em foco.\nLiga a ocultação automática da barra de tarefas enquanto estiver ativo. Desligado, a barra de tarefas fica na tela junto com a barra do ii.",
   "Windows tiling": "Tiling de janelas",
   "Tile windows": "Organizar janelas lado a lado",
   "Arranges windows in a dwindle layout (like Hyprland) inside the space left by the bar and the taskbar.\nOff by default; turning it off puts every window back where it was before tiling.": "Organiza as janelas num layout dwindle (como no Hyprland) no espaço que sobra entre a barra e a barra de tarefas.\nDesligado por padrão; desligar devolve cada janela para onde estava antes.",

@@ -636,7 +636,7 @@ ContentPage {
                 Config.options.windowsPort.taskbarHoverOnly = checked;
             }
             StyledToolTip {
-                text: Translation.tr("Keeps Windows from bringing the taskbar up when an app flashes or nothing else is focused.\nTurns on the taskbar's auto-hide while enabled.")
+                text: Translation.tr("Keeps Windows from bringing the taskbar up when an app flashes or nothing else is focused.\nTurns on the taskbar's auto-hide while enabled. Turn it off to keep the taskbar on screen together with ii's bar.")
             }
         }
     }
