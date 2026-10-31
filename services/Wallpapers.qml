@@ -54,6 +54,29 @@ Singleton {
 
     onCurrentDesktopWallpaperChanged: root._syncSystemWallpaper()
 
+    readonly property string _colorSource: root.desktopWallpapersActive ? root.currentDesktopWallpaper : ""
+    on_ColorSourceChanged: {
+        if (Platform.isWindows && root._shellProcess) recolorTimer.restart();
+    }
+
+    Timer {
+        id: recolorTimer
+        interval: 300
+        onTriggered: root._recolorForDesktop()
+    }
+
+    function _recolorForDesktop() {
+        if (!Config.ready) return;
+        const main = Config.options.background.wallpaperPath;
+        if (!main) return;
+        if (!root.isVideoPath(main)) {
+            root._retheme(main, Appearance.m3colors.darkmode, false);
+            return;
+        }
+        const still = Config.options.background.thumbnailPath;
+        if (still && !root.isVideoPath(still)) root._retheme(still, Appearance.m3colors.darkmode, false, main);
+    }
+
     signal changed()
     signal thumbnailGenerated(directory: string)
     signal thumbnailGeneratedFile(filePath: string)
@@ -420,7 +443,7 @@ Singleton {
         if (hasPath) {
             const target = videoPath.length > 0 ? videoPath : path;
             const changed = root.normalizedPath(target) !== root.normalizedPath(Config.options.background.wallpaperPath);
-            const desktopKeepsOwn = root.desktopWallpapersActive && root.systemDrawsWallpaper && root.currentDesktopWallpaper !== "";
+            const desktopKeepsOwn = root.desktopWallpapersActive && (root.systemDrawsWallpaper || root._nativeDesktopWallpapers) && root.currentDesktopWallpaper !== "";
             if (applyToSystem && !desktopKeepsOwn) {
                 wn.setWallpaper(path, root.systemDrawsWallpaper);
                 root._systemWallpaper = path;
@@ -450,10 +473,11 @@ Singleton {
             return;
         }
 
+        const colorPath = hasPath && root.desktopWallpapersActive && root.currentDesktopWallpaper !== "" ? root.currentDesktopWallpaper : path;
         let schemeType = Config.options.appearance.palette.type || "auto";
         if (schemeType === "auto") {
             schemeType = hasPath && WindowsNative.imageTools
-                ? WindowsNative.imageTools.schemeForImage(path)
+                ? WindowsNative.imageTools.schemeForImage(colorPath)
                 : "scheme-tonal-spot";
         }
 
@@ -463,7 +487,7 @@ Singleton {
         } else if (hasAccentColor) {
             args.push("color", "hex", accentColor);
         } else {
-            args.push("image", path);
+            args.push("image", colorPath);
         }
 
         const config = root._windowsMatugenConfigText();
@@ -486,7 +510,7 @@ Singleton {
 
     readonly property var _systemDesktopPaths: {
         const paths = {};
-        if (!root.desktopWallpapersActive || !root.systemDrawsWallpaper) return paths;
+        if (!root.desktopWallpapersActive) return paths;
         for (const desktopId in root.desktopWallpaperPaths) {
             const own = root.desktopWallpaperFor(desktopId);
             if (own) paths[desktopId] = own;
