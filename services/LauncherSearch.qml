@@ -29,6 +29,8 @@ Singleton {
     onQueryChanged: {
         if (root.query !== "" && !root.userActionsFolder)
             root.loadUserActionsFolder();
+        if (root.query !== "")
+            nonAppResultsTimer.restart();
     }
     function loadUserActionsFolder() {
         if (Platform.isWindows && WindowsNative.fsUtils?.classify(Directories.userActions) !== "dir")
@@ -218,14 +220,26 @@ Singleton {
                 root.mathResult = root.evalArithmetic(expression);
                 return;
             }
-            mathProc.running = false;
+            if (mathProc.running)
+                mathProc.signal(9);
             mathProc.command = baseCommand.concat(expression);
             mathProc.running = true;
+            mathTimeout.restart();
         }
         stdout: SplitParser {
             onRead: data => {
-                root.mathResult = data;
+                if (data.trim() !== "")
+                    root.mathResult = data;
             }
+        }
+    }
+
+    Timer {
+        id: mathTimeout
+        interval: 5000
+        onTriggered: {
+            if (mathProc.running)
+                mathProc.signal(9);
         }
     }
 
@@ -341,7 +355,6 @@ Singleton {
         }
 
         ////////////////// Init ///////////////////
-        nonAppResultsTimer.restart();
         const mathResultObject = resultComp.createObject(null, {
             name: root.mathResult,
             verb: Translation.tr("Copy"),
