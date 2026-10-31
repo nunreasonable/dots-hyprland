@@ -264,7 +264,8 @@ Variants {
             if (next === (bgRoot.pendingWallpaperPath !== "" ? bgRoot.pendingWallpaperPath : bgRoot.wallpaperPath))
                 return;
             bgRoot.finishTransition();
-            if (bgRoot.canAnimateWallpaperChange()) {
+            const switchHidden = desktopSwitch && Platform.isWindows && Config.options.windowsPort.backgroundBehindIcons;
+            if (!switchHidden && bgRoot.canAnimateWallpaperChange()) {
                 bgRoot.transitionShader = desktopSwitch ? "transition" : bgRoot.pickTransitionShader(toVideo);
                 bgRoot.transitionDuration = desktopSwitch ? 450 : 1000;
                 bgRoot.transitionProgress = 0;
