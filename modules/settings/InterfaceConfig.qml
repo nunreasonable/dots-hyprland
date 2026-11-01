@@ -265,13 +265,13 @@ ContentPage {
                     Config.options.dock.pinnedOnStartup = checked;
                 }
             }
-            ConfigSwitch {
-                buttonIcon: "lock"
-                text: Translation.tr("Lock the order of pinned apps")
-                checked: Config.options.dock.lockPinnedApps
-                onCheckedChanged: {
-                    Config.options.dock.lockPinnedApps = checked;
-                }
+        }
+        ConfigSwitch {
+            buttonIcon: "lock"
+            text: Translation.tr("Lock the order of pinned apps")
+            checked: Config.options.dock.lockPinnedApps
+            onCheckedChanged: {
+                Config.options.dock.lockPinnedApps = checked;
             }
         }
         ConfigSwitch {
