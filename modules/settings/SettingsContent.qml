@@ -295,6 +295,7 @@ Item {
                         if (first) {
                             pageArea.opacity = 1;
                             pageArea.anchors.topMargin = 0;
+                            preloadTimer.start();
                         } else {
                             fadeIn.restart();
                         }
@@ -333,6 +334,27 @@ Item {
                                 when: pageLoader.index === root.currentPage
                                 value: true
                                 restoreMode: Binding.RestoreNone
+                            }
+                        }
+                    }
+
+                    Timer {
+                        id: preloadTimer
+                        interval: 300
+                        onTriggered: {
+                            for (let i = 0; i < pageRepeater.count; i++) {
+                                const loader = pageRepeater.itemAt(i);
+                                if (!loader)
+                                    continue;
+                                if (loader.status === Loader.Loading) {
+                                    preloadTimer.restart();
+                                    return;
+                                }
+                                if (!loader.visited) {
+                                    loader.visited = true;
+                                    preloadTimer.restart();
+                                    return;
+                                }
                             }
                         }
                     }

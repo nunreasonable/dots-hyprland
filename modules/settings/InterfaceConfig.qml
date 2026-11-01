@@ -2036,7 +2036,14 @@ ContentPage {
         icon: "event"
         title: Translation.tr("Calendar events")
 
-        Component.onCompleted: CalendarEvents.markOpened()
+        Component.onCompleted: {
+            if (visible)
+                CalendarEvents.markOpened();
+        }
+        onVisibleChanged: {
+            if (visible)
+                CalendarEvents.markOpened();
+        }
 
         StyledText {
             Layout.fillWidth: true
