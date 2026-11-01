@@ -44,31 +44,27 @@ DockButton {
         }
     }
 
-    Item {
-        anchors.fill: parent
+    DragHandler {
+        target: null
+        enabled: root.pinIndex !== -1 && !appListRoot.reorderLocked && appListRoot.pinnedCount > 1
+        xAxis.enabled: !DockStyle.vertical
+        yAxis.enabled: DockStyle.vertical
+        grabPermissions: PointerHandler.CanTakeOverFromAnything
 
-        DragHandler {
-            target: null
-            enabled: root.pinIndex !== -1 && !appListRoot.reorderLocked && appListRoot.pinnedCount > 1
-            xAxis.enabled: !DockStyle.vertical
-            yAxis.enabled: DockStyle.vertical
-            grabPermissions: PointerHandler.CanTakeOverFromAnything
-
-            onActiveChanged: {
-                if (active) {
-                    appListRoot.beginReorder(root.pinIndex, (DockStyle.vertical ? root.height : root.width) + DockStyle.listSpacing);
-                } else if (appListRoot.reorderFrom !== -1) {
-                    root.justReordered = true;
-                    appListRoot.endReorder();
-                    Qt.callLater(() => root.justReordered = false);
-                }
+        onActiveChanged: {
+            if (active) {
+                appListRoot.beginReorder(root.pinIndex, (DockStyle.vertical ? root.height : root.width) + DockStyle.listSpacing);
+            } else if (appListRoot.reorderFrom !== -1) {
+                root.justReordered = true;
+                appListRoot.endReorder();
+                Qt.callLater(() => root.justReordered = false);
             }
-            onCentroidChanged: {
-                if (!active)
-                    return;
-                const delta = DockStyle.vertical ? centroid.scenePosition.y - centroid.scenePressPosition.y : centroid.scenePosition.x - centroid.scenePressPosition.x;
-                appListRoot.updateReorder(delta);
-            }
+        }
+        onCentroidChanged: {
+            if (!active)
+                return;
+            const delta = DockStyle.vertical ? centroid.scenePosition.y - centroid.scenePressPosition.y : centroid.scenePosition.x - centroid.scenePressPosition.x;
+            appListRoot.updateReorder(delta);
         }
     }
 
