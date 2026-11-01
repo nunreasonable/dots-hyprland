@@ -932,6 +932,34 @@ ContentPage {
                     }
                 }
 
+                ContentSubsection {
+                    title: Translation.tr("Clock color")
+                    tooltip: Translation.tr("Automatic picks a light or dark shade of the accent color from the wallpaper. Text follows light or dark mode.")
+                    ConfigSelectionArray {
+                        currentValue: Config.options.background.widgets.clock.color
+                        onSelected: newValue => {
+                            Config.options.background.widgets.clock.color = newValue;
+                        }
+                        options: [
+                            {
+                                displayName: Translation.tr("Automatic"),
+                                icon: "wallpaper",
+                                value: ""
+                            },
+                            {
+                                displayName: Translation.tr("Accent"),
+                                icon: "palette",
+                                value: "primary"
+                            },
+                            {
+                                displayName: Translation.tr("Text"),
+                                icon: "format_color_text",
+                                value: "onLayer0"
+                            }
+                        ]
+                    }
+                }
+
                 MaterialTextArea {
                     Layout.fillWidth: true
                     placeholderText: Translation.tr("Font family")

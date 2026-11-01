@@ -799,6 +799,19 @@ ContentPage {
                                 }
                             }
                         }
+                        ConfigSelectionArray {
+                            text: Translation.tr("Clock color")
+                            icon: "format_color_fill"
+                            currentValue: Config.options.background.widgets.clock.color
+                            onSelected: newValue => {
+                                Config.options.background.widgets.clock.color = newValue;
+                            }
+                            options: [
+                                { displayName: Translation.tr("Automatic"), icon: "wallpaper", value: "" },
+                                { displayName: Translation.tr("Accent"), icon: "palette", value: "primary" },
+                                { displayName: Translation.tr("Text"), icon: "format_color_text", value: "onLayer0" }
+                            ]
+                        }
                     }
 
                     GroupedList {

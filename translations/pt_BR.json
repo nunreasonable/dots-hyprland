@@ -2075,5 +2075,8 @@
   "Music waveform": "Onda da música",
   "Lock the order of pinned apps": "Travar a ordem dos apps fixados",
   "Lock pinned apps": "Travar apps fixados",
-  "Unlock pinned apps": "Destravar apps fixados"
+  "Unlock pinned apps": "Destravar apps fixados",
+  "Clock color": "Cor do relógio",
+  "Accent": "Destaque",
+  "Automatic picks a light or dark shade of the accent color from the wallpaper. Text follows light or dark mode.": "Automático escolhe um tom claro ou escuro da cor de destaque pelo papel de parede. Texto segue o modo claro ou escuro."
 }

@@ -161,7 +161,7 @@ AbstractBackgroundWidget {
         property alias statusIcon: statusIconWidget.text
         property alias statusText: statusTextWidget.text
         property bool shown: true
-        property color textColor: root.clockStyle === "cookie" ? Appearance.colors.colOnSecondaryContainer : root.colText
+        property color textColor: root.clockStyle === "cookie" ? Appearance.colors.colOnSecondaryContainer : root.resolvedClockColor
         opacity: shown ? 1 : 0
         visible: opacity > 0
         Behavior on opacity {
