@@ -794,6 +794,21 @@ Variants {
                 }
 
                 FadeLoader {
+                    id: visualizerLoader
+                    asynchronous: Platform.isWindows
+                    shown: Config.options.background.widgets.visualizer.enable && bgRoot.widgetsOnThisScreen
+                    sourceComponent: VisualizerWidget {
+                        animate: bgRoot.widgetsAnimate
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                        wallpaperItem: wallpaper
+                    }
+                }
+
+                FadeLoader {
                     id: weatherLoader
                     asynchronous: Platform.isWindows
                     shown: Config.options.background.widgets.weather.enable && bgRoot.widgetsOnThisScreen
@@ -982,21 +997,6 @@ Variants {
                     asynchronous: Platform.isWindows
                     shown: Config.options.background.widgets.userCard.enable && bgRoot.widgetsOnThisScreen
                     sourceComponent: UserCardWidget {
-                        screenWidth: bgRoot.screen.width
-                        screenHeight: bgRoot.screen.height
-                        scaledScreenWidth: bgRoot.screen.width
-                        scaledScreenHeight: bgRoot.screen.height
-                        wallpaperScale: 1
-                        wallpaperItem: wallpaper
-                    }
-                }
-
-                FadeLoader {
-                    id: visualizerLoader
-                    asynchronous: Platform.isWindows
-                    shown: Config.options.background.widgets.visualizer.enable && bgRoot.widgetsOnThisScreen
-                    sourceComponent: VisualizerWidget {
-                        animate: bgRoot.widgetsAnimate
                         screenWidth: bgRoot.screen.width
                         screenHeight: bgRoot.screen.height
                         scaledScreenWidth: bgRoot.screen.width
