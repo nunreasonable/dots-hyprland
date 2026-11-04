@@ -382,6 +382,23 @@ ContentPage {
             }
 
             ContentSubsection {
+                title: Translation.tr("Width presets")
+                tooltip: Translation.tr("Column widths in percent that Shift+Super+' and Shift+Super+; step through, comma-separated (e.g. 25, 50, 75, 100)")
+                MaterialTextArea {
+                    Layout.fillWidth: true
+                    placeholderText: "33, 50, 67, 100"
+                    text: Config.options.windowsPort.tiling.scrolling.widthPresets.map(v => Math.round(v * 100)).join(", ")
+                    wrapMode: TextEdit.Wrap
+                    onEditingFinished: {
+                        const items = text.split(",").map(s => parseFloat(s)).filter(v => v >= 10 && v <= 100);
+                        const shown = Config.options.windowsPort.tiling.scrolling.widthPresets.map(v => Math.round(v * 100)).join(", ");
+                        if (items.map(v => Math.round(v)).join(", ") !== shown)
+                            Config.options.windowsPort.tiling.scrolling.widthPresets = items.length > 0 ? items.map(v => v / 100) : [1 / 3, 0.5, 2 / 3, 1];
+                    }
+                }
+            }
+
+            ContentSubsection {
                 title: Translation.tr("Center the focused column")
                 ConfigSelectionArray {
                     currentValue: Config.options.windowsPort.tiling.scrolling.center

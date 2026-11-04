@@ -768,6 +768,7 @@ Singleton {
                     }
                     property JsonObject scrolling: JsonObject {
                         property real columnWidth: 0.5
+                        property list<real> widthPresets: [1 / 3, 0.5, 2 / 3, 1]
                         property string center: "overflow"
                     }
                 }

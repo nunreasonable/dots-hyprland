@@ -425,6 +425,26 @@ ContentPage {
                             { displayName: Translation.tr("Full width"), icon: "width_full", value: 1 }
                         ]
                     }
+                    ConfigTextArea {
+                        id: scrollingPresetsField
+                        Layout.fillWidth: true
+                        buttonIcon: "width_normal"
+                        fieldWidth: 300
+                        text: Translation.tr("Width presets")
+                        placeholderText: "33, 50, 67, 100"
+                        value: Config.options.windowsPort.tiling.scrolling.widthPresets.map(v => Math.round(v * 100)).join(", ")
+                        function commit() {
+                            const items = scrollingPresetsField.value.split(",").map(s => parseFloat(s)).filter(v => v >= 10 && v <= 100);
+                            const shown = Config.options.windowsPort.tiling.scrolling.widthPresets.map(v => Math.round(v * 100)).join(", ");
+                            if (items.map(v => Math.round(v)).join(", ") !== shown)
+                                Config.options.windowsPort.tiling.scrolling.widthPresets = items.length > 0 ? items.map(v => v / 100) : [1 / 3, 0.5, 2 / 3, 1];
+                        }
+                        onEditingFinished: commit()
+                        onConfirmClicked: commit()
+                        W.StyledToolTip {
+                            text: Translation.tr("Column widths in percent that Shift+Super+' and Shift+Super+; step through, comma-separated (e.g. 25, 50, 75, 100)")
+                        }
+                    }
                     ConfigSelectionArray {
                         text: Translation.tr("Center the focused column")
                         icon: "center_focus_strong"

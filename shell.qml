@@ -174,6 +174,12 @@ ShellRoot {
     Binding {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.tiling
+        property: "scrollingPresets"
+        value: Config.options.windowsPort.tiling.scrolling.widthPresets
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.tiling
         property: "scrollingCenter"
         value: Config.options.windowsPort.tiling.scrolling.center
     }
