@@ -45,10 +45,16 @@ Scope {
         }
     }
 
+    function open() {
+        if (GlobalStates.regionSelectorOpen && root.recordingScreen !== "")
+            GlobalStates.regionSelectorOpen = false
+        GlobalStates.regionSelectorOpen = true
+    }
+
     function screenshot() {
         root.action = RegionSelection.SnipAction.Copy
         root.selectionMode = RegionSelection.SelectionMode.RectCorners
-        GlobalStates.regionSelectorOpen = true
+        root.open()
     }
 
     function search() {
@@ -58,13 +64,13 @@ Scope {
         } else {
             root.selectionMode = RegionSelection.SelectionMode.RectCorners
         }
-        GlobalStates.regionSelectorOpen = true
+        root.open()
     }
 
     function ocr() {
         root.action = RegionSelection.SnipAction.CharRecognition
         root.selectionMode = RegionSelection.SelectionMode.RectCorners
-        GlobalStates.regionSelectorOpen = true
+        root.open()
     }
 
     function record() {
