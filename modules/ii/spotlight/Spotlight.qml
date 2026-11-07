@@ -451,7 +451,7 @@ q="$1"; h="$2"
         implicitHeight: panelWindow.areaHeight
 
         mask: Region {
-            item: content
+            item: maskArea
         }
 
         Connections {
@@ -484,6 +484,14 @@ q="$1"; h="$2"
 
         AppContextMenu {
             id: spotlightAppContextMenu
+        }
+
+        Item {
+            id: maskArea
+            x: content.x
+            y: content.y
+            width: content.width
+            height: content.height
         }
 
         Item {
