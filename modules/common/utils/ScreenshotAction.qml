@@ -150,7 +150,7 @@ Singleton {
             Notifications.sendDesktop(Translation.tr("Starting recording"), FileUtils.fileNameForPath(path));
         }
         function onFinished(path) {
-            Notifications.sendDesktop(Translation.tr("Recording Stopped"), path);
+            root.notifyRecordingStopped(path);
         }
         function onFailed(reason) {
             Notifications.sendDesktop(Translation.tr("Recording failed"), reason);
@@ -238,6 +238,13 @@ Singleton {
     }
 
     property int _ffmpegNoticeId: -1
+    property int _recordingNoticeId: -1
+    property string _recordingNoticePath: ""
+    function notifyRecordingStopped(path) {
+        root._recordingNoticePath = path;
+        root._recordingNoticeId = Notifications.sendDesktop(Translation.tr("Recording Stopped"), path,
+            ["-A", `copyfile=${Translation.tr("Copy video")}`]) ?? -1;
+    }
     function offerFfmpegInstall() {
         const reason = root.windowsRecorder?.unavailableReason ?? "";
         const body = (reason ? Translation.tr("Built-in recording is unavailable: %1.").arg(reason) + " " : "")
@@ -248,6 +255,10 @@ Singleton {
     Connections {
         target: Platform.isWindows ? Notifications : null
         function onDesktopActionInvoked(id, action) {
+            if (id === root._recordingNoticeId && action === "copyfile") {
+                WindowsNative.clipboard?.copyFile(root._recordingNoticePath);
+                return;
+            }
             if (id === root._microphoneNoticeId && action === "privacy") {
                 root._microphoneNoticeId = -1;
                 root.openMicrophonePrivacySettings();
@@ -276,7 +287,7 @@ Singleton {
                 } else if (line === "nomic") {
                     Notifications.sendDesktop(Translation.tr("Recording without microphone"), Translation.tr("No microphone found"));
                 } else if (line.startsWith("saved ")) {
-                    Notifications.sendDesktop(Translation.tr("Recording Stopped"), line.slice(6));
+                    root.notifyRecordingStopped(line.slice(6));
                 }
             }
         }

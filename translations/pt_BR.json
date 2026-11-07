@@ -2080,5 +2080,6 @@
   "Accent": "Destaque",
   "Automatic picks a light or dark shade of the accent color from the wallpaper. Text follows light or dark mode.": "Automático escolhe um tom claro ou escuro da cor de destaque pelo papel de parede. Texto segue o modo claro ou escuro.",
   "Width presets": "Larguras predefinidas",
-  "Column widths in percent that Shift+Super+' and Shift+Super+; step through, comma-separated (e.g. 25, 50, 75, 100)": "Larguras de coluna em porcentagem que Shift+Super+' e Shift+Super+; percorrem, separadas por vírgula (ex.: 25, 50, 75, 100)"
+  "Column widths in percent that Shift+Super+' and Shift+Super+; step through, comma-separated (e.g. 25, 50, 75, 100)": "Larguras de coluna em porcentagem que Shift+Super+' e Shift+Super+; percorrem, separadas por vírgula (ex.: 25, 50, 75, 100)",
+  "Copy video": "Copiar vídeo"
 }
