@@ -74,6 +74,39 @@ MouseArea {
         return null;
     }
 
+    function freeSpotNear(widget, x, y, areaWidth, areaHeight) {
+        const others = root.registeredWidgets.filter(w => w !== widget && w.visible);
+        const gap = root.gridSize;
+        const fits = (px, py) => !others.some(w => root.rectsIntersect(Qt.rect(px - gap, py - gap, widget.width + gap * 2, widget.height + gap * 2), Qt.rect(w.x, w.y, w.width, w.height)));
+        const inside = (px, py) => px >= 0 && py >= 0 && px + widget.width <= areaWidth && py + widget.height <= areaHeight;
+        if (fits(x, y))
+            return Qt.point(x, y);
+        const step = root.gridSize * 2;
+        const rings = Math.ceil(Math.max(areaWidth, areaHeight) / step);
+        for (let ring = 1; ring <= rings; ring++) {
+            let best = null;
+            let bestDistance = Infinity;
+            for (let dx = -ring; dx <= ring; dx++) {
+                for (let dy = -ring; dy <= ring; dy++) {
+                    if (Math.max(Math.abs(dx), Math.abs(dy)) !== ring)
+                        continue;
+                    const px = x + dx * step;
+                    const py = y + dy * step;
+                    if (!inside(px, py) || !fits(px, py))
+                        continue;
+                    const distance = dx * dx + dy * dy;
+                    if (distance < bestDistance) {
+                        best = Qt.point(px, py);
+                        bestDistance = distance;
+                    }
+                }
+            }
+            if (best)
+                return best;
+        }
+        return Qt.point(x, y);
+    }
+
     Timer {
         interval: 3000
         running: true

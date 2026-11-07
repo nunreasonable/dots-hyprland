@@ -180,8 +180,16 @@ AbstractWidget {
         if (!parsedContent || parsedContent.error) return;
         root.dominantColor = parsedContent.dominant_color || Appearance.colors.colPrimary;
         if (root.placementStrategy === "free") return;
-        root.targetX = parsedContent.center_x * root.wallpaperScale - root.width / 2;
-        root.targetY  = parsedContent.center_y * root.wallpaperScale - root.height / 2;
+        let x = parsedContent.center_x * root.wallpaperScale - root.width / 2;
+        let y = parsedContent.center_y * root.wallpaperScale - root.height / 2;
+        const canvas = root.findCanvas(root.parent);
+        if (canvas) {
+            const spot = canvas.freeSpotNear(root, x, y, root.scaledScreenWidth, root.scaledScreenHeight);
+            x = spot.x;
+            y = spot.y;
+        }
+        root.targetX = x;
+        root.targetY = y;
     }
 
     Process {
