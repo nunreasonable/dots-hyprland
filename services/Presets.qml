@@ -304,6 +304,8 @@ Singleton {
         id: liveConfigFile
         path: Directories.shellConfigPath
         printErrors: false
+        onLoaded: root._finishSave()
+        onLoadFailed: error => root._failSave(error)
     }
 
     FileView {
@@ -388,6 +390,8 @@ Singleton {
 
     property string _pendingSaveName: ""
     property string _pendingSaveDescription: ""
+    property var _pendingSaves: []
+    property bool _saveReloadPending: false
 
     function save(rawInput) {
         root.ensureDirs();
@@ -404,22 +408,49 @@ Singleton {
         name = root.sanitizeName(name);
         if (name.length === 0)
             return;
-        root._pendingSaveName = name;
-        root._pendingSaveDescription = description;
-        liveConfigFile.reload();
-        Qt.callLater(root._finishSave);
+        root._pendingSaves = root._pendingSaves.concat([{
+            name: name,
+            description: description
+        }]);
+        root._startNextSave();
     }
 
     function overwrite(name) {
         root.save(name);
     }
 
+    function _startNextSave() {
+        if (root._saveReloadPending || root._pendingSaves.length === 0)
+            return;
+        const nextSave = root._pendingSaves[0];
+        root._pendingSaveName = nextSave.name;
+        root._pendingSaveDescription = nextSave.description;
+        root._saveReloadPending = true;
+        liveConfigFile.reload();
+    }
+
+    function _completeSave() {
+        root._pendingSaves = root._pendingSaves.slice(1);
+        root._saveReloadPending = false;
+        Qt.callLater(root._startNextSave);
+    }
+
+    function _failSave(error) {
+        if (!root._saveReloadPending)
+            return;
+        console.log("[Presets] could not read current config:", error);
+        root._completeSave();
+    }
+
     function _finishSave() {
+        if (!root._saveReloadPending)
+            return;
         let parsed;
         try {
             parsed = JSON.parse(liveConfigFile.text());
         } catch (e) {
             console.log("[Presets] could not read current config:", e);
+            root._completeSave();
             return;
         }
         const filtered = root.filterForSave(parsed, "");
@@ -431,6 +462,7 @@ Singleton {
         presetWriteFile.targetPath = `${Directories.userPresetsPath}/${root._pendingSaveName}.json`;
         presetWriteFile.setText(JSON.stringify(filtered, null, 2));
         root.refresh();
+        root._completeSave();
     }
 
     function apply(name) {
