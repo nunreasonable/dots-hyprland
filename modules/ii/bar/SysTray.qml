@@ -51,10 +51,13 @@ Item {
         focusGrab.active = false;
     }
 
+    property real overflowClearedAt: 0
+
     onTrayOverflowOpenChanged: {
-        if (root.trayOverflowOpen) {
+        if (root.trayOverflowOpen)
             root.grabFocus();
-        }
+        else
+            root.releaseFocus();
     }
 
     HyprlandFocusGrab {
@@ -62,6 +65,7 @@ Item {
         active: false
         windows: [overflowPopup.item, root.activeMenu]
         onCleared: {
+            root.overflowClearedAt = Date.now();
             root.trayOverflowOpen = false;
             if (root.activeMenu) {
                 root.activeMenu.close();
@@ -84,7 +88,11 @@ Item {
             toggled: root.trayOverflowOpen
             property bool containsMouse: hovered
 
-            downAction: () => root.trayOverflowOpen = !root.trayOverflowOpen
+            downAction: () => {
+                if (Date.now() - root.overflowClearedAt < 300)
+                    return;
+                root.trayOverflowOpen = !root.trayOverflowOpen;
+            }
 
             Layout.fillHeight: !root.vertical
             Layout.fillWidth: root.vertical
@@ -110,7 +118,7 @@ Item {
             StyledPopup {
                 id: overflowPopup
                 hoverTarget: trayOverflowButton
-                active: root.trayOverflowOpen && root.unpinnedItems.length > 0
+                wantOpen: root.trayOverflowOpen && root.unpinnedItems.length > 0
 
                 GridLayout {
                     id: trayOverflowLayout

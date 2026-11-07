@@ -16,6 +16,7 @@ LazyLoader {
     property real popupBackgroundMargin: 0
 
     readonly property bool shouldShow: !!root.hoverTarget && root.hoverTarget.containsMouse && Config.options.bar.tooltips.enable && !GlobalStates.barStyleEditorOpen
+    property bool wantOpen: root.shouldShow
     readonly property bool morph: Config.options.bar.tooltips.style === "morph"
     property bool closing: false
     readonly property string barEdge: Config.options.bar.vertical ? (Config.options.bar.bottom ? "right" : "left") : (Config.options.bar.bottom ? "bottom" : "top")
@@ -24,9 +25,9 @@ LazyLoader {
     readonly property real filletRadius: 10
     readonly property var group: root.findGroup(root.hoverTarget)
 
-    active: root.shouldShow || root.closing
-    onShouldShowChanged: {
-        if (!root.shouldShow && root.item && root.morph)
+    active: root.wantOpen || root.closing
+    onWantOpenChanged: {
+        if (!root.wantOpen && root.item && root.morph)
             root.closing = true;
     }
 
@@ -172,19 +173,19 @@ LazyLoader {
                     left: "right",
                     right: "left"
                 })[root.barEdge]
-            when: root.morph && root.group !== null && root.shouldShow
+            when: root.morph && root.group !== null && root.wantOpen
         }
         Binding {
             target: root.group
             property: "morphStartFlat"
             value: popupWindow.startCovered
-            when: root.morph && root.group !== null && root.shouldShow
+            when: root.morph && root.group !== null && root.wantOpen
         }
         Binding {
             target: root.group
             property: "morphEndFlat"
             value: popupWindow.endCovered
-            when: root.morph && root.group !== null && root.shouldShow
+            when: root.morph && root.group !== null && root.wantOpen
         }
 
         anchors.left: root.morph || !Config.options.bar.vertical || (Config.options.bar.vertical && !Config.options.bar.bottom)
@@ -295,10 +296,10 @@ LazyLoader {
 
         Connections {
             target: root
-            function onShouldShowChanged() {
+            function onWantOpenChanged() {
                 if (!root.morph)
                     return;
-                if (root.shouldShow) {
+                if (root.wantOpen) {
                     closeAnim.stop();
                     openAnim.restart();
                 } else {
