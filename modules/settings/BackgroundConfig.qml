@@ -25,6 +25,7 @@ ContentPage {
         { displayName: Translation.tr("Glitch"), value: "glitch" },
         { displayName: Translation.tr("Ripple"), value: "ripple" },
         { displayName: Translation.tr("Shatter"), value: "shatter" },
+        { displayName: Translation.tr("Colonies"), value: "colonies" },
         { displayName: Translation.tr("Random"), value: "random" },
     ]
 

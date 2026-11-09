@@ -155,7 +155,7 @@ Variants {
             && !bgRoot.nativeWallpaper && !bgRoot.wallpaperSafetyTriggered
             && (!GlobalStates.screenLocked || !centeredWallpaper.centeredWallpaperEnabled || bgRoot.blurFullScreen)
 
-        readonly property var transitionShaders: ["circlePit", "circleSelect", "magic", "Doom", "Peel", "transition", "pixelate", "stripes", "crt", "dissolve", "glitch", "ripple", "shatter"]
+        readonly property var transitionShaders: ["circlePit", "circleSelect", "magic", "Doom", "Peel", "transition", "pixelate", "stripes", "crt", "dissolve", "glitch", "ripple", "shatter", "colonies"]
         readonly property string wallpaperAnimation: Config.options.background.wallpaperAnimation ?? "random"
         property string transitionShader: "transition"
         property bool transitionLive: false
@@ -267,7 +267,7 @@ Variants {
             const switchHidden = desktopSwitch && Platform.isWindows && Config.options.windowsPort.backgroundBehindIcons;
             if (!switchHidden && bgRoot.canAnimateWallpaperChange()) {
                 bgRoot.transitionShader = desktopSwitch ? "transition" : bgRoot.pickTransitionShader(toVideo);
-                bgRoot.transitionDuration = desktopSwitch ? 450 : 1000;
+                bgRoot.transitionDuration = desktopSwitch ? 450 : bgRoot.transitionShader === "colonies" ? 1600 : 1000;
                 bgRoot.transitionProgress = 0;
                 bgRoot.transitionPending = true;
                 bgRoot.pendingWallpaperPath = next;

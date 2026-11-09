@@ -206,6 +206,7 @@ ContentPage {
                         { displayName: Translation.tr("Glitch"), icon: "bug_report", value: "glitch" },
                         { displayName: Translation.tr("Ripple"), icon: "water", value: "ripple" },
                         { displayName: Translation.tr("Shatter"), icon: "broken_image", value: "shatter" },
+                        { displayName: Translation.tr("Colonies"), icon: "bubble_chart", value: "colonies" },
                         { displayName: Translation.tr("Random"), icon: "shuffle", value: "random" },
                     ]
                     currentValue: Config.options.background.wallpaperAnimation

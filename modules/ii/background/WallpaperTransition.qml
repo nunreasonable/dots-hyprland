@@ -30,6 +30,35 @@ Item {
         hideSource: true
     }
 
+    Loader {
+        id: mapLoader
+        active: root.shader === "colonies"
+        sourceComponent: Item {
+            readonly property alias texture: mapSource
+            readonly property int mapWidth: 240
+            readonly property int mapHeight: Math.max(1, Math.round(240 * root.height / Math.max(1, root.width)))
+
+            ShaderEffect {
+                id: mapEffect
+                width: parent.mapWidth
+                height: parent.mapHeight
+                property real seed: effect.seed
+                property real aspectX: effect.aspectX
+                fragmentShader: Qt.resolvedUrl("shaders/coloniesMap.frag.qsb")
+            }
+
+            ShaderEffectSource {
+                id: mapSource
+                width: mapEffect.width
+                height: mapEffect.height
+                sourceItem: mapEffect
+                hideSource: true
+                smooth: false
+                visible: false
+            }
+        }
+    }
+
     ShaderEffect {
         id: effect
         anchors.fill: parent
@@ -44,6 +73,10 @@ Item {
         property real aspectY: 1.0
         property vector2d aspectRatio: Qt.vector2d(aspectX, aspectY)
         property vector2d origin: Qt.vector2d(0.5, 0.5)
+        property real seed: Math.random() * 1000
+        property var arrivalMap: mapLoader.item ? mapLoader.item.texture : null
+        property real mapWidth: mapLoader.item ? mapLoader.item.mapWidth : 1
+        property real mapHeight: mapLoader.item ? mapLoader.item.mapHeight : 1
 
         fragmentShader: Qt.resolvedUrl(`shaders/${root.shader}.frag.qsb`)
     }
