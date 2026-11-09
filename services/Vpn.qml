@@ -47,12 +47,23 @@ Singleton {
 
     function refresh() {
         if (Platform.isWindows) {
-            if (!listProcWin.running)
+            if (WindowsNative.vpnConnections)
+                root.applyWindowsList(WindowsNative.vpnConnections.list());
+            else if (!listProcWin.running)
                 listProcWin.running = true;
             return;
         }
         if (!listProc.running)
             listProc.running = true;
+    }
+
+    function applyWindowsList(parsed) {
+        root.profiles = parsed.map(entry => ({
+                    name: entry.Name ?? "",
+                    uuid: entry.Name ?? "",
+                    type: "vpn"
+                })).filter(p => p.uuid !== "");
+        root.activeUuids = parsed.filter(entry => entry.ConnectionStatus === "Connected").map(entry => entry.Name);
     }
 
     function toggle() {
@@ -177,12 +188,7 @@ Singleton {
                         parsed = [];
                     }
                 }
-                root.profiles = parsed.map(entry => ({
-                            name: entry.Name ?? "",
-                            uuid: entry.Name ?? "",
-                            type: "vpn"
-                        })).filter(p => p.uuid !== "");
-                root.activeUuids = parsed.filter(entry => entry.ConnectionStatus === "Connected").map(entry => entry.Name);
+                root.applyWindowsList(parsed);
             }
         }
     }

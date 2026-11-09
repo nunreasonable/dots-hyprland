@@ -20,6 +20,7 @@ QtObject {
     readonly property QtObject hotkeys: root.full ? QSWin.Hotkeys : null
     readonly property QtObject notificationSettings: root.full ? QSWin.NotificationSettings : null
     readonly property QtObject network: root.full ? QSWin.Network : null
+    readonly property QtObject vpnConnections: root.full ? QSWin.VpnConnections : null
     readonly property QtObject wallpaper: QSWin.Wallpaper
     readonly property QtObject imageTools: QSWin.ImageTools
     readonly property QtObject thumbnailer: root.full ? QSWin.Thumbnailer : null
