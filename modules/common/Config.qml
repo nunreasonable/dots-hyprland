@@ -109,6 +109,9 @@ Singleton {
             property JsonObject appearance: JsonObject {
                 property string visualStyle: "ii"
                 property string visualStyleApplied: "ii"
+                property JsonObject sekaipop: JsonObject {
+                    property string theme: "mint"
+                }
                 property int visualStylePresetVersion: 0
                 property string settingsLayout: "ii"
                 property string uiBackground: "themed"

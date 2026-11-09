@@ -230,7 +230,7 @@ ButtonMouseArea {
         Colorizer {
             z: 5
             anchors.fill: numbersGrid
-            colorizationColor: Appearance.colors.colOnPrimary
+            colorizationColor: SekaiTheme.active ? SekaiTheme.textOnAccent : Appearance.colors.colOnPrimary
             sourceColor: Appearance.colors.colOnSecondaryContainer
 
             source: activeIndicator
@@ -532,7 +532,9 @@ ButtonMouseArea {
 
             contentLayer: StyledRectangle.ContentLayer.Group
             radius: indicatorThickness / 2
-            color: Appearance.colors.colPrimary
+            color: SekaiTheme.active ? SekaiTheme.accentA : Appearance.colors.colPrimary
+            border.width: SekaiTheme.active ? 2 : 0
+            border.color: SekaiTheme.outline
 
             x: root.vertical ? null : indicatorPosition
             y: root.vertical ? indicatorPosition : null

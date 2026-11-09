@@ -6,7 +6,7 @@ import Quickshell
 Singleton {
     id: root
 
-    readonly property list<string> styles: ["ii", "end4pc", "nabyscape"]
+    readonly property list<string> styles: ["ii", "end4pc", "nabyscape", "sekaipop"]
     readonly property list<string> layoutStyles: ["ii", "end4pc"]
     readonly property string selected: Config.options.appearance.visualStyle
     readonly property string applied: Config.options.appearance.visualStyleApplied
@@ -46,7 +46,7 @@ Singleton {
     }
 
     function layoutStyle(style) {
-        return style === "nabyscape" ? "ii" : style;
+        return style === "nabyscape" || style === "sekaipop" ? "ii" : style;
     }
 
     function defaultLayout(style) {
@@ -123,7 +123,7 @@ Singleton {
         Config.options.bar.workspaces.showAppIcons = !pc;
         Config.options.bar.resources.alwaysShowSwap = !pc;
         Config.options.sidebar.quickSliders.enable = pc;
-        Config.options.appearance.settingsLayout = style === "nabyscape" ? "end4pc" : style;
+        Config.options.appearance.settingsLayout = style === "nabyscape" || style === "sekaipop" ? "end4pc" : style;
         root.applyIsland(style === "nabyscape");
         root.applyNewKeys(pc, root.applied);
         Config.options.appearance.visualStylePresetVersion = root.presetVersion;
