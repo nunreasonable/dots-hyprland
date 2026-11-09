@@ -243,8 +243,26 @@ Singleton {
         }
     }
 
+    readonly property var resultCache: ({
+            previous: new Map(),
+            next: new Map()
+        })
+
+    function reuse(key, source, make) {
+        const cache = root.resultCache;
+        const old = cache.previous.get(key);
+        const hit = old && old.source === source ? old : {
+            source: source,
+            object: make()
+        };
+        cache.next.set(key, hit);
+        return hit.object;
+    }
+
     property list<var> results: {
         // Search results are handled here
+        root.resultCache.previous = root.resultCache.next;
+        root.resultCache.next = new Map();
         ////////////////// Skip? //////////////////
         if (root.query == "")
             return [];
@@ -261,7 +279,7 @@ Singleton {
                 }
                 const type = `#${entry.match(/^\s*(\S+)/)?.[1] || ""}`;
                 const pinned = Cliphist.isPinned(entry);
-                return resultComp.createObject(null, {
+                return root.reuse(`c\u001f${pinned}\u001f${shouldBlurImage}\u001f${entry}`, entry, () => resultComp.createObject(null, {
                     rawValue: entry,
                     name: StringUtils.cleanCliphistEntry(entry),
                     verb: "",
@@ -293,7 +311,7 @@ Singleton {
                             }
                         })],
                     blurImage: shouldBlurImage
-                });
+                }));
             }).filter(Boolean);
             return [...clipboardResults.filter(r => r.pinned), ...clipboardResults.filter(r => !r.pinned)];
         } else if (root.query.startsWith(Config.options.search.prefix.emojis)) {
@@ -301,7 +319,7 @@ Singleton {
             const searchString = StringUtils.cleanPrefix(root.query, Config.options.search.prefix.emojis);
             return Emojis.fuzzyQuery(searchString).map(entry => {
                 const emoji = entry.match(/^\s*(\S+)/)?.[1] || "";
-                return resultComp.createObject(null, {
+                return root.reuse(`e\u001f${entry}`, entry, () => resultComp.createObject(null, {
                     rawValue: entry,
                     name: entry.replace(/^\s*\S+\s+/, ""),
                     iconName: emoji,
@@ -311,7 +329,7 @@ Singleton {
                     execute: () => {
                         Quickshell.clipboardText = entry.match(/^\s*(\S+)/)?.[1];
                     }
-                });
+                }));
             }).filter(Boolean);
         } else if (root.query.startsWith(Config.options.search.prefix.keybinds)) {
             const searchString = StringUtils.cleanPrefix(root.query, Config.options.search.prefix.keybinds).toLowerCase();
@@ -340,7 +358,7 @@ Singleton {
             const searchString = StringUtils.cleanPrefix(root.query, Config.options.search.prefix.symbols);
             return MaterialSymbolsSearch.fuzzyQuery(searchString).map(entry => {
                 const symbolName = entry.split("\t")[0] ?? "";
-                return resultComp.createObject(null, {
+                return root.reuse(`m\u001f${entry}`, entry, () => resultComp.createObject(null, {
                     rawValue: entry,
                     name: symbolName,
                     iconName: symbolName,
@@ -350,7 +368,7 @@ Singleton {
                     execute: () => {
                         Quickshell.clipboardText = symbolName;
                     }
-                });
+                }));
             }).filter(Boolean);
         }
 
@@ -367,7 +385,7 @@ Singleton {
             }
         });
         const appResultObjects = AppSearch.fuzzyQuery(StringUtils.cleanPrefix(root.query, Config.options.search.prefix.app)).map(entry => {
-            return resultComp.createObject(null, {
+            return root.reuse(`a\u001f${entry.id}`, entry, () => resultComp.createObject(null, {
                 type: Translation.tr("App"),
                 id: entry.id,
                 name: entry.name,
@@ -400,7 +418,7 @@ Singleton {
                         }
                     });
                 })
-            });
+            }));
         });
         const commandResultObject = resultComp.createObject(null, {
             name: StringUtils.cleanPrefix(root.query, Config.options.search.prefix.shellCommand).replace("file://", ""),
