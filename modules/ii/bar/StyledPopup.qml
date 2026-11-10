@@ -254,20 +254,27 @@ LazyLoader {
                 id: popupBackground
                 readonly property real margin: 10
                 anchors.fill: parent
-                implicitWidth: contentLoader.implicitWidth + margin * 2
-                implicitHeight: contentLoader.implicitHeight + margin * 2
-                color: Appearance.colors.colUiPopupBackground
+                implicitWidth: contentLoader.implicitWidth + margin * 2 + (SekaiTheme.active ? 8 : 0)
+                implicitHeight: contentLoader.implicitHeight + margin * 2 + (SekaiTheme.active ? 8 + SekaiTheme.shadowOffset : 0)
+                color: SekaiTheme.active ? "transparent" : Appearance.colors.colUiPopupBackground
                 radius: root.morph ? Appearance.rounding.large : Appearance.rounding.small
                 topLeftRadius: popupWindow.flat("tl") ? 0 : radius
                 topRightRadius: popupWindow.flat("tr") ? 0 : radius
                 bottomLeftRadius: popupWindow.flat("bl") ? 0 : radius
                 bottomRightRadius: popupWindow.flat("br") ? 0 : radius
 
-                border.width: root.morph ? 0 : 1
+                border.width: root.morph || SekaiTheme.active ? 0 : 1
                 border.color: Appearance.colors.colLayer0Border
 
+                SekaiBlock {
+                    visible: SekaiTheme.active
+                    width: parent.width
+                    height: parent.height
+                    cornerRadius: 20
+                }
+
                 Fillet {
-                    visible: root.morph
+                    visible: root.morph && !SekaiTheme.active
                     r: popupWindow.startFillet.r
                     x: popupWindow.startFillet.x
                     y: popupWindow.startFillet.y
@@ -276,7 +283,7 @@ LazyLoader {
                     fillColor: popupBackground.color
                 }
                 Fillet {
-                    visible: root.morph
+                    visible: root.morph && !SekaiTheme.active
                     r: popupWindow.endFillet.r
                     x: popupWindow.endFillet.x
                     y: popupWindow.endFillet.y
@@ -288,6 +295,7 @@ LazyLoader {
                 Loader {
                     id: contentLoader
                     anchors.centerIn: parent
+                    anchors.verticalCenterOffset: SekaiTheme.active ? -SekaiTheme.shadowOffset / 2 : 0
                     opacity: root.morph ? 0 : 1
                     sourceComponent: root.contentComponent
                 }

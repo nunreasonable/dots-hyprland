@@ -47,8 +47,20 @@ GroupButton {
         animation: Appearance.animation.elementMove.numberAnimation.createObject(this)
     }
     opacity: 0
+    property bool sekaiReady: false
     Component.onCompleted: {
         opacity = 1
+        sekaiReady = true
+    }
+    onToggledChanged: {
+        if (SekaiTheme.active && sekaiReady && !editMode) {
+            sekaiPop.grow = toggled
+            sekaiPop.restart()
+        }
+    }
+    SekaiPopAnimation {
+        id: sekaiPop
+        target: root
     }
     Behavior on opacity {
         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
@@ -59,14 +71,27 @@ GroupButton {
     horizontalPadding: padding
     verticalPadding: padding
 
-    colBackground: Appearance.colors.colLayer2
-    colBackgroundToggled: (altAction && expandedSize) ? Appearance.colors.colLayer2 : Appearance.colors.colPrimary
-    colBackgroundToggledHover: (altAction && expandedSize) ? Appearance.colors.colLayer2Hover : Appearance.colors.colPrimaryHover
-    colBackgroundToggledActive: (altAction && expandedSize) ? Appearance.colors.colLayer2Active : Appearance.colors.colPrimaryActive
+    readonly property bool sekaiAccent: toggled && !(altAction && expandedSize)
+    colBackground: SekaiTheme.active ? "transparent" : Appearance.colors.colLayer2
+    colBackgroundHover: SekaiTheme.active ? "transparent" : Appearance.colors.colLayer1Hover
+    colBackgroundActive: SekaiTheme.active ? "transparent" : Appearance.colors.colLayer1Active
+    colBackgroundToggled: SekaiTheme.active ? "transparent" : (altAction && expandedSize) ? Appearance.colors.colLayer2 : Appearance.colors.colPrimary
+    colBackgroundToggledHover: SekaiTheme.active ? "transparent" : (altAction && expandedSize) ? Appearance.colors.colLayer2Hover : Appearance.colors.colPrimaryHover
+    colBackgroundToggledActive: SekaiTheme.active ? "transparent" : (altAction && expandedSize) ? Appearance.colors.colLayer2Active : Appearance.colors.colPrimaryActive
     buttonRadius: toggled ? Appearance.rounding.large : height / 2
     buttonRadiusPressed: Appearance.rounding.normal
-    property color colText: (toggled && !(altAction && expandedSize) && enabled) ? Appearance.colors.colOnPrimary : ColorUtils.transparentize(Appearance.colors.colOnLayer2, enabled ? 0 : 0.7)
-    property color colIcon: expandedSize ? ((root.toggled) ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer3) : colText
+    property color colText: SekaiTheme.active ? ColorUtils.transparentize(sekaiAccent ? SekaiTheme.textOnAccent : SekaiTheme.text, enabled ? 0 : 0.6)
+        : (toggled && !(altAction && expandedSize) && enabled) ? Appearance.colors.colOnPrimary : ColorUtils.transparentize(Appearance.colors.colOnLayer2, enabled ? 0 : 0.7)
+    property color colIcon: SekaiTheme.active ? ((root.toggled) ? SekaiTheme.textOnAccent : SekaiTheme.text)
+        : expandedSize ? ((root.toggled) ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer3) : colText
+
+    SekaiBlock {
+        z: -1
+        visible: SekaiTheme.active
+        anchors.fill: parent
+        pressed: root.down
+        fillColor: root.sekaiAccent ? SekaiTheme.accentA : root.hovered ? SekaiTheme.fillHover : SekaiTheme.fill
+    }
 
     onClicked: {
         if (root.expandedSize && root.altAction) root.altAction();
@@ -104,7 +129,8 @@ GroupButton {
                 implicitWidth: height
                 radius: root.radius - root.verticalPadding
                 color: {
-                    const baseColor = root.toggled ? Appearance.colors.colPrimary : Appearance.colors.colLayer3
+                    const baseColor = SekaiTheme.active ? (root.toggled ? SekaiTheme.accentA : SekaiTheme.fillHover)
+                        : root.toggled ? Appearance.colors.colPrimary : Appearance.colors.colLayer3
                     const transparentizeAmount = (root.altAction && root.expandedSize) ? 0 : 1
                     return ColorUtils.transparentize(baseColor, transparentizeAmount)
                 }

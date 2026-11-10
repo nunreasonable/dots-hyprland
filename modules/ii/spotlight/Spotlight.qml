@@ -515,6 +515,16 @@ q="$1"; h="$2"
 
             StyledRectangularShadow {
                 target: panel
+                visible: !SekaiTheme.active
+            }
+
+            SekaiBlock {
+                visible: SekaiTheme.active
+                x: panel.x
+                y: panel.y
+                width: panel.width
+                height: panel.height + SekaiTheme.shadowOffset
+                cornerRadius: panel.radius
             }
 
             Rectangle {
@@ -523,8 +533,8 @@ q="$1"; h="$2"
                 readonly property real pillWidth: 600
                 height: header.height + (root.expanded ? body.height + 8 : 0)
                 radius: root.expanded ? Appearance.rounding.large : height / 2
-                color: Appearance.colors.colLayer0
-                border.width: 1
+                color: SekaiTheme.active ? "transparent" : Appearance.colors.colLayer0
+                border.width: SekaiTheme.active ? 0 : 1
                 border.color: Appearance.colors.colLayer0Border
                 clip: true
 

@@ -42,7 +42,10 @@ Item {
             root.showBluetoothDialog = true;
     }
 
-    Component.onCompleted: root.takeBluetoothRequest()
+    Component.onCompleted: {
+        root.takeBluetoothRequest();
+        root.riseLikeAPhone();
+    }
     property bool editMode: false
     property string editTab: Config.options.sidebar.quickToggles.style === "android" ? "toggles" : "layout"
     readonly property var editTabs: Config.options.sidebar.quickToggles.style === "android"
@@ -67,6 +70,7 @@ Item {
             root.takeBluetoothRequest();
         }
         function onSidebarRightOpenChanged() {
+            root.riseLikeAPhone();
             if (!GlobalStates.sidebarRightOpen) {
                 root.editMode = false;
                 root.showWifiDialog = false;
@@ -81,8 +85,35 @@ Item {
     implicitHeight: sidebarRightBackground.implicitHeight
     implicitWidth: sidebarRightBackground.implicitWidth
 
+    transform: Translate {
+        id: phoneRise
+    }
+    NumberAnimation {
+        id: phoneRiseAnimation
+        target: phoneRise
+        property: "y"
+        from: root.height * 0.6
+        to: 0
+        duration: 520
+        easing.type: Easing.OutBack
+        easing.overshoot: 1.4
+    }
+    function riseLikeAPhone() {
+        if (SekaiTheme.active && GlobalStates.sidebarRightOpen)
+            phoneRiseAnimation.restart();
+    }
+
     StyledRectangularShadow {
         target: sidebarRightBackground
+        visible: !SekaiTheme.active
+    }
+    SekaiBlock {
+        visible: SekaiTheme.active
+        width: sidebarRightBackground.width
+        height: sidebarRightBackground.height
+        cornerRadius: 34
+        ringWidth: 6
+        fillColor: SekaiTheme.dark ? SekaiTheme.deep : "#f6f6fa"
     }
     Rectangle {
         id: sidebarRightBackground
@@ -90,8 +121,8 @@ Item {
         anchors.fill: parent
         implicitHeight: parent.height - Appearance.sizes.hyprlandGapsOut * 2
         implicitWidth: sidebarWidth - Appearance.sizes.hyprlandGapsOut * 2
-        color: Appearance.colors.colUiBackground
-        border.width: 1
+        color: SekaiTheme.active ? "transparent" : Appearance.colors.colUiBackground
+        border.width: SekaiTheme.active ? 0 : 1
         border.color: Appearance.colors.colLayer0Border
         radius: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
 
@@ -99,7 +130,11 @@ Item {
             id: sectionColumn
             anchors.fill: parent
             anchors.margins: sidebarPadding
-            itemSpacing: sidebarPadding
+            anchors.topMargin: SekaiTheme.active ? 18 : sidebarPadding
+            anchors.bottomMargin: SekaiTheme.active ? 18 + SekaiTheme.shadowOffset : sidebarPadding
+            anchors.leftMargin: SekaiTheme.active ? 16 : sidebarPadding
+            anchors.rightMargin: SekaiTheme.active ? 16 : sidebarPadding
+            itemSpacing: SekaiTheme.active ? 12 : sidebarPadding
             order: root.sectionOrder
             editMode: root.editMode && root.editTab === "layout"
             fillKey: "notifications"

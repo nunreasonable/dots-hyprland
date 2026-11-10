@@ -22,9 +22,16 @@ Rectangle {
     implicitWidth: contentItem.implicitWidth + root.horizontalPadding * 2
     implicitHeight: contentItem.implicitHeight + root.verticalPadding * 2
     radius: Appearance.rounding.normal
-    color: Appearance.colors.colLayer1
-    property real verticalPadding: 4
-    property real horizontalPadding: 12
+    color: SekaiTheme.active ? "transparent" : Appearance.colors.colLayer1
+    property real verticalPadding: SekaiTheme.active ? 11 : 4
+    property real horizontalPadding: SekaiTheme.active ? 16 : 12
+
+    SekaiBlock {
+        visible: SekaiTheme.active
+        width: parent.width
+        height: parent.height
+        cornerRadius: 22
+    }
 
     Column {
         id: contentItem
@@ -110,6 +117,9 @@ Rectangle {
         property string secondaryMaterialSymbol
         configuration: StyledSlider.Configuration.M
         stopIndicatorValues: []
+        highlightColor: SekaiTheme.active ? SekaiTheme.accentA : Appearance.colors.colPrimary
+        trackColor: SekaiTheme.active ? SekaiTheme.fillHover : Appearance.colors.colSecondaryContainer
+        handleColor: SekaiTheme.active ? SekaiTheme.outline : Appearance.colors.colPrimary
         dividerValues: secondaryMaterialSymbol.length > 0 ? [secondaryIcon.iconLocation] : []
         
         MaterialSymbol {
@@ -121,7 +131,8 @@ Rectangle {
                 rightMargin: nearFull ? 14 : 8
             }
             iconSize: 20
-            color: nearFull ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
+            color: SekaiTheme.active ? (nearFull ? SekaiTheme.textOnAccent : SekaiTheme.text)
+                : nearFull ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
             text: quickSlider.materialSymbol
 
             Behavior on color {
@@ -143,7 +154,8 @@ Rectangle {
                 rightMargin: nearIcon ? 14 : (1 - iconLocation) * quickSlider.effectiveDraggingWidth + quickSlider.rightPadding + 8
             }
             iconSize: 20
-            color: quickSlider.value >= iconLocation - 0.1 ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
+            color: SekaiTheme.active ? (quickSlider.value >= iconLocation - 0.1 ? SekaiTheme.textOnAccent : SekaiTheme.text)
+                : quickSlider.value >= iconLocation - 0.1 ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
             text: secondaryMaterialSymbol
 
             Behavior on color {
