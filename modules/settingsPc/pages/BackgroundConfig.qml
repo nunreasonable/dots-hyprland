@@ -207,6 +207,10 @@ ContentPage {
                         { displayName: Translation.tr("Ripple"), icon: "water", value: "ripple" },
                         { displayName: Translation.tr("Shatter"), icon: "broken_image", value: "shatter" },
                         { displayName: Translation.tr("Colonies"), icon: "bubble_chart", value: "colonies" },
+                        { displayName: Translation.tr("Pop ring"), icon: "radio_button_unchecked", value: "sekaiRing" },
+                        { displayName: Translation.tr("Pop iris"), icon: "camera", value: "sekaiIris" },
+                        { displayName: Translation.tr("Pop star"), icon: "star", value: "sekaiStar" },
+                        { displayName: Translation.tr("Pop blocks"), icon: "grid_view", value: "sekaiBlocks" },
                         { displayName: Translation.tr("Random"), icon: "shuffle", value: "random" },
                     ]
                     currentValue: Config.options.background.wallpaperAnimation

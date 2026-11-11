@@ -1,4 +1,5 @@
 import QtQuick
+import qs.modules.common
 
 Item {
     id: root
@@ -77,6 +78,11 @@ Item {
         property var arrivalMap: mapLoader.item ? mapLoader.item.texture : null
         property real mapWidth: mapLoader.item ? mapLoader.item.mapWidth : 1
         property real mapHeight: mapLoader.item ? mapLoader.item.mapHeight : 1
+        property real pxWidth: width
+        property real pxHeight: height
+        property color sekaiOutline: SekaiTheme.outline
+        property color sekaiRing: SekaiTheme.ring
+        property color sekaiAccent: SekaiTheme.accentA
 
         fragmentShader: Qt.resolvedUrl(`shaders/${root.shader}.frag.qsb`)
     }

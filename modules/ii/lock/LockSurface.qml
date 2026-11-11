@@ -96,6 +96,16 @@ MouseArea {
     //     }
     // }
 
+    Loader {
+        active: SekaiTheme.active
+        anchors {
+            left: parent.left
+            verticalCenter: parent.verticalCenter
+            leftMargin: 72
+        }
+        sourceComponent: SekaiPoster {}
+    }
+
     // Main toolbar: password box
     Toolbar {
         id: mainIsland

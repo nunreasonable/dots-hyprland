@@ -180,8 +180,8 @@ Scope {
                             anchors.bottomMargin: dockRoot.position === "bottom" ? dockRoot.gap : 0
                             anchors.leftMargin: dockRoot.position === "left" ? dockRoot.gap : dockRoot.position === "right" ? dockRoot.shadowMargin : 0
                             anchors.rightMargin: dockRoot.position === "right" ? dockRoot.gap : dockRoot.position === "left" ? dockRoot.shadowMargin : 0
-                            color: Config.options.dock.showBackground ? dockRoot.backgroundColor : "transparent"
-                            border.width: dockRoot.borderWidth
+                            color: Config.options.dock.showBackground && !SekaiTheme.active ? dockRoot.backgroundColor : "transparent"
+                            border.width: SekaiTheme.active ? 0 : dockRoot.borderWidth
                             border.color: root.colorFromName(Config.options.dock.borderColor)
                             radius: Config.options.dock.radius
                             topLeftRadius: dockRoot.hug && dockRoot.position === "left" ? 0 : radius
@@ -190,8 +190,17 @@ Scope {
                             bottomRightRadius: dockRoot.hug && (dockRoot.position === "right" || dockRoot.position === "bottom") ? 0 : radius
                         }
 
+                        SekaiBlock {
+                            visible: SekaiTheme.active
+                            x: dockVisualBackground.x
+                            y: dockVisualBackground.y
+                            width: dockVisualBackground.width
+                            height: dockVisualBackground.height
+                            cornerRadius: 26
+                        }
+
                         RoundCorner {
-                            visible: dockRoot.hug && Config.options.dock.showBackground
+                            visible: dockRoot.hug && Config.options.dock.showBackground && !SekaiTheme.active
                             anchors.right: dockRoot.vertical ? (dockRoot.position === "right" ? dockVisualBackground.right : undefined) : dockVisualBackground.left
                             anchors.bottom: dockRoot.vertical ? dockVisualBackground.top : dockVisualBackground.bottom
                             anchors.left: dockRoot.position === "left" ? dockVisualBackground.left : undefined
@@ -201,7 +210,7 @@ Scope {
                         }
 
                         RoundCorner {
-                            visible: dockRoot.hug && Config.options.dock.showBackground
+                            visible: dockRoot.hug && Config.options.dock.showBackground && !SekaiTheme.active
                             anchors.left: dockRoot.vertical ? (dockRoot.position === "left" ? dockVisualBackground.left : undefined) : dockVisualBackground.right
                             anchors.bottom: dockRoot.vertical ? undefined : dockVisualBackground.bottom
                             anchors.top: dockRoot.vertical ? dockVisualBackground.bottom : undefined

@@ -26,6 +26,10 @@ ContentPage {
         { displayName: Translation.tr("Ripple"), value: "ripple" },
         { displayName: Translation.tr("Shatter"), value: "shatter" },
         { displayName: Translation.tr("Colonies"), value: "colonies" },
+        { displayName: Translation.tr("Pop ring"), value: "sekaiRing" },
+        { displayName: Translation.tr("Pop iris"), value: "sekaiIris" },
+        { displayName: Translation.tr("Pop star"), value: "sekaiStar" },
+        { displayName: Translation.tr("Pop blocks"), value: "sekaiBlocks" },
         { displayName: Translation.tr("Random"), value: "random" },
     ]
 
