@@ -415,6 +415,12 @@ Singleton {
         root._startNextSave();
     }
 
+    function _writePreset(path, text) {
+        presetWriteFile.targetPath = "";
+        presetWriteFile.targetPath = path;
+        presetWriteFile.setText(text);
+    }
+
     function overwrite(name) {
         root.save(name);
     }
@@ -459,8 +465,7 @@ Singleton {
         filtered._presetMeta = { preview: preview };
         if (root._pendingSaveDescription !== "")
             filtered._presetMeta.description = root._pendingSaveDescription;
-        presetWriteFile.targetPath = `${Directories.userPresetsPath}/${root._pendingSaveName}.json`;
-        presetWriteFile.setText(JSON.stringify(filtered, null, 2));
+        root._writePreset(`${Directories.userPresetsPath}/${root._pendingSaveName}.json`, JSON.stringify(filtered, null, 2));
         root.refresh();
         root._completeSave();
     }
@@ -579,8 +584,7 @@ Singleton {
         let name = root.sanitizeName(suggestedName || "imported");
         if (name.length === 0)
             name = "imported";
-        presetWriteFile.targetPath = `${Directories.userPresetsPath}/${name}.json`;
-        presetWriteFile.setText(JSON.stringify(parsed, null, 2));
+        root._writePreset(`${Directories.userPresetsPath}/${name}.json`, JSON.stringify(parsed, null, 2));
         root.refresh();
         return true;
     }
@@ -615,8 +619,7 @@ Singleton {
         printErrors: false
         onLoaded: {
             const text = renameReadFile.text();
-            presetWriteFile.targetPath = `${Directories.userPresetsPath}/${root._renameNewName}.json`;
-            presetWriteFile.setText(text);
+            root._writePreset(`${Directories.userPresetsPath}/${root._renameNewName}.json`, text);
             root._deletePath(`${Directories.userPresetsPath}/${root._renameOldName}.json`, () => {
                 root.refresh();
                 root.renamed(root._renameOldName, root._renameNewName);
@@ -796,8 +799,7 @@ Singleton {
             } catch (e) {}
         }
 
-        presetWriteFile.targetPath = `${root._stageDir}/${root._stageName}.json`;
-        presetWriteFile.setText(JSON.stringify(finalObj, null, 2));
+        root._writePreset(`${root._stageDir}/${root._stageName}.json`, JSON.stringify(finalObj, null, 2));
         metaStageWriteFile.targetPath = `${root._stageDir}/meta.json`;
         metaStageWriteFile.setText(JSON.stringify(meta, null, 2));
 
@@ -1021,8 +1023,7 @@ Singleton {
             name = `${root._importBaseName}_${n}`;
             n++;
         }
-        presetWriteFile.targetPath = `${Directories.importedPresetsPath}/${name}.json`;
-        presetWriteFile.setText(JSON.stringify(filtered, null, 2));
+        root._writePreset(`${Directories.importedPresetsPath}/${name}.json`, JSON.stringify(filtered, null, 2));
         root.refreshImported();
         root._removeStagingDir(root._importStagingDir);
         root.imported(name);
@@ -1154,8 +1155,7 @@ Singleton {
             finalName = `${name}_${n}`;
             n++;
         }
-        presetWriteFile.targetPath = `${Directories.userPresetsPath}/${finalName}.json`;
-        presetWriteFile.setText(JSON.stringify(filtered, null, 2));
+        root._writePreset(`${Directories.userPresetsPath}/${finalName}.json`, JSON.stringify(filtered, null, 2));
         root.refresh();
         root.installed(finalName, true, "");
     }
