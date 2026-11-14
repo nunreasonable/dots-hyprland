@@ -66,7 +66,7 @@ Singleton {
         && root.patchNumber > root.installedPatchNumber
         && root.patchLabel !== root.failedPatch
         && root.patchDigest !== ""
-        && root.patchUrl.startsWith(root.setupUrlPrefix)
+        && (root.patchUrl.startsWith(root.setupUrlPrefix) || root.apiOverride !== "")
     readonly property string displayVersion: root.installedPatchNumber > 0 ? `${root.installedVersion}-p${root.installedPatchNumber}` : root.installedVersion
 
     readonly property bool updateAvailable: Platform.isWindows
