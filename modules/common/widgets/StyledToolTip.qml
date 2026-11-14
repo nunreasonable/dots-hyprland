@@ -21,7 +21,7 @@ ToolTip {
     }
 
     delay: 0
-    visible: internalVisibleCondition
+    visible: internalVisibleCondition && (root.parent?.visible ?? true)
 
     contentItem: null
     property Item styledContentItem: null

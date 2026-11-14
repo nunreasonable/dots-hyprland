@@ -1999,8 +1999,12 @@ ContentPage {
             }
         }
 
-        StyledToolTip {
+        StyledText {
+            Layout.fillWidth: true
+            wrapMode: Text.Wrap
             text: Translation.tr("Drop images on the widget to convert them. Needs ffmpeg (and ImageMagick for PDF) on PATH.")
+            font.pixelSize: Appearance.font.pixelSize.small
+            color: Appearance.colors.colSubtext
         }
     }
 
