@@ -23,6 +23,7 @@ Item {
 
     StyledRectangularShadow {
         target: valueIndicator
+        visible: !SekaiTheme.active
     }
     Rectangle {
         id: valueIndicator
@@ -31,6 +32,12 @@ Item {
             margins: Appearance.sizes.elevationMargin
         }
         radius: Appearance.rounding.full
+        SekaiShadow {
+            radius: valueIndicator.radius
+        }
+        SekaiFrame {
+            radius: valueIndicator.radius
+        }
         color: Appearance.colors.colUiBackground
 
         implicitWidth: valueRow.implicitWidth

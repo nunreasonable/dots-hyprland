@@ -94,9 +94,8 @@ Item {
         property: "y"
         from: root.height * 0.6
         to: 0
-        duration: 520
-        easing.type: Easing.OutBack
-        easing.overshoot: 1.4
+        duration: 620
+        easing.type: Easing.OutBounce
     }
     function riseLikeAPhone() {
         if (SekaiTheme.active && GlobalStates.sidebarRightOpen)

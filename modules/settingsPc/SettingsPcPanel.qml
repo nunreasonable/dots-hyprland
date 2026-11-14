@@ -112,9 +112,15 @@ PanelWindow {
         width: Math.min(parent.width - 80, 980 * panelWindow.sizeScale)
         height: Math.min(parent.height - 80, 665 * panelWindow.sizeScale)
         color: Appearance.colors.colUiBackground
-        border.width: Config.options.settings.borderSize
+        border.width: SekaiTheme.active ? 0 : Config.options.settings.borderSize
         border.color: CF.ColorUtils.transparentize(Appearance.getColorFromName(Config.options.settings.borderColor), 0.8)
         radius: !panelWindow.isMinimal ? Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 5 : Appearance.rounding.screenRounding + 5
+        SekaiShadow {
+            radius: settingsWindow.radius
+        }
+        SekaiFrame {
+            radius: settingsWindow.radius
+        }
 
         property bool userMoved: false
         anchors.centerIn: userMoved ? undefined : parent

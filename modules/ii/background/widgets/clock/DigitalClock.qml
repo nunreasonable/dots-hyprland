@@ -42,8 +42,28 @@ ColumnLayout {
                     fillColor: SekaiTheme.fill
                 }
 
+                Column {
+                    visible: !key.isKey && key.character === ":"
+                    anchors.centerIn: parent
+                    spacing: sekaiKeys.keySize * 0.16
+
+                    Repeater {
+                        model: 2
+
+                        Rectangle {
+                            width: sekaiKeys.keySize * 0.2
+                            height: width
+                            radius: width / 2
+                            color: SekaiTheme.fill
+                            border.width: SekaiTheme.borderWidth
+                            border.color: SekaiTheme.outline
+                        }
+                    }
+                }
+
                 Text {
                     id: keyText
+                    visible: key.isKey || key.character !== ":"
                     anchors.centerIn: parent
                     anchors.verticalCenterOffset: key.isKey ? -SekaiTheme.shadowOffset / 2 : 0
                     text: key.character
@@ -102,12 +122,30 @@ ColumnLayout {
 
     // Date
     ClockText {
-        visible: Config.options.background.widgets.clock.digital.showDate
-        Layout.topMargin: SekaiTheme.active ? 4 : -20
+        visible: Config.options.background.widgets.clock.digital.showDate && !SekaiTheme.active
+        Layout.topMargin: -20
         Layout.fillWidth: true
         text: DateTime.longDate
         color: clockColumn.colText
         horizontalAlignment: clockColumn.textHorizontalAlignment
+    }
+
+    SekaiBlock {
+        visible: Config.options.background.widgets.clock.digital.showDate && SekaiTheme.active
+        Layout.alignment: Qt.AlignHCenter
+        Layout.topMargin: 2
+        implicitWidth: sekaiDate.implicitWidth + 32
+        implicitHeight: sekaiDate.implicitHeight + 14 + SekaiTheme.shadowOffset
+        fillColor: SekaiTheme.fill
+
+        StyledText {
+            id: sekaiDate
+            anchors.centerIn: parent
+            text: DateTime.longDate
+            color: SekaiTheme.text
+            font.pixelSize: Appearance.font.pixelSize.larger
+            font.weight: Font.Bold
+        }
     }
 
     // Quote

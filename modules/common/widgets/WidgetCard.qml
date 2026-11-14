@@ -16,7 +16,15 @@ Rectangle {
     StyledRectangularShadow {
         target: root
         z: -2
-        visible: !Platform.isWindows && root.shadowed
+        visible: !Platform.isWindows && root.shadowed && !SekaiTheme.active
+    }
+
+    SekaiShadow {
+        radius: root.radius
+    }
+
+    SekaiFrame {
+        radius: root.radius
     }
 
     Loader {

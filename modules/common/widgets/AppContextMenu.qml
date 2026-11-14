@@ -113,6 +113,7 @@ Item {
 
             StyledRectangularShadow {
                 target: menuBackground
+                visible: !SekaiTheme.active
             }
 
             Rectangle {
@@ -122,6 +123,12 @@ Item {
                 anchors.centerIn: parent
                 color: Appearance.m3colors.m3surfaceContainer
                 radius: Appearance.rounding.normal
+                SekaiShadow {
+                    radius: menuBackground.radius
+                }
+                SekaiFrame {
+                    radius: menuBackground.radius
+                }
                 implicitWidth: menuColumn.implicitWidth + padding * 2
                 implicitHeight: menuColumn.implicitHeight + padding * 2
                 focus: true

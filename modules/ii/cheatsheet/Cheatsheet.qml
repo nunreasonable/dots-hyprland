@@ -125,6 +125,7 @@ Scope { // Scope
             // Background
             StyledRectangularShadow {
                 target: cheatsheetBackground
+                visible: !SekaiTheme.active
             }
             Rectangle {
                 id: cheatsheetBackground
@@ -133,6 +134,12 @@ Scope { // Scope
                 border.width: 1
                 border.color: Appearance.colors.colLayer0Border
                 radius: Appearance.rounding.windowRounding
+                SekaiShadow {
+                    radius: cheatsheetBackground.radius
+                }
+                SekaiFrame {
+                    radius: cheatsheetBackground.radius
+                }
                 property real padding: 20
                 implicitWidth: cheatsheetColumnLayout.implicitWidth + padding * 2
                 implicitHeight: cheatsheetColumnLayout.implicitHeight + padding * 2

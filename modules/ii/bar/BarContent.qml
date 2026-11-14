@@ -161,9 +161,23 @@ Item { // Bar content region
             anchors.verticalCenter: parent.verticalCenter
         }
 
+        Loader {
+            active: SekaiTheme.active
+            readonly property real startX: leftSidebarButton.visible ? leftSidebarButton.x : activeWindow.x
+            readonly property real endX: activeWindow.visible ? activeWindow.x + Math.min(activeWindow.width, activeWindow.implicitWidth) : leftSidebarButton.x + leftSidebarButton.width
+            x: startX - 8
+            y: 2
+            width: endX - startX + 16
+            height: parent.height - 4
+            sourceComponent: SekaiBlock {
+                cornerRadius: capHeight / 2
+            }
+        }
+
         RowLayout {
             id: leftSectionRowLayout
             anchors.fill: parent
+            anchors.bottomMargin: SekaiTheme.active ? SekaiTheme.shadowOffset : 0
             spacing: 0
 
             LeftSidebarButton { // Left sidebar button
@@ -321,9 +335,23 @@ Item { // Bar content region
             anchors.verticalCenter: parent.verticalCenter
         }
 
+        Loader {
+            active: SekaiTheme.active
+            readonly property real startX: sysTray.visible && sysTray.width > 0 ? sysTray.x : rightSidebarButton.x
+            readonly property real endX: rightSidebarButton.x + rightSidebarButton.width
+            x: startX - 8
+            y: 2
+            width: endX - startX + 16
+            height: parent.height - 4
+            sourceComponent: SekaiBlock {
+                cornerRadius: capHeight / 2
+            }
+        }
+
         RowLayout {
             id: rightSectionRowLayout
             anchors.fill: parent
+            anchors.bottomMargin: SekaiTheme.active ? SekaiTheme.shadowOffset : 0
             spacing: 5
             layoutDirection: Qt.RightToLeft
 
@@ -422,6 +450,7 @@ Item { // Bar content region
             }
 
             SysTray {
+                id: sysTray
                 classic: true
                 visible: root.useShortenedForm === 0
                 Layout.fillWidth: false
