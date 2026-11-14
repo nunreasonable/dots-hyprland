@@ -475,7 +475,8 @@ Singleton {
             const statusMatch = raw.match(/HTTP_STATUS:(\d+)\s*$/);
             const body = statusMatch ? raw.slice(0, statusMatch.index) : raw;
             const status = statusMatch ? statusMatch[1] : "";
-            if (exitCode !== 0 || status !== "200") {
+            const localTest = root.apiOverride.startsWith("file:") && status === "000";
+            if (exitCode !== 0 || (status !== "200" && !localTest)) {
                 root.lastError = status
                     ? Translation.tr("GitHub answered HTTP %1.").arg(status)
                     : Translation.tr("Could not reach GitHub.");
