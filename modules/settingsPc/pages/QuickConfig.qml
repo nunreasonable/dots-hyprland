@@ -89,7 +89,7 @@ ContentPage {
             }
             Rectangle {
                 anchors.fill: parent
-                color: ColorUtils.transparentize(Appearance.colors.colLayer1, 0.4)
+                color: Qt.rgba(Appearance.colors.colLayer1.r, Appearance.colors.colLayer1.g, Appearance.colors.colLayer1.b, 0.85)
             }
         }
 
@@ -160,7 +160,7 @@ ContentPage {
             }
             Rectangle {
                 anchors.fill: parent
-                color: ColorUtils.transparentize(Appearance.colors.colLayer1, 0.25)
+                color: Qt.rgba(Appearance.colors.colLayer1.r, Appearance.colors.colLayer1.g, Appearance.colors.colLayer1.b, 0.9)
             }
         }
 
