@@ -18,13 +18,16 @@ Singleton {
     readonly property var styleNames: ({
             "ii": "illogical-impulse (ii)",
             "end4pc": "end4-pC",
-            "nabyscape": "NabyScape"
+            "nabyscape": "NabyScape",
+            "sekaipop": "SekaiPop"
         })
+    property string arch: ""
 
     function bugReportUrl(zip) {
         const fields = {
             "template": "bug_report.yml",
             "version": SelfUpdate.installedVersion,
+            "arch": root.arch,
             "windows": `${SystemInfo.distroName}, build ${SystemInfo.windowsBuild}`,
             "style": root.styleNames[Config.options.appearance.visualStyle] ?? "",
             "family": Config.options.panelFamily,
@@ -32,6 +35,16 @@ Singleton {
         };
         const query = Object.keys(fields).filter(key => fields[key]).map(key => `${key}=${encodeURIComponent(fields[key])}`).join("&");
         return `${root.newIssueUrl}?${query}`;
+    }
+
+    function issueSummary() {
+        return [
+            `ii-windows version: ${SelfUpdate.installedVersion}`,
+            `Architecture: ${root.arch}`,
+            `Visual style: ${root.styleNames[Config.options.appearance.visualStyle] ?? Config.options.appearance.visualStyle}`,
+            `Panel family: ${Config.options.panelFamily}`,
+            `Windows version: ${SystemInfo.distroName}, build ${SystemInfo.windowsBuild}`
+        ].join("\n");
     }
 
     function collect() {
@@ -62,6 +75,9 @@ Singleton {
             const last = (lines[lines.length - 1] ?? "").trim();
             if (exitCode === 0 && last.toLowerCase().endsWith(".zip")) {
                 root.zipPath = last;
+                const archLine = lines.find(line => line.trim().startsWith("ARCH "));
+                root.arch = archLine ? archLine.trim().slice(5) : "";
+                Quickshell.clipboardText = root.issueSummary();
                 Quickshell.execDetached(["explorer.exe", `/select,${last}`]);
                 Qt.openUrlExternally(root.bugReportUrl(last));
                 return;

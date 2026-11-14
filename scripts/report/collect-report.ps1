@@ -154,13 +154,21 @@ foreach ($crash in @($crashes | Select-Object -First 10)) {
 $info.Add("windows error events for ii in the last 7 days: " + $faults.Count)
 [IO.File]::WriteAllText((Join-Path $work 'system-info.txt'), (Scrub ($info -join "`r`n")), $utf8)
 
-$desktop = [Environment]::GetFolderPath('Desktop')
-if (-not $desktop -or -not (Test-Path $desktop)) { $desktop = $env:TEMP }
-$zip = Join-Path $desktop "ii-windows-report-$stamp.zip"
+$reports = $null
+$documents = [Environment]::GetFolderPath('MyDocuments')
+if ($documents -and (Test-Path $documents)) {
+    $reports = Join-Path $documents 'ii-windows\reports'
+    New-Item -ItemType Directory -Force -Path $reports -ErrorAction SilentlyContinue | Out-Null
+}
+if (-not $reports -or -not (Test-Path $reports)) { $reports = $env:TEMP }
+$zip = Join-Path $reports "ii-windows-report-$stamp.zip"
 Compress-Archive -Path (Join-Path $work '*') -DestinationPath $zip -Force
 Remove-Item -Recurse -Force $work -ErrorAction SilentlyContinue
 if (-not (Test-Path $zip)) {
     [Console]::Error.WriteLine("Couldn't write $zip")
     exit 1
 }
+$arch = $env:PROCESSOR_ARCHITEW6432
+if (-not $arch) { $arch = $env:PROCESSOR_ARCHITECTURE }
+Write-Output ("ARCH " + $(if ($arch -eq 'ARM64') { 'ARM64' } else { 'x86_64' }))
 Write-Output $zip
