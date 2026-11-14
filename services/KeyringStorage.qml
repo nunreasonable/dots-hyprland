@@ -31,7 +31,22 @@ Singleton {
     )
     property string keyringLabel: Translation.tr("%1 Safe Storage").arg("illogical-impulse")
 
+    property var pendingFields: []
+    onLoadedChanged: {
+        if (!root.loaded || root.pendingFields.length === 0)
+            return;
+        const pending = root.pendingFields;
+        root.pendingFields = [];
+        for (const field of pending)
+            root.setNestedField(field.path, field.value);
+    }
+
     function setNestedField(path, value) {
+        if (!root.loaded) {
+            root.pendingFields = root.pendingFields.concat([{ path: path, value: value }]);
+            root.fetchKeyringData();
+            return;
+        }
         if (!root.keyringData) root.keyringData = {};
         let keys = path;
         let obj = root.keyringData;

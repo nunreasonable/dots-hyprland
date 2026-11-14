@@ -40,6 +40,7 @@ StyledOverlayWidget {
                 BigRecorderButton {
                     materialSymbol: "photo_camera"
                     name: "Screenshot"
+                    visible: !Platform.isWindows
                     onClicked: {
                         GlobalStates.overlayOpen = false;
                         Quickshell.execDetached(["bash", "-c", "grim - | wl-copy"]);

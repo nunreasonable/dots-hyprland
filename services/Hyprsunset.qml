@@ -108,7 +108,7 @@ Singleton {
 
         // console.log("[Hyprsunset] Enabling");
         if (Platform.isWindows) {
-            WindowsNative.nightLight.enable(root.colorTemperature);
+            WindowsNative.nightLight?.enable(root.colorTemperature);
             return;
         }
         root.startHyprsunset();
@@ -119,7 +119,7 @@ Singleton {
         root.temperatureActive = false;
         // console.log("[Hyprsunset] Disabling");
         if (Platform.isWindows) {
-            WindowsNative.nightLight.disable();
+            WindowsNative.nightLight?.disable();
             return;
         }
         Quickshell.execDetached(["bash", "-c", `hyprctl hyprsunset temperature ${root.defaultColorTemperature}`]);
@@ -184,7 +184,7 @@ Singleton {
         function onColorTemperatureChanged() {
             if (!root.temperatureActive) return;
             if (Platform.isWindows) {
-                WindowsNative.nightLight.enable(root.colorTemperature);
+                WindowsNative.nightLight?.enable(root.colorTemperature);
                 return;
             }
             Quickshell.execDetached(["hyprctl", "hyprsunset", "temperature", `${Config.options.light.night.colorTemperature}`]);

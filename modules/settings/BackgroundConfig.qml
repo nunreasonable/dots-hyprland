@@ -541,6 +541,8 @@ ContentPage {
                             const name = screenButton.modelData.name;
                             const current = Array.from(Config.options.background.screenList);
                             const next = current.includes(name) ? current.filter(s => s !== name) : current.concat([name]);
+                            if (next.length === 0)
+                                return;
                             const allNames = Quickshell.screens.map(s => s.name);
                             Config.options.background.screenList = allNames.every(n => next.includes(n)) ? [] : next;
                         }
@@ -708,7 +710,7 @@ ContentPage {
         ConfigSpinBox {
             icon: "loupe"
             text: Translation.tr("Preferred wallpaper zoom (%)")
-            value: Config.options.background.parallax.workspaceZoom * 100
+            value: Math.round(Config.options.background.parallax.workspaceZoom * 100)
             from: 10
             to: 200
             stepSize: 1
@@ -719,7 +721,7 @@ ContentPage {
         ConfigSpinBox {
             icon: "open_with"
             text: Translation.tr("Widgets parallax strength (%)")
-            value: Config.options.background.parallax.widgetsFactor * 100
+            value: Math.round(Config.options.background.parallax.widgetsFactor * 100)
             from: 0
             to: 300
             stepSize: 5
@@ -2476,7 +2478,7 @@ ContentPage {
             text: Translation.tr("Sensitivity")
             buttonIcon: "tune"
             usePercentTooltip: false
-            value: Config.options.background.widgets.visualizer.sensitivity * 100
+            value: Math.round(Config.options.background.widgets.visualizer.sensitivity * 100)
             from: 10
             to: 300
             stopIndicatorValues: [100]

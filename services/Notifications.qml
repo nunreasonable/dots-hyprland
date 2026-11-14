@@ -329,7 +329,14 @@ Singleton {
         path: Qt.resolvedUrl(filePath)
         onLoaded: {
             const fileContents = notifFileView.text()
-            const stored = JSON.parse(fileContents)
+            let stored = []
+            try {
+                stored = JSON.parse(fileContents)
+            } catch (e) {
+                console.warn("[Notifications] Could not read the stored notifications:", e)
+            }
+            if (!Array.isArray(stored))
+                stored = []
             const kept = root.storedLimit > 0 ? stored.slice(-root.storedLimit) : stored
             root.list = kept.map((notif) => {
                 return notifComponent.createObject(root, {

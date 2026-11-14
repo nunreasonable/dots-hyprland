@@ -2,6 +2,7 @@ pragma Singleton
 pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
+import qs.modules.common
 import qs.modules.common.utils
 
 Singleton {
@@ -51,7 +52,7 @@ Singleton {
     }
 
     function getToken() {
-        if (root.keyError) {
+        if (root.keyError || Platform.isWindows) {
             root.tokenError = true;
             root.tokenReady = true;
             return;

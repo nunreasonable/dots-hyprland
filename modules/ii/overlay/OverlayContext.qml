@@ -1,6 +1,7 @@
 pragma Singleton
 pragma ComponentBehavior: Bound
 import Quickshell
+import qs.modules.common
 
 Singleton {
     id: root
@@ -9,7 +10,7 @@ Singleton {
 
     readonly property list<var> availableWidgets: [
         { identifier: "crosshair", materialSymbol: "point_scan" },
-        { identifier: "fpsLimiter", materialSymbol: "animation" },
+        ...(Platform.isWindows ? [] : [{ identifier: "fpsLimiter", materialSymbol: "animation" }]),
         { identifier: "floatingImage", materialSymbol: "imagesmode" },
         { identifier: "recorder", materialSymbol: "screen_record" },
         { identifier: "resources", materialSymbol: "browse_activity" },

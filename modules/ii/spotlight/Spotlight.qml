@@ -136,7 +136,13 @@ Scope {
         }
     }
 
-    onItemsChanged: root.currentIndex = 0
+    property string _lastItemsKey: ""
+    onItemsChanged: {
+        const key = `${root.mode}\u001f${root.query}`;
+        if (key !== root._lastItemsKey || root.currentIndex >= root.items.length)
+            root.currentIndex = 0;
+        root._lastItemsKey = key;
+    }
 
     function open(modeId) {
         GlobalStates.overviewOpen = false;
@@ -192,7 +198,7 @@ Scope {
 
     function launchApp(entry) {
         root.close();
-        if (!entry.runInTerminal)
+        if (!entry.runInTerminal || Platform.isWindows)
             entry.execute();
         else
             Quickshell.execDetached(["bash", "-c", `${Config.options.apps.terminal} -e '${StringUtils.shellSingleQuoteEscape(entry.command.join(' '))}'`]);
@@ -425,6 +431,7 @@ q="$1"; h="$2"
     PanelWindow {
         id: panelWindow
         visible: GlobalStates.spotlightOpen
+        screen: Quickshell.screens.find(s => s.name === Hyprland.focusedMonitor?.name) ?? null
         color: "transparent"
         exclusionMode: ExclusionMode.Ignore
         WlrLayershell.namespace: "quickshell:spotlight"

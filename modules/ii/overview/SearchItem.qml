@@ -215,8 +215,8 @@ RippleButton {
                     }
                 }
                 Loader { // Checkmark for copied clipboard entry
-                    visible: itemName == Quickshell.clipboardText && root.cliphistRawString
-                    active: itemName == Quickshell.clipboardText && root.cliphistRawString
+                    visible: root.cliphistRawString !== "" && itemName == Quickshell.clipboardText
+                    active: root.cliphistRawString !== "" && itemName == Quickshell.clipboardText
                     sourceComponent: Rectangle {
                         implicitWidth: activeText.implicitHeight
                         implicitHeight: activeText.implicitHeight

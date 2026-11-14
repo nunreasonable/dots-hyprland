@@ -35,7 +35,9 @@ SpinBox {
             font.pixelSize: Appearance.font.pixelSize.small
             validator: root.validator
             onTextChanged: {
-                root.value = parseFloat(text);
+                const parsed = parseFloat(text);
+                if (!isNaN(parsed))
+                    root.value = parsed;
             }
         }
     }

@@ -33,7 +33,7 @@ Scope {
         WlrLayershell.namespace: "quickshell:notificationPopup"
         WlrLayershell.layer: WlrLayer.Overlay
         exclusiveZone: 0
-        exclusionMode: SekaiTheme.active ? ExclusionMode.Ignore : ExclusionMode.Auto
+        exclusionMode: SekaiTheme.active ? ExclusionMode.Ignore : ExclusionMode.Normal
 
         anchors {
             top: true

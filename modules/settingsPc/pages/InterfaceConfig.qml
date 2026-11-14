@@ -622,7 +622,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "loupe"
                     text: Translation.tr("Scale (%)")
-                    value: Config.options.overview.scale * 100
+                    value: Math.round(Config.options.overview.scale * 100)
                     from: 1
                     to: 100
                     stepSize: 1
@@ -1254,7 +1254,7 @@ ContentPage {
                         ConfigSpinBox {
                             icon: "loupe"
                             text: Translation.tr("Extra wallpaper zoom (%)")
-                            value: Config.options.lock.blur.extraZoom * 100
+                            value: Math.round(Config.options.lock.blur.extraZoom * 100)
                             from: 1; to: 150; stepSize: 2
                             onValueChanged: { Config.options.lock.blur.extraZoom = value / 100 }
                         }
@@ -1288,7 +1288,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "opacity"
                     text: Translation.tr("Clickthrough widget opacity (%)")
-                    value: Config.options.overlay.clickthroughOpacity * 100
+                    value: Math.round(Config.options.overlay.clickthroughOpacity * 100)
                     from: 0
                     to: 100
                     stepSize: 5
@@ -1317,7 +1317,7 @@ ContentPage {
                     ConfigSpinBox {
                         icon: "loupe"
                         text: Translation.tr("Scale (%)")
-                        value: Config.options.overlay.floatingImage.scale * 100
+                        value: Math.round(Config.options.overlay.floatingImage.scale * 100)
                         from: 10
                         to: 500
                         stepSize: 10
@@ -1439,7 +1439,7 @@ ContentPage {
                     ConfigSpinBox {
                         icon: "opacity"
                         text: Translation.tr("Window/layer opacity (%)")
-                        value: Config.options.regionSelector.targetRegions.opacity * 100
+                        value: Math.round(Config.options.regionSelector.targetRegions.opacity * 100)
                         from: 0
                         to: 100
                         stepSize: 5
@@ -1471,7 +1471,7 @@ ContentPage {
                         ConfigSpinBox {
                             icon: "opacity"
                             text: Translation.tr("Content region opacity (%)")
-                            value: Config.options.regionSelector.targetRegions.contentRegionOpacity * 100
+                            value: Math.round(Config.options.regionSelector.targetRegions.contentRegionOpacity * 100)
                             from: 0
                             to: 100
                             stepSize: 5
@@ -1815,7 +1815,7 @@ ContentPage {
                             enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
                             icon: "swipe"
                             text: Translation.tr("Touchpad sensitivity")
-                            value: Config.options.interactions.scrolling.touchpadSensitivity * 100
+                            value: Math.round(Config.options.interactions.scrolling.touchpadSensitivity * 100)
                             from: 50
                             to: 2000
                             stepSize: 10
@@ -1827,7 +1827,7 @@ ContentPage {
                             enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
                             icon: "speed"
                             text: Translation.tr("Fling friction")
-                            value: Config.options.interactions.scrolling.flingFriction * 10000
+                            value: Math.round(Config.options.interactions.scrolling.flingFriction * 10000)
                             from: 1
                             to: 500
                             stepSize: 1
@@ -1842,7 +1842,7 @@ ContentPage {
                             enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
                             icon: "stop_circle"
                             text: Translation.tr("Fling stop threshold")
-                            value: Config.options.interactions.scrolling.flingStopThreshold * 1000
+                            value: Math.round(Config.options.interactions.scrolling.flingStopThreshold * 1000)
                             from: 1
                             to: 200
                             stepSize: 1
@@ -1854,7 +1854,7 @@ ContentPage {
                             enabled: Config.options.interactions.scrolling.fasterTouchpadScroll
                             icon: "vertical_align_center"
                             text: Translation.tr("Bounce damping")
-                            value: Config.options.interactions.scrolling.bounceDamping * 100
+                            value: Math.round(Config.options.interactions.scrolling.bounceDamping * 100)
                             from: 0
                             to: 100
                             stepSize: 5
@@ -2766,7 +2766,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "invert_colors"
                     text: Translation.tr("Terminal: Harmony (%)")
-                    value: Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmony * 100
+                    value: Math.round(Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmony * 100)
                     from: 0; to: 100; stepSize: 10
                     onValueChanged: { Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmony = value / 100 }
                 }
@@ -2780,7 +2780,7 @@ ContentPage {
                 ConfigSpinBox {
                     icon: "format_color_text"
                     text: Translation.tr("Terminal: Foreground boost (%)")
-                    value: Config.options.appearance.wallpaperTheming.terminalGenerationProps.termFgBoost * 100
+                    value: Math.round(Config.options.appearance.wallpaperTheming.terminalGenerationProps.termFgBoost * 100)
                     from: 0; to: 100; stepSize: 10
                     onValueChanged: { Config.options.appearance.wallpaperTheming.terminalGenerationProps.termFgBoost = value / 100 }
                 }

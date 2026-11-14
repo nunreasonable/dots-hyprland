@@ -55,7 +55,7 @@ Singleton {
         temp.sunset = data?.astronomy?.sunset || "0.0";
         temp.windDir = data?.current?.winddir16Point || "N";
         temp.wCode = data?.current?.weatherCode || "113";
-        temp.city = data?.location?.areaName[0]?.value || "City";
+        temp.city = data?.location?.areaName?.[0]?.value || "City";
         temp.description = data?.current?.weatherDesc?.[0]?.value || "";
         temp.cr = Math.round((data?.current?.cloudcover || 0) * 0.8) + "%";
         temp.temp = "";

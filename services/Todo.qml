@@ -70,7 +70,12 @@ Singleton {
         path: Qt.resolvedUrl(root.filePath)
         onLoaded: {
             const fileContents = todoFileView.text()
-            root.list = JSON.parse(fileContents)
+            try {
+                root.list = JSON.parse(fileContents)
+            } catch (e) {
+                console.warn("[To Do] Could not read the to-do file, keeping it as is:", e)
+                return
+            }
             console.log("[To Do] File loaded")
         }
         onLoadFailed: (error) => {

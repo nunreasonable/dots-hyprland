@@ -55,7 +55,7 @@ Scope { // Scope
     }
 
     function togglePin() {
-        if (!root.pin) pinWithFunnyHyprlandWorkaroundProc.doIt()
+        if (!root.pin && !Platform.isWindows) pinWithFunnyHyprlandWorkaroundProc.doIt()
         else root.pin = !root.pin;
     }
 

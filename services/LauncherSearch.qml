@@ -216,7 +216,8 @@ Singleton {
         property list<string> baseCommand: ["qalc", "-t"]
         function calculateExpression(expression) {
             if (Platform.isWindows) root.checkWindowsQalc();
-            if (Platform.isWindows && !root.windowsHasQalc) {
+            const hasLetters = /[A-Za-z]/.test(expression);
+            if (Platform.isWindows && (!root.windowsHasQalc || !hasLetters)) {
                 root.mathResult = root.evalArithmetic(expression);
                 return;
             }
@@ -448,9 +449,9 @@ Singleton {
             iconType: LauncherSearchResult.IconType.Material,
             execute: () => {
                 let query = StringUtils.cleanPrefix(root.query, Config.options.search.prefix.webSearch);
-                let url = Config.options.search.engineBaseUrl + query;
+                let url = Config.options.search.engineBaseUrl + encodeURIComponent(query);
                 for (let site of Config.options.search.excludedSites) {
-                    url += ` -site:${site}`;
+                    url += encodeURIComponent(` -site:${site}`);
                 }
                 Qt.openUrlExternally(url);
             }
@@ -494,7 +495,7 @@ Singleton {
         const startsWithMathPrefix = root.query.startsWith(Config.options.search.prefix.math);
         const startsWithShellCommandPrefix = root.query.startsWith(Config.options.search.prefix.shellCommand);
         const startsWithWebSearchPrefix = root.query.startsWith(Config.options.search.prefix.webSearch);
-        if (startsWithNumber || startsWithMathPrefix) {
+        if ((startsWithNumber || startsWithMathPrefix) && root.mathResult !== "") {
             result.push(mathResultObject);
         } else if (startsWithShellCommandPrefix) {
             result.push(commandResultObject);

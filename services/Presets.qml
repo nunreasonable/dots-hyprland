@@ -28,7 +28,7 @@ Singleton {
 
     readonly property var allowedRoots: ["appearance", "background", "bar", "calendar", "cheatsheet", "crosshair", "custom", "dock", "interactions", "lock", "nabyIsland", "notifications", "osd", "overview", "panelFamily", "settings", "sidebar", "time", "waffles", "wallpaperSelector"]
     readonly property var allowedPrefixes: ["windowsPort.decoration", "windowsPort.panelAnimationStyle"]
-    readonly property var stateKeys: ["appearance.visualStyleApplied", "appearance.visualStylePresetVersion"]
+    readonly property var stateKeys: ["appearance.visualStyleApplied", "appearance.visualStylePresetVersion", "nabyIsland.keptNativeTaskbar"]
     readonly property var forbiddenParts: ["__proto__", "prototype", "constructor"]
     readonly property var spicyKeys: [
         "background.konachanSpicy",
@@ -40,7 +40,8 @@ Singleton {
         "dock.pinnedApps",
         "bar.screenList",
         "notifications.forceMonitor",
-        "nabyIsland.screen"
+        "nabyIsland.screen",
+        "calendar.events.sources"
     ]
     readonly property var themingDefaults: ({
         "appearance.palette.type": "auto",
@@ -443,7 +444,10 @@ Singleton {
 
     function overwrite(name, meta) {
         root.ensureDirs();
-        const clean = root.sanitizeName(name);
+        const existing = Platform.isWindows && WindowsNative.fsUtils
+            && WindowsNative.fsUtils.classify(`${Directories.userPresetsPath}/${name}.json`) !== "invalid"
+            && !/[\\/:*?"<>|\x00-\x1f]/.test(name);
+        const clean = existing ? String(name) : root.sanitizeName(name);
         if (clean.length === 0)
             return;
         const keep = {};
@@ -535,8 +539,13 @@ Singleton {
         root.resetMissingTheming(parsed);
         root.lastSkippedKeys = skipped;
         const wallpaper = root.presetWallpaper(parsed);
+        const accent = String(parsed?.appearance?.palette?.accentColor ?? "");
         if (wallpaper !== "")
-            Qt.callLater(() => Wallpapers.apply(wallpaper));
+            Qt.callLater(() => {
+                Wallpapers.apply(wallpaper);
+                if (accent !== "")
+                    Config.options.appearance.palette.accentColor = accent;
+            });
         else
             Qt.callLater(() => Wallpapers.reapplyPalette());
         root.notify(Translation.tr("Preset applied"), name);

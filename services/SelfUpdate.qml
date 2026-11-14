@@ -34,6 +34,8 @@ Singleton {
     property string htmlUrl: ""
     property string setupUrl: ""
     property int setupSize: 0
+    property string setupDigest: ""
+    readonly property string setupUrlPrefix: `https://github.com/${root.repo}/releases/download/`
     property double lastCheckedAt: 0
     property string stableVersion: ""
     readonly property bool canGoBackToStable: Platform.isWindows && root.installedIsPrerelease
@@ -192,6 +194,10 @@ Singleton {
 
     function startUpdate() {
         if (!Platform.isWindows || root.setupUrl === "" || root.downloading) return;
+        if (!root.setupUrl.startsWith(root.setupUrlPrefix)) {
+            root.lastError = Translation.tr("Couldn't download the update.");
+            return;
+        }
         root.downloading = true;
         root.lastError = "";
         root.downloadDest = `${Directories.selfUpdateDownloadDir}/${root.setupAssetName}`;
@@ -229,7 +235,8 @@ Singleton {
             releaseName: root.releaseName,
             htmlUrl: root.htmlUrl,
             setupUrl: root.setupUrl,
-            setupSize: root.setupSize
+            setupSize: root.setupSize,
+            setupDigest: root.setupDigest
         }));
     }
 
@@ -276,6 +283,7 @@ Singleton {
                 root.htmlUrl = data.htmlUrl ?? "";
                 root.setupUrl = data.setupUrl ?? "";
                 root.setupSize = data.setupSize ?? 0;
+                root.setupDigest = data.setupDigest ?? "";
                 root.lastCheckedAt = data.lastCheckedAt ?? 0;
             } catch (e) {}
             root._cacheDone = true;
@@ -354,6 +362,7 @@ Singleton {
                     const setupAsset = assets.find(a => (a.name ?? "").toLowerCase() === root.setupAssetName);
                     root.setupUrl = setupAsset ? (setupAsset.browser_download_url ?? "") : "";
                     root.setupSize = setupAsset ? (setupAsset.size ?? 0) : 0;
+                    root.setupDigest = setupAsset ? String(setupAsset.digest ?? "").replace(/^sha256:/i, "").toLowerCase() : "";
                 }
                 root.lastError = "";
                 root._maybeNotify();
@@ -382,6 +391,27 @@ Singleton {
             if (root.setupSize > 0 && downloadedSize !== root.setupSize) {
                 root.lastError = Translation.tr("The downloaded file doesn't match the size GitHub reported.");
                 if (fromNotification) Notifications.sendDesktop(Translation.tr("ii-windows update"), root.lastError, root.notifyIdentity);
+                return;
+            }
+            if (!/^[0-9a-f]{64}$/.test(root.setupDigest)) {
+                Quickshell.execDetached([root.downloadDest, "--update"]);
+                return;
+            }
+            hashProc.command = ["certutil.exe", "-hashfile", root.downloadDest.replace(/\//g, "\\"), "SHA256"];
+            hashProc.notify = fromNotification;
+            hashProc.running = true;
+        }
+    }
+
+    Process {
+        id: hashProc
+        property bool notify: false
+        stdout: StdioCollector { id: hashCollector }
+        onExited: (exitCode, exitStatus) => {
+            const found = (hashCollector.text.match(/^[0-9a-f ]{64,95}$/im) ?? [""])[0].replace(/\s+/g, "").toLowerCase();
+            if (exitCode !== 0 || found !== root.setupDigest) {
+                root.lastError = Translation.tr("The downloaded file doesn't match the checksum GitHub reported.");
+                if (hashProc.notify) Notifications.sendDesktop(Translation.tr("ii-windows update"), root.lastError, root.notifyIdentity);
                 return;
             }
             Quickshell.execDetached([root.downloadDest, "--update"]);

@@ -364,6 +364,10 @@ Singleton {
     }
 
     function startAssets(name, stagingJsonPath, folderAssets, wallpaperFiles) {
+        if (!root.safeFileName(name)) {
+            root.fail(Translation.tr("Failed to finalize preset"));
+            return;
+        }
         const dir = root.assetDir(name);
         assetsProc.entryName = name;
         assetsProc.stagingJsonPath = stagingJsonPath;
@@ -373,7 +377,7 @@ Singleton {
         const wallpaperAssets = rootBase === "" ? [] : wallpaperFiles.map(f => ({ filename: f.split("/").pop(), url: root.rawUrl(f, rootBase) }));
         const seen = new Set();
         const toDownload = [...wallpaperAssets, ...folderAssets].filter(a => {
-            if (seen.has(a.filename)) return false;
+            if (!root.safeFileName(a.filename) || seen.has(a.filename)) return false;
             seen.add(a.filename);
             return true;
         });
@@ -621,13 +625,22 @@ Singleton {
         }
     }
 
+    function safeFileName(name) {
+        const text = String(name ?? "");
+        return /^[A-Za-z0-9 _.()+\-]+$/.test(text) && !/^\.+$/.test(text) && text.length <= 120;
+    }
+
     function _winStartAssets(name, stagingText, folderAssets, wallpaperFiles) {
+        if (!root.safeFileName(name)) {
+            root.fail(Translation.tr("Failed to finalize preset"));
+            return;
+        }
         const dir = root.assetDir(name);
         const rootBase = root.activeEntry?.rootWallpapers ? root.activeEntry.rawBase : "";
         const wallpaperAssets = rootBase === "" ? [] : wallpaperFiles.map(f => ({ filename: f.split("/").pop(), url: root.rawUrl(f, rootBase) }));
         const seen = new Set();
         const toDownload = [...wallpaperAssets, ...folderAssets].filter(a => {
-            if (seen.has(a.filename)) return false;
+            if (!root.safeFileName(a.filename) || seen.has(a.filename)) return false;
             seen.add(a.filename);
             return true;
         });
@@ -648,7 +661,7 @@ Singleton {
             return;
         }
         const asset = root._winAssetQueue.shift();
-        winAssetProc.command = [root.curlBin, "-sSL", asset.url, "-o", `${root._winAssetDir}/${asset.filename}`];
+        winAssetProc.command = [root.curlBin, "-fsSL", "--max-time", "120", asset.url, "-o", `${root._winAssetDir}/${asset.filename}`];
         winAssetProc.running = true;
     }
 

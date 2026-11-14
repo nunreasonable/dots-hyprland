@@ -58,7 +58,7 @@ ContentPage {
         ConfigSpinBox {
             icon: "invert_colors"
             text: Translation.tr("Terminal: Harmony (%)")
-            value: Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmony * 100
+            value: Math.round(Config.options.appearance.wallpaperTheming.terminalGenerationProps.harmony * 100)
             from: 0
             to: 100
             stepSize: 10
@@ -80,7 +80,7 @@ ContentPage {
         ConfigSpinBox {
             icon: "format_color_text"
             text: Translation.tr("Terminal: Foreground boost (%)")
-            value: Config.options.appearance.wallpaperTheming.terminalGenerationProps.termFgBoost * 100
+            value: Math.round(Config.options.appearance.wallpaperTheming.terminalGenerationProps.termFgBoost * 100)
             from: 0
             to: 100
             stepSize: 10

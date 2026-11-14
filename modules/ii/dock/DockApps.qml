@@ -132,6 +132,9 @@ Item {
             && appTopLevel && appTopLevel.toplevels && appTopLevel.toplevels.length > 0
 
         property bool show: false
+        mask: Region {
+            item: popupMouseArea
+        }
         readonly property bool hasContent: previewPopup.show || body.opacity > 0
         property real cachedCenter: 0
         readonly property real shiftX: DockStyle.position === "left" ? -12 : DockStyle.position === "right" ? 12 : 0

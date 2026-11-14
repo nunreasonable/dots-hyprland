@@ -487,10 +487,10 @@ Singleton {
             Directories.windowsTerminalOhMyPoshPath, Directories.windowsTerminalOhMyPoshPlainPath];
         if (fs && !outputs.some(path => fs.classify(path) !== "invalid")) return;
         removeOutputsProc.command = ["powershell", "-NoProfile", "-NonInteractive", "-Command",
-            `Remove-Item -LiteralPath '${Directories.windowsTerminalSequencesPath}' -Force -ErrorAction SilentlyContinue; `
-            + `Remove-Item -LiteralPath '${Directories.windowsTerminalFragmentPath}' -Force -ErrorAction SilentlyContinue; `
-            + `Remove-Item -LiteralPath '${Directories.windowsTerminalOhMyPoshPath}' -Force -ErrorAction SilentlyContinue; `
-            + `Remove-Item -LiteralPath '${Directories.windowsTerminalOhMyPoshPlainPath}' -Force -ErrorAction SilentlyContinue`];
+            `Remove-Item -LiteralPath '${String(Directories.windowsTerminalSequencesPath).replace(/'/g, "''")}' -Force -ErrorAction SilentlyContinue; `
+            + `Remove-Item -LiteralPath '${String(Directories.windowsTerminalFragmentPath).replace(/'/g, "''")}' -Force -ErrorAction SilentlyContinue; `
+            + `Remove-Item -LiteralPath '${String(Directories.windowsTerminalOhMyPoshPath).replace(/'/g, "''")}' -Force -ErrorAction SilentlyContinue; `
+            + `Remove-Item -LiteralPath '${String(Directories.windowsTerminalOhMyPoshPlainPath).replace(/'/g, "''")}' -Force -ErrorAction SilentlyContinue`];
         removeOutputsProc.running = false;
         removeOutputsProc.running = true;
         root._nudgeWindowsTerminal();
@@ -499,7 +499,7 @@ Singleton {
 
     function _nudgeWindowsTerminal() {
         if (!Platform.isWindows) return;
-        const path = Directories.windowsTerminalSettingsJsonPath;
+        const path = String(Directories.windowsTerminalSettingsJsonPath).replace(/'/g, "''");
         const script = `if (Test-Path -LiteralPath '${path}') { (Get-Item -LiteralPath '${path}').LastWriteTime = Get-Date }`;
         nudgeProc.command = ["powershell", "-NoProfile", "-NonInteractive", "-Command", script];
         nudgeProc.running = false;
