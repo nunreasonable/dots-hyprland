@@ -2094,5 +2094,9 @@
   "Automatic picks a light or dark shade of the accent color from the wallpaper. Text follows light or dark mode.": "Automático escolhe um tom claro ou escuro da cor de destaque pelo papel de parede. Texto segue o modo claro ou escuro.",
   "Width presets": "Larguras predefinidas",
   "Column widths in percent that Shift+Super+' and Shift+Super+; step through, comma-separated (e.g. 25, 50, 75, 100)": "Larguras de coluna em porcentagem que Shift+Super+' e Shift+Super+; percorrem, separadas por vírgula (ex.: 25, 50, 75, 100)",
-  "Copy video": "Copiar vídeo"
+  "Copy video": "Copiar vídeo",
+  "Window opacity": "Opacidade das janelas",
+  "Focused window (%)": "Janela em foco (%)",
+  "Other windows (%)": "Outras janelas (%)",
+  "Makes app windows see-through, like an opacity rule for every window. Full-screen windows, games and apps that already draw their own transparency stay as they are.": "Deixa as janelas dos apps transparentes, como uma regra de opacidade pra todas as janelas. Janelas em tela cheia, jogos e apps que já desenham a própria transparência ficam como estão."
 }

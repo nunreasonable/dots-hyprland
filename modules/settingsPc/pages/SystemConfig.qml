@@ -562,6 +562,41 @@ ContentPage {
 
             ContentSubsection {
                 Layout.topMargin: 10
+                title: Translation.tr("Window opacity")
+
+                GroupedList {
+                    W.StyledText {
+                        Layout.fillWidth: true
+                        wrapMode: Text.Wrap
+                        text: Translation.tr("Makes app windows see-through, like an opacity rule for every window. Full-screen windows, games and apps that already draw their own transparency stay as they are.")
+                        font.pixelSize: Appearance.font.pixelSize.small
+                        color: Appearance.colors.colSubtext
+                    }
+                    ConfigSpinBox {
+                        icon: "select_window"
+                        text: Translation.tr("Focused window (%)")
+                        value: Math.round(Config.options.windowsPort.decoration.activeOpacity * 100)
+                        from: 10; to: 100; stepSize: 5
+                        onValueChanged: {
+                            if (value !== Math.round(Config.options.windowsPort.decoration.activeOpacity * 100))
+                                Config.options.windowsPort.decoration.activeOpacity = value / 100;
+                        }
+                    }
+                    ConfigSpinBox {
+                        icon: "opacity"
+                        text: Translation.tr("Other windows (%)")
+                        value: Math.round(Config.options.windowsPort.decoration.inactiveOpacity * 100)
+                        from: 10; to: 100; stepSize: 5
+                        onValueChanged: {
+                            if (value !== Math.round(Config.options.windowsPort.decoration.inactiveOpacity * 100))
+                                Config.options.windowsPort.decoration.inactiveOpacity = value / 100;
+                        }
+                    }
+                }
+            }
+
+            ContentSubsection {
+                Layout.topMargin: 10
                 title: Translation.tr("Workspaces")
 
                 GroupedList {

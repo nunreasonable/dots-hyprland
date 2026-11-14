@@ -493,6 +493,32 @@ ContentPage {
         }
 
         ContentSubsection {
+            title: Translation.tr("Window opacity")
+            tooltip: Translation.tr("Makes app windows see-through, like an opacity rule for every window. Full-screen windows, games and apps that already draw their own transparency stay as they are.")
+
+            ConfigSpinBox {
+                icon: "select_window"
+                text: Translation.tr("Focused window (%)")
+                value: Math.round(Config.options.windowsPort.decoration.activeOpacity * 100)
+                from: 10; to: 100; stepSize: 5
+                onValueChanged: {
+                    if (value !== Math.round(Config.options.windowsPort.decoration.activeOpacity * 100))
+                        Config.options.windowsPort.decoration.activeOpacity = value / 100;
+                }
+            }
+            ConfigSpinBox {
+                icon: "opacity"
+                text: Translation.tr("Other windows (%)")
+                value: Math.round(Config.options.windowsPort.decoration.inactiveOpacity * 100)
+                from: 10; to: 100; stepSize: 5
+                onValueChanged: {
+                    if (value !== Math.round(Config.options.windowsPort.decoration.inactiveOpacity * 100))
+                        Config.options.windowsPort.decoration.inactiveOpacity = value / 100;
+                }
+            }
+        }
+
+        ContentSubsection {
             title: Translation.tr("Workspaces")
 
             ConfigSwitch {

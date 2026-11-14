@@ -777,6 +777,8 @@ Singleton {
                 }
                 property JsonObject decoration: JsonObject {
                     property string corners: "default"
+                    property real activeOpacity: 1
+                    property real inactiveOpacity: 1
                 }
                 property JsonObject binds: JsonObject {
                     property bool workspaceBackAndForth: false

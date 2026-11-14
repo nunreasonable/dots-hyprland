@@ -210,6 +210,18 @@ ShellRoot {
     Binding {
         when: Platform.isWindows && Config.ready && WindowsNative.ready
         target: WindowsNative.windowManager
+        property: "activeOpacity"
+        value: Config.options.windowsPort.decoration.activeOpacity
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.windowManager
+        property: "inactiveOpacity"
+        value: Config.options.windowsPort.decoration.inactiveOpacity
+    }
+    Binding {
+        when: Platform.isWindows && Config.ready && WindowsNative.ready
+        target: WindowsNative.windowManager
         property: "workspaceBackAndForth"
         value: Config.options.windowsPort.binds.workspaceBackAndForth
     }
