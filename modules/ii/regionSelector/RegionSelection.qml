@@ -266,6 +266,14 @@ PanelWindow {
         }
     }
 
+    Connections {
+        target: root.nativeRecorder ? ScreenshotAction : null
+        function onWindowsNativeRecordingChanged() {
+            if (!ScreenshotAction.windowsNativeRecording && root.isRecording && root.phase === RegionSelection.Phase.Post)
+                root.dismiss();
+        }
+    }
+
     property int _contentRegionsRequestId: -1
     Connections {
         target: Platform.isWindows ? WindowsNative.imageTools : null
