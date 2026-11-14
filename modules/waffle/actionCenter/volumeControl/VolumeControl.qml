@@ -62,7 +62,7 @@ Item {
                 color: "transparent"
 
                 onClicked: {
-                    Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "sidebarLeft", "toggle"]);
+                    GlobalStates.sidebarLeftOpen = false;
                     if (Platform.isWindows) {
                         Qt.openUrlExternally("ms-settings:apps-volume");
                     } else {

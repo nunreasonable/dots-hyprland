@@ -207,13 +207,14 @@ MouseArea {
         maximumLineCount: root.expanded ? 100 : 1
         text: {
             if (root.expanded)
-                return `<style>img{max-width:${summaryText.width}px; align: right}</style>` + `${NotificationUtils.processNotificationBody(root.notification.body, root.notification.appName || root.notification.summary).replace(/\n/g, "<br/>")}`;
-            return NotificationUtils.processNotificationBody(root.notification.body, root.notification.appName || root.notification.summary).replace(/\n/g, "<br/>");
+                return `<style>img{max-width:${summaryText.width}px; align: right}</style>` + `${NotificationUtils.processNotificationBody(root.notification?.body ?? "", root.notification?.appName || root.notification?.summary).replace(/\n/g, "<br/>")}`;
+            return NotificationUtils.processNotificationBody(root.notification?.body ?? "", root.notification?.appName || root.notification?.summary).replace(/\n/g, "<br/>");
         }
         color: Looks.colors.subfg
         textFormat: root.expanded ? Text.RichText : Text.StyledText
         onLinkActivated: link => {
-            Qt.openUrlExternally(link);
+            if (/^(https?|mailto):/i.test(link))
+                Qt.openUrlExternally(link);
             GlobalStates.sidebarRightOpen = false;
         }
     }

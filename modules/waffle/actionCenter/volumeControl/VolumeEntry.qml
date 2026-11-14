@@ -25,7 +25,10 @@ RowLayout {
     WPanelIconButton {
         id: iconButton
         iconName: WIcons.audioAppIcon(root.node)
-        onClicked: root.node.audio.muted = !root.node?.audio.muted
+        onClicked: {
+            if (root.node?.audio)
+                root.node.audio.muted = !root.node.audio.muted;
+        }
 
         FluentIcon {
             id: muteIcon
@@ -49,6 +52,9 @@ RowLayout {
         Layout.fillWidth: true
         Layout.rightMargin: 10
         value: root.node?.audio.volume ?? 0
-        onMoved: root.node.audio.volume = value
+        onMoved: {
+            if (root.node?.audio)
+                root.node.audio.volume = value;
+        }
     }
 }

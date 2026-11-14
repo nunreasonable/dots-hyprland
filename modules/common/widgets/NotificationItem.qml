@@ -210,7 +210,8 @@ Item { // Notification item area
                         }
 
                         onLinkActivated: (link) => {
-                            Qt.openUrlExternally(link)
+                            if (/^(https?|mailto):/i.test(link))
+                                Qt.openUrlExternally(link)
                             GlobalStates.sidebarRightOpen = false
                         }
                     

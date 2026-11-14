@@ -89,10 +89,12 @@ Item {
         }
 
         SectionText {
+            visible: !Platform.isWindows
             text: Translation.tr("Anti-flashbang (experimental)")
         }
 
         ToggleItem {
+            visible: !Platform.isWindows
             name: Translation.tr("Enable")
             description: Translation.tr("Balance brightness based on content")
             iconName: "flash-off"

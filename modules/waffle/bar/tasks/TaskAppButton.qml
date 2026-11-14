@@ -47,7 +47,7 @@ AppButton {
             root.hoverPreviewRequested()
         } else if (root.appEntry.toplevels.length === 1) {
             root.appEntry.toplevels[0].activate()
-        } else {
+        } else if (root.desktopEntry) {
             root.desktopEntry.execute()
         }
     }

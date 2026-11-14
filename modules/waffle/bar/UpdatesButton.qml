@@ -17,7 +17,10 @@ BarIconButton {
     tooltipText: Translation.tr("Get the latest features and security improvements with\nthe newest feature update.\n\n%1 packages").arg(Updates.count)
 
     onClicked: {
-        Quickshell.execDetached(["bash", "-c", Config.options.apps.update]);
+        if (Platform.isWindows)
+            Qt.openUrlExternally("ms-settings:windowsupdate");
+        else
+            Quickshell.execDetached(["bash", "-c", Config.options.apps.update]);
     }
 
     overlayingItems: Rectangle {

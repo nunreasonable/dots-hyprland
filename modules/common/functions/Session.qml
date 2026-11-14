@@ -23,7 +23,7 @@ Singleton {
 
     function lock() {
         if (Platform.isWindows) {
-            WindowsNative.session.lock();
+            WindowsNative.session?.lock();
             return;
         }
         Quickshell.execDetached(["loginctl", "lock-session"]);
@@ -31,7 +31,7 @@ Singleton {
 
     function suspend() {
         if (Platform.isWindows) {
-            WindowsNative.session.suspend();
+            WindowsNative.session?.suspend();
             return;
         }
         Quickshell.execDetached(["bash", "-c", "systemctl suspend || loginctl suspend"]);
@@ -40,7 +40,7 @@ Singleton {
     function logout() {
         closeAllWindows();
         if (Platform.isWindows) {
-            WindowsNative.session.logout();
+            WindowsNative.session?.logout();
             return;
         }
         Quickshell.execDetached(["pkill", "-i", "Hyprland"]);
@@ -56,7 +56,7 @@ Singleton {
 
     function hibernate() {
         if (Platform.isWindows) {
-            WindowsNative.session.hibernate();
+            WindowsNative.session?.hibernate();
             return;
         }
         Quickshell.execDetached(["bash", "-c", `systemctl hibernate || loginctl hibernate`]);
@@ -65,7 +65,7 @@ Singleton {
     function poweroff() {
         closeAllWindows();
         if (Platform.isWindows) {
-            WindowsNative.session.shutdown();
+            WindowsNative.session?.shutdown();
             return;
         }
         Quickshell.execDetached(["bash", "-c", `systemctl poweroff || loginctl poweroff`]);
@@ -74,7 +74,7 @@ Singleton {
     function reboot() {
         closeAllWindows();
         if (Platform.isWindows) {
-            WindowsNative.session.reboot();
+            WindowsNative.session?.reboot();
             return;
         }
         Quickshell.execDetached(["bash", "-c", `reboot || loginctl reboot`]);
@@ -83,7 +83,7 @@ Singleton {
     function rebootToFirmware() {
         closeAllWindows();
         if (Platform.isWindows) {
-            WindowsNative.session.rebootToFirmware();
+            WindowsNative.session?.rebootToFirmware();
             return;
         }
         Quickshell.execDetached(["bash", "-c", `systemctl reboot --firmware-setup || loginctl reboot --firmware-setup`]);

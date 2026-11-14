@@ -206,7 +206,7 @@ AbstractBackgroundWidget {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 34
                             radius: Appearance.rounding?.large ?? 14
-                            color: Appearance.colors.colSurfaceVariant ?? ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                            color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                             RowLayout {
                                 anchors.centerIn: parent
@@ -229,7 +229,7 @@ AbstractBackgroundWidget {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 34
                             radius: Appearance.rounding?.large ?? 14
-                            color: Appearance.colors.colSurfaceVariant ?? ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                            color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                             RowLayout {
                                 anchors.centerIn: parent
@@ -333,7 +333,7 @@ AbstractBackgroundWidget {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         radius: Appearance.rounding?.large ?? 14
-                        color: Appearance.colors.colSurfaceVariant ?? ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                        color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
                             anchors.fill: parent
@@ -368,7 +368,7 @@ AbstractBackgroundWidget {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         radius: Appearance.rounding?.large ?? 14
-                        color: Appearance.colors.colSurfaceVariant ?? ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                        color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
                             anchors.fill: parent
@@ -404,7 +404,7 @@ AbstractBackgroundWidget {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         radius: Appearance.rounding?.large ?? 14
-                        color: Appearance.colors.colSurfaceVariant ?? ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                        color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
                             anchors.fill: parent
@@ -439,7 +439,7 @@ AbstractBackgroundWidget {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         radius: Appearance.rounding?.large ?? 14
-                        color: Appearance.colors.colSurfaceVariant ?? ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                        color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
                             anchors.fill: parent
@@ -546,7 +546,7 @@ AbstractBackgroundWidget {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 38
                         radius: Appearance.rounding?.large ?? 14
-                        color: Appearance.colors.colSurfaceVariant ?? ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                        color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
                             anchors.centerIn: parent
@@ -569,7 +569,7 @@ AbstractBackgroundWidget {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 38
                         radius: Appearance.rounding?.large ?? 14
-                        color: Appearance.colors.colSurfaceVariant ?? ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                        color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
                             anchors.centerIn: parent
@@ -592,7 +592,7 @@ AbstractBackgroundWidget {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 38
                         radius: Appearance.rounding?.large ?? 14
-                        color: Appearance.colors.colSurfaceVariant ?? ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                        color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
                             anchors.centerIn: parent
@@ -615,7 +615,7 @@ AbstractBackgroundWidget {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 38
                         radius: Appearance.rounding?.large ?? 14
-                        color: Appearance.colors.colSurfaceVariant ?? ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                        color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
                             anchors.centerIn: parent
@@ -734,7 +734,7 @@ AbstractBackgroundWidget {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         radius: Appearance.rounding?.large ?? 18
-                        color: Appearance.colors.colSurfaceVariant ?? ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                        color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
                             anchors.fill: parent
@@ -770,7 +770,7 @@ AbstractBackgroundWidget {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         radius: Appearance.rounding?.large ?? 18
-                        color: Appearance.colors.colSurfaceVariant ?? ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                        color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
                             anchors.fill: parent
@@ -806,7 +806,7 @@ AbstractBackgroundWidget {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         radius: Appearance.rounding?.large ?? 18
-                        color: Appearance.colors.colSurfaceVariant ?? ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                        color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
                             anchors.fill: parent
@@ -842,7 +842,7 @@ AbstractBackgroundWidget {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         radius: Appearance.rounding?.large ?? 18
-                        color: Appearance.colors.colSurfaceVariant ?? ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                        color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
                             anchors.fill: parent
@@ -878,7 +878,7 @@ AbstractBackgroundWidget {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         radius: Appearance.rounding?.large ?? 18
-                        color: Appearance.colors.colSurfaceVariant ?? ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                        color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
                             anchors.fill: parent
@@ -914,7 +914,7 @@ AbstractBackgroundWidget {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
                         radius: Appearance.rounding?.large ?? 18
-                        color: Appearance.colors.colSurfaceVariant ?? ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
+                        color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
                             anchors.fill: parent

@@ -9,6 +9,7 @@ import QtQuick
 import Quickshell
 
 Singleton {
+    id: root
     // XDG Dirs, with "file://"
     readonly property string home: StandardPaths.standardLocations(StandardPaths.HomeLocation)[0]
     readonly property string config: StandardPaths.standardLocations(
@@ -126,8 +127,26 @@ Singleton {
     }
 
     // Cleanup on init
+    function makeWindowsDirs() {
+        const fs = WindowsNative.fsUtils;
+        if (!Platform.isWindows || !fs)
+            return;
+        for (const dir of [favicons, coverArt, booruPreviews, latexOutput, aiChats, userActions])
+            fs.makePath(FileUtils.trimFileProtocol(dir));
+    }
+
+    Connections {
+        target: Platform.isWindows ? WindowsNative : null
+        function onReadyChanged() {
+            root.makeWindowsDirs();
+        }
+    }
+
     Component.onCompleted: {
-        if (Platform.isWindows) return;
+        if (Platform.isWindows) {
+            root.makeWindowsDirs();
+            return;
+        }
         Quickshell.execDetached(["mkdir", "-p", `${shellConfig}`])
         Quickshell.execDetached(["mkdir", "-p", `${favicons}`])
         Quickshell.execDetached(["bash", "-c", `rm -rf '${coverArt}'; mkdir -p '${coverArt}'`])

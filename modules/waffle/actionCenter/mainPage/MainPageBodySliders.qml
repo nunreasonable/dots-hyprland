@@ -55,10 +55,11 @@ ColumnLayout {
         
         WSlider {
             Layout.fillWidth: true
-            value: Audio.sink.audio.volume
+            value: Audio.sink?.audio?.volume ?? 0
             scrollable: true
             onMoved: {
-                Audio.sink.audio.volume = value;
+                if (Audio.sink?.audio)
+                    Audio.sink.audio.volume = value;
             }
         }
 

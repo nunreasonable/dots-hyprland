@@ -58,7 +58,7 @@ StyledImage {
             if (!ok || outputPath !== FileUtils.trimFileProtocol(root.thumbnailPath)) return;
             if (root.status === Image.Ready && String(root.source) === String(Qt.resolvedUrl(root.thumbnailPath))) return;
             root.source = "";
-            root.source = root.thumbnailPath;
+            root.source = Qt.binding(() => root.thumbnailPath);
         }
     }
     Process {

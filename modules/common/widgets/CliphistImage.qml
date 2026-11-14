@@ -49,7 +49,7 @@ Rectangle {
 
     Component.onCompleted: {
         if (Platform.isWindows) {
-            root.source = WindowsNative.clipboard.imagePath(root.entryNumber);
+            root.source = WindowsNative.clipboard?.imagePath(root.entryNumber) ?? "";
             return;
         }
         decodeImageProcess.running = true;
