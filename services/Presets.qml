@@ -26,7 +26,9 @@ Singleton {
 
     property list<string> lastSkippedKeys: []
 
-    readonly property var allowedRoots: ["appearance", "background", "bar", "calendar", "cheatsheet", "crosshair", "custom", "dock", "interactions", "lock", "notifications", "osd", "overview", "settings", "sidebar", "time", "waffles", "wallpaperSelector"]
+    readonly property var allowedRoots: ["appearance", "background", "bar", "calendar", "cheatsheet", "crosshair", "custom", "dock", "interactions", "lock", "nabyIsland", "notifications", "osd", "overview", "panelFamily", "settings", "sidebar", "time", "waffles", "wallpaperSelector"]
+    readonly property var allowedPrefixes: ["windowsPort.decoration", "windowsPort.panelAnimationStyle"]
+    readonly property var stateKeys: ["appearance.visualStyleApplied", "appearance.visualStylePresetVersion"]
     readonly property var forbiddenParts: ["__proto__", "prototype", "constructor"]
     readonly property var spicyKeys: [
         "background.konachanSpicy",
@@ -37,7 +39,8 @@ Singleton {
         "wallpaperSelector.wppSpicyFolder",
         "dock.pinnedApps",
         "bar.screenList",
-        "notifications.forceMonitor"
+        "notifications.forceMonitor",
+        "nabyIsland.screen"
     ]
     readonly property var themingDefaults: ({
         "appearance.palette.type": "auto",
@@ -48,7 +51,7 @@ Singleton {
         "appearance.uiBackground": "themed"
     })
     readonly property var sensitiveNamePattern: /(api[-_]?key|token|secret|credential|password|useragent)/i
-    readonly property var pathLikeLeafPattern: /(path|url|uri|folder|dir|file|picture|image|icon|city|username|prompt|location|pins)$/i
+    readonly property var pathLikeLeafPattern: /^(path|url|uri|folder|dir|file|picture|image|icon|city|username|prompt|location|pins)$|(Path|Url|Uri|URL|Folder|Dir|File|Picture|Image|Icon|City|Username|Prompt|Location|Pins)$/
     readonly property var imageExtPattern: /\.(png|jpe?g|webp|bmp)$/i
 
     readonly property string curlBin: Platform.isWindows ? "curl.exe" : "curl"
@@ -168,11 +171,14 @@ Singleton {
         return "";
     }
 
-    function isSkippedKey(dottedKey) {
+    function isSkippedKey(dottedKey, value) {
         const parts = dottedKey.split(".");
         if (parts.some(part => root.forbiddenParts.includes(part)))
             return true;
-        if (!root.allowedRoots.includes(parts[0]))
+        const prefixed = root.allowedPrefixes.some(prefix => dottedKey === prefix || dottedKey.startsWith(prefix + ".") || prefix.startsWith(dottedKey + "."));
+        if (!root.allowedRoots.includes(parts[0]) && !prefixed)
+            return true;
+        if (root.stateKeys.includes(dottedKey))
             return true;
         const lower = dottedKey.toLowerCase();
         for (const spicy of root.spicyKeys) {
@@ -181,7 +187,7 @@ Singleton {
         }
         if (root.sensitiveNamePattern.test(dottedKey.replace(/[._-]/g, "")))
             return true;
-        if (root.pathLikeLeafPattern.test(parts[parts.length - 1]))
+        if ((value === undefined || typeof value === "string") && root.pathLikeLeafPattern.test(parts[parts.length - 1]))
             return true;
         return false;
     }
@@ -207,9 +213,9 @@ Singleton {
             if (key === "_presetMeta")
                 continue;
             const dotted = prefix ? `${prefix}.${key}` : key;
-            if (root.isSkippedKey(dotted))
-                continue;
             const value = obj[key];
+            if (root.isSkippedKey(dotted, root.isPlainObject(value) ? null : value))
+                continue;
             out[key] = root.isPlainObject(value) ? root.filterForSave(value, dotted) : value;
         }
         return out;
@@ -220,11 +226,12 @@ Singleton {
             if (key === "_presetMeta")
                 continue;
             const dotted = prefix ? `${prefix}.${key}` : key;
-            if (root.isSkippedKey(dotted)) {
-                skipped.push(dotted);
+            const value = preset[key];
+            if (root.isSkippedKey(dotted, root.isPlainObject(value) ? null : value)) {
+                if (!root.stateKeys.includes(dotted) && dotted !== "background.wallpaperPath")
+                    skipped.push(dotted);
                 continue;
             }
-            const value = preset[key];
             if (root.isPlainObject(value)) {
                 root.applyFiltered(value, dotted, skipped);
                 continue;
@@ -257,7 +264,7 @@ Singleton {
     }
 
     function sanitizeName(rawName) {
-        let name = String(rawName).trim().replace(/[\\/:*?"<>|\x00-\x1f]/g, "_").replace(/\s+/g, "_").replace(/^\.+/, "").slice(0, 80);
+        let name = String(rawName).trim().replace(/[\\/:*?"<>|,\x00-\x1f]/g, "_").replace(/\s+/g, "_").replace(/^\.+/, "").slice(0, 80);
         if (/^(con|prn|aux|nul|com\d|lpt\d)$/i.test(name))
             name = "_" + name;
         return name.length > 0 ? name : "preset";
@@ -345,12 +352,15 @@ Singleton {
     }
 
     function _copyWallpaperForPreset(sourcePath, presetName) {
-        const clean = FileUtils.trimFileProtocol(String(sourcePath ?? ""));
+        let clean = FileUtils.trimFileProtocol(String(sourcePath ?? "")).replace(/\\/g, "/");
+        if (Wallpapers.isVideoPath(clean))
+            clean = FileUtils.trimFileProtocol(String(Config.options.background.thumbnailPath ?? "")).replace(/\\/g, "/");
         if (clean === "" || /^https?:\/\//i.test(clean) || Wallpapers.isVideoPath(clean))
-            return sourcePath ?? "";
+            return "";
 
         let buffer;
         try {
+            wallpaperSniffFile.targetPath = "";
             wallpaperSniffFile.targetPath = clean;
             buffer = wallpaperSniffFile.data();
         } catch (e) {
@@ -369,8 +379,7 @@ Singleton {
         const destPath = `${Directories.userPresetsPath}/assets/${presetName}/${destName}`;
 
         try {
-            wallpaperCopyFile.targetPath = destPath;
-            wallpaperCopyFile.setData(buffer);
+            root._writeBytes(wallpaperCopyFile, destPath, buffer);
         } catch (e) {
             return sourcePath;
         }
@@ -390,6 +399,7 @@ Singleton {
 
     property string _pendingSaveName: ""
     property string _pendingSaveDescription: ""
+    property var _pendingSaveKeepMeta: null
     property var _pendingSaves: []
     property bool _saveReloadPending: false
 
@@ -416,13 +426,35 @@ Singleton {
     }
 
     function _writePreset(path, text) {
-        presetWriteFile.targetPath = "";
-        presetWriteFile.targetPath = path;
-        presetWriteFile.setText(text);
+        root._writeText(presetWriteFile, path, text);
     }
 
-    function overwrite(name) {
-        root.save(name);
+    function _writeText(view, path, text) {
+        view.targetPath = "";
+        view.targetPath = path;
+        view.setText(text);
+    }
+
+    function _writeBytes(view, path, buffer) {
+        view.targetPath = "";
+        view.targetPath = path;
+        view.setData(buffer);
+    }
+
+    function overwrite(name, meta) {
+        root.ensureDirs();
+        const clean = root.sanitizeName(name);
+        if (clean.length === 0)
+            return;
+        const keep = {};
+        if (meta?.origin)
+            keep.origin = meta.origin;
+        root._pendingSaves = root._pendingSaves.concat([{
+            name: clean,
+            description: String(meta?.description ?? ""),
+            keepMeta: keep
+        }]);
+        root._startNextSave();
     }
 
     function _startNextSave() {
@@ -431,6 +463,7 @@ Singleton {
         const nextSave = root._pendingSaves[0];
         root._pendingSaveName = nextSave.name;
         root._pendingSaveDescription = nextSave.description;
+        root._pendingSaveKeepMeta = nextSave.keepMeta ?? null;
         root._saveReloadPending = true;
         liveConfigFile.reload();
     }
@@ -461,8 +494,9 @@ Singleton {
         }
         const filtered = root.filterForSave(parsed, "");
         const livePreview = String(parsed?.background?.wallpaperPath ?? "");
-        const preview = livePreview !== "" ? root._copyWallpaperForPreset(livePreview, root._pendingSaveName) : "";
-        filtered._presetMeta = { preview: preview };
+        const spicy = livePreview !== "" && Wallpapers.isInSpicyFolder(FileUtils.trimFileProtocol(livePreview));
+        const preview = livePreview !== "" && !spicy ? root._copyWallpaperForPreset(livePreview, root._pendingSaveName) : "";
+        filtered._presetMeta = Object.assign({}, root._pendingSaveKeepMeta ?? {}, { preview: preview });
         if (root._pendingSaveDescription !== "")
             filtered._presetMeta.description = root._pendingSaveDescription;
         root._writePreset(`${Directories.userPresetsPath}/${root._pendingSaveName}.json`, JSON.stringify(filtered, null, 2));
@@ -493,12 +527,46 @@ Singleton {
             console.log("[Presets] could not read preset:", name, e);
             return;
         }
+        const style = String(parsed?.appearance?.visualStyle ?? "");
+        if (style !== "" && VisualStyle.styles.includes(style) && style !== Config.options.appearance.visualStyleApplied)
+            VisualStyle.applyPreset(style);
         const skipped = [];
         root.applyFiltered(parsed, "", skipped);
         root.resetMissingTheming(parsed);
         root.lastSkippedKeys = skipped;
-        Qt.callLater(() => Wallpapers.reapplyPalette());
+        const wallpaper = root.presetWallpaper(parsed);
+        if (wallpaper !== "")
+            Qt.callLater(() => Wallpapers.apply(wallpaper));
+        else
+            Qt.callLater(() => Wallpapers.reapplyPalette());
+        root.notify(Translation.tr("Preset applied"), name);
     }
+
+    function presetWallpaper(preset) {
+        const candidates = [preset?._presetMeta?.preview, preset?.background?.wallpaperPath];
+        const roots = [Directories.userPresetsPath, Directories.onlinePresetsPath, Directories.importedPresetsPath, `${FileUtils.trimFileProtocol(Directories.pictures)}/Wallpapers`]
+            .map(dir => FileUtils.trimFileProtocol(String(dir)).replace(/\\/g, "/").toLowerCase() + "/");
+        for (const candidate of candidates) {
+            const path = FileUtils.trimFileProtocol(String(candidate ?? "")).replace(/\\/g, "/");
+            if (path === "" || !/^[A-Za-z]:\//.test(path) && !(!Platform.isWindows && path.startsWith("/")))
+                continue;
+            if (path.includes("/../") || !roots.some(dir => path.toLowerCase().startsWith(dir)))
+                continue;
+            if (Platform.isWindows && WindowsNative.fsUtils && WindowsNative.fsUtils.classify(path) === "invalid")
+                continue;
+            return path;
+        }
+        return "";
+    }
+
+    function notify(title, body) {
+        Notifications.sendDesktop(title, body, ["-a", "Shell"]);
+    }
+
+    onExported: (name, ok, message) => root.notify(ok ? Translation.tr("Preset exported") : Translation.tr("Couldn't export the preset"), ok ? message || name : message)
+    onImported: name => root.notify(Translation.tr("Preset imported"), name)
+    onImportFailed: message => root.notify(Translation.tr("Couldn't import the preset"), message)
+    onInstalled: (name, ok, message) => root.notify(ok ? Translation.tr("Preset installed") : Translation.tr("Couldn't install the preset"), ok ? name : message)
 
     function remove(name) {
         root._deletePath(`${Directories.userPresetsPath}/${name}.json`, root.refresh);
@@ -743,8 +811,7 @@ Singleton {
         root._stageUsedNames[destName] = sourcePath;
         root._stageRenameMap[sourcePath] = destName;
         try {
-            stageWriteFile.targetPath = `${root._stageDir}/${destName}`;
-            stageWriteFile.setData(buffer);
+            root._writeBytes(stageWriteFile, `${root._stageDir}/${destName}`, buffer);
         } catch (e) {}
         root._stageNext();
     }
@@ -754,6 +821,7 @@ Singleton {
         property string targetPath: ""
         path: targetPath
         blockLoading: true
+        blockWrites: true
         printErrors: false
     }
 
@@ -768,6 +836,7 @@ Singleton {
         property string targetPath: ""
         path: targetPath
         blockLoading: true
+        blockWrites: true
         printErrors: false
     }
 
@@ -776,6 +845,7 @@ Singleton {
         property string targetPath: ""
         path: targetPath
         blockLoading: true
+        blockWrites: true
         printErrors: false
     }
 
@@ -793,15 +863,13 @@ Singleton {
                 const buf = previewReadFile.data();
                 const ext = (root._stagePreview.match(/\.[^.\\/]+$/) ?? [".png"])[0].toLowerCase();
                 const previewName = `preview${ext === ".jpeg" ? ".jpg" : ext}`;
-                previewStageWriteFile.targetPath = `${root._stageDir}/${previewName}`;
-                previewStageWriteFile.setData(buf);
+                root._writeBytes(previewStageWriteFile, `${root._stageDir}/${previewName}`, buf);
                 meta.preview = previewName;
             } catch (e) {}
         }
 
         root._writePreset(`${root._stageDir}/${root._stageName}.json`, JSON.stringify(finalObj, null, 2));
-        metaStageWriteFile.targetPath = `${root._stageDir}/meta.json`;
-        metaStageWriteFile.setText(JSON.stringify(meta, null, 2));
+        root._writeText(metaStageWriteFile, `${root._stageDir}/meta.json`, JSON.stringify(meta, null, 2));
 
         const names = [`${root._stageName}.json`, "meta.json"].concat(Object.values(root._stageRenameMap));
         if (meta.preview !== "")
@@ -842,7 +910,9 @@ Singleton {
             root._zipStagingDir(stagingDir, names, `${Directories.userPresetsPath}/${name}.zip`, ok => {
                 root._removeStagingDir(stagingDir);
                 root.refresh();
-                root.exported(name, ok, ok ? "" : Translation.tr("Could not create the ZIP file"));
+                root.exported(name, ok, ok ? `${Directories.userPresetsPath}/${name}.zip` : Translation.tr("Could not create the ZIP file"));
+                if (ok)
+                    root.openPresetsFolder();
             });
         }, message => root.exported(name, false, message));
     }
@@ -983,8 +1053,7 @@ Singleton {
         onLoaded: {
             try {
                 const buf = importCopyReadFile.data();
-                importCopyWriteFile.targetPath = `${root._importDestDir}/${importCopyReadFile.destName}`;
-                importCopyWriteFile.setData(buf);
+                root._writeBytes(importCopyWriteFile, `${root._importDestDir}/${importCopyReadFile.destName}`, buf);
             } catch (e) {}
             root._importCopyNext();
         }
@@ -996,6 +1065,7 @@ Singleton {
         property string targetPath: ""
         path: targetPath
         blockLoading: true
+        blockWrites: true
         printErrors: false
     }
 
@@ -1099,6 +1169,7 @@ Singleton {
         property string targetPath: ""
         path: targetPath
         blockLoading: true
+        blockWrites: true
         printErrors: false
     }
 
@@ -1127,8 +1198,7 @@ Singleton {
             destPath = `${destDir}/${stem}-${Date.now().toString(36)}${ext}`;
         }
         try {
-            installAssetWriteFile.targetPath = destPath;
-            installAssetWriteFile.setData(buffer);
+            root._writeBytes(installAssetWriteFile, destPath, buffer);
             root._installRenameMap[sourcePath] = destPath;
         } catch (e) {}
     }
@@ -1144,7 +1214,7 @@ Singleton {
         const map = root._installRenameMap;
         let fixed = root.mapStrings(root._installParsed, s => map[s] !== undefined ? map[s] : s);
         const filtered = root.filterForSave(fixed, "");
-        filtered._presetMeta = { origin: root._installSource === "imported" ? "imported" : PresetsOnline.originOf(root._installName) };
+        filtered._presetMeta = Object.assign({}, root.isPlainObject(fixed?._presetMeta) ? fixed._presetMeta : {}, { origin: root._installSource === "imported" ? "imported" : PresetsOnline.originOf(root._installName) });
 
         let name = root.sanitizeName(PresetsOnline.displayName(root._installName));
         if (name === "")
@@ -1414,6 +1484,7 @@ Singleton {
         ghApiProc.hasBody = bodyObj !== null;
         ghApiProc.bodyText = bodyObj !== null ? JSON.stringify(bodyObj) : "";
         ghApiProc.command = args;
+        ghApiProc.stdinEnabled = bodyObj !== null;
         ghApiProc.running = true;
     }
 

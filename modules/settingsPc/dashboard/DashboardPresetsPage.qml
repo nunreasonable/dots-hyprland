@@ -17,6 +17,11 @@ Flickable {
 
     property bool importDropHover: false
 
+    Component.onCompleted: {
+        if (Config.options.profile.onlinePresets)
+            PresetsOnline.ensureFresh();
+    }
+
     function presetMenuActions(name, scope, hasOrigin) {
         const actions = [];
         if (scope === "mine") {
@@ -236,6 +241,8 @@ Flickable {
                         FileView {
                             path: presetDelegate.filePath
                             printErrors: false
+                            watchChanges: true
+                            onFileChanged: reload()
                             onLoaded: {
                                 try {
                                     const data = JSON.parse(text());
@@ -253,7 +260,7 @@ Flickable {
                         menuActions: root.presetMenuActions(presetDelegate.presetName, "mine", presetDelegate.presetOrigin !== "")
                         onApply: () => Presets.apply(presetDelegate.presetName)
                         onRemove: () => Presets.remove(presetDelegate.presetName)
-                        onOverwrite: () => Presets.overwrite(presetDelegate.presetName)
+                        onOverwrite: () => Presets.overwrite(presetDelegate.presetName, { description: presetDelegate.presetDescription, origin: presetDelegate.presetOrigin })
                         onRename: newName => Presets.rename(presetDelegate.presetName, newName)
                     }
                 }

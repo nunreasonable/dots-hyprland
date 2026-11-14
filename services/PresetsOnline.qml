@@ -669,8 +669,9 @@ Singleton {
             if (root.activeEntry?.sanitize)
                 parsed = root._applyShareFilter(parsed);
             parsed = root._fixReferences(parsed, root._winAssetDir, root._winAssetFilenames);
-            winFinalWriteFile.targetPath = `${root.cacheDir()}/${root._winEntryName}.json`;
             WindowsNative.fsUtils?.makePath(root.cacheDir());
+            winFinalWriteFile.targetPath = "";
+            winFinalWriteFile.targetPath = `${root.cacheDir()}/${root._winEntryName}.json`;
             winFinalWriteFile.setText(JSON.stringify(parsed, null, 2));
             Presets.refreshOnline();
             root.downloadingName = "";
