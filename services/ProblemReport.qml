@@ -26,7 +26,7 @@ Singleton {
     function bugReportUrl(zip) {
         const fields = {
             "template": "bug_report.yml",
-            "version": SelfUpdate.installedVersion,
+            "version": SelfUpdate.displayVersion,
             "arch": root.arch,
             "windows": `${SystemInfo.distroName}, build ${SystemInfo.windowsBuild}`,
             "style": root.styleNames[Config.options.appearance.visualStyle] ?? "",
@@ -39,7 +39,7 @@ Singleton {
 
     function issueSummary() {
         return [
-            `ii-windows version: ${SelfUpdate.installedVersion}`,
+            `ii-windows version: ${SelfUpdate.displayVersion}`,
             `Architecture: ${root.arch}`,
             `Visual style: ${root.styleNames[Config.options.appearance.visualStyle] ?? Config.options.appearance.visualStyle}`,
             `Panel family: ${Config.options.panelFamily}`,
@@ -54,7 +54,7 @@ Singleton {
         root.zipPath = "";
         root.lastError = "";
         const screens = Quickshell.screens.map(s => `${s.name} ${s.width}x${s.height} x${s.devicePixelRatio}`).join("; ");
-        const command = ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", FileUtils.trimFileProtocol(`${Directories.scriptPath}/report/collect-report.ps1`), "-Version", SelfUpdate.installedVersion, "-Screens", screens, "-Style", Config.options.appearance.visualStyle, "-Family", Config.options.panelFamily];
+        const command = ["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-File", FileUtils.trimFileProtocol(`${Directories.scriptPath}/report/collect-report.ps1`), "-Version", SelfUpdate.displayVersion, "-Screens", screens, "-Style", Config.options.appearance.visualStyle, "-Family", Config.options.panelFamily];
         if (root.includeCrashDump)
             command.push("-IncludeDump");
         reportProc.command = command;

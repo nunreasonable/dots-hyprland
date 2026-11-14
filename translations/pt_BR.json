@@ -2105,5 +2105,14 @@
   "Preset installed": "Preset instalado",
   "Couldn't export the preset": "Não foi possível exportar o preset",
   "Couldn't import the preset": "Não foi possível importar o preset",
-  "Couldn't install the preset": "Não foi possível instalar o preset"
+  "Couldn't install the preset": "Não foi possível instalar o preset",
+  "ii-windows fix available": "Correção do ii-windows disponível",
+  "A small fix for %1 is ready. Applying it restarts the shell for a moment; nothing else is reinstalled.": "Uma pequena correção pra %1 está pronta. Aplicar reinicia o shell por um instante; nada mais é reinstalado.",
+  "Apply fix": "Aplicar correção",
+  "ii-windows fix": "Correção do ii-windows",
+  "Couldn't download the fix.": "Não foi possível baixar a correção.",
+  "The downloaded fix doesn't match the checksum GitHub reported.": "A correção baixada não confere com o checksum informado pelo GitHub.",
+  "A fix for %1 is available. Applying it restarts the shell for a moment; nothing else is reinstalled.": "Há uma correção pra %1. Aplicar reinicia o shell por um instante; nada mais é reinstalado.",
+  "Applying the fix…": "Aplicando a correção…",
+  "The downloaded file doesn't match the checksum GitHub reported.": "O arquivo baixado não confere com o checksum informado pelo GitHub."
 }

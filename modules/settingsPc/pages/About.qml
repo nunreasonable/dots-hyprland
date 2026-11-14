@@ -215,6 +215,23 @@ ContentPage {
             }
         }
 
+        W.NoticeBox {
+            Layout.fillWidth: true
+            visible: SelfUpdate.patchAvailable
+            materialIcon: "build"
+            text: Translation.tr("A fix for %1 is available. Applying it restarts the shell for a moment; nothing else is reinstalled.").arg(SelfUpdate.installedVersion)
+                + (SelfUpdate.patching ? "\n" + Translation.tr("Applying the fix…") : "")
+
+            W.RippleButtonWithIcon {
+                materialIcon: "build"
+                mainText: Translation.tr("Apply fix")
+                enabled: !SelfUpdate.patching
+                onClicked: {
+                    SelfUpdate.applyPatch()
+                }
+            }
+        }
+
         W.StyledText {
             Layout.fillWidth: true
             visible: !SelfUpdate.updateAvailable
@@ -225,7 +242,7 @@ ContentPage {
                 : SelfUpdate.lastError !== ""
                     ? SelfUpdate.lastError
                     : SelfUpdate.installedVersion !== ""
-                        ? Translation.tr("ii-windows %1 is up to date.").arg(SelfUpdate.installedVersion)
+                        ? Translation.tr("ii-windows %1 is up to date.").arg(SelfUpdate.displayVersion)
                         : Translation.tr("Couldn't determine the installed version.")
         }
 

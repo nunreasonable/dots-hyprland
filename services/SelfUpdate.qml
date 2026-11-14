@@ -47,6 +47,28 @@ Singleton {
     property int _notificationId: -1
     property bool _updateFromNotification: false
 
+    property string installedPatch: ""
+    property string failedPatch: ""
+    property int patchNumber: 0
+    property string patchUrl: ""
+    property string patchDigest: ""
+    property int patchSize: 0
+    property bool patching: false
+    property string _patchNotified: ""
+    property int _patchNotificationId: -1
+    readonly property int installedPatchNumber: {
+        const m = root.installedPatch.match(/^(.+)-p(\d+)$/);
+        return m && m[1] === root.installedVersion ? parseInt(m[2], 10) : 0;
+    }
+    readonly property string patchLabel: root.patchNumber > 0 ? `${root.installedVersion}-p${root.patchNumber}` : ""
+    readonly property bool patchAvailable: Platform.isWindows
+        && !root.updateAvailable
+        && root.patchNumber > root.installedPatchNumber
+        && root.patchLabel !== root.failedPatch
+        && root.patchDigest !== ""
+        && root.patchUrl.startsWith(root.setupUrlPrefix)
+    readonly property string displayVersion: root.installedPatchNumber > 0 ? `${root.installedVersion}-p${root.installedPatchNumber}` : root.installedVersion
+
     readonly property bool updateAvailable: Platform.isWindows
         && root.installedVersion !== ""
         && root.latestVersion !== ""
@@ -240,8 +262,117 @@ Singleton {
         }));
     }
 
+    function _pickPatch(assets) {
+        const prefix = `ii-qml-${root.installedVersion}-p`;
+        let best = null;
+        let bestNumber = 0;
+        for (const asset of assets) {
+            const name = String(asset.name ?? "");
+            if (!name.startsWith(prefix) || !name.endsWith(".zip")) continue;
+            const number = parseInt(name.slice(prefix.length, -4), 10);
+            if (!(number > bestNumber) || String(number) !== name.slice(prefix.length, -4)) continue;
+            best = asset;
+            bestNumber = number;
+        }
+        root.patchNumber = best ? bestNumber : 0;
+        root.patchUrl = best ? String(best.browser_download_url ?? "") : "";
+        root.patchSize = best ? (best.size ?? 0) : 0;
+        root.patchDigest = best ? String(best.digest ?? "").replace(/^sha256:/i, "").toLowerCase() : "";
+    }
+
+    function _maybeNotifyPatch() {
+        if (!Config.ready || !Config.options.windowsPort.selfUpdate.notify) return;
+        if (!root.patchAvailable || root._patchNotified === root.patchLabel) return;
+        root._patchNotified = root.patchLabel;
+        root._patchNotificationId = Notifications.sendDesktop(
+            Translation.tr("ii-windows fix available"),
+            Translation.tr("A small fix for %1 is ready. Applying it restarts the shell for a moment; nothing else is reinstalled.").arg(root.installedVersion),
+            [...root.notifyIdentity, "-A", `patch=${Translation.tr("Apply fix")}`]
+        ) ?? -1;
+    }
+
+    function applyPatch() {
+        if (!root.patchAvailable || root.patching || root.downloading) return;
+        root.patching = true;
+        root.lastError = "";
+        root.downloadDest = `${Directories.selfUpdateDownloadDir}/ii-qml-${root.patchLabel}.zip`;
+        patchDownloadProc.label = root.patchLabel;
+        patchDownloadProc.digest = root.patchDigest;
+        patchDownloadProc.command = [root.curlBin, "--create-dirs", "-fsSL", "--max-time", "120", "-o", root.downloadDest, root.patchUrl];
+        patchDownloadProc.running = true;
+    }
+
+    function _patchFailed(message) {
+        root.patching = false;
+        root.lastError = message;
+        Notifications.sendDesktop(Translation.tr("ii-windows fix"), message, root.notifyIdentity);
+    }
+
+    Process {
+        id: patchDownloadProc
+        property string label: ""
+        property string digest: ""
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode !== 0) {
+                root._patchFailed(Translation.tr("Couldn't download the fix."));
+                return;
+            }
+            patchHashProc.label = patchDownloadProc.label;
+            patchHashProc.digest = patchDownloadProc.digest;
+            patchHashProc.zip = root.downloadDest;
+            patchHashProc.command = ["certutil.exe", "-hashfile", root.downloadDest.replace(/\//g, "\\"), "SHA256"];
+            patchHashProc.running = true;
+        }
+    }
+
+    Process {
+        id: patchHashProc
+        property string label: ""
+        property string digest: ""
+        property string zip: ""
+        stdout: StdioCollector { id: patchHashCollector }
+        onExited: (exitCode, exitStatus) => {
+            const found = (patchHashCollector.text.match(/^[0-9a-f ]{64,95}$/im) ?? [""])[0].replace(/\s+/g, "").toLowerCase();
+            if (exitCode !== 0 || found !== patchHashProc.digest) {
+                root._patchFailed(Translation.tr("The downloaded fix doesn't match the checksum GitHub reported."));
+                return;
+            }
+            root._runPatch(patchHashProc.zip, patchHashProc.label);
+        }
+    }
+
+    function _runPatch(zip, label) {
+        const win = path => FileUtils.trimFileProtocol(String(path)).replace(/\//g, "\\").replace(/\\+$/, "");
+        const live = win(Quickshell.shellPath(""));
+        Quickshell.execDetached(["powershell.exe", "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", "-WindowStyle", "Hidden",
+            "-File", win(`${Directories.scriptPath}/update/apply-qml-patch.ps1`),
+            "-Zip", win(zip), "-Label", label, "-InstallDir", win(Directories.installDir), "-LiveDir", live]);
+    }
+
+    FileView {
+        id: patchFileView
+        path: Platform.isWindows ? `${Directories.installDir}/PATCH` : ""
+        printErrors: false
+        watchChanges: true
+        onFileChanged: reload()
+        onLoaded: root.installedPatch = patchFileView.text().trim()
+        onLoadFailed: root.installedPatch = ""
+    }
+
+    FileView {
+        id: failedPatchFileView
+        path: Platform.isWindows ? `${Directories.installDir}/PATCH-FAILED` : ""
+        printErrors: false
+        watchChanges: true
+        onFileChanged: reload()
+        onLoaded: root.failedPatch = failedPatchFileView.text().trim()
+        onLoadFailed: root.failedPatch = ""
+    }
+
     Component.onCompleted: {
         if (!Platform.isWindows) return;
+        patchFileView.reload();
+        failedPatchFileView.reload();
         manifestFileView.reload();
         cacheFileView.reload();
     }
@@ -249,6 +380,10 @@ Singleton {
     Connections {
         target: Platform.isWindows ? Notifications : null
         function onDesktopActionInvoked(id, action) {
+            if (id === root._patchNotificationId && action === "patch") {
+                root.applyPatch();
+                return;
+            }
             if (id !== root._notificationId) return;
             if (action === "update") root._updateFromNotificationAction();
             else if (action === "notes" && root.htmlUrl !== "") Qt.openUrlExternally(root.htmlUrl);
@@ -363,9 +498,11 @@ Singleton {
                     root.setupUrl = setupAsset ? (setupAsset.browser_download_url ?? "") : "";
                     root.setupSize = setupAsset ? (setupAsset.size ?? 0) : 0;
                     root.setupDigest = setupAsset ? String(setupAsset.digest ?? "").replace(/^sha256:/i, "").toLowerCase() : "";
+                    root._pickPatch(tag.replace(/^v/i, "") === root.installedVersion ? assets : []);
                 }
                 root.lastError = "";
                 root._maybeNotify();
+                root._maybeNotifyPatch();
                 root._saveCache();
             } catch (e) {
                 root.lastError = Translation.tr("Could not parse GitHub's response.");
