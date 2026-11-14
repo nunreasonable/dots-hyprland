@@ -115,10 +115,10 @@ PanelWindow {
         border.width: SekaiTheme.active ? 0 : Config.options.settings.borderSize
         border.color: CF.ColorUtils.transparentize(Appearance.getColorFromName(Config.options.settings.borderColor), 0.8)
         radius: !panelWindow.isMinimal ? Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 5 : Appearance.rounding.screenRounding + 5
-        SekaiShadow {
+        W.SekaiShadow {
             radius: settingsWindow.radius
         }
-        SekaiFrame {
+        W.SekaiFrame {
             radius: settingsWindow.radius
         }
 
