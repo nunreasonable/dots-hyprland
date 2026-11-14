@@ -108,6 +108,9 @@ Scope {
         function recordWithSound() {
             root.recordWithSound()
         }
+        function close() {
+            root.dismiss()
+        }
     }
 
     GlobalShortcut {
