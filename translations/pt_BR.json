@@ -2098,5 +2098,12 @@
   "Window opacity": "Opacidade das janelas",
   "Focused window (%)": "Janela em foco (%)",
   "Other windows (%)": "Outras janelas (%)",
-  "Makes app windows see-through, like an opacity rule for every window. Full-screen windows, games and apps that already draw their own transparency stay as they are.": "Deixa as janelas dos apps transparentes, como uma regra de opacidade pra todas as janelas. Janelas em tela cheia, jogos e apps que já desenham a própria transparência ficam como estão."
+  "Makes app windows see-through, like an opacity rule for every window. Full-screen windows, games and apps that already draw their own transparency stay as they are.": "Deixa as janelas dos apps transparentes, como uma regra de opacidade pra todas as janelas. Janelas em tela cheia, jogos e apps que já desenham a própria transparência ficam como estão.",
+  "Preset applied": "Preset aplicado",
+  "Preset exported": "Preset exportado",
+  "Preset imported": "Preset importado",
+  "Preset installed": "Preset instalado",
+  "Couldn't export the preset": "Não foi possível exportar o preset",
+  "Couldn't import the preset": "Não foi possível importar o preset",
+  "Couldn't install the preset": "Não foi possível instalar o preset"
 }
