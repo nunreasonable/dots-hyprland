@@ -86,9 +86,8 @@ Singleton {
             WindowsNative.fsUtils.makePath(Directories.importedPresetsPath);
             WindowsNative.fsUtils.makePath(Directories.presetsStagingPath);
         } else {
-            presetsDirMarker.setText("");
-            onlineDirMarker.setText("");
-            importedDirMarker.setText("");
+            ensureDirsProc.command = ["mkdir", "-p", Directories.userPresetsPath, Directories.onlinePresetsPath, Directories.importedPresetsPath];
+            ensureDirsProc.running = true;
         }
         root.dirsReady = true;
         root.refresh();
@@ -108,25 +107,13 @@ Singleton {
         }
     }
 
-    FileView {
-        id: presetsDirMarker
-        path: `${Directories.userPresetsPath}/.keep`
-        printErrors: false
-        onSaved: root.refresh()
-    }
-
-    FileView {
-        id: onlineDirMarker
-        path: `${Directories.onlinePresetsPath}/.keep`
-        printErrors: false
-        onSaved: root.refreshOnline()
-    }
-
-    FileView {
-        id: importedDirMarker
-        path: `${Directories.importedPresetsPath}/.keep`
-        printErrors: false
-        onSaved: root.refreshImported()
+    Process {
+        id: ensureDirsProc
+        onExited: {
+            root.refresh();
+            root.refreshOnline();
+            root.refreshImported();
+        }
     }
 
     FolderListModel {
