@@ -296,7 +296,7 @@ Singleton {
     function windowsRecordingStatusCommand() {
         const pidFile = Directories.recordingPidFile;
         const script = `if (Test-Path '${pidFile}') { `
-            + `$p = Get-Content '${pidFile}' -ErrorAction SilentlyContinue; `
+            + `$p = Get-Content '${pidFile}' -ErrorAction SilentlyContinue | Select-Object -First 1; `
             + `if ($p -and (Get-Process -Id $p -ErrorAction SilentlyContinue)) { exit 0 }; `
             + `Remove-Item -Force '${pidFile}' -ErrorAction SilentlyContinue }; `
             + `if (Get-Command ffmpeg -ErrorAction SilentlyContinue) { exit 2 } else { exit 1 }`;
