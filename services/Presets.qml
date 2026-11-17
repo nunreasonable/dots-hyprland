@@ -645,9 +645,15 @@ Singleton {
         }
         if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed))
             return false;
-        let name = root.sanitizeName(suggestedName || "imported");
-        if (name.length === 0)
-            name = "imported";
+        let rawName = root.sanitizeName(suggestedName || "imported");
+        if (rawName.length === 0)
+            rawName = "imported";
+        let name = rawName;
+        let n = 2;
+        while (root._mineNameExists(name)) {
+            name = `${rawName}_${n}`;
+            n++;
+        }
         root._writePreset(`${Directories.userPresetsPath}/${name}.json`, JSON.stringify(parsed, null, 2));
         root.refresh();
         return true;
