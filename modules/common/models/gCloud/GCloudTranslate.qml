@@ -33,11 +33,12 @@ GCloudApi {
 
         // print("PENDING STRINGS:", root.pendingStrings)
 
+        multiproc.environment = ({ "GCLOUD_TOKEN": GoogleCloud.token });
         var seq = [];
         seq.push([ //
             "bash", "-c", //
             `curl -sL -X POST \
--H "Authorization: Bearer ${GoogleCloud.token}" \
+-H @<(printf 'Authorization: Bearer %s\\n' "$GCLOUD_TOKEN") \
 -H "x-goog-user-project: ${GoogleCloud.projectId}" \
 -H "Content-Type: application/json" \
 -d '${StringUtils.shellSingleQuoteEscape(JSON.stringify(payload))}' \

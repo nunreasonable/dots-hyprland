@@ -59,7 +59,7 @@ GCloudApi {
         seq.push([
             "bash", "-c",
             `curl -s -X POST \
--H "Authorization: Bearer ${GoogleCloud.token}" \
+-H @<(printf 'Authorization: Bearer %s\\n' "$GCLOUD_TOKEN") \
 -H "x-goog-user-project: ${GoogleCloud.projectId}" \
 -H "Content-Type: application/json" \
 https://vision.googleapis.com/v1/images:annotate \
@@ -70,6 +70,7 @@ https://vision.googleapis.com/v1/images:annotate \
             root.handleApiOutput(out);
         });
 
+        lookMultiproc.environment = ({ "GCLOUD_TOKEN": GoogleCloud.token });
         lookMultiproc.runSequence(seq);
     }
 

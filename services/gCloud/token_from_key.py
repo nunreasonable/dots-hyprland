@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import calendar
+import os
 import sys
 import json
 import google.auth.transport.requests
@@ -31,8 +32,9 @@ def get_token(json_str):
         sys.exit(1)
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
+    key_json = sys.argv[1] if len(sys.argv) > 1 else os.environ.get("SERVICE_KEY_CONTENT", "")
+    if not key_json:
         sys.stderr.write("Usage: python3 get_token.py '<json_string>'\n")
         sys.exit(1)
     
-    get_token(sys.argv[1])
+    get_token(key_json)
