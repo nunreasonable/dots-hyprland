@@ -45,6 +45,10 @@ Singleton {
         .replace(/'/g, "'\\''");
     }
 
+    function curlConfigLine(name, value) {
+        return `${name} = "${String(value).replace(/[\r\n]/g, "").replace(/[\\"]/g, "\\$&")}"\n`;
+    }
+
     /**
      * Splits markdown blocks into three different types: text, think, and code.
      * @param { string } markdown

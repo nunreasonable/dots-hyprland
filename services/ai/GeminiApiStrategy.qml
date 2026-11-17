@@ -213,7 +213,7 @@ ApiStrategy {
         // Initial resumable request defining metadata.
         // The upload url is in the response headers dump them to a file.
         content += 'curl "https://generativelanguage.googleapis.com/upload/v1beta/files"'
-            + ` -H "x-goog-api-key: \$${apiKeyEnvVarName}"`
+            + ` -H @<(printf 'x-goog-api-key: %s\\n' "\$${apiKeyEnvVarName}")`
             + ' -D $tmp_header_file'
             + ' -H "X-Goog-Upload-Protocol: resumable"'
             + ' -H "X-Goog-Upload-Command: start"'
@@ -229,7 +229,7 @@ ApiStrategy {
 
         // Upload the actual file
         content += 'curl "${upload_url}"'
-            + ` -H "x-goog-api-key: \$${apiKeyEnvVarName}"`
+            + ` -H @<(printf 'x-goog-api-key: %s\\n' "\$${apiKeyEnvVarName}")`
             + ' -H "Content-Length: ${NUM_BYTES}"'
             + ' -H "X-Goog-Upload-Offset: 0"'
             + ' -H "X-Goog-Upload-Command: upload, finalize"'

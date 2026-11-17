@@ -740,6 +740,14 @@ Singleton {
         property list<string> baseCommand: ["bash"]
         property AiMessageData message
         property ApiStrategy currentStrategy
+        property string curlConfig: ""
+
+        onRunningChanged: {
+            if (requester.running && requester.stdinEnabled) {
+                requester.write(requester.curlConfig);
+                requester.stdinEnabled = false;
+            }
+        }
 
         function markDone() {
             requester.message.done = true;
@@ -798,15 +806,17 @@ Singleton {
 
             /* Get authorization header from strategy */
             const authHeader = requester.currentStrategy.buildAuthorizationHeader(root.apiKeyEnvVarName);
+            const key = model.requires_key ? (root.apiKeys ? (root.apiKeys[model.key_id] ?? "") : "") : "";
+            const url = endpoint.split(`\${${root.apiKeyEnvVarName}}`).join(encodeURIComponent(key));
+            requester.curlConfig = CF.StringUtils.curlConfigLine("url", url)
+                + (authHeader && authHeader.length > 0 ? CF.StringUtils.curlConfigLine("header", `Authorization: Bearer ${key}`) : "");
+            requester.stdinEnabled = true;
 
             if (Platform.isWindows) {
-                const key = model.requires_key ? (root.apiKeys ? (root.apiKeys[model.key_id] ?? "") : "") : "";
-                const url = endpoint.split(`\${${root.apiKeyEnvVarName}}`).join(encodeURIComponent(key));
-                const args = ["curl.exe", "--no-buffer", "-sS", url];
+                const args = ["curl.exe", "--no-buffer", "-sS", "-K", "-"];
                 for (const [name, value] of Object.entries(requestHeaders)) {
                     if (value && value.length > 0) args.push("-H", `${name}: ${value}`);
                 }
-                if (authHeader && authHeader.length > 0) args.push("-H", `Authorization: Bearer ${key}`);
                 args.push("--data-binary", `@${root.windowsRequestBodyPath}`);
                 const body = JSON.stringify(data);
                 const filePath = root.pendingFilePath ?? "";
@@ -834,9 +844,8 @@ Singleton {
 
             /* Create command string */
             let scriptRequestContent = ""
-            scriptRequestContent += `curl --no-buffer "${endpoint}"`
+            scriptRequestContent += `curl --no-buffer -K -`
                 + ` ${headerString}`
-                + (authHeader ? ` ${authHeader}` : "")
                 + ` --data '${CF.StringUtils.shellSingleQuoteEscape(JSON.stringify(data))}'`
                 + "\n"
             
