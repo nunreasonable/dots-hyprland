@@ -124,7 +124,7 @@ Item {
     MouseArea {
         anchors.fill: trackInfoColumn
         cursorShape: Qt.PointingHandCursor
-        onClicked: GlobalStates.mediaControlsOpen = !GlobalStates.mediaControlsOpen
+        onClicked: GlobalStates.toggleMediaControlsFrom(diMediaRoot)
     }
 
     WaveVisualizer {

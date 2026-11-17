@@ -110,7 +110,14 @@ Scope {
             margins {
                 top: Config.options.bar.vertical ? ((panelWindow.screen.height / 2) - widgetHeight * 1.5) : Appearance.sizes.barHeight
                 bottom: Appearance.sizes.barHeight
-                left: Config.options.bar.vertical ? Appearance.sizes.barHeight : ((panelWindow.screen.width / 2) - (osdWidth / 2) - widgetWidth)
+                left: {
+                    if (Config.options.bar.vertical)
+                        return Appearance.sizes.barHeight;
+                    const screenWidth = panelWindow.screen?.width ?? 0;
+                    if (GlobalStates.mediaControlsAnchorX < 0 || GlobalStates.mediaControlsAnchorScreen !== (panelWindow.screen?.name ?? ""))
+                        return (screenWidth / 2) - (osdWidth / 2) - widgetWidth;
+                    return Math.round(Math.max(0, Math.min(screenWidth - widgetWidth, GlobalStates.mediaControlsAnchorX - widgetWidth / 2)));
+                }
                 right: Appearance.sizes.barHeight
             }
 

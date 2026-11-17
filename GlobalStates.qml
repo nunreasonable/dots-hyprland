@@ -30,6 +30,8 @@ Singleton {
     onSidebarLeftOpenChanged: if (sidebarLeftOpen && !sidebarLeftHasContent) sidebarLeftOpen = false
     property bool sidebarRightOpen: false
     property bool mediaControlsOpen: false
+    property string mediaControlsAnchorScreen: ""
+    property real mediaControlsAnchorX: -1
     property bool keybindsEditorOpen: false
     property bool nowPlayingShown: false
     property var nowPlayingSources: ({})
@@ -118,6 +120,25 @@ Singleton {
 
     function isBarContentShown(screenName) {
         return root.barContentShown[screenName ?? ""] ?? true;
+    }
+
+    function toggleMediaControlsFrom(item) {
+        if (!root.mediaControlsOpen) {
+            const win = item?.QsWindow?.window ?? null;
+            const scr = win?.screen ?? null;
+            if (win && scr) {
+                let x;
+                if (Platform.isWindows) {
+                    x = item.mapToGlobal(item.width / 2, 0).x - scr.x;
+                } else {
+                    const originX = win.anchors?.left ? (win.margins?.left ?? 0) : scr.width - win.width - (win.margins?.right ?? 0);
+                    x = originX + item.mapToItem(null, item.width / 2, 0).x;
+                }
+                root.mediaControlsAnchorScreen = scr.name;
+                root.mediaControlsAnchorX = x;
+            }
+        }
+        root.mediaControlsOpen = !root.mediaControlsOpen;
     }
     property bool desktopWidgetKeyboardFocus: false
 
