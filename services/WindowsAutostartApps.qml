@@ -44,9 +44,11 @@ Singleton {
             interval: 400
             repeat: true
             onTriggered: {
-                Hyprland.dispatch(`movetoworkspace ${moveTimer.workspace},pid:${moveTimer.pid}`);
+                const found = Hyprland.toplevels.values.some(t => t.lastIpcObject?.pid === moveTimer.pid);
+                if (found)
+                    Hyprland.dispatch(`movetoworkspace ${moveTimer.workspace},pid:${moveTimer.pid}`);
                 moveTimer.attempts += 1;
-                if (moveTimer.attempts >= 15) {
+                if (found || moveTimer.attempts >= 15) {
                     moveTimer.stop();
                     moveTimer.destroy();
                 }
