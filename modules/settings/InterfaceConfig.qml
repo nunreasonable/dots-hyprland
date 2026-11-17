@@ -8,7 +8,12 @@ import qs.modules.common
 import qs.modules.common.widgets
 
 ContentPage {
+    id: page
     forceWidth: true
+
+    readonly property var forceMonitorOptions: Quickshell.screens.map(screen => screen.name)
+        .concat(Config.options.notifications.forceMonitor.name.length > 0 && !Quickshell.screens.some(screen => screen.name === Config.options.notifications.forceMonitor.name) ? [Config.options.notifications.forceMonitor.name] : [])
+        .map(name => ({ displayName: name, value: name }))
 
     ContentSection {
         icon: "view_quilt"
@@ -1083,13 +1088,16 @@ ContentPage {
 
         ConfigRow {
             enabled: Config.options.notifications.forceMonitor.enable
-            MaterialTextArea {
+            StyledComboBox {
                 Layout.fillWidth: true
-                placeholderText: Translation.tr("Monitor name to show notifications on (e.g., eDP-1)")
-                text: Config.options.notifications.forceMonitor.name
-                wrapMode: TextEdit.Wrap
-                onTextChanged: {
-                    Config.options.notifications.forceMonitor.name = text;
+                textRole: "displayName"
+                model: page.forceMonitorOptions
+                currentIndex: {
+                    const index = model.findIndex(item => item.value === Config.options.notifications.forceMonitor.name);
+                    return index !== -1 ? index : 0;
+                }
+                onActivated: index => {
+                    Config.options.notifications.forceMonitor.name = model[index].value;
                 }
             }
         }
