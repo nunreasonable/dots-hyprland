@@ -40,7 +40,7 @@ FloatingWindow {
     implicitWidth: Math.min(1100, root.screenWidth - 80)
     implicitHeight: Math.min(700, root.screenHeight - 140)
     minimumSize: Qt.size(Math.min(900, root.implicitWidth), Math.min(600, root.implicitHeight))
-    color: Qt.rgba(Appearance.colors.colUiBackground.r, Appearance.colors.colUiBackground.g, Appearance.colors.colUiBackground.b, 1)
+    color: Appearance.colors.colUiBackground
 
     onClosed: root.closeRequested()
     onVisibleChanged: {
