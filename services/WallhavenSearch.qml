@@ -65,7 +65,7 @@ Singleton {
             return;
         if (root.apiKey.length === 0)
             KeyringStorage.setNestedField(["apiKeys", "wallhaven"], legacyKey);
-        if (Platform.isWindows && !(WindowsNative.credentials?.read(KeyringStorage.properties.application) ?? "").includes(JSON.stringify(root.apiKey)))
+        if (Platform.isWindows && !KeyringStorage.storedText().includes(JSON.stringify(root.apiKey)))
             return;
         Config.options.wallpaperSelector.wallhavenApiKey = "";
     }

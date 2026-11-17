@@ -32,6 +32,22 @@ Singleton {
     property string keyringLabel: Translation.tr("%1 Safe Storage").arg("illogical-impulse")
 
     property var pendingFields: []
+    readonly property int credentialPartLength: 1200
+
+    function credentialTarget(index) {
+        return index === 0 ? root.properties.application : `${root.properties.application}#${index}`;
+    }
+
+    function storedText() {
+        let raw = WindowsNative.credentials?.read(root.credentialTarget(0)) ?? "";
+        for (let index = 1; raw && index < 64; index++) {
+            const part = WindowsNative.credentials.read(root.credentialTarget(index));
+            if (!part)
+                break;
+            raw += part;
+        }
+        return raw;
+    }
     onLoadedChanged: {
         if (!root.loaded || root.pendingFields.length === 0)
             return;
@@ -84,14 +100,13 @@ Singleton {
                 Qt.callLater(() => root.fetchKeyringData());
                 return;
             }
-            const raw = WindowsNative.credentials.read(root.properties.application);
+            const raw = root.storedText();
             if (raw && raw.length > 0) {
                 try {
                     root.keyringData = JSON.parse(raw);
                 } catch (e) {
-                    console.error("[KeyringStorage] Failed to parse stored credential, reinitializing.");
+                    console.error("[KeyringStorage] Failed to parse stored credential, starting empty.");
                     root.keyringData = {};
-                    saveKeyringData();
                 }
             } else {
                 root.keyringData = {};
@@ -110,7 +125,15 @@ Singleton {
                 Qt.callLater(() => root.saveKeyringData());
                 return;
             }
-            WindowsNative.credentials.write(root.properties.application, JSON.stringify(root.keyringData));
+            const text = JSON.stringify(root.keyringData);
+            let count = 0;
+            for (let start = 0; start === 0 || start < text.length; start += root.credentialPartLength) {
+                if (!WindowsNative.credentials.write(root.credentialTarget(count), text.slice(start, start + root.credentialPartLength)))
+                    console.error(`[KeyringStorage] Failed to save part ${count} of the stored credential.`);
+                count++;
+            }
+            for (let index = count; index < 64 && WindowsNative.credentials.exists(root.credentialTarget(index)); index++)
+                WindowsNative.credentials.remove(root.credentialTarget(index));
             root.dataChanged();
             return;
         }
