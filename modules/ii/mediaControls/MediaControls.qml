@@ -99,6 +99,9 @@ Scope {
             implicitWidth: root.widgetWidth
             implicitHeight: playerColumnLayout.implicitHeight
             color: "transparent"
+            readonly property bool followsWidget: !Config.options.bar.vertical
+                && GlobalStates.mediaControlsAnchorX >= 0
+                && GlobalStates.mediaControlsAnchorScreen === (panelWindow.screen?.name ?? "")
             WlrLayershell.namespace: "quickshell:mediaControls"
 
             anchors {
@@ -114,7 +117,7 @@ Scope {
                     if (Config.options.bar.vertical)
                         return Appearance.sizes.barHeight;
                     const screenWidth = panelWindow.screen?.width ?? 0;
-                    if (GlobalStates.mediaControlsAnchorX < 0 || GlobalStates.mediaControlsAnchorScreen !== (panelWindow.screen?.name ?? ""))
+                    if (!panelWindow.followsWidget)
                         return (screenWidth / 2) - (osdWidth / 2) - widgetWidth;
                     return Math.round(Math.max(0, Math.min(screenWidth - widgetWidth, GlobalStates.mediaControlsAnchorX - widgetWidth / 2)));
                 }
@@ -173,6 +176,8 @@ Scope {
                 Item {
                     // No player placeholder
                     Layout.alignment: {
+                        if (panelWindow.followsWidget)
+                            return Qt.AlignHCenter;
                         if (panelWindow.anchors.left)
                             return Qt.AlignLeft;
                         if (panelWindow.anchors.right)
