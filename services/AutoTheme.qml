@@ -86,14 +86,25 @@ Singleton {
         return best;
     }
 
+    property double _nextBoundaryMs: 0
+
     function _armScheduleTimer() {
         scheduleTimer.stop();
         if (!root.scheduling) return;
         const now = new Date();
         const next = root._nextBoundaryDate(now);
         if (!next) return;
+        root._nextBoundaryMs = next.getTime();
         scheduleTimer.interval = Math.max(1000, next.getTime() - now.getTime());
         scheduleTimer.start();
+    }
+
+    Connections {
+        target: root.scheduling ? DateTime.clock : null
+        function onDateChanged() {
+            if (scheduleTimer.running && Date.now() >= root._nextBoundaryMs)
+                root._evaluateSchedule();
+        }
     }
 
     function _evaluateSchedule() {
