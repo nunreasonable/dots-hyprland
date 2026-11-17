@@ -137,6 +137,8 @@ Item {
         }
         readonly property bool hasContent: previewPopup.show || body.opacity > 0
         property real cachedCenter: 0
+        readonly property bool fitsCard: Platform.isWindows && !DockStyle.vertical
+        readonly property real cardWindowX: Math.max(0, Math.min((root.QsWindow.window?.width ?? 0) - popupMouseArea.implicitWidth, previewPopup.cachedCenter - popupMouseArea.implicitWidth / 2))
         readonly property real shiftX: DockStyle.position === "left" ? -12 : DockStyle.position === "right" ? 12 : 0
         readonly property real shiftY: DockStyle.vertical ? 0 : 12
 
@@ -261,15 +263,17 @@ Item {
                 ? DockStyle.zone + Appearance.sizes.hyprlandGapsOut - Appearance.sizes.elevationMargin
                 : DockStyle.position === "right"
                     ? (root.QsWindow.window?.width ?? 0) - DockStyle.zone - Appearance.sizes.hyprlandGapsOut + Appearance.sizes.elevationMargin
-                    : 0
+                    : previewPopup.fitsCard ? previewPopup.cardWindowX : 0
         }
 
         visible: body.opacity > 0
         color: "transparent"
-        implicitWidth: DockStyle.vertical ? popupMouseArea.implicitWidth : (root.QsWindow.window?.width ?? 1)
+        implicitWidth: DockStyle.vertical || previewPopup.fitsCard ? popupMouseArea.implicitWidth : (root.QsWindow.window?.width ?? 1)
         implicitHeight: DockStyle.vertical
             ? (root.QsWindow.window?.height ?? 1)
-            : popupMouseArea.implicitHeight + root.windowControlsHeight + Appearance.sizes.elevationMargin * 2
+            : previewPopup.fitsCard
+                ? popupMouseArea.implicitHeight
+                : popupMouseArea.implicitHeight + root.windowControlsHeight + Appearance.sizes.elevationMargin * 2
 
         MouseArea {
             id: popupMouseArea
@@ -277,11 +281,11 @@ Item {
             anchors.left: DockStyle.position === "left" ? parent.left : undefined
             anchors.right: DockStyle.position === "right" ? parent.right : undefined
             implicitWidth: popupBackground.implicitWidth + Appearance.sizes.elevationMargin * 2
-            implicitHeight: DockStyle.vertical
+            implicitHeight: DockStyle.vertical || previewPopup.fitsCard
                 ? popupBackground.implicitHeight + Appearance.sizes.elevationMargin * 2
                 : root.maxWindowPreviewHeight + root.windowControlsHeight + Appearance.sizes.elevationMargin * 2
             hoverEnabled: true
-            x: DockStyle.vertical ? 0 : previewPopup.cachedCenter - width / 2
+            x: DockStyle.vertical || previewPopup.fitsCard ? 0 : previewPopup.cachedCenter - width / 2
             y: DockStyle.vertical
                 ? Math.max(0, Math.min((root.QsWindow.window?.height ?? 0) - height, previewPopup.cachedCenter - height / 2))
                 : 0
