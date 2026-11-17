@@ -1021,13 +1021,6 @@ MouseArea {
                                         }
                                         event.accepted = false;
                                     }
-                                    Connections {
-                                        target: GlobalStates
-                                        function onWallpaperSelectorOpenChanged() {
-                                            if (!GlobalStates.wallpaperSelectorOpen)
-                                                onlineSearchField.text = "";
-                                        }
-                                    }
                                 }
 
                                 StyledComboBox {
