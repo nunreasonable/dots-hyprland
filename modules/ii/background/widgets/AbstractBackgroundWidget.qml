@@ -58,7 +58,15 @@ AbstractWidget {
         root.restoreXYBinding();
     }
 
-    onReleased: root.commitPosition()
+    property bool draggedSinceRelease: false
+    onDraggingChanged: if (root.dragging) root.draggedSinceRelease = true
+
+    onReleased: {
+        if (!root.draggedSinceRelease)
+            return;
+        root.draggedSinceRelease = false;
+        root.commitPosition();
+    }
 
     function takeKeyboard() {
         if (!Platform.isWindows)
