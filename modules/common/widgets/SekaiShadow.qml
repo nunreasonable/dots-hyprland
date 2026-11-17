@@ -1,14 +1,25 @@
 import QtQuick
 import qs.modules.common
 
-Rectangle {
+Item {
     id: root
 
-    anchors.fill: parent
-    anchors.topMargin: SekaiTheme.shadowOffset
-    anchors.bottomMargin: -SekaiTheme.shadowOffset
+    property real radius: 0
+
+    anchors.left: parent.left
+    anchors.right: parent.right
+    anchors.top: parent.bottom
+    height: SekaiTheme.shadowOffset
     z: -3
     visible: SekaiTheme.active
-    color: SekaiTheme.shadow
-    antialiasing: true
+    clip: true
+
+    Rectangle {
+        width: root.width
+        height: root.parent.height
+        y: SekaiTheme.shadowOffset - root.parent.height
+        radius: root.radius
+        color: SekaiTheme.shadow
+        antialiasing: true
+    }
 }
