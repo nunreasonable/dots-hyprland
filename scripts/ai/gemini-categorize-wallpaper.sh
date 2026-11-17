@@ -55,7 +55,7 @@ payload='{
 
 # Make the request
 response=$(curl "https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent" \
--H "x-goog-api-key: $API_KEY" \
+-H @<(printf 'x-goog-api-key: %s\n' "$API_KEY") \
 -H 'Content-Type: application/json' \
 -X POST \
 -d "$payload" 2> /dev/null)
