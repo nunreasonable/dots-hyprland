@@ -12,9 +12,11 @@ $stamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 $work = Join-Path $env:TEMP "ii-windows-report-$stamp"
 New-Item -ItemType Directory -Force $work | Out-Null
 
-$userPattern = '(?i)(Users[\\/]+)' + [regex]::Escape($env:USERNAME) + '(?=[\\/"]|$)'
+$profileName = Split-Path -Leaf $env:USERPROFILE
+$userNames = @($env:USERNAME, $profileName) | Where-Object { $_ } | Select-Object -Unique
+$userPattern = '(?i)(Users[\\/]+)(' + (($userNames | ForEach-Object { [regex]::Escape($_) }) -join '|') + ')(?=[\\/"]|$)'
 function Scrub([string]$text) {
-    if (-not $env:USERNAME) { return $text }
+    if ($userNames.Count -eq 0) { return $text }
     return [regex]::Replace($text, $userPattern, '$1<user>')
 }
 
