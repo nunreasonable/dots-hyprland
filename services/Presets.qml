@@ -1001,7 +1001,13 @@ Singleton {
             return;
         }
         const assetDir = root._importBaseDir === "" ? root._importStagingDir : `${root._importStagingDir}/${root._importBaseDir}`;
-        const baseName = root.sanitizeName(FileUtils.fileNameForPath(root._importJsonEntry).replace(/\.json$/i, ""));
+        const rawName = root.sanitizeName(FileUtils.fileNameForPath(root._importJsonEntry).replace(/\.json$/i, ""));
+        let baseName = rawName;
+        let n = 2;
+        while (root._importedNameExists(baseName)) {
+            baseName = `${rawName}_${n}`;
+            n++;
+        }
         root._importParsed = parsed;
         root._importBaseName = baseName;
         if (Platform.isWindows) {
@@ -1089,16 +1095,10 @@ Singleton {
         filtered._presetMeta = Object.assign({}, fixed?._presetMeta, { source: "imported" });
         delete filtered._presetMeta.origin;
 
-        let name = root._importBaseName;
-        let n = 2;
-        while (root._importedNameExists(name)) {
-            name = `${root._importBaseName}_${n}`;
-            n++;
-        }
-        root._writePreset(`${Directories.importedPresetsPath}/${name}.json`, JSON.stringify(filtered, null, 2));
+        root._writePreset(`${Directories.importedPresetsPath}/${root._importBaseName}.json`, JSON.stringify(filtered, null, 2));
         root.refreshImported();
         root._removeStagingDir(root._importStagingDir);
-        root.imported(name);
+        root.imported(root._importBaseName);
     }
 
     property var _installParsed: null
