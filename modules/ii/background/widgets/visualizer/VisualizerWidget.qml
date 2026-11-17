@@ -88,7 +88,9 @@ AbstractBackgroundWidget {
             root.coverDownloaded = true;
             return;
         }
-        coverDownloader.command = Platform.isWindows ? ["curl", "-4", "-sSL", "-o", root.artFilePath, "--url", root.artUrl] : ["bash", "-c", '[ -f "$1" ] || curl -sSL "$2" -o "$1"', "_", root.artFilePath, root.artUrl];
+        coverDownloader.command = Platform.isWindows
+            ? ["curl", "-4", "-sSL", "-o", root.artFilePath, "--url", root.artUrl]
+            : ["bash", "-c", '[ -f "$1" ] || { curl -sSL "$2" -o "$1.part" && mv "$1.part" "$1"; }', "_", root.artFilePath, root.artUrl];
         coverDownloader.running = true;
     }
     Process {

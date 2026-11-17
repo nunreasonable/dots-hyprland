@@ -81,7 +81,7 @@ Item {
         property string artFilePath: root.artFilePath
         command: Platform.isWindows
             ? ["curl", "-4", "-sSL", "-o", artFilePath, "--url", targetFile]
-            : ["bash", "-c", '[ -f "$2" ] || curl -4 -sSL -o "$2" --url "$1"', "art", targetFile, artFilePath]
+            : ["bash", "-c", '[ -f "$2" ] || { curl -4 -sSL -o "$2.part" --url "$1" && mv "$2.part" "$2"; }', "art", targetFile, artFilePath]
         onExited: (exitCode, exitStatus) => {
             root.downloaded = !Platform.isWindows || exitCode === 0;
         }

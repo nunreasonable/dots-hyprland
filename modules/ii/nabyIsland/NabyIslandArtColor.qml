@@ -55,7 +55,7 @@ Item {
         property string outputFile: ""
         command: Platform.isWindows
             ? ["curl", "-4", "-sSL", "--create-dirs", "-o", downloader.outputFile, "--url", downloader.targetFile]
-            : ["bash", "-c", 'mkdir -p "$(dirname "$2")"; [ -f "$2" ] || curl -4 -sSL -o "$2" --url "$1"', "art", downloader.targetFile, downloader.outputFile]
+            : ["bash", "-c", 'mkdir -p "$(dirname "$2")"; [ -f "$2" ] || { curl -4 -sSL -o "$2.part" --url "$1" && mv "$2.part" "$2"; }', "art", downloader.targetFile, downloader.outputFile]
         onExited: (exitCode, exitStatus) => {
             if (downloader.outputFile === root.artFilePath)
                 root.downloaded = exitCode === 0;
