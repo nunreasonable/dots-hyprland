@@ -34,10 +34,11 @@ SpinBox {
             font.variableAxes: Appearance.font.variableAxes.numbers
             font.pixelSize: Appearance.font.pixelSize.small
             validator: root.validator
-            onTextChanged: {
+            onEditingFinished: {
                 const parsed = parseFloat(text);
                 if (!isNaN(parsed))
                     root.value = parsed;
+                text = root.value;
             }
         }
     }
