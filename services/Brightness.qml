@@ -101,10 +101,22 @@ Singleton {
     onMonitorsChanged: {
         ddcMonitors = [];
         if (Platform.isWindows) {
-            initializeMonitor(0);
+            initializeAllMonitors();
         } else {
             ddcProc.running = true;
         }
+    }
+
+    Connections {
+        target: Platform.isWindows ? WindowsNative : null
+        function onReadyChanged() {
+            root.initializeAllMonitors();
+        }
+    }
+
+    function initializeAllMonitors(): void {
+        for (const monitor of root.monitors)
+            monitor.initialize();
     }
 
     function initializeMonitor(i: int): void {
@@ -178,11 +190,8 @@ Singleton {
         function initialize() {
             monitor.ready = false;
             if (Platform.isWindows) {
-                if (!WindowsNative.brightness) {
-                    Qt.callLater(() => monitor.initialize());
-                    return;
-                }
-                WindowsNative.brightness.probe(monitor.screen.name);
+                if (WindowsNative.brightness)
+                    WindowsNative.brightness.probe(monitor.screen.name);
                 return;
             }
             const match = root.ddcMonitors.find(m => m.name === screen.name && !root.monitors.slice(0, root.monitors.indexOf(this)).some(mon => mon.busNum === m.busNum));
@@ -200,7 +209,6 @@ Singleton {
                 monitor.rawMaxBrightness = 100;
                 monitor.brightness = available ? queriedBrightness : 1;
                 monitor.ready = true;
-                root.initializeMonitor(root.monitors.indexOf(monitor) + 1);
             }
             function onRouteChanged(screenName, method) {
                 if (screenName !== monitor.screen.name) return;
