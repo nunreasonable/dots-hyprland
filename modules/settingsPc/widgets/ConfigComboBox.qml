@@ -19,8 +19,14 @@ RowLayout {
     property bool searchable: false
 
     readonly property var comboBox: comboLoader.item
-    readonly property int currentIndex: {
+    readonly property var effectiveModel: {
         const index = root.model.findIndex(item => item.value === root.currentValue);
+        if (index !== -1 || root.currentValue === undefined)
+            return root.model;
+        return root.model.concat([{ [root.textRole]: String(root.currentValue), value: root.currentValue }]);
+    }
+    readonly property int currentIndex: {
+        const index = root.effectiveModel.findIndex(item => item.value === root.currentValue);
         return index !== -1 ? index : 0;
     }
 
@@ -72,7 +78,7 @@ RowLayout {
             id: comboBox
             enabled: root.enabled
             textRole: root.textRole
-            model: root.model
+            model: root.effectiveModel
             currentIndex: root.currentIndex
 
             onActivated: index => {
@@ -88,7 +94,7 @@ RowLayout {
             id: searchComboBox
             enabled: root.enabled
             textRole: root.textRole
-            model: root.model
+            model: root.effectiveModel
             currentIndex: root.currentIndex
 
             onActivated: index => {
