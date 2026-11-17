@@ -322,6 +322,7 @@ Singleton {
 
     Component.onCompleted: {
         refresh()
+        notifFileView.waitForJob()
     }
 
     FileView {
