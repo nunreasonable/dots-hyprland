@@ -37,8 +37,12 @@ RippleButton {
             id: switchWidget
             down: root.down
             Layout.fillWidth: false
-            checked: root.checked
             onClicked: root.clicked()
+        }
+        Binding {
+            target: switchWidget
+            property: "checked"
+            value: root.checked
         }
     }
 }
