@@ -45,10 +45,6 @@ Singleton {
         "winget.exe",
         "appinstallercli.exe",
         "msiexec.exe",
-        "wuauclt.exe",
-        "usoclient.exe",
-        "mousocoreworker.exe",
-        "tiworker.exe",
     ]
 
     Process {
@@ -59,7 +55,7 @@ Singleton {
             onStreamFinished: {
                 const runningLower = packageManagerCollector.text.toLowerCase();
                 root.packageManagerRunning = root.windowsPackageManagerProcessNames.some(
-                    name => runningLower.includes(name)
+                    name => runningLower.includes(`"${name}"`)
                 );
             }
         }
