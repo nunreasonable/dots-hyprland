@@ -14,7 +14,7 @@ QtObject {
     readonly property QtObject keyboard: (root.full || root.process === "settings") ? QSWin.Keyboard : null
     readonly property QtObject inputSettings: (root.full || root.process === "settings") ? QSWin.InputSettings : null
     readonly property QtObject clipboard: root.full ? QSWin.Clipboard : null
-    readonly property QtObject credentials: root.full ? QSWin.Credentials : null
+    readonly property QtObject credentials: (root.full || root.process === "settings") ? QSWin.Credentials : null
     readonly property QtObject input: root.full ? QSWin.Input : null
     readonly property QtObject nightLight: root.full ? QSWin.NightLight : null
     readonly property QtObject hotkeys: root.full ? QSWin.Hotkeys : null

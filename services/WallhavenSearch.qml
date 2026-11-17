@@ -27,7 +27,7 @@ Singleton {
     property string seed: ""
     property string minResolution: ""
     property string ratios: ""
-    property string apiKey: ""
+    readonly property string apiKey: KeyringStorage.keyringData?.apiKeys?.wallhaven ?? ""
     property string colors: ""
 
     readonly property string downloadDirectory: `${FileUtils.trimFileProtocol(Directories.pictures)
@@ -40,13 +40,47 @@ Singleton {
 
     Component.onCompleted: {
         loadFromConfig();
+        if (!KeyringStorage.loaded)
+            KeyringStorage.fetchKeyringData();
+        migrateApiKey();
+    }
+
+    Connections {
+        target: KeyringStorage
+        function onLoadedChanged() {
+            root.migrateApiKey();
+        }
+    }
+
+    Connections {
+        target: Config
+        function onReadyChanged() {
+            root.migrateApiKey();
+        }
+    }
+
+    function migrateApiKey() {
+        const legacyKey = Config.options?.wallpaperSelector?.wallhavenApiKey ?? "";
+        if (!Config.ready || !KeyringStorage.loaded || legacyKey.length === 0)
+            return;
+        if (root.apiKey.length === 0)
+            KeyringStorage.setNestedField(["apiKeys", "wallhaven"], legacyKey);
+        if (Platform.isWindows && !(WindowsNative.credentials?.read(KeyringStorage.properties.application) ?? "").includes(JSON.stringify(root.apiKey)))
+            return;
+        Config.options.wallpaperSelector.wallhavenApiKey = "";
+    }
+
+    function setApiKey(key) {
+        const value = String(key ?? "").trim();
+        if (value === root.apiKey)
+            return;
+        KeyringStorage.setNestedField(["apiKeys", "wallhaven"], value);
     }
 
     function loadFromConfig() {
         const cfg = Config.options?.wallpaperSelector;
         if (!cfg)
             return;
-        apiKey = KeyringStorage.keyringData?.apiKeys?.wallhaven ?? cfg.wallhavenApiKey ?? "";
         categories = cfg.wallhavenCategories || "111";
         purity = cfg.wallhavenPurity || "100";
         sorting = cfg.wallhavenSorting || "relevance";
@@ -69,11 +103,6 @@ Singleton {
         cfg.wallhavenColors = colors;
         cfg.wallhavenTopRange = topRange;
         cfg.wallhavenQuery = currentQuery;
-        cfg.wallhavenApiKey = apiKey;
-        if (Platform.isWindows)
-            return;
-        if (apiKey.length > 0)
-            KeyringStorage.setNestedField(["apiKeys", "wallhaven"], apiKey);
     }
 
     function clearQuery() {

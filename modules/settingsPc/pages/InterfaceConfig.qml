@@ -2430,7 +2430,7 @@ ContentPage {
                         Layout.fillWidth: true
                         echoMode: TextInput.Password
                         placeholderText: Translation.tr("Optional — needed for Spicy results")
-                        text: Config.options.wallpaperSelector.wallhavenApiKey ?? ""
+                        text: WallhavenSearch.apiKey
                         color: Appearance.colors.colOnLayer1
                         background: Rectangle {
                             color: Appearance.colors.colLayer1
@@ -2438,10 +2438,7 @@ ContentPage {
                             border.width: 1
                             border.color: wallhavenApiKeyField.activeFocus ? Appearance.colors.colPrimary : Appearance.colors.colLayer0Border
                         }
-                        onEditingFinished: {
-                            Config.options.wallpaperSelector.wallhavenApiKey = text;
-                            WallhavenSearch.apiKey = text;
-                        }
+                        onEditingFinished: WallhavenSearch.setApiKey(text)
                     }
                 }
 
@@ -2551,7 +2548,7 @@ ContentPage {
                         }
                     }
                     ConfigSwitch {
-                        visible: Config.options.wallpaperSelector.wallhavenApiKey.length > 0
+                        visible: WallhavenSearch.apiKey.length > 0
                         buttonIcon: "whatshot"
                         text: Translation.tr('Spicy')
                         enabled: SpicyStuff.allowed

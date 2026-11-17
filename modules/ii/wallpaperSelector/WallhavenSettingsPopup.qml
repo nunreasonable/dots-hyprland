@@ -471,7 +471,7 @@ WindowDialog {
                                                                 Appearance.colors.colLayer0Border
                     }
                     onEditingFinished: {
-                        WallhavenSearch.apiKey = text;
+                        WallhavenSearch.setApiKey(text);
                         WallhavenSearch.saveToConfig();
                     }
                 }
