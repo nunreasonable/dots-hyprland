@@ -1336,18 +1336,25 @@ Singleton {
 
     function _verifyToken(token) {
         verifyTokenProc.command = [root.curlBin, "-sS", "-w", "\nHTTP_STATUS:%{http_code}",
-            "-H", `Authorization: Bearer ${token}`,
+            "-K", "-",
             "-H", "Accept: application/vnd.github+json",
             "-H", "X-GitHub-Api-Version: 2022-11-28",
             "-H", "User-Agent: ii-windows-presets",
             "https://api.github.com/user"];
         verifyTokenProc.token = token;
+        verifyTokenProc.stdinEnabled = true;
         verifyTokenProc.running = true;
     }
 
     Process {
         id: verifyTokenProc
         property string token: ""
+        onRunningChanged: {
+            if (verifyTokenProc.running && verifyTokenProc.stdinEnabled) {
+                verifyTokenProc.write(StringUtils.curlConfigLine("header", `Authorization: Bearer ${verifyTokenProc.token}`));
+                verifyTokenProc.stdinEnabled = false;
+            }
+        }
         stdout: StdioCollector { id: verifyTokenOut }
         onExited: code => {
             const parsed = root._parseGhResponse(verifyTokenOut.text);
@@ -1476,33 +1483,46 @@ Singleton {
         const url = path.startsWith("http") ? path : `https://api.github.com${path}`;
         const args = [root.curlBin, "-sS", "-X", method,
             "-w", "\nHTTP_STATUS:%{http_code}",
-            "-H", `Authorization: Bearer ${root._ghToken}`,
+            "-K", "-",
             "-H", "Accept: application/vnd.github+json",
             "-H", "X-GitHub-Api-Version: 2022-11-28",
             "-H", "User-Agent: ii-windows-presets"];
-        if (bodyObj !== null)
-            args.push("-H", "Content-Type: application/json", "--data-binary", "@-");
+        if (bodyObj !== null) {
+            ghApiBodyFile.setText(JSON.stringify(bodyObj));
+            args.push("-H", "Content-Type: application/json", "--data-binary", `@${root.ghApiBodyPath}`);
+        }
         args.push(url);
         ghApiProc.hasBody = bodyObj !== null;
-        ghApiProc.bodyText = bodyObj !== null ? JSON.stringify(bodyObj) : "";
+        ghApiProc.curlConfig = StringUtils.curlConfigLine("header", `Authorization: Bearer ${root._ghToken}`);
         ghApiProc.command = args;
-        ghApiProc.stdinEnabled = bodyObj !== null;
+        ghApiProc.stdinEnabled = true;
         ghApiProc.running = true;
+    }
+
+    readonly property string ghApiBodyPath: `${Directories.presetsStagingPath}/github-request.json`
+
+    FileView {
+        id: ghApiBodyFile
+        path: root.ghApiBodyPath
+        preload: false
+        blockWrites: true
+        printErrors: false
     }
 
     Process {
         id: ghApiProc
         property bool hasBody: false
-        property string bodyText: ""
+        property string curlConfig: ""
         stdout: StdioCollector { id: ghApiOut }
         onRunningChanged: {
-            if (ghApiProc.running && ghApiProc.hasBody) {
-                ghApiProc.stdinEnabled = true;
-                ghApiProc.write(ghApiProc.bodyText);
+            if (ghApiProc.running && ghApiProc.stdinEnabled) {
+                ghApiProc.write(ghApiProc.curlConfig);
                 ghApiProc.stdinEnabled = false;
             }
         }
         onExited: code => {
+            if (ghApiProc.hasBody)
+                ghApiBodyFile.setText("");
             const parsed = root._parseGhResponse(ghApiOut.text);
             const cb = root._ghApiCallback;
             root._ghApiCallback = null;
