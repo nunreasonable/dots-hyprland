@@ -144,7 +144,9 @@ Singleton {
         const url = `https://api.unsplash.com/photos/random?orientation=${orientation}&count=${count}${q}&client_id=${clientId}`;
 
         fetchProc.provider = "unsplash";
-        fetchProc.command = ["curl", "-s", url];
+        fetchProc.command = ["curl", "-s", "-K", "-"];
+        fetchProc.curlConfig = StringUtils.curlConfigLine("url", url);
+        fetchProc.stdinEnabled = true;
         fetchProc.running = true;
     }
 
@@ -152,7 +154,9 @@ Singleton {
         const q = root.query.length > 0 ? root.query : "wallpaper landscape";
         const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&per_page=24&page=${root.page}`;
         fetchProc.provider = "pexels";
-        fetchProc.command  = ["curl", "-s", "-H", `Authorization: ${root.pexelsApiKey}`, url];
+        fetchProc.command  = ["curl", "-s", "-K", "-"];
+        fetchProc.curlConfig = StringUtils.curlConfigLine("header", `Authorization: ${root.pexelsApiKey}`) + StringUtils.curlConfigLine("url", url);
+        fetchProc.stdinEnabled = true;
         fetchProc.running  = true;
     }
 
@@ -378,9 +382,14 @@ Singleton {
         id: fetchProc
         property string provider: ""
         property string buffer:   ""
+        property string curlConfig: ""
 
         onRunningChanged: {
             if (running) buffer = "";
+            if (running && stdinEnabled) {
+                fetchProc.write(fetchProc.curlConfig);
+                fetchProc.stdinEnabled = false;
+            }
         }
 
         stdout: SplitParser {
