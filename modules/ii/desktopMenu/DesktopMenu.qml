@@ -181,6 +181,22 @@ Scope {
                 onPressed: GlobalStates.desktopMenuOpen = false
             }
 
+            function updateDismissable() {
+                if (root.visible)
+                    GlobalFocusGrab.addDismissable(root);
+                else
+                    GlobalFocusGrab.removeDismissable(root);
+            }
+            Component.onCompleted: root.updateDismissable()
+            Component.onDestruction: GlobalFocusGrab.removeDismissable(root)
+            onVisibleChanged: root.updateDismissable()
+            Connections {
+                target: GlobalFocusGrab
+                function onDismissed() {
+                    GlobalStates.desktopMenuOpen = false;
+                }
+            }
+
             StyledRectangularShadow {
                 target: menuCard
             }
