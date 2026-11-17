@@ -30,7 +30,10 @@ Item {
 
         ColumnLayout {
             id: contentColumn
-            width: root.forceWidth ? root.baseWidth : Math.max(root.baseWidth, implicitWidth)
+            width: {
+                const desired = root.forceWidth ? root.baseWidth : Math.max(root.baseWidth, implicitWidth)
+                return root.width > 0 ? Math.min(desired, root.width) : desired
+            }
             anchors {
                 top: parent.top
                 horizontalCenter: parent.horizontalCenter
