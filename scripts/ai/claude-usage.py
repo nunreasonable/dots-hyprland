@@ -5,7 +5,7 @@ import os
 import time
 from datetime import datetime
 
-home = os.path.expanduser("~/.claude")
+home = os.environ.get("CLAUDE_CONFIG_DIR") or os.path.expanduser("~/.claude")
 now = time.time()
 window = 5 * 3600
 

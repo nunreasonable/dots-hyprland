@@ -1,7 +1,7 @@
 $ErrorActionPreference = "SilentlyContinue"
 try { [Console]::OutputEncoding = [System.Text.Encoding]::UTF8 } catch {}
 
-$claudeDir = Join-Path $env:USERPROFILE ".claude"
+$claudeDir = if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { Join-Path $env:USERPROFILE ".claude" }
 $now = [DateTimeOffset]::UtcNow.ToUnixTimeSeconds()
 $window = 5 * 3600
 $cutoff = $now - 2 * $window
