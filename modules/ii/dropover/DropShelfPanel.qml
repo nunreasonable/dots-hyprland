@@ -84,8 +84,8 @@ Scope {
                 left: true
             }
             margins {
-                left: Math.max(20, GlobalStates.dropoverX - implicitWidth / 2)
-                top: Math.max(20, GlobalStates.dropoverY - implicitHeight - 30)
+                left: Math.min(Math.max(20, GlobalStates.dropoverX - implicitWidth / 2), Math.max(20, (shelfRoot.screen?.width ?? 0) - implicitWidth - 20))
+                top: Math.min(Math.max(20, GlobalStates.dropoverY - implicitHeight - 30), Math.max(20, (shelfRoot.screen?.height ?? 0) - implicitHeight - 20))
             }
 
             implicitWidth: 380
