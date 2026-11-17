@@ -1602,6 +1602,8 @@ Singleton {
     property int _pubUploadIndex: 0
 
     function publish(name) {
+        if (root.githubBusy)
+            return;
         if (!Config.options.profile.uploadGuideSeen) {
             root.uploadGuideName = name;
             root.uploadGuideOpen = true;
@@ -1702,6 +1704,8 @@ Singleton {
     property var _unshareDeleteQueue: []
 
     function unpublish(name) {
+        if (root.githubBusy)
+            return;
         root.githubBusy = true;
         root.githubError = "";
         root._withGithubToken(() => {
