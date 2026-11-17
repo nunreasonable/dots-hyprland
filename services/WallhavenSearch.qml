@@ -265,6 +265,13 @@ Singleton {
     }
 
     function downloadWallpaper(wallpaper, callback) {
+        if (downloadProc.running) {
+            console.warn("[WallhavenSearch] A download is already in progress");
+            if (callback)
+                callback(false, "");
+            return;
+        }
+
         var url = getWallpaperUrl(wallpaper);
         if (!url) {
             console.warn("[WallhavenSearch] No URL available for wallpaper", wallpaper.id);
