@@ -15,6 +15,7 @@ Item {
     property bool showAimLines: Config.options.regionSelector.rect.showAimLines
 
     property bool breathingBorderOnly: false
+    readonly property real borderGap: root.breathingBorderOnly ? 3 : 0
 
     // Overlay to darken screen
     // Base dark overlay around region
@@ -41,11 +42,11 @@ Item {
         anchors {
             left: parent.left
             top: parent.top
-            leftMargin: Math.round(root.regionX) - borderWidth
-            topMargin: Math.round(root.regionY) - borderWidth
+            leftMargin: Math.round(root.regionX) - borderWidth - root.borderGap
+            topMargin: Math.round(root.regionY) - borderWidth - root.borderGap
         }
-        width: Math.round(root.regionWidth) + borderWidth * 2
-        height: Math.round(root.regionHeight) + borderWidth * 2
+        width: Math.round(root.regionWidth) + (borderWidth + root.borderGap) * 2
+        height: Math.round(root.regionHeight) + (borderWidth + root.borderGap) * 2
 
         color: root.color
         dashLength: 8
