@@ -6,9 +6,9 @@ Item {
 
     property real radius: 0
 
-    anchors.left: parent.left
-    anchors.right: parent.right
-    anchors.top: parent.bottom
+    anchors.left: parent ? parent.left : undefined
+    anchors.right: parent ? parent.right : undefined
+    anchors.top: parent ? parent.bottom : undefined
     height: SekaiTheme.shadowOffset
     z: -3
     visible: SekaiTheme.active
@@ -16,8 +16,8 @@ Item {
 
     Rectangle {
         width: root.width
-        height: root.parent.height
-        y: SekaiTheme.shadowOffset - root.parent.height
+        height: root.parent?.height ?? 0
+        y: SekaiTheme.shadowOffset - height
         radius: root.radius
         color: SekaiTheme.shadow
         antialiasing: true
