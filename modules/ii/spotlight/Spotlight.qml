@@ -48,6 +48,7 @@ Scope {
         { name: Translation.tr("Log out"), description: Translation.tr("Close all apps and end the session"), icon: "logout", run: () => Session.logout() },
         { name: Translation.tr("Hibernate"), description: Translation.tr("Save the session to disk and power off"), icon: "downloading", run: () => Session.hibernate() },
         { name: Translation.tr("Reload shell"), description: Translation.tr("Restart Quickshell widgets"), icon: "refresh", run: () => Quickshell.reload(true) },
+        { name: Translation.tr("Exit shell"), description: Translation.tr("Close ii until you start it again"), icon: "exit_to_app", run: () => Qt.quit() },
         { name: Translation.tr("UEFI settings"), description: Translation.tr("Reboot into firmware setup"), icon: "settings_applications", run: () => Session.rebootToFirmware() },
         { name: Translation.tr("Task manager"), description: Translation.tr("Open the task manager"), icon: "browse_activity", run: () => Session.launchTaskManager() },
     ]

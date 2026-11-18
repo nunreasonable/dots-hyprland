@@ -769,6 +769,8 @@
   "Save the session to disk and power off": "Salvar a sessão no disco e desligar",
   "Reload shell": "Recarregar shell",
   "Restart Quickshell widgets": "Reiniciar os widgets do Quickshell",
+  "Exit shell": "Sair do shell",
+  "Close ii until you start it again": "Fecha o ii até você abrir de novo",
   "UEFI settings": "Configurações da UEFI",
   "Reboot into firmware setup": "Reiniciar na configuração do firmware",
   "Task manager": "Gerenciador de tarefas",
