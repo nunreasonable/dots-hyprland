@@ -13,6 +13,12 @@ Singleton {
         });
     }
 
+    function exitShell() {
+        if (Platform.isWindows && WindowsNative.taskbar)
+            WindowsNative.taskbar.hoverOnly = false;
+        Qt.quit();
+    }
+
     function changePassword() {
         if (Platform.isWindows) {
             Qt.openUrlExternally("ms-settings:signinoptions");
