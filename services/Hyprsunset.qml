@@ -106,7 +106,10 @@ Singleton {
         const to = toHour * 60 + toMinute;
         const manualActive = manualActiveHour * 60 + manualActiveMinute;
 
-        if (root.manualActive !== undefined && (inBetween(from, manualActive, t) || inBetween(to, manualActive, t))) {
+        // In the minute it was switched no schedule time has passed yet; from
+        // equal to `t` reads as a whole day gone round.
+        if (root.manualActive !== undefined && manualActive !== t
+            && (inBetween(from, manualActive, t) || inBetween(to, manualActive, t))) {
             root.manualActive = undefined;
             root.saveManual();
         }
