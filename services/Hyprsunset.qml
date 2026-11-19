@@ -42,8 +42,42 @@ Singleton {
     onClockMinuteChanged: reEvaluate()
     onAutomaticChanged: {
         root.manualActive = undefined;
+        root.saveManual();
         root.firstEvaluation = true;
         reEvaluate();
+    }
+
+    // A night light switched by hand stays so across shell restarts, until the
+    // schedule's next from/to time, as it does while the shell keeps running.
+    readonly property real manualMaxAgeMs: 24 * 60 * 60 * 1000
+    function saveManual() {
+        if (!Persistent.ready) return;
+        Persistent.states.nightLight.manual = root.manualActive === undefined ? -1 : (root.manualActive ? 1 : 0);
+        Persistent.states.nightLight.manualAt = root.manualActive === undefined ? 0 : Date.now();
+    }
+    Connections {
+        target: Persistent
+        function onReadyChanged() {
+            if (!Persistent.ready) return;
+            const manual = Persistent.states.nightLight.manual;
+            const at = Persistent.states.nightLight.manualAt;
+            if (manual === -1 || Date.now() - at > root.manualMaxAgeMs) {
+                Persistent.states.nightLight.manual = -1;
+                return;
+            }
+            const when = new Date(at);
+            root.manualActiveHour = when.getHours();
+            root.manualActiveMinute = when.getMinutes();
+            root.manualActive = manual === 1;
+            root.reEvaluate();
+            if (root.manualActive === undefined) {
+                root.ensureState();
+            } else if (root.manualActive) {
+                root.enableTemperature();
+            } else {
+                root.disableTemperature();
+            }
+        }
     }
 
     function inBetween(t, from, to) {
@@ -63,6 +97,7 @@ Singleton {
 
         if (root.manualActive !== undefined && (inBetween(from, manualActive, t) || inBetween(to, manualActive, t))) {
             root.manualActive = undefined;
+            root.saveManual();
         }
         root.shouldBeOn = inBetween(t, from, to);
         if (firstEvaluation) {
@@ -171,6 +206,7 @@ Singleton {
         }
 
         root.manualActive = active !== undefined ? active : !root.manualActive;
+        root.saveManual();
         if (root.manualActive) {
             root.enableTemperature();
         } else {
