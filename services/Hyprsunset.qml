@@ -40,9 +40,20 @@ Singleton {
     property int manualActiveMinute
 
     onClockMinuteChanged: reEvaluate()
+    // `automatic` also turns on as the config finishes loading at startup;
+    // only a change made after that drops a night light switched by hand.
+    property bool configLoaded: false
+    Connections {
+        target: Config
+        function onReadyChanged() {
+            if (Config.ready) Qt.callLater(() => root.configLoaded = true);
+        }
+    }
     onAutomaticChanged: {
-        root.manualActive = undefined;
-        root.saveManual();
+        if (root.configLoaded) {
+            root.manualActive = undefined;
+            root.saveManual();
+        }
         root.firstEvaluation = true;
         reEvaluate();
     }
