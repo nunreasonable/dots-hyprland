@@ -16,10 +16,12 @@ Singleton {
     property bool active: false
 
     function fetchAvailability() {
+        if (Platform.isWindows) return;
         fetchAvailabilityProc.running = true
     }
 
     function fetchActiveState() {
+        if (Platform.isWindows) return;
         fetchActiveStateProc.running = true
     }
 
