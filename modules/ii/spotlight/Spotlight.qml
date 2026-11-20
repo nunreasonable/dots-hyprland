@@ -327,7 +327,10 @@ Scope {
     Binding {
         target: LauncherSearch
         property: "query"
-        value: root.mode === "clipboard" ? Config.options.search.prefix.clipboard + root.query : root.query
+        value: {
+            const prefix = Config.options.search.prefix.clipboard;
+            return root.mode === "clipboard" && !root.query.startsWith(prefix) ? prefix + root.query : root.query;
+        }
         when: GlobalStates.spotlightOpen && (root.mode === "" || root.mode === "clipboard")
     }
 
@@ -459,7 +462,20 @@ q="$1"; h="$2"
         implicitHeight: panelWindow.areaHeight
 
         mask: Region {
-            item: maskArea
+            x: content.x + panel.x
+            y: content.y + panel.y
+            width: GlobalStates.spotlightOpen ? panel.width : 0
+            height: GlobalStates.spotlightOpen ? panel.height : 0
+            radius: panel.radius
+
+            Region {
+                intersection: Intersection.Combine
+                x: content.x + idleRow.x
+                y: content.y + idleRow.y
+                width: GlobalStates.spotlightOpen && idleRow.visible ? idleRow.width : 0
+                height: GlobalStates.spotlightOpen && idleRow.visible ? idleRow.height : 0
+                radius: idleRow.height / 2
+            }
         }
 
         Connections {
@@ -492,14 +508,6 @@ q="$1"; h="$2"
 
         AppContextMenu {
             id: spotlightAppContextMenu
-        }
-
-        Item {
-            id: maskArea
-            x: content.x
-            y: content.y
-            width: content.width
-            height: content.height
         }
 
         Item {
