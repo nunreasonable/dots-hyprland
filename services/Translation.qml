@@ -31,7 +31,29 @@ Singleton {
         if (configLang !== "auto")
             return configLang;
 
-        return Qt.locale().name;
+        const name = Qt.locale().name;
+        const languages = root.allAvailableLanguages;
+        if (languages.includes(name))
+            return name;
+        const prefix = name.split("_")[0];
+        return languages.find(language => language.split("_")[0] === prefix) ?? name;
+    }
+
+    function scanWindowsLanguages() {
+        if (!Platform.isWindows || !WindowsNative.fsUtils)
+            return;
+        const scan = dir => WindowsNative.fsUtils.listDir(dir).filter(file => file.endsWith(".json")).map(file => file.slice(0, -5));
+        const shipped = scan(root.translationsDir);
+        if (shipped.length > 0)
+            root.availableLanguages = shipped;
+        root.availableGeneratedLanguages = scan(root.generatedTranslationsDir);
+    }
+
+    Connections {
+        target: Platform.isWindows ? WindowsNative : null
+        function onReadyChanged() {
+            root.scanWindowsLanguages();
+        }
     }
 
     TranslationScanner {
@@ -51,6 +73,7 @@ Singleton {
     }
 
     Component.onCompleted: {
+        root.scanWindowsLanguages();
         if (translationFileView.path !== "") return;
         translationFileView.reread();
         generatedTranslationFileView.reread();
