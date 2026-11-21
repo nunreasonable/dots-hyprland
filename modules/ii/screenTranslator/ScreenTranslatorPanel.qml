@@ -164,7 +164,8 @@ PanelWindow {
 
         Toolbar {
             id: toolbar
-            focus: root.visible
+            visible: !Platform.isWindows
+            focus: root.visible && !Platform.isWindows
             Keys.onPressed: event => { // Esc to close
                 if (event.key === Qt.Key_Escape) {
                     root.dismiss();
@@ -234,6 +235,12 @@ PanelWindow {
 
         ToolbarPairedFab {
             iconText: "close"
+            focus: root.visible && Platform.isWindows
+            Keys.onPressed: event => {
+                if (event.key === Qt.Key_Escape) {
+                    root.dismiss();
+                }
+            }
             onClicked: root.dismiss()
             StyledToolTip {
                 text: Translation.tr("Close")
