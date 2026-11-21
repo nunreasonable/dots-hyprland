@@ -18,9 +18,10 @@ Item {
     implicitHeight: fabWidget.implicitHeight
     Loader {
         active: root.enableShadow
-        anchors.fill: parent
+        anchors.fill: fabWidget
         sourceComponent: StyledRectangularShadow {
             target: fabWidget
+            anchors.fill: undefined
             radius: fabWidget.buttonRadius
         }
     }
