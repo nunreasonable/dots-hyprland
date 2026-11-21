@@ -83,6 +83,11 @@ Singleton {
                 property bool inhibit: false
             }
 
+            property JsonObject nightLight: JsonObject {
+                property int manual: -1
+                property real manualAt: 0
+            }
+
             property JsonObject nowPlaying: JsonObject {
                 property real x: -1
                 property real y: -1
