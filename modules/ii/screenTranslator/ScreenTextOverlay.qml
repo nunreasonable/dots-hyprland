@@ -208,19 +208,15 @@ Item {
                 return;
             }
             pending++;
-            root.windowsTrack(GoogleTranslateFree.translate("auto", Translation.languageCode, batch.join("\n"), translated => {
+            root.windowsTrack(GoogleTranslateFree.translateMany("auto", Translation.languageCode, batch, parts => {
                 if (generation !== root.windowsGeneration) return;
-                if (translated) {
-                    let parts = translated.split(/\r?\n/).map(part => part.trim());
-                    if (parts.length !== batch.length) parts = parts.filter(part => part.length > 0);
-                    if (parts.length === batch.length) {
-                        batch.forEach((text, i) => {
-                            translation[text] = parts[i];
-                        });
-                        translatedCount += batch.length;
-                    } else {
-                        batch.forEach(text => translateOne(text));
-                    }
+                if (parts.length === batch.length) {
+                    batch.forEach((text, i) => {
+                        translation[text] = parts[i].trim();
+                    });
+                    translatedCount += batch.length;
+                } else {
+                    batch.forEach(text => translateOne(text));
                 }
                 finishOne();
             }));
