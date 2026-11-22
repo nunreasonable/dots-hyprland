@@ -54,9 +54,19 @@ MouseArea {
                     visible: isCharging && percentage < 1 // TODO: animation
                 }
                 StyledText {
+                    id: percentText
                     Layout.alignment: Qt.AlignVCenter
                     font: batteryProgress.font
                     text: batteryProgress.text
+                    transform: Translate {
+                        y: Platform.isWindows ? Math.round(percentText.height / 2 - (percentText.baselineOffset + percentMetrics.tightBoundingRect.y + percentMetrics.tightBoundingRect.height / 2)) : 0
+                    }
+
+                    TextMetrics {
+                        id: percentMetrics
+                        font: percentText.font
+                        text: percentText.text
+                    }
                 }
             }
         }
