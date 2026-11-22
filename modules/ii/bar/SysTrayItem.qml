@@ -83,8 +83,8 @@ MouseArea {
         visible: !Config.options.tray.monochromeIcons
         source: root.item.icon
         anchors.centerIn: parent
-        width: parent.width
-        height: parent.height
+        width: 16
+        height: 16
     }
 
     Loader {
