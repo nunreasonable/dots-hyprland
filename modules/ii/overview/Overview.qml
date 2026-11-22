@@ -44,8 +44,45 @@ Scope {
         color: "transparent"
 
         readonly property bool windowDragging: (overviewLoader.item?.draggingFromWorkspace ?? -1) !== -1
+        readonly property bool useVisibleRegions: Platform.isWindows && GlobalStates.overviewOpen && !panelWindow.windowDragging
+        readonly property Item searchSurface: searchWidgetLoader.item?.inputSurface ?? null
+        readonly property Item previewSurface: searchWidgetLoader.item?.previewSurface ?? null
+
         mask: Region {
-            item: GlobalStates.overviewOpen ? (panelWindow.windowDragging ? fullscreenMask : columnMask) : null
+            item: GlobalStates.overviewOpen
+                ? (panelWindow.windowDragging ? fullscreenMask : (Platform.isWindows ? null : columnMask))
+                : null
+
+            Region {
+                x: columnLayout.x + searchWidgetLoader.x + (panelWindow.searchSurface?.x ?? 0)
+                y: columnLayout.y + searchWidgetLoader.y + (panelWindow.searchSurface?.y ?? 0)
+                width: panelWindow.useVisibleRegions ? (panelWindow.searchSurface?.width ?? 0) : 0
+                height: panelWindow.useVisibleRegions ? (panelWindow.searchSurface?.height ?? 0) : 0
+                radius: panelWindow.searchSurface?.radius ?? 0
+            }
+
+            Region {
+                x: columnLayout.x + searchWidgetLoader.x + (panelWindow.previewSurface?.x ?? 0)
+                y: columnLayout.y + searchWidgetLoader.y + (panelWindow.previewSurface?.y ?? 0)
+                width: panelWindow.useVisibleRegions && panelWindow.previewSurface?.visible ? panelWindow.previewSurface.width : 0
+                height: panelWindow.useVisibleRegions && panelWindow.previewSurface?.visible ? panelWindow.previewSurface.height : 0
+            }
+
+            Region {
+                x: columnLayout.x + overviewLoader.x
+                y: columnLayout.y + overviewLoader.y
+                // The grid hides itself while searching, but its loader keeps its
+                // size: only a shown grid takes clicks, or the area under a
+                // search's results kept the overview from closing.
+                width: panelWindow.useVisibleRegions && (overviewLoader.item?.visible ?? false) ? overviewLoader.width : 0
+                height: panelWindow.useVisibleRegions && (overviewLoader.item?.visible ?? false) ? overviewLoader.height : 0
+            }
+        }
+
+        HyprlandFocusGrab {
+            windows: [panelWindow]
+            active: Platform.isWindows && GlobalStates.overviewOpen
+            onCleared: GlobalStates.overviewOpen = false
         }
 
         anchors {
@@ -79,7 +116,8 @@ Scope {
                     if (!overviewScope.dontAutoCancelSearch) {
                         searchWidgetLoader.item?.cancelSearch();
                     }
-                    GlobalFocusGrab.addDismissable(panelWindow);
+                    if (!Platform.isWindows)
+                        GlobalFocusGrab.addDismissable(panelWindow);
                 }
             }
         }
