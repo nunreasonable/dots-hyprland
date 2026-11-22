@@ -381,6 +381,9 @@ Item {
                                             }
                                             GroupButton {
                                                 id: closeButton
+                                                z: 10
+                                                Layout.fillWidth: false
+                                                Layout.fillHeight: false
                                                 colBackground: ColorUtils.transparentize(Appearance.colors.colSurfaceContainer)
                                                 baseWidth: root.windowControlsHeight
                                                 baseHeight: root.windowControlsHeight
@@ -393,7 +396,10 @@ Item {
                                                     color: Appearance.m3colors.m3onSurface
                                                 }
                                                 onClicked: {
-                                                    windowButton.modelData?.close();
+                                                    const target = windowButton.modelData;
+                                                    if (!target) return;
+                                                    target.activate();
+                                                    target.close();
                                                 }
                                             }
                                         }

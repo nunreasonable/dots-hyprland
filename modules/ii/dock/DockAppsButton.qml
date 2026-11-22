@@ -5,8 +5,6 @@ import QtQuick.Layouts
 
 DockButton {
     visible: Config.options.dock.showAppsButton
-    Layout.topMargin: 0
-    Layout.leftMargin: 0
     innerInset: DockStyle.appsButtonInset
     outerInset: DockStyle.appsButtonInset
 
