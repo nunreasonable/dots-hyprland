@@ -71,7 +71,7 @@ ContentPage {
                     id: wallpaperPreview
                     anchors.fill: parent
                     fillMode: Image.PreserveAspectCrop
-                    source: Config.options.background.wallpaperPath
+                    source: Wallpapers.isVideoPath(Config.options.background.wallpaperPath) ? (Config.options.background.thumbnailPath || "") : Config.options.background.wallpaperPath
                     sourceSize: Qt.size(Math.ceil(340 * Screen.devicePixelRatio), Math.ceil(200 * Screen.devicePixelRatio))
                     layer.enabled: true
                     layer.effect: OpacityMask {
