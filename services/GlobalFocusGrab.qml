@@ -58,10 +58,6 @@ Singleton {
 
     HyprlandFocusGrab {
         id: grab
-        // On Windows a sidebar often doesn't get keyboard focus when it opens,
-        // and a click on the bar then dismissed it right before the bar
-        // button toggled it open again. The bar always belongs to the grab
-        // there, as it does on Hyprland once the sidebar has focus.
         windows: Qt.platform.os === "windows" || root.dismissable.every(w => !w?.focusable) || root.dismissable.some(w => hasActive(w?.contentItem)) ? [...root.dismissable, ...root.persistent] : [...root.dismissable]
         active: root.dismissable.length > 0
         onCleared: () => {

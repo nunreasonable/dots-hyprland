@@ -71,9 +71,6 @@ Scope {
             Region {
                 x: columnLayout.x + overviewLoader.x
                 y: columnLayout.y + overviewLoader.y
-                // The grid hides itself while searching, but its loader keeps its
-                // size: only a shown grid takes clicks, or the area under a
-                // search's results kept the overview from closing.
                 width: panelWindow.useVisibleRegions && (overviewLoader.item?.visible ?? false) ? overviewLoader.width : 0
                 height: panelWindow.useVisibleRegions && (overviewLoader.item?.visible ?? false) ? overviewLoader.height : 0
             }
