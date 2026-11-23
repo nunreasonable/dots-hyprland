@@ -33,10 +33,12 @@ Process {
     function windowsCommand() {
         if (WindowsNative.fsUtils?.classify(rawFilePath()) === "file") return ["cmd", "/c", "exit", "0"];
         const userAgent = downloadUserAgent ? ["-H", `User-Agent: ${downloadUserAgent}`] : [];
-        return ["curl", "--create-dirs", "-sSL", root.sourceUrl, ...userAgent, "-o", rawFilePath()];
+        WindowsNative.fsUtils?.makePath(FileUtils.parentDirectory(rawFilePath()));
+        return ["curl", "-sSL", root.sourceUrl, ...userAgent, "-o", FileUtils.fileNameForPath(rawFilePath())];
     }
 
     running: true
+    workingDirectory: Platform.isWindows ? FileUtils.parentDirectory(rawFilePath()) : ""
     command: Platform.isWindows
         ? windowsCommand()
         : ["bash", "-c",

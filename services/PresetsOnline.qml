@@ -101,7 +101,8 @@ Singleton {
         if (entry === null) return;
         winThumbSrcProc.entryName = entry.name;
         winThumbSrcProc.srcPath = `${root.thumbsDir}/.${entry.name}.src`;
-        winThumbSrcProc.command = [root.curlBin, "-fsSL", "-m", "40", "-o", winThumbSrcProc.srcPath, entry.screenshot];
+        winThumbSrcProc.workingDirectory = root.thumbsDir;
+        winThumbSrcProc.command = [root.curlBin, "-fsSL", "-m", "40", "-o", FileUtils.fileNameForPath(winThumbSrcProc.srcPath), entry.screenshot];
         winThumbSrcProc.running = true;
     }
 
@@ -661,7 +662,8 @@ Singleton {
             return;
         }
         const asset = root._winAssetQueue.shift();
-        winAssetProc.command = [root.curlBin, "-fsSL", "--max-time", "120", asset.url, "-o", `${root._winAssetDir}/${asset.filename}`];
+        winAssetProc.workingDirectory = root._winAssetDir;
+        winAssetProc.command = [root.curlBin, "-fsSL", "--max-time", "120", asset.url, "-o", asset.filename];
         winAssetProc.running = true;
     }
 

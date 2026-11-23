@@ -24,8 +24,9 @@ IconImage {
     Process {
         id: faviconDownloadProcess
         running: false
+        workingDirectory: Platform.isWindows ? FileUtils.parentDirectory(root.faviconFilePath) : ""
         command: Platform.isWindows
-            ? ["curl", "-s", root.faviconUrl, "-o", root.faviconFilePath, "-L", "-H", `User-Agent: ${downloadUserAgent}`]
+            ? ["curl", "-s", root.faviconUrl, "-o", FileUtils.fileNameForPath(root.faviconFilePath), "-L", "-H", `User-Agent: ${downloadUserAgent}`]
             : ["bash", "-c", `[ -f ${faviconFilePath} ] || curl -s '${root.faviconUrl}' -o '${faviconFilePath}' -L -H 'User-Agent: ${downloadUserAgent}'`]
         onExited: (exitCode, exitStatus) => {
             root.urlToLoad = root.faviconFilePath

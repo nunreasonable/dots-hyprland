@@ -174,6 +174,7 @@ Button {
                                 const targetPath = root.imageData.is_nsfw ? root.nsfwPath : root.downloadPath;
                                 const userAgent = Config.options?.networking?.userAgent ?? ""
                                 if (Platform.isWindows) {
+                                    WindowsNative.fsUtils?.makePath(targetPath);
                                     booruDownloadProc.targetPath = targetPath;
                                     booruDownloadProc.userAgent = userAgent;
                                     booruDownloadProc.running = true;
@@ -190,9 +191,10 @@ Button {
                             id: booruDownloadProc
                             property string targetPath: ""
                             property string userAgent: ""
-                            command: ["curl", "--create-dirs", "-sSL", root.imageData.file_url,
+                            workingDirectory: booruDownloadProc.targetPath
+                            command: ["curl", "-sSL", root.imageData.file_url,
                                 ...(booruDownloadProc.userAgent ? ["-H", `User-Agent: ${booruDownloadProc.userAgent}`] : []),
-                                "-o", `${booruDownloadProc.targetPath}\\${root.fileName}`]
+                                "-o", root.fileName]
                             onExited: (exitCode, exitStatus) => {
                                 if (exitCode !== 0) return;
                                 Notifications.sendDesktop(

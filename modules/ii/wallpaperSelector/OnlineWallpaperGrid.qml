@@ -61,7 +61,14 @@ Item {
         const fullPath = `${picturesPath}/Wallpapers/${fileName}`
         downloadProc.filePath = fullPath
         downloadProc.applyAfter = apply
-        downloadProc.command = ["curl", "--create-dirs", "-sSL", "--max-filesize", "60000000", "-o", fullPath, "--url", item.full]
+        if (Platform.isWindows) {
+            WindowsNative.fsUtils?.makePath(FileUtils.parentDirectory(fullPath))
+            downloadProc.workingDirectory = FileUtils.parentDirectory(fullPath)
+            downloadProc.command = ["curl", "-sSL", "--max-filesize", "60000000", "-o", FileUtils.fileNameForPath(fullPath), "--url", item.full]
+        } else {
+            downloadProc.workingDirectory = ""
+            downloadProc.command = ["curl", "--create-dirs", "-sSL", "--max-filesize", "60000000", "-o", fullPath, "--url", item.full]
+        }
         downloadProc.running = true
     }
 

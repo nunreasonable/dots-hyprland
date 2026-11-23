@@ -80,8 +80,9 @@ Scope {
         property string targetFile: root.artUrl
         property string targetPath: root.artFilePath
         property string partPath: targetPath + ".part"
+        workingDirectory: Platform.isWindows ? FileUtils.parentDirectory(targetPath) : ""
         command: Platform.isWindows
-            ? ["curl", "-4", "-sSL", "-o", targetPath, "--url", targetFile]
+            ? ["curl", "-4", "-sSL", "-o", FileUtils.fileNameForPath(targetPath), "--url", targetFile]
             : ["bash", "-c", `[ -f ${targetPath} ] || { curl -4 -sSL '${targetFile}' -o '${partPath}' && mv '${partPath}' '${targetPath}'; }`]
         onExited: (exitCode, exitStatus) => {
             if (exitCode === 0) root.colorSourceFilePath = Platform.isWindows ? `file:///${root.artFilePath}` : Qt.resolvedUrl(root.artFilePath)

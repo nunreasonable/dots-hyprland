@@ -98,8 +98,9 @@ Item { // Player instance
         id: coverArtDownloader
         property string targetFile: root.artUrl
         property string artFilePath: root.artFilePath
+        workingDirectory: Platform.isWindows ? FileUtils.parentDirectory(artFilePath) : ""
         command: Platform.isWindows
-            ? ["curl", "-4", "-sSL", "-o", artFilePath, "--url", targetFile]
+            ? ["curl", "-4", "-sSL", "-o", FileUtils.fileNameForPath(artFilePath), "--url", targetFile]
             : ["bash", "-c", '[ -f "$2" ] || { curl -4 -sSL -o "$2.part" --url "$1" && mv "$2.part" "$2"; }', "art", targetFile, artFilePath]
         onExited: (exitCode, exitStatus) => {
             root.downloaded = !Platform.isWindows || exitCode === 0

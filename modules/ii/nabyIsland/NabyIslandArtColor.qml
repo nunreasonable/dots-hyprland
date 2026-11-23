@@ -1,5 +1,6 @@
 import qs.services
 import qs.modules.common
+import qs.modules.common.functions
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -53,8 +54,9 @@ Item {
         id: downloader
         property string targetFile: ""
         property string outputFile: ""
+        workingDirectory: Platform.isWindows ? FileUtils.parentDirectory(downloader.outputFile) : ""
         command: Platform.isWindows
-            ? ["curl", "-4", "-sSL", "--create-dirs", "-o", downloader.outputFile, "--url", downloader.targetFile]
+            ? ["curl", "-4", "-sSL", "-o", FileUtils.fileNameForPath(downloader.outputFile), "--url", downloader.targetFile]
             : ["bash", "-c", 'mkdir -p "$(dirname "$2")"; [ -f "$2" ] || { curl -4 -sSL -o "$2.part" --url "$1" && mv "$2.part" "$2"; }', "art", downloader.targetFile, downloader.outputFile]
         onExited: (exitCode, exitStatus) => {
             if (downloader.outputFile === root.artFilePath)

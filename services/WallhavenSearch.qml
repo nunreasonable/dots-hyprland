@@ -296,7 +296,14 @@ Singleton {
         downloadProc.localPath = localPath;
         downloadProc.callback = callback;
         downloadProc.wallpaperId = wallpaperId;
-        downloadProc.command = ["curl", "--create-dirs", "-sSL", "--max-filesize", "60000000", "-o", localPath, "--url", url];
+        if (Platform.isWindows) {
+            WindowsNative.fsUtils?.makePath(root.downloadDirectory);
+            downloadProc.workingDirectory = root.downloadDirectory;
+            downloadProc.command = ["curl", "-sSL", "--max-filesize", "60000000", "-o", FileUtils.fileNameForPath(localPath), "--url", url];
+        } else {
+            downloadProc.workingDirectory = "";
+            downloadProc.command = ["curl", "--create-dirs", "-sSL", "--max-filesize", "60000000", "-o", localPath, "--url", url];
+        }
         downloadProc.running = true;
     }
 

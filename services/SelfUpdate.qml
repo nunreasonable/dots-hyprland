@@ -223,7 +223,9 @@ Singleton {
         root.downloading = true;
         root.lastError = "";
         root.downloadDest = `${Directories.selfUpdateDownloadDir}/${root.setupAssetName}`;
-        downloadProc.command = [root.curlBin, "--create-dirs", "-fsSL", "--max-time", "180", "-o", root.downloadDest,
+        WindowsNative.fsUtils?.makePath(FileUtils.parentDirectory(root.downloadDest));
+        downloadProc.workingDirectory = FileUtils.parentDirectory(root.downloadDest);
+        downloadProc.command = [root.curlBin, "-fsSL", "--max-time", "180", "-o", FileUtils.fileNameForPath(root.downloadDest),
             "-w", "SIZE:%{size_download}", root.setupUrl];
         downloadProc.running = true;
     }
@@ -298,7 +300,9 @@ Singleton {
         root.downloadDest = `${Directories.selfUpdateDownloadDir}/ii-qml-${root.patchLabel}.zip`;
         patchDownloadProc.label = root.patchLabel;
         patchDownloadProc.digest = root.patchDigest;
-        patchDownloadProc.command = [root.curlBin, "--create-dirs", "-fsSL", "--max-time", "120", "-o", root.downloadDest, root.patchUrl];
+        WindowsNative.fsUtils?.makePath(FileUtils.parentDirectory(root.downloadDest));
+        patchDownloadProc.workingDirectory = FileUtils.parentDirectory(root.downloadDest);
+        patchDownloadProc.command = [root.curlBin, "-fsSL", "--max-time", "120", "-o", FileUtils.fileNameForPath(root.downloadDest), root.patchUrl];
         patchDownloadProc.running = true;
     }
 
