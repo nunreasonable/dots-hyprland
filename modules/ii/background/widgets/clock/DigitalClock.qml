@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.functions
 import QtQuick
 import QtQuick.Layouts
 
@@ -84,9 +85,25 @@ ColumnLayout {
         }
     }
 
+    readonly property bool caractereBlockClock: StyleTheme.key === "caractere" && !clockColumn.isVertical
+
+    Loader {
+        Layout.alignment: Qt.AlignHCenter
+        active: clockColumn.caractereBlockClock
+        visible: active
+        sourceComponent: Text {
+            color: clockColumn.colText
+            horizontalAlignment: Text.AlignHCenter
+            font.family: Appearance.font.family.main
+            font.pixelSize: Config.options.background.widgets.clock.digital.font.size * 0.22
+            lineHeight: 1
+            text: CaractereGlyphs.blockDigitsText(DateTime.time)
+        }
+    }
+
     ClockText {
         id: timeTextTop
-        visible: !SekaiTheme.active
+        visible: !SekaiTheme.active && !clockColumn.caractereBlockClock
         text: clockColumn.isVertical ? DateTime.time.split(":")[0].padStart(2, "0") : DateTime.time
         color: clockColumn.colText
         horizontalAlignment: Text.AlignHCenter

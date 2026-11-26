@@ -61,4 +61,34 @@ QtObject {
         }
         return out;
     }
+
+    readonly property var blockDigits: ({
+                                            "0": ["111", "101", "101", "101", "111"],
+                                            "1": ["010", "110", "010", "010", "111"],
+                                            "2": ["111", "001", "111", "100", "111"],
+                                            "3": ["111", "001", "111", "001", "111"],
+                                            "4": ["101", "101", "111", "001", "001"],
+                                            "5": ["111", "100", "111", "001", "111"],
+                                            "6": ["111", "100", "111", "101", "111"],
+                                            "7": ["111", "001", "001", "001", "001"],
+                                            "8": ["111", "101", "111", "101", "111"],
+                                            "9": ["111", "101", "111", "001", "111"],
+                                            ":": ["000", "010", "000", "010", "000"],
+                                            " ": ["000", "000", "000", "000", "000"]
+                                        })
+
+    function blockDigitsText(text) {
+        const rows = ["", "", "", "", ""];
+        const chars = String(text).split("");
+        for (let i = 0; i < chars.length; i++) {
+            const bitmap = root.blockDigits[chars[i]] ?? root.blockDigits[" "];
+            for (let row = 0; row < 5; row++) {
+                let rowText = "";
+                for (let col = 0; col < bitmap[row].length; col++)
+                    rowText += bitmap[row][col] === "1" ? root.fullBlock + root.fullBlock : "  ";
+                rows[row] += rowText + "  ";
+            }
+        }
+        return rows.map(r => r.replace(/\s+$/, "")).join("\n");
+    }
 }

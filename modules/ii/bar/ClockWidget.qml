@@ -15,10 +15,76 @@ BarWidgetSwitcher {
     readonly property bool hasAmPm: root.dateTimeString.toLowerCase().includes("am") || root.dateTimeString.toLowerCase().includes("pm")
 
     horizontalExtraPadding: root.classic ? 0 : 12
-    rowDefault: root.classic ? classicRow : layoutRow
-    rowMaterial: root.classic ? classicRow : materialRow
-    colDefault: columnContent
-    colMaterial: materialColumn
+    rowDefault: StyleTheme.key === "caractere" ? caractereRow : (root.classic ? classicRow : layoutRow)
+    rowMaterial: StyleTheme.key === "caractere" ? caractereRow : (root.classic ? classicRow : materialRow)
+    colDefault: StyleTheme.key === "caractere" ? caractereColumn : columnContent
+    colMaterial: StyleTheme.key === "caractere" ? caractereColumn : materialColumn
+
+    Component {
+        id: caractereRow
+        RowLayout {
+            spacing: 8
+
+            StyledText {
+                visible: root.showDate
+                font.pixelSize: Appearance.font.pixelSize.small
+                color: root.contentColor
+                text: DateTime.shortDate
+            }
+
+            Rectangle {
+                implicitWidth: caractereTimeText.implicitWidth + 12
+                implicitHeight: caractereTimeText.implicitHeight + 8
+                radius: 0
+                color: StyleTheme.current.termMatch ?? Appearance.colors.colPrimary
+
+                StyledText {
+                    id: caractereTimeText
+                    anchors.centerIn: parent
+                    font.pixelSize: Appearance.font.pixelSize.small
+                    color: StyleTheme.current.termBg ?? Appearance.colors.colOnPrimary
+                    text: DateTime.time
+                    font.features: ({
+                        "tnum": 1
+                    })
+                }
+            }
+        }
+    }
+
+    Component {
+        id: caractereColumn
+        ColumnLayout {
+            spacing: 2
+
+            Rectangle {
+                Layout.alignment: Qt.AlignHCenter
+                implicitWidth: caractereColTimeText.implicitWidth + 10
+                implicitHeight: caractereColTimeText.implicitHeight + 6
+                radius: 0
+                color: StyleTheme.current.termMatch ?? Appearance.colors.colPrimary
+
+                StyledText {
+                    id: caractereColTimeText
+                    anchors.centerIn: parent
+                    font.pixelSize: Appearance.font.pixelSize.smaller
+                    color: StyleTheme.current.termBg ?? Appearance.colors.colOnPrimary
+                    text: DateTime.time
+                    font.features: ({
+                        "tnum": 1
+                    })
+                }
+            }
+
+            StyledText {
+                visible: root.showDate
+                Layout.alignment: Qt.AlignHCenter
+                font.pixelSize: Appearance.font.pixelSize.smallest
+                color: root.contentColor
+                text: DateTime.shortDate
+            }
+        }
+    }
 
     Component {
         id: classicRow

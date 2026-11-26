@@ -531,8 +531,8 @@ ButtonMouseArea {
             property real indicatorThickness: root.activeWorkspaceSize
 
             contentLayer: StyledRectangle.ContentLayer.Group
-            radius: indicatorThickness / 2
-            color: StyleTheme.palette.accent ?? Appearance.colors.colPrimary
+            radius: StyleTheme.key === "caractere" ? 0 : indicatorThickness / 2
+            color: StyleTheme.key === "caractere" ? (StyleTheme.current.termWorkspace ?? Appearance.colors.colPrimary) : (StyleTheme.palette.accent ?? Appearance.colors.colPrimary)
             border.width: Math.min(2, StyleTheme.surface.borderWidth)
             border.color: StyleTheme.surface.borderColor ?? "transparent"
 
