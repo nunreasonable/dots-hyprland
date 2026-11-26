@@ -15,10 +15,30 @@ BarWidgetSwitcher {
     readonly property bool hasAmPm: root.dateTimeString.toLowerCase().includes("am") || root.dateTimeString.toLowerCase().includes("pm")
 
     horizontalExtraPadding: root.classic ? 0 : 12
-    rowDefault: root.classic ? classicRow : layoutRow
-    rowMaterial: root.classic ? classicRow : materialRow
+    rowDefault: StyleTheme.key === "aparelho" ? aparelhoRow : root.classic ? classicRow : layoutRow
+    rowMaterial: StyleTheme.key === "aparelho" ? aparelhoRow : root.classic ? classicRow : materialRow
     colDefault: columnContent
     colMaterial: materialColumn
+
+    Component {
+        id: aparelhoRow
+        RowLayout {
+            spacing: 6
+
+            AparelhoLcd {
+                text: DateTime.hourStr + ":" + DateTime.minuteStr
+                minDigits: 5
+                pixelSize: 20
+            }
+
+            StyledText {
+                visible: root.showDate
+                font.pixelSize: Appearance.font.pixelSize.smaller
+                color: root.contentColor
+                text: DateTime.shortDate
+            }
+        }
+    }
 
     Component {
         id: classicRow

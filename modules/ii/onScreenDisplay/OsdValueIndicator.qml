@@ -94,14 +94,30 @@ Item {
                         text: root.name
                     }
 
+                    Loader {
+                        Layout.fillWidth: false
+                        sourceComponent: StyleTheme.key === "aparelho" ? aparelhoValue : defaultValue
+                    }
+                }
+
+                Component {
+                    id: defaultValue
                     StyledText {
                         color: Appearance.colors.colOnLayer0
                         font.pixelSize: Appearance.font.pixelSize.small
-                        Layout.fillWidth: false
                         text: Math.round(root.value * 100)
                     }
                 }
-                
+
+                Component {
+                    id: aparelhoValue
+                    AparelhoLcd {
+                        text: Math.round(root.value * 100).toString()
+                        minDigits: 3
+                        pixelSize: 16
+                    }
+                }
+
                 StyledProgressBar {
                     id: valueProgressBar
                     Layout.fillWidth: true

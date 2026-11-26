@@ -188,6 +188,10 @@ Scope {
                             bottomLeftRadius: dockRoot.hug && (dockRoot.position === "left" || dockRoot.position === "bottom") ? 0 : radius
                             topRightRadius: dockRoot.hug && dockRoot.position === "right" ? 0 : radius
                             bottomRightRadius: dockRoot.hug && (dockRoot.position === "right" || dockRoot.position === "bottom") ? 0 : radius
+
+                            StyleFrame {
+                                radius: dockVisualBackground.radius
+                            }
                         }
 
                         SekaiBlock {

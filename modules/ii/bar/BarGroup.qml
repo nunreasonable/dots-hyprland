@@ -22,7 +22,11 @@ Item {
         }
         visible: !SekaiTheme.active
         color: Config.options?.bar.borderless ? "transparent" : Appearance.colors.colLayer1
-        radius: Appearance.rounding.small
+        radius: StyleTheme.surface.radiusInner ?? Appearance.rounding.small
+
+        StyleFrame {
+            radius: background.radius
+        }
     }
 
     Loader {

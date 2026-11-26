@@ -85,11 +85,43 @@ Rectangle {
             }
             visible: active
             active: Config.options.sidebar.quickSliders.showVolume
-            sourceComponent: QuickSlider {
+            sourceComponent: StyleTheme.key === "aparelho" ? aparelhoVolume : defaultVolume
+        }
+
+        Component {
+            id: defaultVolume
+            QuickSlider {
                 materialSymbol: "volume_up"
                 value: Audio.sink.audio.volume
                 onMoved: {
                     Audio.sink.audio.volume = value
+                }
+            }
+        }
+
+        Component {
+            id: aparelhoVolume
+            RowLayout {
+                spacing: 10
+
+                MaterialSymbol {
+                    text: "volume_up"
+                    iconSize: 20
+                    color: StyleTheme.palette.text ?? Appearance.colors.colOnSecondaryContainer
+                }
+
+                AparelhoKnob {
+                    value: Audio.sink.audio.volume
+                    onMoved: {
+                        Audio.sink.audio.volume = value
+                    }
+                }
+
+                AparelhoLcd {
+                    Layout.alignment: Qt.AlignVCenter
+                    text: Math.round(Audio.sink.audio.volume * 10).toString()
+                    minDigits: 2
+                    pixelSize: 18
                 }
             }
         }
