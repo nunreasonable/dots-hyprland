@@ -756,7 +756,7 @@ Singleton {
         FolderListModelWithHistory {
             folder: root._requestedDirectory
             caseSensitive: false
-            nameFilters: root.extensions.map(ext => `*${root.searchQuery.split(" ").filter(s => s.length > 0).map(s => `*${s}*`)}*.${ext}`)
+            nameFilters: root.extensions.map(ext => `*${root.searchQuery.split(" ").filter(s => s.length > 0).map(s => `*${s}*`).join("")}*.${ext}`)
             showDirs: true
             showDotAndDotDot: false
             showOnlyReadable: true
