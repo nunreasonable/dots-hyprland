@@ -237,6 +237,24 @@ ContentPage {
                     }
                 }
             }
+
+            ContentSubsection {
+                title: "Claude Code"
+
+                GroupedList {
+                    ConfigSwitch {
+                        buttonIcon: "asterisk"
+                        text: Translation.tr("Claude Code panel")
+                        checked: Config.options.ai.claudePanel.enable
+                        onCheckedChanged: {
+                            Config.options.ai.claudePanel.enable = checked;
+                        }
+                        W.StyledToolTip {
+                            text: Translation.tr("Lists your recent Claude Code sessions with their model, context and tasks, and resumes them in a terminal. Open it from the desktop menu or with ! in Spotlight.\nInspired by the Claude panel in Anserin by lukpednoi")
+                        }
+                    }
+                }
+            }
         }
 
         ContentSection {

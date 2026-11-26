@@ -51,6 +51,7 @@ Scope {
         { name: Translation.tr("Exit shell"), description: Translation.tr("Close ii until you start it again"), icon: "exit_to_app", run: () => Session.exitShell() },
         { name: Translation.tr("UEFI settings"), description: Translation.tr("Reboot into firmware setup"), icon: "settings_applications", run: () => Session.rebootToFirmware() },
         { name: Translation.tr("Task manager"), description: Translation.tr("Open the task manager"), icon: "browse_activity", run: () => Session.launchTaskManager() },
+        ...(Config.options.ai.claudePanel.enable ? [{ name: "Claude Code", description: Translation.tr("Resume or start Claude Code sessions"), icon: "asterisk", run: () => GlobalStates.claudePanelOpen = true }] : []),
     ]
 
     readonly property var items: {

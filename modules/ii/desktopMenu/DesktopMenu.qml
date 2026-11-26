@@ -310,6 +310,15 @@ Scope {
                             }
                         }
                     }
+                    DesktopMenuItem {
+                        visible: Config.options.ai.claudePanel.enable
+                        iconName: "asterisk"
+                        buttonText: "Claude Code"
+                        onClicked: {
+                            GlobalStates.desktopMenuOpen = false;
+                            GlobalStates.claudePanelOpen = true;
+                        }
+                    }
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.topMargin: 2
