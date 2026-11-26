@@ -104,11 +104,13 @@ Singleton {
     }
 
     function launch(folder, args) {
-        const dir = folder || root.homeDir;
+        let dir = folder || root.homeDir;
         if (!Platform.isWindows) {
             Quickshell.execDetached(["bash", "-c", `cd -- "$1" 2>/dev/null; shift; c=$(command -v claude || printf %s "$HOME/.local/bin/claude"); ${Config.options.apps.terminal} -e "$c" "$@"`, "claude", dir, ...args]);
             return;
         }
+        if (!(WindowsNative.fsUtils?.isAccessibleDir(dir) ?? false))
+            dir = root.homeDir;
         const exe = root.claudeExecutable() || "claude";
         const wt = root.windowsTerminal();
         if (wt !== "") {
