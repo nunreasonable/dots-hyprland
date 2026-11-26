@@ -169,6 +169,8 @@ AbstractBackgroundWidget {
         }
 
         ToolbarPairedFab {
+            anchors.verticalCenter: undefined
+            Layout.alignment: Qt.AlignVCenter
             iconText: "check"
             onClicked: root.finishEditing(true)
         }
