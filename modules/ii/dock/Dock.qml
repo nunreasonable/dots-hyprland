@@ -199,6 +199,14 @@ Scope {
                             cornerRadius: 26
                         }
 
+                        Loader {
+                            active: StyleTheme.key === "riso" && Config.options.dock.showBackground && !dockRoot.hug
+                            anchors.fill: dockVisualBackground
+                            sourceComponent: RisoInk {
+                                radius: dockVisualBackground.radius
+                            }
+                        }
+
                         RoundCorner {
                             visible: dockRoot.hug && Config.options.dock.showBackground && !SekaiTheme.active
                             anchors.right: dockRoot.vertical ? (dockRoot.position === "right" ? dockVisualBackground.right : undefined) : dockVisualBackground.left
