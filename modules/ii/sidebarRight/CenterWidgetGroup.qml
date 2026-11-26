@@ -15,6 +15,7 @@ Rectangle {
     }
     StyleFrame {
         radius: root.radius
+        visible: StyleTheme.surface.frame && !QuadrinhoTheme.active
     }
     color: StyleTheme.surface.fill ?? Appearance.colors.colLayer1
 

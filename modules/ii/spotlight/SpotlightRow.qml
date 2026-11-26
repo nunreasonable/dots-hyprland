@@ -19,7 +19,7 @@ RippleButton {
     signal trailingClicked
 
     implicitHeight: 52
-    buttonRadius: Appearance.rounding.normal
+    buttonRadius: QuadrinhoTheme.active ? 0 : Appearance.rounding.normal
     colBackground: root.selected ? Appearance.colors.colSecondaryContainer : ColorUtils.transparentize(Appearance.colors.colSecondaryContainer, 1)
     colBackgroundHover: root.selected ? Appearance.colors.colSecondaryContainerHover : Appearance.colors.colLayer1Hover
     colRipple: Appearance.colors.colSecondaryContainerActive
@@ -32,6 +32,17 @@ RippleButton {
             radius: root.buttonEffectiveRadius
             filled: true
             rim: false
+        }
+    }
+
+    Loader {
+        z: 1
+        active: QuadrinhoTheme.active && root.selected
+        anchors.fill: parent
+        sourceComponent: Rectangle {
+            color: "transparent"
+            border.width: QuadrinhoTheme.line
+            border.color: QuadrinhoTheme.spot
         }
     }
 

@@ -18,8 +18,8 @@ Item {
     property real valueIndicatorLeftPadding: 10
     property real valueIndicatorRightPadding: 20 // An icon is circle ish, a column isn't, hence the extra padding
 
-    implicitWidth: aquarioOsd.item?.implicitWidth ?? (Appearance.sizes.osdWidth + 2 * Appearance.sizes.elevationMargin)
-    implicitHeight: aquarioOsd.item?.implicitHeight ?? (valueIndicator.implicitHeight + 2 * Appearance.sizes.elevationMargin)
+    implicitWidth: aquarioOsd.item?.implicitWidth ?? ((quadrinhoOsd.item?.implicitWidth ?? Appearance.sizes.osdWidth) + 2 * Appearance.sizes.elevationMargin)
+    implicitHeight: aquarioOsd.item?.implicitHeight ?? ((quadrinhoOsd.item?.implicitHeight ?? valueIndicator.implicitHeight) + 2 * Appearance.sizes.elevationMargin)
 
     Loader {
         id: aquarioOsd
@@ -42,7 +42,7 @@ Item {
     }
     Rectangle {
         id: valueIndicator
-        visible: !aquarioOsd.active
+        visible: !aquarioOsd.active && !quadrinhoOsd.active
         anchors {
             fill: parent
             margins: Appearance.sizes.elevationMargin
@@ -153,6 +153,18 @@ Item {
                     value: root.value
                 }
             }
+        }
+    }
+
+    Loader {
+        id: quadrinhoOsd
+        active: QuadrinhoTheme.active
+        anchors.fill: parent
+        anchors.margins: Appearance.sizes.elevationMargin
+        sourceComponent: QuadrinhoOsd {
+            value: root.value
+            icon: root.icon
+            name: root.name
         }
     }
 }

@@ -19,6 +19,11 @@ MouseArea { // Notification group area
     property bool expanded: false
     property bool popup: false
     property real padding: 10
+    readonly property bool quadrinho: QuadrinhoTheme.active
+    readonly property bool quadrinhoTailUp: root.quadrinho && root.popup && !Config.options.bar.bottom
+    readonly property real balloonTop: root.quadrinho ? (root.quadrinhoTailUp ? 26 : 12) : 0
+    readonly property real balloonBottom: root.quadrinho && root.popup && Config.options.bar.bottom ? 16 : 0
+    readonly property real balloonSide: root.quadrinho ? 8 : 0
     implicitHeight: background.implicitHeight
 
     property real dragConfirmThreshold: 70 // Drag further to discard notification
@@ -115,13 +120,13 @@ MouseArea { // Notification group area
 
     StyledRectangularShadow {
         target: background
-        visible: popup && StyleTheme.key !== "riso"
+        visible: popup && StyleTheme.key !== "riso" && !root.quadrinho
     }
     Rectangle { // Background of the notification
         id: background
         anchors.left: parent.left
         width: parent.width
-        color: popup ? Appearance.colors.colBackgroundSurfaceContainer : Appearance.colors.colLayer2
+        color: root.quadrinho ? "transparent" : popup ? Appearance.colors.colBackgroundSurfaceContainer : Appearance.colors.colLayer2
         radius: Appearance.rounding.normal
         anchors.leftMargin: root.xOffset
 
@@ -135,9 +140,9 @@ MouseArea { // Notification group area
         }
         
         clip: true
-        implicitHeight: root.expanded ? 
+        implicitHeight: root.balloonTop + root.balloonBottom + (root.expanded ? 
             row.implicitHeight + padding * 2 :
-            Math.min(80, row.implicitHeight + padding * 2)
+            Math.min(80, row.implicitHeight + padding * 2))
 
         Behavior on implicitHeight {
             id: implicitHeightAnim
@@ -154,12 +159,27 @@ MouseArea { // Notification group area
             }
         }
 
+        Loader {
+            active: root.quadrinho
+            anchors.fill: parent
+            sourceComponent: QuadrinhoNotificationFrame {
+                appName: root.notificationGroup?.appName ?? ""
+                critical: root.notifications.some(n => n.urgency === NotificationUrgency.Critical.toString())
+                tailSide: !root.popup ? "none" : root.quadrinhoTailUp ? "top" : "bottom"
+                topSpace: root.balloonTop
+                bottomSpace: root.balloonBottom
+            }
+        }
+
         RowLayout { // Left column for icon, right column for content
             id: row
             anchors.top: parent.top
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.margins: root.padding
+            anchors.topMargin: root.padding + root.balloonTop
+            anchors.leftMargin: root.padding + root.balloonSide
+            anchors.rightMargin: root.padding + root.balloonSide
             spacing: 10
 
             NotificationAppIcon { // Icons

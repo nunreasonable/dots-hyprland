@@ -219,6 +219,16 @@ ButtonMouseArea {
             }
         }
 
+        Loader {
+            z: 2.5
+            active: QuadrinhoTheme.active
+            anchors.fill: parent
+            sourceComponent: QuadrinhoWorkspaceCells {
+                host: root
+                model: wsModel
+            }
+        }
+
         /////////////////// Hover ///////////////////
         TrailingIndicator {
             id: interactionIndicator

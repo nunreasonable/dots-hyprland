@@ -97,7 +97,7 @@ ColumnLayout {
 
     ClockText {
         id: timeTextTop
-        visible: !SekaiTheme.active && !risoClock.active && StyleTheme.key !== "mainel" && StyleTheme.key !== "aquario"
+        visible: !SekaiTheme.active && !risoClock.active && StyleTheme.key !== "mainel" && StyleTheme.key !== "aquario" && !QuadrinhoTheme.active
         text: clockColumn.isVertical ? DateTime.time.split(":")[0].padStart(2, "0") : DateTime.time
         color: clockColumn.colText
         horizontalAlignment: Text.AlignHCenter
@@ -138,7 +138,7 @@ ColumnLayout {
     Loader {
         Layout.topMargin: -40
         Layout.fillWidth: true
-        active: clockColumn.isVertical && !risoClock.active
+        active: clockColumn.isVertical && !risoClock.active && !QuadrinhoTheme.active
         visible: active
         sourceComponent: ClockText {
             id: timeTextBottom
@@ -156,7 +156,7 @@ ColumnLayout {
 
     // Date
     ClockText {
-        visible: Config.options.background.widgets.clock.digital.showDate && !SekaiTheme.active && !risoClock.active
+        visible: Config.options.background.widgets.clock.digital.showDate && !SekaiTheme.active && !risoClock.active && !QuadrinhoTheme.active
         Layout.topMargin: -20
         Layout.fillWidth: true
         text: DateTime.longDate
@@ -179,6 +179,19 @@ ColumnLayout {
             color: SekaiTheme.text
             font.pixelSize: Appearance.font.pixelSize.larger
             font.weight: Font.Bold
+        }
+    }
+
+    Loader {
+        active: QuadrinhoTheme.active
+        visible: active
+        Layout.fillWidth: true
+        sourceComponent: QuadrinhoClock {
+            lines: clockColumn.isVertical ? [DateTime.time.split(":")[0].padStart(2, "0"), DateTime.time.split(":")[1].split(" ")[0].padStart(2, "0")] : [DateTime.time]
+            date: DateTime.longDate
+            showDate: Config.options.background.widgets.clock.digital.showDate
+            pixelSize: Config.options.background.widgets.clock.digital.font.size
+            horizontalAlignment: clockColumn.textHorizontalAlignment
         }
     }
 
