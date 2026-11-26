@@ -86,7 +86,7 @@ ColumnLayout {
 
     ClockText {
         id: timeTextTop
-        visible: !SekaiTheme.active
+        visible: !SekaiTheme.active && StyleTheme.key !== "aquario"
         text: clockColumn.isVertical ? DateTime.time.split(":")[0].padStart(2, "0") : DateTime.time
         color: clockColumn.colText
         horizontalAlignment: Text.AlignHCenter
@@ -98,6 +98,16 @@ ColumnLayout {
                     "wdth": Config.options.background.widgets.clock.digital.font.width,
                     "ROND": Config.options.background.widgets.clock.digital.font.roundness
                 })
+        }
+    }
+
+    Loader {
+        active: StyleTheme.key === "aquario"
+        visible: active
+        Layout.alignment: Qt.AlignHCenter
+        sourceComponent: AquarioClock {
+            text: timeTextTop.text
+            pixelSize: timeTextTop.font.pixelSize
         }
     }
 

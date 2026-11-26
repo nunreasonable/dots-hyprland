@@ -44,6 +44,8 @@ Singleton {
     readonly property color waterSoft: root.hue(root.dark ? "#1b4a60" : "#cdeff7")
     readonly property color jadeTop: root.hue("#6fe3d6")
     readonly property color jadeBottom: root.hue("#25a9c9")
+    readonly property color cellTop: root.hue("#2fb0c6")
+    readonly property color cellBottom: root.hue("#167aa3")
     readonly property color alarmTop: "#ffb4a6"
     readonly property color alarmBottom: "#d9473a"
     readonly property color onWater: "#ffffff"

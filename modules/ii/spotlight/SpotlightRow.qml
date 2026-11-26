@@ -24,6 +24,17 @@ RippleButton {
     colBackgroundHover: root.selected ? Appearance.colors.colSecondaryContainerHover : Appearance.colors.colLayer1Hover
     colRipple: Appearance.colors.colSecondaryContainerActive
 
+    Loader {
+        z: -0.5
+        active: StyleTheme.key === "aquario" && root.selected && !AquarioTheme.dark
+        anchors.fill: parent
+        sourceComponent: AquarioCell {
+            radius: root.buttonEffectiveRadius
+            filled: true
+            rim: false
+        }
+    }
+
     contentItem: RowLayout {
         anchors.fill: parent
         anchors.leftMargin: 12

@@ -9,6 +9,9 @@ StyleValues {
     hint: Translation.tr("Aquário turns the shell into glossy glass where every level is water: volume, brightness, battery and workspaces fill up and ripple when they change. Turn on transparency for blurred glass")
     layout: "end4pc"
     selectable: true
+    preset: ({
+            "background.widgets.clock.style": ["digital", "cookie"]
+        })
 
     surface.frame: true
     surface.borderWidth: 1

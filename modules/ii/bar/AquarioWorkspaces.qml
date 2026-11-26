@@ -51,43 +51,12 @@ Item {
                 }
             }
 
-            Rectangle {
+            AquarioBubble {
                 id: sphere
                 anchors.centerIn: parent
-                width: root.diameter
-                height: width
-                radius: width / 2
-                border.width: 1
-                border.color: AquarioTheme.rimOuter
-                gradient: Gradient {
-                    GradientStop {
-                        position: 0
-                        color: AquarioTheme.dark ? "#1affffff" : "#d4ebf4"
-                    }
-                    GradientStop {
-                        position: 1
-                        color: AquarioTheme.dark ? "#40ffffff" : "#fbfeff"
-                    }
-                }
-            }
-
-            AquarioWater {
-                anchors.fill: sphere
-                anchors.margins: 1.5
+                diameter: root.diameter
                 level: cell.windows === 0 ? 0 : [0.32, 0.56, 0.8][Math.min(cell.windows, 3) - 1]
-                topColor: cell.active ? AquarioTheme.waterTop : Qt.lighter(AquarioTheme.waterTop, 1.08)
-                bottomColor: cell.active ? AquarioTheme.waterDeep : AquarioTheme.waterBottom
-                meniscus: 0.8
-            }
-
-            Rectangle {
-                x: sphere.x + root.diameter * 0.2
-                y: sphere.y + root.diameter * 0.12
-                width: root.diameter * 0.36
-                height: root.diameter * 0.2
-                radius: height / 2
-                rotation: -28
-                color: AquarioTheme.dark ? "#66ffffff" : "#f2ffffff"
+                deep: cell.active
             }
 
             StyledText {
