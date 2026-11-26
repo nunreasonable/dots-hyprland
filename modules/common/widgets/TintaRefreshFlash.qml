@@ -13,7 +13,7 @@ Rectangle {
     visible: StyleTheme.key === "tinta" && flashTimer.running
 
     function flash() {
-        if (StyleTheme.key === "tinta")
+        if (StyleTheme.key === "tinta" && StyleTheme.current.requestFlash())
             flashTimer.restart();
     }
 

@@ -14,6 +14,7 @@ Item { // Notification item area
     property var notificationObject
     property bool expanded: false
     property bool onlyNotification: false
+    property bool popup: false
     property real fontSize: Appearance.font.pixelSize.small
     property real padding: onlyNotification ? 0 : 8
     property real summaryElideRatio: 0.85
@@ -131,7 +132,10 @@ Item { // Notification item area
 
         TintaRefreshFlash {
             flashRadius: background.radius
-            Component.onCompleted: flash()
+            Component.onCompleted: {
+                if (root.popup)
+                    flash();
+            }
         }
 
         Behavior on anchors.leftMargin {

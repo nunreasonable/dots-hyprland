@@ -105,7 +105,13 @@ StyleValues {
         "m3onSuccessContainer": root.ink
     })
 
-    preset: ({
-        "appearance.fonts.expressive": ["Literata", "Space Grotesk"]
-    })
+    property real lastFlashAt: 0
+
+    function requestFlash() {
+        const now = Date.now();
+        if (now - root.lastFlashAt < 500)
+            return false;
+        root.lastFlashAt = now;
+        return true;
+    }
 }
