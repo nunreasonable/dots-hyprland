@@ -220,15 +220,16 @@ Scope {
 
                         ColumnLayout {
                             spacing: 0
+                            readonly property var greeting: Greetings.pick(Config.options.background.widgets.greeting.name || SystemInfo.username || "", new Date(), Math.random().toString())
                             StyledText {
-                                text: Translation.tr("Welcome back")
+                                text: parent.greeting.title
                                 font.pixelSize: Appearance.font.pixelSize.title
                                 font.family: Appearance.font.family.title
                                 font.weight: Font.Medium
                                 color: Appearance.colors.colOnLayer0
                             }
                             StyledText {
-                                text: (SystemInfo.username || "user") + "@" + (SystemInfo.hostname || "host")
+                                text: parent.greeting.subtitle
                                 color: Appearance.colors.colSubtext
                                 font.pixelSize: Appearance.font.pixelSize.small
                             }
