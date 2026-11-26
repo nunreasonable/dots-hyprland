@@ -18,8 +18,8 @@ Item {
     property real valueIndicatorLeftPadding: 10
     property real valueIndicatorRightPadding: 20 // An icon is circle ish, a column isn't, hence the extra padding
 
-    implicitWidth: Appearance.sizes.osdWidth + 2 * Appearance.sizes.elevationMargin
-    implicitHeight: valueIndicator.implicitHeight + 2 * Appearance.sizes.elevationMargin
+    implicitWidth: (quadrinhoOsd.item?.implicitWidth ?? Appearance.sizes.osdWidth) + 2 * Appearance.sizes.elevationMargin
+    implicitHeight: (quadrinhoOsd.item?.implicitHeight ?? valueIndicator.implicitHeight) + 2 * Appearance.sizes.elevationMargin
 
     StyledRectangularShadow {
         target: valueIndicator
@@ -27,6 +27,7 @@ Item {
     }
     Rectangle {
         id: valueIndicator
+        visible: !quadrinhoOsd.active
         anchors {
             fill: parent
             margins: Appearance.sizes.elevationMargin
@@ -108,6 +109,18 @@ Item {
                     value: root.value
                 }
             }
+        }
+    }
+
+    Loader {
+        id: quadrinhoOsd
+        active: QuadrinhoTheme.active
+        anchors.fill: parent
+        anchors.margins: Appearance.sizes.elevationMargin
+        sourceComponent: QuadrinhoOsd {
+            value: root.value
+            icon: root.icon
+            name: root.name
         }
     }
 }

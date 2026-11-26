@@ -22,7 +22,7 @@ Rectangle {
     implicitWidth: contentItem.implicitWidth + root.horizontalPadding * 2
     implicitHeight: contentItem.implicitHeight + root.verticalPadding * 2
     radius: Appearance.rounding.normal
-    color: SekaiTheme.active ? "transparent" : Appearance.colors.colLayer1
+    color: SekaiTheme.active || QuadrinhoTheme.active ? "transparent" : Appearance.colors.colLayer1
     property real verticalPadding: SekaiTheme.active ? 11 : 4
     property real horizontalPadding: SekaiTheme.active ? 16 : 12
 
@@ -121,6 +121,15 @@ Rectangle {
         trackColor: StyleTheme.surface.fillHover ?? Appearance.colors.colSecondaryContainer
         handleColor: StyleTheme.surface.borderColor ?? Appearance.colors.colPrimary
         dividerValues: secondaryMaterialSymbol.length > 0 ? [secondaryIcon.iconLocation] : []
+
+        Loader {
+            z: -0.5
+            active: QuadrinhoTheme.active
+            anchors.fill: parent
+            sourceComponent: QuadrinhoSliderSkin {
+                slider: quickSlider
+            }
+        }
         
         MaterialSymbol {
             id: icon

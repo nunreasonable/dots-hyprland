@@ -135,14 +135,22 @@ Item {
             visible: StyleTheme.surface.frame && !SekaiTheme.active
         }
 
+        Loader {
+            active: QuadrinhoTheme.active
+            anchors.fill: sectionColumn
+            sourceComponent: QuadrinhoSidebarPanels {
+                column: sectionColumn
+            }
+        }
+
         ReorderableColumn {
             id: sectionColumn
             anchors.fill: parent
             anchors.margins: sidebarPadding
-            anchors.topMargin: SekaiTheme.active ? 18 : sidebarPadding
-            anchors.bottomMargin: SekaiTheme.active ? 18 + SekaiTheme.shadowOffset : sidebarPadding
-            anchors.leftMargin: SekaiTheme.active ? 16 : sidebarPadding
-            anchors.rightMargin: SekaiTheme.active ? 16 : sidebarPadding
+            anchors.topMargin: SekaiTheme.active ? 18 : QuadrinhoTheme.active ? 16 : sidebarPadding
+            anchors.bottomMargin: SekaiTheme.active ? 18 + SekaiTheme.shadowOffset : QuadrinhoTheme.active ? 16 : sidebarPadding
+            anchors.leftMargin: SekaiTheme.active || QuadrinhoTheme.active ? 16 : sidebarPadding
+            anchors.rightMargin: SekaiTheme.active || QuadrinhoTheme.active ? 16 : sidebarPadding
             itemSpacing: StyleTheme.surface.gap ?? sidebarPadding
             order: root.sectionOrder
             editMode: root.editMode && root.editTab === "layout"
@@ -188,7 +196,16 @@ Item {
     Component {
         id: bannerSection
         Loader {
-            sourceComponent: Config.options.sidebar.banner ? bannerComponent : normalComponent
+            sourceComponent: QuadrinhoTheme.active ? quadrinhoHeader : Config.options.sidebar.banner ? bannerComponent : normalComponent
+        }
+    }
+
+    Component {
+        id: quadrinhoHeader
+        QuadrinhoSidebarHeader {
+            editMode: root.editMode
+            settingsQmlPath: root.settingsQmlPath
+            onEditToggled: root.editMode = !root.editMode
         }
     }
 
