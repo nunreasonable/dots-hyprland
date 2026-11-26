@@ -672,7 +672,7 @@ Item {
 
                 DashboardCard {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Math.max(90, (homeGrid.height - 12) * 0.3)
+                    Layout.preferredHeight: Math.max(128, (homeGrid.height - 12) * 0.3)
                     tint: Appearance.colors.colTertiaryContainer
                     pager: root.pager
                     staggerMs: root.staggerMs
@@ -689,48 +689,14 @@ Item {
                             Layout.fillWidth: true
                             spacing: 12
 
-                            Rectangle {
+                            RippleButton {
+                                id: updatesRefresh
                                 implicitWidth: 52
                                 implicitHeight: 52
-                                radius: 18
-                                color: Appearance.colors.colTertiary
-
-                                MaterialSymbol {
-                                    anchors.centerIn: parent
-                                    text: Updates.count > 0 ? "system_update_alt" : "check_circle"
-                                    iconSize: 28
-                                    fill: 1
-                                    color: Appearance.colors.colOnTertiary
-                                }
-                            }
-
-                            ColumnLayout {
-                                spacing: 0
-
-                                StyledText {
-                                    text: !Updates.available ? Translation.tr("Updates") : Updates.count > 0 ? Updates.count + " " + Translation.tr("updates available") : Translation.tr("System up to date")
-                                    font.pixelSize: Appearance.font.pixelSize.larger
-                                    font.weight: Font.DemiBold
-                                    color: Appearance.colors.colOnTertiaryContainer
-                                }
-                                StyledText {
-                                    text: !Updates.available ? Translation.tr("Update check unavailable") : Updates.checking ? Translation.tr("Checking...") : Platform.isWindows ? "winget" : Translation.tr("Pacman + AUR")
-                                    font.pixelSize: Appearance.font.pixelSize.smaller
-                                    color: Appearance.colors.colOnTertiaryContainer
-                                    opacity: 0.75
-                                }
-                            }
-
-                            Item { Layout.fillWidth: true }
-
-                            RippleButton {
-                                Layout.alignment: Qt.AlignRight | Qt.AlignVCenter
-                                visible: Updates.available || Platform.isWindows
-                                implicitWidth: 40
-                                implicitHeight: 40
-                                buttonRadius: 20
-                                colBackground: Qt.rgba(1, 1, 1, 0.1)
-                                colBackgroundHover: Qt.rgba(1, 1, 1, 0.2)
+                                buttonRadius: 18
+                                colBackground: Appearance.colors.colTertiary
+                                colBackgroundHover: Appearance.colors.colTertiary
+                                colRipple: Qt.rgba(1, 1, 1, 0.3)
                                 downAction: () => {
                                     Updates.refresh();
                                     if (Platform.isWindows) SelfUpdate.refresh();
@@ -738,10 +704,36 @@ Item {
                                 contentItem: Item {
                                     MaterialSymbol {
                                         anchors.centerIn: parent
-                                        text: "refresh"
-                                        iconSize: 22
-                                        color: Appearance.colors.colOnTertiaryContainer
+                                        text: updatesRefresh.hovered || Updates.checking ? "refresh" : Updates.count > 0 ? "system_update_alt" : "check_circle"
+                                        iconSize: 28
+                                        fill: 1
+                                        color: Appearance.colors.colOnTertiary
                                     }
+                                }
+                                StyledToolTip {
+                                    text: Translation.tr("Check for updates")
+                                }
+                            }
+
+                            ColumnLayout {
+                                Layout.fillWidth: true
+                                spacing: 0
+
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    elide: Text.ElideRight
+                                    text: !Updates.available ? Translation.tr("Updates") : Updates.count > 0 ? Updates.count + " " + Translation.tr("updates available") : Translation.tr("System up to date")
+                                    font.pixelSize: Appearance.font.pixelSize.larger
+                                    font.weight: Font.DemiBold
+                                    color: Appearance.colors.colOnTertiaryContainer
+                                }
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    elide: Text.ElideRight
+                                    text: !Updates.available ? Translation.tr("Update check unavailable") : Updates.checking ? Translation.tr("Checking...") : Platform.isWindows ? "winget" : Translation.tr("Pacman + AUR")
+                                    font.pixelSize: Appearance.font.pixelSize.smaller
+                                    color: Appearance.colors.colOnTertiaryContainer
+                                    opacity: 0.75
                                 }
                             }
                         }
@@ -752,32 +744,38 @@ Item {
 
                             RippleButton {
                                 Layout.fillWidth: true
+                                Layout.preferredWidth: 1
                                 implicitHeight: 38
                                 buttonRadius: 19
                                 colBackground: Appearance.colors.colTertiary
                                 colBackgroundHover: Appearance.colors.colTertiary
                                 colRipple: Qt.rgba(1, 1, 1, 0.3)
                                 downAction: () => root.runSystemUpdate()
-                                contentItem: RowLayout {
-                                    spacing: 6
-                                    Item { Layout.fillWidth: true }
-                                    MaterialSymbol {
-                                        text: "system_update_alt"
-                                        iconSize: 18
-                                        color: Appearance.colors.colOnTertiary
+                                contentItem: Item {
+                                    RowLayout {
+                                        anchors.centerIn: parent
+                                        width: Math.min(implicitWidth, parent.width)
+                                        spacing: 6
+                                        MaterialSymbol {
+                                            text: "system_update_alt"
+                                            iconSize: 18
+                                            color: Appearance.colors.colOnTertiary
+                                        }
+                                        StyledText {
+                                            Layout.fillWidth: true
+                                            elide: Text.ElideRight
+                                            text: Translation.tr("Update system")
+                                            font.weight: Font.Medium
+                                            color: Appearance.colors.colOnTertiary
+                                        }
                                     }
-                                    StyledText {
-                                        text: Translation.tr("Update system")
-                                        font.weight: Font.Medium
-                                        color: Appearance.colors.colOnTertiary
-                                    }
-                                    Item { Layout.fillWidth: true }
                                 }
                             }
 
                             RippleButton {
                                 Layout.fillWidth: true
-                                visible: Platform.isWindows
+                                Layout.preferredWidth: 1
+                                visible: Platform.isWindows && (root.shellUpdateReady || root.shellUpdating)
                                 implicitHeight: 38
                                 buttonRadius: 19
                                 colBackground: Qt.rgba(1, 1, 1, 0.12)
@@ -785,23 +783,27 @@ Item {
                                 downAction: () => {
                                     if (!root.shellUpdating) root.runShellUpdate();
                                 }
-                                contentItem: RowLayout {
-                                    spacing: 6
-                                    Item { Layout.fillWidth: true }
-                                    MaterialSymbol {
-                                        text: "deployed_code_update"
-                                        iconSize: 18
-                                        color: Appearance.colors.colOnTertiaryContainer
+                                contentItem: Item {
+                                    RowLayout {
+                                        anchors.centerIn: parent
+                                        width: Math.min(implicitWidth, parent.width)
+                                        spacing: 6
+                                        MaterialSymbol {
+                                            text: "deployed_code_update"
+                                            iconSize: 18
+                                            color: Appearance.colors.colOnTertiaryContainer
+                                        }
+                                        StyledText {
+                                            Layout.fillWidth: true
+                                            elide: Text.ElideRight
+                                            text: root.shellUpdating ? Translation.tr("Updating…")
+                                                : root.shellUpdateReady ? Translation.tr("Update shell")
+                                                : SelfUpdate.checking ? Translation.tr("Checking...")
+                                                : Translation.tr("Shell up to date")
+                                            font.weight: Font.Medium
+                                            color: Appearance.colors.colOnTertiaryContainer
+                                        }
                                     }
-                                    StyledText {
-                                        text: root.shellUpdating ? Translation.tr("Updating…")
-                                            : root.shellUpdateReady ? Translation.tr("Update shell")
-                                            : SelfUpdate.checking ? Translation.tr("Checking...")
-                                            : Translation.tr("Shell up to date")
-                                        font.weight: Font.Medium
-                                        color: Appearance.colors.colOnTertiaryContainer
-                                    }
-                                    Item { Layout.fillWidth: true }
                                 }
                             }
                         }
@@ -809,6 +811,8 @@ Item {
                 }
 
                 DashboardCard {
+                    id: calendarCard
+                    readonly property bool roomy: height >= 330
                     Layout.fillWidth: true
                     Layout.fillHeight: true
                     tint: Appearance.colors.colLayer1
@@ -828,6 +832,7 @@ Item {
                             spacing: 8
 
                             ColumnLayout {
+                                visible: calendarCard.roomy
                                 spacing: 0
 
                                 StyledText {
@@ -872,6 +877,7 @@ Item {
                         }
 
                         Rectangle {
+                            visible: calendarCard.roomy
                             Layout.fillWidth: true
                             implicitHeight: 1
                             color: Appearance.colors.colOutlineVariant
@@ -1117,7 +1123,10 @@ Item {
                     Layout.fillWidth: true
                     id: tasksCard
                     property bool adding: false
+                    Layout.fillHeight: true
+                    Layout.minimumHeight: 120
                     Layout.preferredHeight: tasksContent.implicitHeight + 28
+                    Layout.maximumHeight: tasksContent.implicitHeight + 28
                     tint: Appearance.colors.colSecondaryContainer
                     pager: root.pager
                     staggerMs: root.staggerMs
@@ -1213,6 +1222,8 @@ Item {
                         StyledListView {
                             id: homeTodos
                             Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.minimumHeight: 40
                             Layout.preferredHeight: 3 * 40 + 2 * 6
                             clip: true
                             spacing: 6

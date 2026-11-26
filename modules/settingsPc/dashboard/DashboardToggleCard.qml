@@ -105,6 +105,9 @@ DashboardCard {
             font.weight: Font.DemiBold
             color: root.checked ? Appearance.colors.colOnPrimaryContainer : Appearance.colors.colOnLayer1
             elide: Text.ElideRight
+            wrapMode: Text.Wrap
+            maximumLineCount: 2
+            lineHeight: 0.9
         }
         StyledText {
             text: root.checked ? Translation.tr("On") : Translation.tr("Off")

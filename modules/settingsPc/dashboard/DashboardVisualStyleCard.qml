@@ -71,63 +71,79 @@ DashboardCard {
             }
         }
 
-        GridLayout {
+        Item {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            columns: 2
-            rowSpacing: 10
-            columnSpacing: 10
 
-            Repeater {
-                model: root.styles
+            StyledFlickable {
+                id: stylesFlick
+                anchors.fill: parent
+                clip: true
+                contentWidth: width
+                contentHeight: stylesFlow.implicitHeight
+                boundsBehavior: Flickable.StopAtBounds
+                interactive: contentHeight > height
 
-                delegate: RippleButton {
-                    id: option
-                    required property string modelData
+                Flow {
+                    id: stylesFlow
+                    width: stylesFlick.width
+                    spacing: 8
 
-                    readonly property var info: root.styleInfo(modelData)
-                    readonly property bool selected: Config.options.appearance.visualStyle === modelData
+                    Repeater {
+                        model: root.styles
 
-                    Layout.fillWidth: true
-                    Layout.fillHeight: true
-                    Layout.preferredWidth: 1
-                    Layout.preferredHeight: 1
-                    buttonRadius: Appearance.rounding.large
-                    colBackground: selected ? Appearance.colors.colPrimary : Appearance.colors.colSecondaryContainer
-                    colBackgroundHover: selected ? Appearance.colors.colPrimaryHover : Appearance.colors.colSecondaryContainerHover
-                    colRipple: selected ? Appearance.colors.colPrimaryActive : Appearance.colors.colSecondaryContainerActive
-                    downAction: () => {
-                        const value = option.modelData;
-                        Qt.callLater(() => { Config.options.appearance.visualStyle = value; });
-                    }
+                        delegate: RippleButton {
+                            id: option
+                            required property string modelData
 
-                    contentItem: ColumnLayout {
-                        spacing: 6
+                            readonly property var info: root.styleInfo(modelData)
+                            readonly property bool selected: Config.options.appearance.visualStyle === modelData
 
-                        Item { Layout.fillHeight: true }
+                            width: Math.min(optionRow.implicitWidth + 28, stylesFlow.width)
+                            implicitHeight: 40
+                            buttonRadius: height / 2
+                            colBackground: selected ? Appearance.colors.colPrimary : Appearance.colors.colSecondaryContainer
+                            colBackgroundHover: selected ? Appearance.colors.colPrimaryHover : Appearance.colors.colSecondaryContainerHover
+                            colRipple: selected ? Appearance.colors.colPrimaryActive : Appearance.colors.colSecondaryContainerActive
+                            downAction: () => {
+                                const value = option.modelData;
+                                Qt.callLater(() => { Config.options.appearance.visualStyle = value; });
+                            }
 
-                        MaterialShapeWrappedMaterialSymbol {
-                            Layout.alignment: Qt.AlignHCenter
-                            shape: MaterialShape.Shape.Clover4Leaf
-                            text: option.info.icon
-                            iconSize: 26
-                            fill: 1
-                            padding: 12
-                            color: option.selected ? Appearance.colors.colOnPrimary : Appearance.colors.colPrimary
-                            colSymbol: option.selected ? Appearance.colors.colPrimary : Appearance.colors.colOnPrimary
+                            contentItem: Item {
+                                RowLayout {
+                                    id: optionRow
+                                    anchors.verticalCenter: parent.verticalCenter
+                                    anchors.horizontalCenter: parent.horizontalCenter
+                                    width: Math.min(implicitWidth, parent.width)
+                                    spacing: 8
+
+                                    MaterialSymbol {
+                                        text: option.selected ? "check" : option.info.icon
+                                        iconSize: 20
+                                        fill: 1
+                                        color: option.selected ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
+                                    }
+
+                                    StyledText {
+                                        Layout.fillWidth: true
+                                        text: option.info.name
+                                        elide: Text.ElideRight
+                                        font.pixelSize: Appearance.font.pixelSize.normal
+                                        font.weight: option.selected ? Font.DemiBold : Font.Medium
+                                        color: option.selected ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
+                                    }
+                                }
+                            }
                         }
-
-                        StyledText {
-                            Layout.alignment: Qt.AlignHCenter
-                            text: option.info.name
-                            font.pixelSize: Appearance.font.pixelSize.normal
-                            font.weight: Font.DemiBold
-                            color: option.selected ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
-                        }
-
-                        Item { Layout.fillHeight: true }
                     }
                 }
+            }
+
+            ScrollEdgeFade {
+                target: stylesFlick
+                fadeSize: 24
+                color: Appearance.colors.colLayer1Base
             }
         }
 

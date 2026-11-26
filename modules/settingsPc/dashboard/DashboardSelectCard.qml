@@ -95,21 +95,28 @@ DashboardCard {
                     }
 
                     contentItem: Item {
+                        id: optionContent
                         implicitWidth: optionRow.implicitWidth
                         implicitHeight: optionRow.implicitHeight
 
                         RowLayout {
                             id: optionRow
                             anchors.centerIn: parent
+                            width: Math.min(implicitWidth, optionContent.width)
                             spacing: 6
 
                             MaterialSymbol {
+                                visible: text !== "" && optionContent.width >= optionLabel.implicitWidth + 24
                                 text: option.modelData.icon ?? ""
                                 iconSize: 18
                                 fill: option.selected ? 1 : 0
                                 color: option.selected ? Appearance.colors.colOnTertiary : Appearance.colors.colOnTertiaryContainer
                             }
                             StyledText {
+                                id: optionLabel
+                                Layout.fillWidth: true
+                                horizontalAlignment: Text.AlignHCenter
+                                elide: Text.ElideRight
                                 text: option.modelData.displayName
                                 font.pixelSize: Appearance.font.pixelSize.small
                                 font.weight: Font.Medium

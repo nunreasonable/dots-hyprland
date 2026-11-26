@@ -35,66 +35,65 @@ DashboardCard {
             }
 
             ColumnLayout {
+                Layout.fillWidth: true
                 spacing: 0
 
                 StyledText {
+                    Layout.fillWidth: true
                     text: Translation.tr("Settings Panel")
+                    elide: Text.ElideRight
                     font.pixelSize: Appearance.font.pixelSize.larger
                     font.weight: Font.DemiBold
                     color: Appearance.colors.colOnLayer1
                 }
-                StyledText {
-                    text: Translation.tr("Choose how settings open")
-                    font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colSubtext
-                }
-            }
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: 8
 
-            Item { Layout.fillWidth: true }
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: Config.options.settings.style === "dashboard" ? Translation.tr("Animation speed") : Translation.tr("Choose how settings open")
+                        elide: Text.ElideRight
+                        font.pixelSize: Appearance.font.pixelSize.smaller
+                        color: Appearance.colors.colSubtext
+                    }
 
-            ColumnLayout {
-                visible: Config.options.settings.style === "dashboard"
-                spacing: 2
+                    Row {
+                        visible: Config.options.settings.style === "dashboard"
+                        spacing: 4
 
-                StyledText {
-                    Layout.alignment: Qt.AlignRight
-                    text: Translation.tr("Animation speed")
-                    font.pixelSize: Appearance.font.pixelSize.smaller
-                    color: Appearance.colors.colSubtext
-                }
+                        Repeater {
+                            model: [
+                                { value: 1, label: "1x" },
+                                { value: 1.5, label: "1.5x" },
+                                { value: 2, label: "2x" },
+                                { value: 3, label: "3x" }
+                            ]
 
-                Row {
-                    Layout.alignment: Qt.AlignRight
-                    spacing: 4
+                            delegate: RippleButton {
+                                required property var modelData
+                                readonly property bool picked: (Config.options.settings.animationSpeed ?? 1) === modelData.value
 
-                    Repeater {
-                        model: [
-                            { value: 1, label: "1x" },
-                            { value: 1.5, label: "1.5x" },
-                            { value: 2, label: "2x" },
-                            { value: 3, label: "3x" }
-                        ]
-
-                        delegate: RippleButton {
-                            required property var modelData
-                            readonly property bool picked: (Config.options.settings.animationSpeed ?? 1) === modelData.value
-
-                            implicitWidth: 44
-                            implicitHeight: 28
-                            buttonRadius: 14
-                            colBackground: picked ? Appearance.colors.colPrimary : Appearance.colors.colSecondaryContainer
-                            colBackgroundHover: picked ? Appearance.colors.colPrimaryHover : Appearance.colors.colSecondaryContainerHover
-                            colRipple: picked ? Appearance.colors.colPrimaryActive : Appearance.colors.colSecondaryContainerActive
-                            downAction: () => {
-                                const value = modelData.value;
-                                Qt.callLater(() => { Config.options.settings.animationSpeed = value; });
-                            }
-                            contentItem: StyledText {
-                                horizontalAlignment: Text.AlignHCenter
-                                verticalAlignment: Text.AlignVCenter
-                                text: modelData.label
-                                font.pixelSize: Appearance.font.pixelSize.smaller
-                                color: picked ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
+                                implicitWidth: 36
+                                implicitHeight: 24
+                                buttonRadius: 12
+                                colBackground: picked ? Appearance.colors.colPrimary : Appearance.colors.colSecondaryContainer
+                                colBackgroundHover: picked ? Appearance.colors.colPrimaryHover : Appearance.colors.colSecondaryContainerHover
+                                colRipple: picked ? Appearance.colors.colPrimaryActive : Appearance.colors.colSecondaryContainerActive
+                                downAction: () => {
+                                    const value = modelData.value;
+                                    Qt.callLater(() => { Config.options.settings.animationSpeed = value; });
+                                }
+                                contentItem: StyledText {
+                                    horizontalAlignment: Text.AlignHCenter
+                                    verticalAlignment: Text.AlignVCenter
+                                    text: modelData.label
+                                    font.pixelSize: Appearance.font.pixelSize.smaller
+                                    color: picked ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
+                                }
+                                StyledToolTip {
+                                    text: Translation.tr("Animation speed")
+                                }
                             }
                         }
                     }
@@ -145,7 +144,9 @@ DashboardCard {
                         }
 
                         StyledText {
-                            Layout.alignment: Qt.AlignHCenter
+                            Layout.fillWidth: true
+                            horizontalAlignment: Text.AlignHCenter
+                            elide: Text.ElideRight
                             text: option.modelData.name
                             font.pixelSize: Appearance.font.pixelSize.larger
                             font.weight: Font.DemiBold

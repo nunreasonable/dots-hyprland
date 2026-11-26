@@ -75,12 +75,17 @@ ColumnLayout {
                         SpringAnimation { spring: 4 * root.speed; damping: 0.22 }
                     }
 
+                    topPadding: 2
+                    bottomPadding: 2
                     contentItem: ColumnLayout {
                         spacing: 1
 
+                        Item {
+                            Layout.fillHeight: true
+                        }
+
                         MaterialSymbol {
                             Layout.alignment: Qt.AlignHCenter
-                            Layout.topMargin: 6
                             text: box.modelData.icon
                             iconSize: Appearance.font.pixelSize.huge
                             fill: box.on ? 1 : 0
@@ -90,11 +95,20 @@ ColumnLayout {
 
                         StyledText {
                             Layout.alignment: Qt.AlignHCenter
-                            Layout.bottomMargin: 6
+                            Layout.preferredWidth: root.boxSize - 6
+                            horizontalAlignment: Text.AlignHCenter
+                            wrapMode: Text.WordWrap
+                            maximumLineCount: 2
+                            elide: Text.ElideRight
+                            lineHeight: 0.85
                             text: box.modelData.name
                             font.pixelSize: Appearance.font.pixelSize.smallest
                             font.weight: Font.DemiBold
                             color: box.on ? box.modelData.onAccent : box.modelData.onContainer
+                        }
+
+                        Item {
+                            Layout.fillHeight: true
                         }
                     }
                 }
