@@ -250,9 +250,9 @@ Singleton {
                         property real x: 100
                         property real y: 100
                         property real z: 0
-                        property string style: "cookie"        // Options: "cookie", "digital", "pixel"
+                        property string style: "cookie"        // Options: "cookie", "digital", "pixel", "bigDate"
                         property string color: ""
-                        property string styleLocked: "cookie"  // Options: "cookie", "digital"
+                        property string styleLocked: "cookie"  // Options: "cookie", "digital", "bigDate"
                         property JsonObject cookie: JsonObject {
                             property bool aiStyling: false
                             property int sides: 14
@@ -384,6 +384,21 @@ Singleton {
                         property real x: 400
                         property real y: 100
                         property real z: 0
+                    }
+                    property JsonObject quote: JsonObject {
+                        property bool enable: false
+                        property string placementStrategy: "free"
+                        property real x: 400
+                        property real y: 100
+                        property real z: 0
+                    }
+                    property JsonObject greeting: JsonObject {
+                        property bool enable: false
+                        property string placementStrategy: "free"
+                        property real x: 400
+                        property real y: 100
+                        property real z: 0
+                        property string name: ""
                     }
                     property JsonObject timers: JsonObject {
                         property bool enable: false

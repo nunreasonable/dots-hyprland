@@ -701,6 +701,11 @@ ContentPage {
                             displayName: Translation.tr("Pixel"),
                             icon: "grid_view",
                             value: "pixel"
+                        },
+                        {
+                            displayName: Translation.tr("Big date"),
+                            icon: "today",
+                            value: "bigDate"
                         }
                     ]
                 }
@@ -726,6 +731,11 @@ ContentPage {
                             displayName: Translation.tr("Pixel"),
                             icon: "grid_view",
                             value: "pixel"
+                        },
+                        {
+                            displayName: Translation.tr("Big date"),
+                            icon: "today",
+                            value: "bigDate"
                         }
                     ]
                 }
@@ -1656,6 +1666,100 @@ ContentPage {
                     }
                 }
                 Rectangle {
+                    id: quoteCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.quote.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "format_quote"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: quoteCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.quote.enable = checked;
+                                }
+                            }
+                        }
+                        W.StyledText {
+                            text: Translation.tr("Quote")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: quoteCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                }
+                Rectangle {
+                    id: greetingCard
+                    readonly property bool widgetEnabled: Config.options.background.widgets.greeting.enable
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 105
+                    radius: Appearance.rounding.normal
+                    color: Appearance.colors.colLayer1
+                    border.width: 1
+                    border.color: Appearance.colors.colLayer0Border
+                    ColumnLayout {
+                        anchors {
+                            top: parent.top
+                            left: parent.left
+                            right: parent.right
+                            margins: 12
+                        }
+                        spacing: 0
+                        RowLayout {
+                            Layout.fillWidth: true
+                            W.MaterialSymbol {
+                                text: "waving_hand"
+                                iconSize: Appearance.font.pixelSize.normal + 5
+                                color: Appearance.colors.colPrimary
+                            }
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                            ConfigSwitch {
+                                Layout.fillWidth: false
+                                checked: greetingCard.widgetEnabled
+                                onCheckedChanged: {
+                                    Config.options.background.widgets.greeting.enable = checked;
+                                }
+                            }
+                        }
+                        W.StyledText {
+                            text: Translation.tr("Greeting")
+                            font.pixelSize: Appearance.font.pixelSize.normal
+                            color: Appearance.colors.colOnLayer1
+                        }
+                        W.StyledText {
+                            text: greetingCard.widgetEnabled ? Translation.tr("Enabled") : Translation.tr("Disabled")
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            color: Appearance.colors.colSubtext
+                        }
+                    }
+                }
+                Rectangle {
                     id: timersCard
                     readonly property bool widgetEnabled: Config.options.background.widgets.timers.enable
                     Layout.fillWidth: true
@@ -1983,6 +2087,24 @@ ContentPage {
                         currentValue: Config.options.background.widgets.notes.placementStrategy
                         onSelected: newValue => {
                             Config.options.background.widgets.notes.placementStrategy = newValue;
+                        }
+                        options: page.placementOptions
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("Quote")
+                        icon: "format_quote"
+                        currentValue: Config.options.background.widgets.quote.placementStrategy
+                        onSelected: newValue => {
+                            Config.options.background.widgets.quote.placementStrategy = newValue;
+                        }
+                        options: page.placementOptions
+                    }
+                    ConfigSelectionArray {
+                        text: Translation.tr("Greeting")
+                        icon: "waving_hand"
+                        currentValue: Config.options.background.widgets.greeting.placementStrategy
+                        onSelected: newValue => {
+                            Config.options.background.widgets.greeting.placementStrategy = newValue;
                         }
                         options: page.placementOptions
                     }
@@ -2798,6 +2920,69 @@ ContentPage {
                     text: Translation.tr("Pick the actual time zones from the widget's own settings flip (the gear icon on the widget).")
                     font.pixelSize: Appearance.font.pixelSize.small
                     color: Appearance.colors.colSubtext
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "format_quote"
+            shape: W.MaterialShape.Shape.Fan
+            title: Translation.tr("Widget: Quote")
+
+            GroupedList {
+                ConfigSwitch {
+                    buttonIcon: "check"
+                    text: Translation.tr("Enable")
+                    checked: Config.options.background.widgets.quote.enable
+                    onCheckedChanged: {
+                        Config.options.background.widgets.quote.enable = checked;
+                    }
+                }
+                ConfigSelectionArray {
+                    text: Translation.tr("Placement strategy")
+                    icon: "move"
+                    currentValue: Config.options.background.widgets.quote.placementStrategy
+                    onSelected: newValue => {
+                        Config.options.background.widgets.quote.placementStrategy = newValue;
+                    }
+                    options: page.placementOptions
+                }
+            }
+        }
+
+        ContentSection {
+            icon: "waving_hand"
+            shape: W.MaterialShape.Shape.Heart
+            title: Translation.tr("Widget: Greeting")
+
+            GroupedList {
+                ConfigSwitch {
+                    buttonIcon: "check"
+                    text: Translation.tr("Enable")
+                    checked: Config.options.background.widgets.greeting.enable
+                    onCheckedChanged: {
+                        Config.options.background.widgets.greeting.enable = checked;
+                    }
+                }
+                ConfigSelectionArray {
+                    text: Translation.tr("Placement strategy")
+                    icon: "move"
+                    currentValue: Config.options.background.widgets.greeting.placementStrategy
+                    onSelected: newValue => {
+                        Config.options.background.widgets.greeting.placementStrategy = newValue;
+                    }
+                    options: page.placementOptions
+                }
+                ConfigTextArea {
+                    Layout.fillWidth: true
+                    fieldWidth: 300
+                    buttonIcon: "badge"
+                    text: Translation.tr("Name")
+                    placeholderText: Translation.tr("Leave empty to use your account name")
+                    value: Config.options.background.widgets.greeting.name
+                    onValueChanged: {
+                        Config.options.background.widgets.greeting.name = value;
+                    }
                 }
             }
         }

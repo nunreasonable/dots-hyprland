@@ -20,9 +20,11 @@ import qs.modules.ii.background.widgets.weather
 import qs.modules.ii.background.widgets.resources
 import qs.modules.ii.background.widgets.calendar
 import qs.modules.ii.background.widgets.customtext
+import qs.modules.ii.background.widgets.greeting
 import qs.modules.ii.background.widgets.images
 import qs.modules.ii.background.widgets.media
 import qs.modules.ii.background.widgets.notes
+import qs.modules.ii.background.widgets.quote
 import qs.modules.ii.background.widgets.timers
 import qs.modules.ii.background.widgets.todo
 import qs.modules.ii.background.widgets.usercard
@@ -447,6 +449,14 @@ Variants {
                     }
                     WidgetMaskRegion {
                         loader: notesLoader
+                        canvas: widgetCanvas
+                    }
+                    WidgetMaskRegion {
+                        loader: quoteWidgetLoader
+                        canvas: widgetCanvas
+                    }
+                    WidgetMaskRegion {
+                        loader: greetingWidgetLoader
                         canvas: widgetCanvas
                     }
                     WidgetMaskRegion {
@@ -958,6 +968,34 @@ Variants {
                     asynchronous: Platform.isWindows
                     shown: Config.options.background.widgets.notes.enable && bgRoot.widgetsOnThisScreen
                     sourceComponent: NotesWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                        wallpaperItem: wallpaper
+                    }
+                }
+
+                FadeLoader {
+                    id: quoteWidgetLoader
+                    asynchronous: Platform.isWindows
+                    shown: Config.options.background.widgets.quote.enable && bgRoot.widgetsOnThisScreen
+                    sourceComponent: QuoteWidget {
+                        screenWidth: bgRoot.screen.width
+                        screenHeight: bgRoot.screen.height
+                        scaledScreenWidth: bgRoot.screen.width
+                        scaledScreenHeight: bgRoot.screen.height
+                        wallpaperScale: 1
+                        wallpaperItem: wallpaper
+                    }
+                }
+
+                FadeLoader {
+                    id: greetingWidgetLoader
+                    asynchronous: Platform.isWindows
+                    shown: Config.options.background.widgets.greeting.enable && bgRoot.widgetsOnThisScreen
+                    sourceComponent: GreetingWidget {
                         screenWidth: bgRoot.screen.width
                         screenHeight: bgRoot.screen.height
                         scaledScreenWidth: bgRoot.screen.width

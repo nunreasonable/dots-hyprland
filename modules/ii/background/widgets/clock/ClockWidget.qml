@@ -27,7 +27,7 @@ AbstractBackgroundWidget {
     }
     property bool wallpaperSafetyTriggered: false
     property bool animate: true
-    needsColText: clockStyle === "digital"
+    needsColText: clockStyle === "digital" || clockStyle === "bigDate"
     x: forceCenter ? ((root.screenWidth - root.width) / 2) : targetX
     y: forceCenter ? ((root.screenHeight - root.height) / 2) : targetY
     visibleWhenLocked: true
@@ -83,6 +83,16 @@ AbstractBackgroundWidget {
                 wallpaperItem: root.wallpaperItem
                 originX: root.x
                 originY: root.y
+            }
+        }
+
+        FadeLoader {
+            id: bigDateClockLoader
+            anchors.horizontalCenter: parent.horizontalCenter
+            shown: root.clockStyle === "bigDate" && (root.shouldShow)
+            fade: false
+            sourceComponent: BigDateClock {
+                colText: root.resolvedClockColor
             }
         }
 

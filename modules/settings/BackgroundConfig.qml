@@ -824,6 +824,11 @@ ContentPage {
                             displayName: Translation.tr("Pixel"),
                             icon: "grid_view",
                             value: "pixel"
+                        },
+                        {
+                            displayName: Translation.tr("Big date"),
+                            icon: "today",
+                            value: "bigDate"
                         }
                     ]
                 }
@@ -852,6 +857,11 @@ ContentPage {
                             displayName: Translation.tr("Pixel"),
                             icon: "grid_view",
                             value: "pixel"
+                        },
+                        {
+                            displayName: Translation.tr("Big date"),
+                            icon: "today",
+                            value: "bigDate"
                         }
                     ]
                 }
@@ -2579,6 +2589,108 @@ ContentPage {
         }
         StyledToolTip {
             text: Translation.tr("Pick the actual time zones from the widget's own settings flip (the gear icon on the widget).")
+        }
+    }
+
+    ContentSection {
+        icon: "format_quote"
+        title: Translation.tr("Widget: Quote")
+
+        ConfigRow {
+            Layout.fillWidth: true
+
+            ConfigSwitch {
+                Layout.fillWidth: false
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.widgets.quote.enable
+                onCheckedChanged: {
+                    Config.options.background.widgets.quote.enable = checked;
+                }
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            ConfigSelectionArray {
+                Layout.fillWidth: false
+                currentValue: Config.options.background.widgets.quote.placementStrategy
+                onSelected: newValue => {
+                    Config.options.background.widgets.quote.placementStrategy = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Draggable"),
+                        icon: "drag_pan",
+                        value: "free"
+                    },
+                    {
+                        displayName: Translation.tr("Least busy"),
+                        icon: "category",
+                        value: "leastBusy"
+                    },
+                    {
+                        displayName: Translation.tr("Most busy"),
+                        icon: "shapes",
+                        value: "mostBusy"
+                    },
+                ]
+            }
+        }
+    }
+
+    ContentSection {
+        icon: "waving_hand"
+        title: Translation.tr("Widget: Greeting")
+
+        ConfigRow {
+            Layout.fillWidth: true
+
+            ConfigSwitch {
+                Layout.fillWidth: false
+                buttonIcon: "check"
+                text: Translation.tr("Enable")
+                checked: Config.options.background.widgets.greeting.enable
+                onCheckedChanged: {
+                    Config.options.background.widgets.greeting.enable = checked;
+                }
+            }
+            Item {
+                Layout.fillWidth: true
+            }
+            ConfigSelectionArray {
+                Layout.fillWidth: false
+                currentValue: Config.options.background.widgets.greeting.placementStrategy
+                onSelected: newValue => {
+                    Config.options.background.widgets.greeting.placementStrategy = newValue;
+                }
+                options: [
+                    {
+                        displayName: Translation.tr("Draggable"),
+                        icon: "drag_pan",
+                        value: "free"
+                    },
+                    {
+                        displayName: Translation.tr("Least busy"),
+                        icon: "category",
+                        value: "leastBusy"
+                    },
+                    {
+                        displayName: Translation.tr("Most busy"),
+                        icon: "shapes",
+                        value: "mostBusy"
+                    },
+                ]
+            }
+        }
+
+        MaterialTextArea {
+            Layout.fillWidth: true
+            placeholderText: Translation.tr("Name (leave empty to use your account name)")
+            text: Config.options.background.widgets.greeting.name
+            wrapMode: TextEdit.Wrap
+            onTextChanged: {
+                Config.options.background.widgets.greeting.name = text;
+            }
         }
     }
 }
