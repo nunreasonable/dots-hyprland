@@ -2,10 +2,6 @@ import QtQuick
 import QtQuick.Shapes
 import qs.modules.common
 
-// The logo's three-stroke asterisk (three diameters 60 degrees apart, rotated 15
-// degrees) used as Mainel's generic indicator: launcher glyph, dock key, busy spinner.
-// `spinning` steps it 60 degrees at a time so the 6-fold symmetry reads as a tick,
-// not a continuous spinner.
 Item {
     id: root
 

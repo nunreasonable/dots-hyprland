@@ -112,8 +112,6 @@ ColumnLayout {
         }
     }
 
-    // Mainel: the clock cut by a mainel, the bottom half nudged sideways like the
-    // logo's offset transom.
     MainelClockText {
         visible: StyleTheme.key === "mainel"
         Layout.alignment: Qt.AlignHCenter

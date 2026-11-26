@@ -1,13 +1,6 @@
 import QtQuick
 import qs.modules.common
 
-// Mainel's "PaneGroup": paints one pane rectangle behind every child of `target`,
-// radius distributed by position - the four corners of the group's own silhouette
-// (first/last row x first/last column) get `radiusOuter`, everything else gets
-// `radiusInner`. `target` stays a normal Row/Grid/GridLayout that already places its
-// children (a `Repeater` declared among them is fine - it is excluded automatically,
-// along with anything else that isn't a plain sized Item); this only paints the
-// backdrop, in reading order (row-major).
 Item {
     id: root
 
@@ -21,10 +14,6 @@ Item {
     property Gradient accentGradient: MainelTheme.jadeGradient
     property color accentColor: StyleTheme.palette.accent ?? Appearance.colors.colPrimary
 
-    // `target.children` also lists a directly-declared `Repeater` once it has
-    // instantiated delegates (it stays in the list, sized 0x0, alongside the
-    // delegates it reparented onto `target`) - a plain `count`/`model` duck-type
-    // check is enough to tell it apart from a real pane placeholder.
     readonly property var cells: {
         const list = [];
         if (root.target) {

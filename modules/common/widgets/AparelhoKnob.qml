@@ -4,7 +4,7 @@ import qs.modules.common
 Item {
     id: root
 
-    property real value: 0 // 0..1
+    property real value: 0
     property real stepSize: 0.1
     property int ticks: 11
     property real diameter: 48

@@ -43,9 +43,6 @@ Item {
         }
     }
 
-    // Mainel: every bar group is its own floating pane - fully rounded (it's a
-    // standalone group), wallpaper shows through the gaps BarContent already leaves
-    // between groups.
     StyledRectangularShadow {
         target: mainelBackground
         visible: StyleTheme.key === "mainel" && StyleTheme.softShadow
