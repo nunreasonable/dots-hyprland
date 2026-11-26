@@ -4,6 +4,7 @@ import QtQml
 import QtQuick
 import Quickshell
 import qs.modules.common
+import qs.modules.common.functions
 
 Singleton {
     id: root
@@ -53,6 +54,22 @@ Singleton {
     readonly property QtObject calendarEvents: _impl ? _impl.calendarEvents : null
     readonly property QtObject appActions: _impl ? _impl.appActions : null
     readonly property QtObject windowFrame: _impl ? _impl.windowFrame : null
+
+    function downloadName(path, tag) {
+        const name = FileUtils.fileNameForPath(path);
+        return typeof root.fsUtils?.renameFile === "function" ? `${name}.${tag}.part` : name;
+    }
+
+    function finishDownload(path, tag, ok) {
+        const name = FileUtils.fileNameForPath(path);
+        const part = root.downloadName(path, tag);
+        if (part === name)
+            return ok;
+        const dir = FileUtils.parentDirectory(path);
+        const done = ok && (root.fsUtils.renameFile(`${dir}/${part}`, `${dir}/${name}`) || root.fsUtils.classify(`${dir}/${name}`) === "file");
+        root.fsUtils.removeFile(`${dir}/${part}`);
+        return done;
+    }
 
     Component.onCompleted: {
         if (!Platform.isWindows) return;

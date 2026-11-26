@@ -54,13 +54,15 @@ Item {
         id: downloader
         property string targetFile: ""
         property string outputFile: ""
+        readonly property string partTag: Math.random().toString(36).slice(2, 10)
         workingDirectory: Platform.isWindows ? FileUtils.parentDirectory(downloader.outputFile) : ""
         command: Platform.isWindows
-            ? ["curl", "-4", "-sSL", "-o", FileUtils.fileNameForPath(downloader.outputFile), "--url", downloader.targetFile]
+            ? ["curl", "-4", "-sSL", "-o", WindowsNative.downloadName(downloader.outputFile, downloader.partTag), "--url", downloader.targetFile]
             : ["bash", "-c", 'mkdir -p "$(dirname "$2")"; [ -f "$2" ] || { curl -4 -sSL -o "$2.part" --url "$1" && mv "$2.part" "$2"; }', "art", downloader.targetFile, downloader.outputFile]
         onExited: (exitCode, exitStatus) => {
+            const ok = Platform.isWindows ? WindowsNative.finishDownload(downloader.outputFile, downloader.partTag, exitCode === 0) : exitCode === 0;
             if (downloader.outputFile === root.artFilePath)
-                root.downloaded = exitCode === 0;
+                root.downloaded = ok;
             else
                 root.fetch();
         }

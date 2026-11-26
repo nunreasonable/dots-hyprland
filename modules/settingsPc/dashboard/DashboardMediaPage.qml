@@ -64,12 +64,13 @@ Item {
         id: coverDownloader
         property string targetFile: root.artUrl
         property string artFilePath: root.artFilePath
+        readonly property string partTag: Math.random().toString(36).slice(2, 10)
         workingDirectory: Platform.isWindows ? FileUtils.parentDirectory(artFilePath) : ""
         command: Platform.isWindows
-            ? ["curl", "-4", "-sSL", "-o", FileUtils.fileNameForPath(artFilePath), "--url", targetFile]
+            ? ["curl", "-4", "-sSL", "-o", WindowsNative.downloadName(artFilePath, partTag), "--url", targetFile]
             : ["bash", "-c", '[ -f "$2" ] || { curl -4 -sSL -o "$2.part" --url "$1" && mv "$2.part" "$2"; }', "art", targetFile, artFilePath]
         onExited: (exitCode, exitStatus) => {
-            root.artDownloaded = !Platform.isWindows || exitCode === 0;
+            root.artDownloaded = !Platform.isWindows || WindowsNative.finishDownload(coverDownloader.artFilePath, coverDownloader.partTag, exitCode === 0);
         }
     }
 

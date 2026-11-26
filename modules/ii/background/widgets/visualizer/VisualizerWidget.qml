@@ -90,14 +90,15 @@ AbstractBackgroundWidget {
         }
         coverDownloader.workingDirectory = Platform.isWindows ? FileUtils.parentDirectory(root.artFilePath) : "";
         coverDownloader.command = Platform.isWindows
-            ? ["curl", "-4", "-sSL", "-o", FileUtils.fileNameForPath(root.artFilePath), "--url", root.artUrl]
+            ? ["curl", "-4", "-sSL", "-o", WindowsNative.downloadName(root.artFilePath, coverDownloader.partTag), "--url", root.artUrl]
             : ["bash", "-c", '[ -f "$1" ] || { curl -sSL "$2" -o "$1.part" && mv "$1.part" "$1"; }', "_", root.artFilePath, root.artUrl];
         coverDownloader.running = true;
     }
     Process {
         id: coverDownloader
+        readonly property string partTag: Math.random().toString(36).slice(2, 10)
         onExited: (exitCode, exitStatus) => {
-            root.coverDownloaded = !Platform.isWindows || exitCode === 0;
+            root.coverDownloaded = !Platform.isWindows || WindowsNative.finishDownload(root.artFilePath, coverDownloader.partTag, exitCode === 0);
         }
     }
     ColorQuantizer {
