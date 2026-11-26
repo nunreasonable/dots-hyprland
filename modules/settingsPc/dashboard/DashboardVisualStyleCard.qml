@@ -10,13 +10,8 @@ DashboardCard {
     readonly property var styles: VisualStyle.styles
 
     function styleInfo(id) {
-        switch (id) {
-        case "ii": return { name: "illogical-impulse", icon: "auto_awesome" };
-        case "end4pc": return { name: "end4-pC", icon: "dashboard_customize" };
-        case "nabyscape": return { name: "NabyScape", icon: "toolbar" };
-        case "sekaipop": return { name: "SekaiPop", icon: "interests" };
-        default: return { name: id, icon: "palette" };
-        }
+        const entry = VisualStyle.entry(id);
+        return { name: entry.displayName, icon: entry.icon };
     }
 
     readonly property var sekaiThemes: [
