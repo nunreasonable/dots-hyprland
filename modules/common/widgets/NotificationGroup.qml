@@ -115,7 +115,7 @@ MouseArea { // Notification group area
 
     StyledRectangularShadow {
         target: background
-        visible: popup
+        visible: popup && StyleTheme.key !== "riso"
     }
     Rectangle { // Background of the notification
         id: background
@@ -316,6 +316,14 @@ MouseArea { // Notification group area
                 }
 
             }
+        }
+    }
+
+    Loader {
+        active: root.popup && StyleTheme.key === "riso"
+        anchors.fill: background
+        sourceComponent: RisoInk {
+            radius: background.radius
         }
     }
 }

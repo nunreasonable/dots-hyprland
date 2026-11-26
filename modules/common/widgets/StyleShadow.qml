@@ -6,8 +6,9 @@ Item {
 
     property Item target: parent
     property real radius: 0
-    readonly property real dx: StyleTheme.elevation.x
-    readonly property real dy: StyleTheme.elevation.y
+    property real lift: 0
+    readonly property real dx: StyleTheme.elevation.x + root.lift
+    readonly property real dy: StyleTheme.elevation.y + root.lift
     readonly property color color: StyleTheme.elevation.color ?? "transparent"
 
     x: root.target === root.parent ? 0 : (root.target?.x ?? 0)
@@ -16,6 +17,13 @@ Item {
     height: root.target?.height ?? 0
     z: -3
     visible: StyleTheme.hardShadow
+
+    Loader {
+        active: StyleTheme.key === "riso"
+        sourceComponent: RisoRegister {
+            shadow: root
+        }
+    }
 
     Item {
         y: root.height

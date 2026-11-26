@@ -84,9 +84,20 @@ ColumnLayout {
         }
     }
 
+    Loader {
+        id: risoClock
+        active: StyleTheme.key === "riso"
+        visible: active
+        Layout.alignment: Qt.AlignHCenter
+        sourceComponent: RisoClock {
+            showDate: Config.options.background.widgets.clock.digital.showDate
+            horizontalAlignment: clockColumn.textHorizontalAlignment
+        }
+    }
+
     ClockText {
         id: timeTextTop
-        visible: !SekaiTheme.active
+        visible: !SekaiTheme.active && !risoClock.active
         text: clockColumn.isVertical ? DateTime.time.split(":")[0].padStart(2, "0") : DateTime.time
         color: clockColumn.colText
         horizontalAlignment: Text.AlignHCenter
@@ -104,7 +115,7 @@ ColumnLayout {
     Loader {
         Layout.topMargin: -40
         Layout.fillWidth: true
-        active: clockColumn.isVertical
+        active: clockColumn.isVertical && !risoClock.active
         visible: active
         sourceComponent: ClockText {
             id: timeTextBottom
@@ -122,7 +133,7 @@ ColumnLayout {
 
     // Date
     ClockText {
-        visible: Config.options.background.widgets.clock.digital.showDate && !SekaiTheme.active
+        visible: Config.options.background.widgets.clock.digital.showDate && !SekaiTheme.active && !risoClock.active
         Layout.topMargin: -20
         Layout.fillWidth: true
         text: DateTime.longDate

@@ -125,6 +125,14 @@ Item { // Bar content region
         border.color: Appearance.colors.colLayer0Border
     }
 
+    Loader {
+        active: StyleTheme.key === "riso" && Config.options.bar.showBackground && Config.options.bar.cornerStyle < 3
+        anchors.fill: barBackground
+        sourceComponent: RisoBarInk {
+            radius: barBackground.radius
+        }
+    }
+
     FocusedScrollMouseArea { // Left side | scroll to change brightness
         id: barLeftSideMouseArea
         transform: Scale {

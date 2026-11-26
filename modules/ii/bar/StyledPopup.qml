@@ -247,7 +247,7 @@ LazyLoader {
 
             StyledRectangularShadow {
                 target: popupBackground
-                visible: !root.morph
+                visible: !root.morph && StyleTheme.key !== "riso"
             }
 
             Rectangle {
@@ -271,6 +271,14 @@ LazyLoader {
                     width: parent.width
                     height: parent.height
                     cornerRadius: 20
+                }
+
+                Loader {
+                    active: StyleTheme.key === "riso" && !root.morph
+                    anchors.fill: parent
+                    sourceComponent: RisoInk {
+                        radius: popupBackground.radius
+                    }
                 }
 
                 Fillet {
