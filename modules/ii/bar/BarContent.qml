@@ -105,7 +105,7 @@ Item { // Bar content region
 
     // Background shadow
     Loader {
-        active: Config.options.bar.showBackground && Config.options.bar.cornerStyle === 1 && Config.options.bar.floatStyleShadow && !SekaiTheme.active
+        active: Config.options.bar.showBackground && Config.options.bar.cornerStyle === 1 && Config.options.bar.floatStyleShadow && StyleTheme.surface.barStrip && StyleTheme.softShadow
         anchors.fill: barBackground
         sourceComponent: StyledRectangularShadow {
             anchors.fill: undefined // The loader's anchors act on this, and this should not have any anchor
@@ -119,9 +119,9 @@ Item { // Bar content region
             fill: parent
             margins: Config.options.bar.cornerStyle === 1 ? (Appearance.sizes.hyprlandGapsOut) : 0 // idk why but +1 is needed
         }
-        color: Config.options.bar.showBackground && !SekaiTheme.active ? Appearance.colors.colLayer0 : "transparent"
+        color: Config.options.bar.showBackground && StyleTheme.surface.barStrip ? Appearance.colors.colLayer0 : "transparent"
         radius: Config.options.bar.cornerStyle === 1 ? Appearance.rounding.windowRounding : 0
-        border.width: Config.options.bar.showBackground && Config.options.bar.cornerStyle === 1 && !SekaiTheme.active ? 1 : 0
+        border.width: Config.options.bar.showBackground && Config.options.bar.cornerStyle === 1 && StyleTheme.surface.barStrip ? 1 : 0
         border.color: Appearance.colors.colLayer0Border
     }
 

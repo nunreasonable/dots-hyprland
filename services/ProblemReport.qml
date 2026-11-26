@@ -15,12 +15,6 @@ Singleton {
     property string lastError: ""
     property bool includeCrashDump: false
     readonly property string newIssueUrl: "https://github.com/nunreasonable/ii-windows/issues/new"
-    readonly property var styleNames: ({
-            "ii": "illogical-impulse (ii)",
-            "end4pc": "end4-pC",
-            "nabyscape": "NabyScape",
-            "sekaipop": "SekaiPop"
-        })
     property string arch: ""
 
     function bugReportUrl(zip) {
@@ -29,7 +23,7 @@ Singleton {
             "version": SelfUpdate.displayVersion,
             "arch": root.arch,
             "windows": `${SystemInfo.distroName}, build ${SystemInfo.windowsBuild}`,
-            "style": root.styleNames[Config.options.appearance.visualStyle] ?? "",
+            "style": VisualStyle.reportName(Config.options.appearance.visualStyle),
             "family": Config.options.panelFamily,
             "logs": `Problem report: ${zip.split(/[\\/]/).pop()} (drag the zip here)`
         };
@@ -41,7 +35,7 @@ Singleton {
         return [
             `ii-windows version: ${SelfUpdate.displayVersion}`,
             `Architecture: ${root.arch}`,
-            `Visual style: ${root.styleNames[Config.options.appearance.visualStyle] ?? Config.options.appearance.visualStyle}`,
+            `Visual style: ${VisualStyle.reportName(Config.options.appearance.visualStyle) || Config.options.appearance.visualStyle}`,
             `Panel family: ${Config.options.panelFamily}`,
             `Windows version: ${SystemInfo.distroName}, build ${SystemInfo.windowsBuild}`
         ].join("\n");

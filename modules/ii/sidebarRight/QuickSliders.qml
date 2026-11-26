@@ -117,9 +117,9 @@ Rectangle {
         property string secondaryMaterialSymbol
         configuration: StyledSlider.Configuration.M
         stopIndicatorValues: []
-        highlightColor: SekaiTheme.active ? SekaiTheme.accentA : Appearance.colors.colPrimary
-        trackColor: SekaiTheme.active ? SekaiTheme.fillHover : Appearance.colors.colSecondaryContainer
-        handleColor: SekaiTheme.active ? SekaiTheme.outline : Appearance.colors.colPrimary
+        highlightColor: StyleTheme.palette.accent ?? Appearance.colors.colPrimary
+        trackColor: StyleTheme.surface.fillHover ?? Appearance.colors.colSecondaryContainer
+        handleColor: StyleTheme.surface.borderColor ?? Appearance.colors.colPrimary
         dividerValues: secondaryMaterialSymbol.length > 0 ? [secondaryIcon.iconLocation] : []
         
         MaterialSymbol {
@@ -131,8 +131,7 @@ Rectangle {
                 rightMargin: nearFull ? 14 : 8
             }
             iconSize: 20
-            color: SekaiTheme.active ? (nearFull ? SekaiTheme.textOnAccent : SekaiTheme.text)
-                : nearFull ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
+            color: nearFull ? (StyleTheme.palette.onAccent ?? Appearance.colors.colOnPrimary) : (StyleTheme.palette.text ?? Appearance.colors.colOnSecondaryContainer)
             text: quickSlider.materialSymbol
 
             Behavior on color {
@@ -154,8 +153,7 @@ Rectangle {
                 rightMargin: nearIcon ? 14 : (1 - iconLocation) * quickSlider.effectiveDraggingWidth + quickSlider.rightPadding + 8
             }
             iconSize: 20
-            color: SekaiTheme.active ? (quickSlider.value >= iconLocation - 0.1 ? SekaiTheme.textOnAccent : SekaiTheme.text)
-                : quickSlider.value >= iconLocation - 0.1 ? Appearance.colors.colOnPrimary : Appearance.colors.colOnSecondaryContainer
+            color: quickSlider.value >= iconLocation - 0.1 ? (StyleTheme.palette.onAccent ?? Appearance.colors.colOnPrimary) : (StyleTheme.palette.text ?? Appearance.colors.colOnSecondaryContainer)
             text: secondaryMaterialSymbol
 
             Behavior on color {

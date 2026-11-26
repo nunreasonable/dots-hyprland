@@ -29,7 +29,7 @@ RippleButton {
         horizontalAlignment: Text.AlignHCenter
         text: root.symbol
         iconSize: Appearance.font.pixelSize.larger
-        color: SekaiTheme.active ? SekaiTheme.text : Appearance.colors.colOnLayer0
+        color: StyleTheme.palette.text ?? Appearance.colors.colOnLayer0
     }
 
     StyledToolTip {

@@ -21,6 +21,14 @@ Singleton {
     }
 
     property int failedReads: 0
+    property var generated: null
+    property bool applying: false
+    readonly property var styleScheme: StyleTheme.palette.scheme
+
+    onStyleSchemeChanged: {
+        if (!root.applying && root.generated)
+            root.applyGenerated()
+    }
 
     function applyColors(fileContent) {
         let json
@@ -36,6 +44,17 @@ Singleton {
             return
         }
         root.failedReads = 0
+        root.generated = json
+        root.applyGenerated()
+
+        if (Platform.isWindows && json.primary)
+            root.syncAccentColor(json.primary)
+        root.ready = true
+    }
+
+    function applyGenerated() {
+        const json = root.generated
+        root.applying = true
         for (const key in json) {
             if (json.hasOwnProperty(key)) {
                 // Convert snake_case to CamelCase
@@ -50,9 +69,10 @@ Singleton {
         if (Platform.isWindows && (Config.options.appearance.palette.namedScheme ?? "") !== "")
             ColorSchemes.applySecondaryOverride()
 
-        if (Platform.isWindows && json.primary)
-            root.syncAccentColor(json.primary)
-        root.ready = true
+        const scheme = root.styleScheme ?? {}
+        for (const key in scheme)
+            Appearance.m3colors[key] = scheme[key]
+        root.applying = false
     }
 
     property string pendingAccentColor: ""

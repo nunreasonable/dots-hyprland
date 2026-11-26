@@ -22,7 +22,7 @@ VerticalButtonGroup {
         baseHeight: 35
         clickedWidth: baseWidth
         clickedHeight: baseHeight + 20
-        buttonRadius: SekaiTheme.active ? Appearance.rounding.full : Appearance.rounding.normal
+        buttonRadius: StyleTheme.surface.radiusInner ?? Appearance.rounding.normal
         toggled: root.pinned
         onClicked: root.toggled()
         contentItem: MaterialSymbol {

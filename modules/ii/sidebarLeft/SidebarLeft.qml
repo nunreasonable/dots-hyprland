@@ -187,7 +187,7 @@ Scope { // Scope
             // Content
             StyledRectangularShadow {
                 target: sidebarLeftBackground
-                visible: !SekaiTheme.active
+                visible: StyleTheme.softShadow
                 radius: sidebarLeftBackground.radius
             }
             Rectangle {
@@ -199,13 +199,13 @@ Scope { // Scope
                 width: panelWindow.sidebarWidth - Appearance.sizes.hyprlandGapsOut - Appearance.sizes.elevationMargin
                 height: parent.height - Appearance.sizes.hyprlandGapsOut * 2
                 color: Appearance.colors.colUiBackground
-                border.width: SekaiTheme.active ? 0 : 1
+                border.width: StyleTheme.surface.frame ? 0 : 1
                 border.color: Appearance.colors.colLayer0Border
-                radius: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
-                SekaiShadow {
+                radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
+                StyleShadow {
                     radius: sidebarLeftBackground.radius
                 }
-                SekaiFrame {
+                StyleFrame {
                     radius: sidebarLeftBackground.radius
                 }
 

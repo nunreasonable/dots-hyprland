@@ -10,20 +10,20 @@ Rectangle {
     property color tint: Appearance.colors.colLayer1
     property real tintOpacity: 0.55
 
-    radius: Appearance.rounding?.verylarge ?? 30
+    radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding?.verylarge ?? 30
     color: Appearance.colors.colPrimaryContainer
 
     StyledRectangularShadow {
         target: root
         z: -2
-        visible: !Platform.isWindows && root.shadowed && !SekaiTheme.active
+        visible: !Platform.isWindows && root.shadowed && StyleTheme.softShadow
     }
 
-    SekaiShadow {
+    StyleShadow {
         radius: root.radius
     }
 
-    SekaiFrame {
+    StyleFrame {
         radius: root.radius
     }
 

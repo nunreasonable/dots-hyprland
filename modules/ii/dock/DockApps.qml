@@ -312,18 +312,18 @@ Item {
 
                 StyledRectangularShadow {
                     target: popupBackground
-                    visible: !SekaiTheme.active
+                    visible: StyleTheme.softShadow
                 }
 
                 Rectangle {
                     id: popupBackground
                     property real padding: 5
                     color: Appearance.m3colors.m3surfaceContainer
-                    radius: Appearance.rounding.normal
-                    SekaiShadow {
+                    radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.normal
+                    StyleShadow {
                         radius: popupBackground.radius
                     }
-                    SekaiFrame {
+                    StyleFrame {
                         radius: popupBackground.radius
                     }
                     anchors.bottom: DockStyle.vertical ? undefined : parent.bottom

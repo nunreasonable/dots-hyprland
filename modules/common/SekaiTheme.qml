@@ -6,7 +6,7 @@ import qs.modules.common.functions
 Singleton {
     id: root
 
-    readonly property bool active: Config.options.appearance.visualStyleApplied === "sekaipop"
+    readonly property bool active: StyleTheme.key === "sekaipop"
     readonly property bool dark: Appearance.m3colors.darkmode
     readonly property list<string> themes: ["mint", "indigo", "lime", "rose", "amber", "violet", "mono", "wallpaper"]
     readonly property string themeName: root.themes.includes(Config.options.appearance.sekaipop.theme) ? Config.options.appearance.sekaipop.theme : "mint"

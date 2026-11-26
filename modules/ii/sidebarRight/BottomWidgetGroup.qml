@@ -11,13 +11,13 @@ import QtQuick.Layouts
 Rectangle {
     id: root
     radius: Appearance.rounding.normal
-    SekaiShadow {
+    StyleShadow {
         radius: root.radius
     }
-    SekaiFrame {
+    StyleFrame {
         radius: root.radius
     }
-    color: SekaiTheme.active ? SekaiTheme.fill : Appearance.colors.colLayer1
+    color: StyleTheme.surface.fill ?? Appearance.colors.colLayer1
     implicitHeight: collapsed ? collapsedBottomWidgetGroupRow.implicitHeight : 350
     property int selectedTab: Persistent.states.sidebar.bottomGroup.tab
     property int previousIndex: -1

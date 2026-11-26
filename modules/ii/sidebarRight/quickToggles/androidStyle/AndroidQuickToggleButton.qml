@@ -129,8 +129,7 @@ GroupButton {
                 implicitWidth: height
                 radius: root.radius - root.verticalPadding
                 color: {
-                    const baseColor = SekaiTheme.active ? (root.toggled ? SekaiTheme.accentA : SekaiTheme.fillHover)
-                        : root.toggled ? Appearance.colors.colPrimary : Appearance.colors.colLayer3
+                    const baseColor = root.toggled ? (StyleTheme.palette.accent ?? Appearance.colors.colPrimary) : (StyleTheme.surface.fillHover ?? Appearance.colors.colLayer3)
                     const transparentizeAmount = (root.altAction && root.expandedSize) ? 0 : 1
                     return ColorUtils.transparentize(baseColor, transparentizeAmount)
                 }

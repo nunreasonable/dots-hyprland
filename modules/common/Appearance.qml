@@ -15,9 +15,9 @@ Singleton {
     property QtObject sizes
     property string syntaxHighlightingTheme
     readonly property bool animationsEnabled: !(Platform.isWindows
-        && Config.options.windowsPort.gameMode.enable)
-    readonly property real animationScale: animationsEnabled ? 1 : 0
-    readonly property real animationVelocityScale: animationsEnabled ? 1 : 1000
+        && Config.options.windowsPort.gameMode.enable) && StyleTheme.smoothMotion
+    readonly property real animationScale: animationsEnabled ? StyleTheme.motionScale : 0
+    readonly property real animationVelocityScale: animationsEnabled ? 1 / StyleTheme.motionScale : 1000
 
     function getColorFromName(name) {
         switch (name) {
@@ -251,9 +251,9 @@ Singleton {
 
     font: QtObject {
         property QtObject family: QtObject {
-            property string main: Config.options.appearance.fonts.main
-            property string numbers: Config.options.appearance.fonts.numbers
-            property string title: Config.options.appearance.fonts.title
+            property string main: StyleTheme.type.ui || Config.options.appearance.fonts.main
+            property string numbers: StyleTheme.type.numbers || Config.options.appearance.fonts.numbers
+            property string title: StyleTheme.type.display || Config.options.appearance.fonts.title
             property string iconMaterial: "Material Symbols Rounded"
             property string iconNerd: Config.options.appearance.fonts.iconNerd
             property string monospace: Config.options.appearance.fonts.monospace
@@ -261,14 +261,14 @@ Singleton {
             property string expressive: Config.options.appearance.fonts.expressive
         }
         property QtObject variableAxes: QtObject {
-            property var main: ({
+            property var main: StyleTheme.type.uiAxes ?? ({
                 "wght": 450,
                 "wdth": 100,
             })
-            property var numbers: ({
+            property var numbers: StyleTheme.type.numbersAxes ?? ({
                 "wght": 450,
             })
-            property var title: ({ // Slightly bold weight for title
+            property var title: StyleTheme.type.displayAxes ?? ({ // Slightly bold weight for title
                 "wght": 550, // Weight (Lowered to compensate for increased grade)
             })
         }

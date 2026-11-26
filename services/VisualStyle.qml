@@ -6,8 +6,15 @@ import Quickshell
 Singleton {
     id: root
 
-    readonly property list<string> styles: ["ii", "end4pc", "nabyscape", "sekaipop"]
+    readonly property var entries: StyleTheme.all.filter(entry => entry.selectable)
+    readonly property list<string> styles: root.entries.map(entry => entry.key)
     readonly property list<string> layoutStyles: ["ii", "end4pc"]
+    readonly property var options: root.entries.map(entry => ({
+                displayName: entry.displayName,
+                icon: entry.icon,
+                value: entry.key
+            }))
+    readonly property string hints: root.entries.filter(entry => entry.hint !== "").map(entry => " " + entry.hint).join("")
     readonly property string selected: Config.options.appearance.visualStyle
     readonly property string applied: Config.options.appearance.visualStyleApplied
 
@@ -29,7 +36,7 @@ Singleton {
     }
 
     function upgradePreset(style) {
-        const pc = style === "end4pc";
+        const pc = root.entry(style).layout === "end4pc";
         const version = Config.options.appearance.visualStylePresetVersion ?? 0;
         if (pc && version < 1)
             root.applyNewKeys(pc, style);
@@ -45,8 +52,16 @@ Singleton {
             layouts.rightLayout = BarLayouts.end4pcRight;
     }
 
+    function entry(style) {
+        return StyleTheme.entry(style) ?? StyleTheme.all[0];
+    }
+
+    function reportName(style) {
+        return StyleTheme.entry(style)?.reportName ?? "";
+    }
+
     function layoutStyle(style) {
-        return style === "nabyscape" || style === "sekaipop" ? "ii" : style;
+        return StyleTheme.entry(style)?.layout ?? style;
     }
 
     function defaultLayout(style) {
@@ -102,7 +117,7 @@ Singleton {
     }
 
     function applyIsland(naby) {
-        const was = root.applied === "nabyscape";
+        const was = root.entry(root.applied).island;
         Config.options.nabyIsland.enable = naby;
         if (!Platform.isWindows || naby === was)
             return;
@@ -114,8 +129,20 @@ Singleton {
         }
     }
 
+    function applyTweaks(entry) {
+        for (const other of StyleTheme.all) {
+            for (const key in other.preset) {
+                if (!(key in entry.preset))
+                    Config.setNestedValue(key, other.preset[key][1]);
+            }
+        }
+        for (const key in entry.preset)
+            Config.setNestedValue(key, entry.preset[key][0]);
+    }
+
     function applyPreset(style) {
-        const pc = style === "end4pc";
+        const entry = root.entry(style);
+        const pc = entry.layout === "end4pc";
         Config.options.bar.utilButtons.showColorPicker = pc;
         Config.options.bar.utilButtons.showDarkModeToggle = !pc;
         Config.options.bar.utilButtons.showKeyboardToggle = !pc;
@@ -123,9 +150,10 @@ Singleton {
         Config.options.bar.workspaces.showAppIcons = !pc;
         Config.options.bar.resources.alwaysShowSwap = !pc;
         Config.options.sidebar.quickSliders.enable = pc;
-        Config.options.appearance.settingsLayout = style === "nabyscape" || style === "sekaipop" ? "end4pc" : style;
-        root.applyIsland(style === "nabyscape");
+        Config.options.appearance.settingsLayout = entry.settingsLayout;
+        root.applyIsland(entry.island);
         root.applyNewKeys(pc, root.applied);
+        root.applyTweaks(entry);
         Config.options.appearance.visualStylePresetVersion = root.presetVersion;
         Config.options.appearance.visualStyleApplied = style;
     }

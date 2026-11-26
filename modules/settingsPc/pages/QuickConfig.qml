@@ -732,7 +732,7 @@ ContentPage {
             icon: "style"
             shape: W.MaterialShape.Shape.SoftBurst
             title: Translation.tr("Style")
-            hint: Translation.tr("Switching the style resets the bar buttons, workspace numbers, quick sliders and settings layout to that style's defaults. A bar layout you changed is kept and comes back with its style") + " " + Translation.tr("NabyScape puts a black island at the top of the screen, inspired by NabyScape by BillyNabil. On Windows it also swaps ii's bar for the Windows taskbar until you switch to another style") + " " + Translation.tr("SekaiPop draws the bar as outlined blocks with a hard shadow that sink when pressed, inspired by SekaiPop by Blapples")
+            hint: Translation.tr("Switching the style resets the bar buttons, workspace numbers, quick sliders and settings layout to that style's defaults. A bar layout you changed is kept and comes back with its style") + VisualStyle.hints
 
             GroupedList {
                 ConfigSelectionArray {
@@ -742,28 +742,7 @@ ContentPage {
                     onSelected: newValue => {
                         Config.options.appearance.visualStyle = newValue;
                     }
-                    options: [
-                        {
-                            displayName: "illogical-impulse",
-                            icon: "auto_awesome",
-                            value: "ii"
-                        },
-                        {
-                            displayName: "end4-pC",
-                            icon: "dashboard_customize",
-                            value: "end4pc"
-                        },
-                        {
-                            displayName: "NabyScape",
-                            icon: "toolbar",
-                            value: "nabyscape"
-                        },
-                        {
-                            displayName: "SekaiPop",
-                            icon: "interests",
-                            value: "sekaipop"
-                        }
-                    ]
+                    options: VisualStyle.options
                 }
                 ConfigComboBox {
                     visible: Config.options.appearance.visualStyle === "sekaipop"

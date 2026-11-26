@@ -150,7 +150,7 @@ Scope {
 
             StyledRectangularShadow {
                 target: card
-                visible: !SekaiTheme.active
+                visible: StyleTheme.softShadow
             }
 
             Rectangle {
@@ -158,15 +158,15 @@ Scope {
                 anchors.centerIn: parent
                 width: Math.min((win.screen?.width ?? 1280) - 160, 760)
                 height: Math.min((win.screen?.height ?? 900) - 160, 680)
-                radius: Appearance.rounding.windowRounding
+                radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.windowRounding
                 color: Appearance.colors.colLayer0
                 border.width: 1
                 border.color: Appearance.colors.colLayer0Border
 
-                SekaiShadow {
+                StyleShadow {
                     radius: card.radius
                 }
-                SekaiFrame {
+                StyleFrame {
                     radius: card.radius
                 }
 

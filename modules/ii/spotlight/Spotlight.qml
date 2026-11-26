@@ -533,7 +533,7 @@ q="$1"; h="$2"
 
             StyledRectangularShadow {
                 target: panel
-                visible: !SekaiTheme.active
+                visible: StyleTheme.softShadow
             }
 
             SekaiBlock {
@@ -545,16 +545,27 @@ q="$1"; h="$2"
                 cornerRadius: panel.radius
             }
 
+            StyleShadow {
+                target: panel
+                radius: panel.radius
+                visible: StyleTheme.hardShadow && !SekaiTheme.active
+            }
+
             Rectangle {
                 id: panel
                 width: root.expanded ? content.width : pillWidth
                 readonly property real pillWidth: 600
                 height: header.height + (root.expanded ? body.height + (SekaiTheme.active ? 18 : 8) : 0)
-                radius: root.expanded ? Appearance.rounding.large : height / 2
+                radius: StyleTheme.surface.radiusOuter ?? (root.expanded ? Appearance.rounding.large : height / 2)
                 color: SekaiTheme.active ? "transparent" : Appearance.colors.colLayer0
-                border.width: SekaiTheme.active ? 0 : 1
+                border.width: StyleTheme.surface.frame ? 0 : 1
                 border.color: Appearance.colors.colLayer0Border
                 clip: true
+
+                StyleFrame {
+                    radius: panel.radius
+                    visible: StyleTheme.surface.frame && !SekaiTheme.active
+                }
 
                 Behavior on width {
                     animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)

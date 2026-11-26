@@ -137,7 +137,7 @@ Scope {
 
             StyledRectangularShadow {
                 target: background
-                visible: !SekaiTheme.active
+                visible: StyleTheme.softShadow
                 opacity: background.opacity
                 scale: background.scale
             }
@@ -150,7 +150,7 @@ Scope {
                 color: Appearance.colors.colLayer0
                 border.width: 1
                 border.color: Appearance.colors.colLayer0Border
-                radius: Appearance.rounding.windowRounding
+                radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.windowRounding
                 focus: true
                 opacity: root.shown ? 1 : 0
                 scale: root.shown ? 1 : 0.96
@@ -162,10 +162,10 @@ Scope {
                     animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                 }
 
-                SekaiShadow {
+                StyleShadow {
                     radius: background.radius
                 }
-                SekaiFrame {
+                StyleFrame {
                     radius: background.radius
                 }
 

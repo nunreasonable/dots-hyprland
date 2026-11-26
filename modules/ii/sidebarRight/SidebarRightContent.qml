@@ -104,7 +104,7 @@ Item {
 
     StyledRectangularShadow {
         target: sidebarRightBackground
-        visible: !SekaiTheme.active
+        visible: StyleTheme.softShadow
     }
     SekaiBlock {
         visible: SekaiTheme.active
@@ -114,6 +114,11 @@ Item {
         ringWidth: 6
         fillColor: SekaiTheme.dark ? SekaiTheme.deep : "#f6f6fa"
     }
+    StyleShadow {
+        target: sidebarRightBackground
+        radius: sidebarRightBackground.radius
+        visible: StyleTheme.hardShadow && !SekaiTheme.active
+    }
     Rectangle {
         id: sidebarRightBackground
 
@@ -121,9 +126,14 @@ Item {
         implicitHeight: parent.height - Appearance.sizes.hyprlandGapsOut * 2
         implicitWidth: sidebarWidth - Appearance.sizes.hyprlandGapsOut * 2
         color: SekaiTheme.active ? "transparent" : Appearance.colors.colUiBackground
-        border.width: SekaiTheme.active ? 0 : 1
+        border.width: StyleTheme.surface.frame ? 0 : 1
         border.color: Appearance.colors.colLayer0Border
-        radius: Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
+        radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
+
+        StyleFrame {
+            radius: sidebarRightBackground.radius
+            visible: StyleTheme.surface.frame && !SekaiTheme.active
+        }
 
         ReorderableColumn {
             id: sectionColumn
@@ -133,7 +143,7 @@ Item {
             anchors.bottomMargin: SekaiTheme.active ? 18 + SekaiTheme.shadowOffset : sidebarPadding
             anchors.leftMargin: SekaiTheme.active ? 16 : sidebarPadding
             anchors.rightMargin: SekaiTheme.active ? 16 : sidebarPadding
-            itemSpacing: SekaiTheme.active ? 12 : sidebarPadding
+            itemSpacing: StyleTheme.surface.gap ?? sidebarPadding
             order: root.sectionOrder
             editMode: root.editMode && root.editTab === "layout"
             fillKey: "notifications"

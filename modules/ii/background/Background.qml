@@ -158,7 +158,6 @@ Variants {
             && (!GlobalStates.screenLocked || !centeredWallpaper.centeredWallpaperEnabled || bgRoot.blurFullScreen)
 
         readonly property var transitionShaders: ["circlePit", "circleSelect", "magic", "Doom", "Peel", "transition", "pixelate", "stripes", "crt", "dissolve", "glitch", "ripple", "shatter", "colonies"]
-        readonly property var sekaiTransitionShaders: ["sekaiRing", "sekaiIris", "sekaiStar", "sekaiBlocks"]
         readonly property string wallpaperAnimation: Config.options.background.wallpaperAnimation ?? "random"
         property string transitionShader: "transition"
         property bool transitionLive: false
@@ -254,7 +253,7 @@ Variants {
             if (toVideo)
                 return "transition";
             if (bgRoot.wallpaperAnimation === "random") {
-                const pool = SekaiTheme.active ? bgRoot.sekaiTransitionShaders : bgRoot.transitionShaders;
+                const pool = StyleTheme.motion.wallpaperTransitions ?? bgRoot.transitionShaders;
                 return pool[Math.floor(Math.random() * pool.length)];
             }
             return bgRoot.wallpaperAnimation;

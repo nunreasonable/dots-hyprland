@@ -43,7 +43,7 @@ GroupButton {
         anchors.centerIn: parent
         iconSize: 22
         fill: toggled ? 1 : 0
-        color: SekaiTheme.active ? (toggled ? SekaiTheme.textOnAccent : SekaiTheme.text) : toggled ? Appearance.m3colors.m3onPrimary : Appearance.colors.colOnLayer1
+        color: toggled ? (StyleTheme.palette.onAccent ?? Appearance.m3colors.m3onPrimary) : (StyleTheme.palette.text ?? Appearance.colors.colOnLayer1)
         horizontalAlignment: Text.AlignHCenter
         verticalAlignment: Text.AlignVCenter
         text: buttonIcon
