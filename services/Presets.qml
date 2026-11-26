@@ -1214,9 +1214,12 @@ Singleton {
 
     function _installFinish() {
         const map = root._installRenameMap;
-        let fixed = root.mapStrings(root._installParsed, s => map[s] !== undefined ? map[s] : s);
+        const original = root._installParsed;
+        let fixed = root.mapStrings(original, s => map[s] !== undefined ? map[s] : s);
         const filtered = root.filterForSave(fixed, "");
-        filtered._presetMeta = Object.assign({}, root.isPlainObject(fixed?._presetMeta) ? fixed._presetMeta : {}, { origin: root._installSource === "imported" ? "imported" : PresetsOnline.originOf(root._installName) });
+        const existingMeta = root.isPlainObject(original?._presetMeta) ? original._presetMeta : {};
+        const preview = String(existingMeta.preview ?? "") !== "" ? existingMeta.preview : String(original?.background?.wallpaperPath ?? "");
+        filtered._presetMeta = Object.assign({}, existingMeta, { preview: preview, origin: root._installSource === "imported" ? "imported" : PresetsOnline.originOf(root._installName) });
 
         let name = root.sanitizeName(PresetsOnline.displayName(root._installName));
         if (name === "")
