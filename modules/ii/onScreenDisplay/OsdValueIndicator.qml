@@ -18,15 +18,29 @@ Item {
     property real valueIndicatorLeftPadding: 10
     property real valueIndicatorRightPadding: 20 // An icon is circle ish, a column isn't, hence the extra padding
 
-    implicitWidth: Appearance.sizes.osdWidth + 2 * Appearance.sizes.elevationMargin
-    implicitHeight: valueIndicator.implicitHeight + 2 * Appearance.sizes.elevationMargin
+    implicitWidth: aquarioOsd.item?.implicitWidth ?? (Appearance.sizes.osdWidth + 2 * Appearance.sizes.elevationMargin)
+    implicitHeight: aquarioOsd.item?.implicitHeight ?? (valueIndicator.implicitHeight + 2 * Appearance.sizes.elevationMargin)
+
+    Loader {
+        id: aquarioOsd
+        active: StyleTheme.key === "aquario"
+        anchors.fill: parent
+        sourceComponent: AquarioBeaker {
+            value: root.value
+            icon: root.icon
+            name: root.name
+            from: root.from
+            to: root.to
+        }
+    }
 
     StyledRectangularShadow {
         target: valueIndicator
-        visible: StyleTheme.softShadow
+        visible: StyleTheme.softShadow && !aquarioOsd.active
     }
     Rectangle {
         id: valueIndicator
+        visible: !aquarioOsd.active
         anchors {
             fill: parent
             margins: Appearance.sizes.elevationMargin

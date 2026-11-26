@@ -130,6 +130,14 @@ Item {
         border.color: Appearance.colors.colLayer0Border
         radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
 
+        Loader {
+            active: StyleTheme.key === "aquario"
+            anchors.fill: parent
+            sourceComponent: AquarioGlass {
+                radius: sidebarRightBackground.radius
+            }
+        }
+
         StyleFrame {
             radius: sidebarRightBackground.radius
             visible: StyleTheme.surface.frame && !SekaiTheme.active

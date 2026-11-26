@@ -95,6 +95,17 @@ Slider {
         cursorShape: root.pressed ? Qt.ClosedHandCursor : Qt.PointingHandCursor 
     }
 
+    Loader {
+        active: StyleTheme.key === "aquario"
+        z: -1
+        anchors.verticalCenter: parent.verticalCenter
+        width: root.width
+        height: Math.max(10, root.trackWidth)
+        sourceComponent: AquarioSlider {
+            slider: root
+        }
+    }
+
     background: Item {
         id: background
         anchors.verticalCenter: parent.verticalCenter

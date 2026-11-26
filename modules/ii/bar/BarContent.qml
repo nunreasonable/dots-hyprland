@@ -124,6 +124,14 @@ Item { // Bar content region
         border.width: Config.options.bar.showBackground && Config.options.bar.cornerStyle === 1 && StyleTheme.surface.barStrip ? 1 : 0
         border.color: Appearance.colors.colLayer0Border
     }
+    Loader {
+        active: StyleTheme.key === "aquario" && Config.options.bar.showBackground && StyleTheme.surface.barStrip
+        anchors.fill: barBackground
+        sourceComponent: AquarioGlass {
+            radius: barBackground.radius
+            rim: barBackground.radius > 0
+        }
+    }
 
     FocusedScrollMouseArea { // Left side | scroll to change brightness
         id: barLeftSideMouseArea
