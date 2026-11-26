@@ -288,6 +288,7 @@ Scope {
                                 }
 
                                 ClaudeSessionStats {
+                                    Layout.fillWidth: false
                                     Layout.preferredWidth: panelWindow.sideWidth
                                     Layout.fillHeight: true
                                     session: root.selected
