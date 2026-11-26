@@ -9,6 +9,7 @@ Item {
     readonly property real dx: StyleTheme.elevation.x
     readonly property real dy: StyleTheme.elevation.y
     readonly property color color: StyleTheme.elevation.color ?? "transparent"
+    readonly property bool dithered: StyleTheme.elevation.kind === "dither"
 
     x: root.target === root.parent ? 0 : (root.target?.x ?? 0)
     y: root.target === root.parent ? 0 : (root.target?.y ?? 0)
@@ -24,6 +25,7 @@ Item {
         clip: true
 
         Rectangle {
+            visible: !root.dithered
             x: root.dx
             y: root.dy - root.height
             width: root.width
@@ -31,6 +33,12 @@ Item {
             radius: root.radius
             color: root.color
             antialiasing: true
+        }
+
+        Loader {
+            anchors.fill: parent
+            active: root.dithered
+            sourceComponent: TintaDitherTile {}
         }
     }
 
@@ -41,6 +49,7 @@ Item {
         clip: true
 
         Rectangle {
+            visible: !root.dithered
             x: root.dx - root.width
             y: root.dy
             width: root.width
@@ -48,6 +57,12 @@ Item {
             radius: root.radius
             color: root.color
             antialiasing: true
+        }
+
+        Loader {
+            anchors.fill: parent
+            active: root.dithered
+            sourceComponent: TintaDitherTile {}
         }
     }
 }

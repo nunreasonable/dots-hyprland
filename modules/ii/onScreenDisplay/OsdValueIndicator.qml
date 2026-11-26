@@ -21,6 +21,8 @@ Item {
     implicitWidth: Appearance.sizes.osdWidth + 2 * Appearance.sizes.elevationMargin
     implicitHeight: valueIndicator.implicitHeight + 2 * Appearance.sizes.elevationMargin
 
+    onValueChanged: tintaFlash.flash()
+
     StyledRectangularShadow {
         target: valueIndicator
         visible: StyleTheme.softShadow
@@ -37,6 +39,10 @@ Item {
         }
         StyleFrame {
             radius: valueIndicator.radius
+        }
+        TintaRefreshFlash {
+            id: tintaFlash
+            flashRadius: valueIndicator.radius
         }
         color: Appearance.colors.colUiBackground
 
