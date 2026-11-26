@@ -86,7 +86,7 @@ ColumnLayout {
 
     ClockText {
         id: timeTextTop
-        visible: !SekaiTheme.active
+        visible: !SekaiTheme.active && StyleTheme.key !== "mainel"
         text: clockColumn.isVertical ? DateTime.time.split(":")[0].padStart(2, "0") : DateTime.time
         color: clockColumn.colText
         horizontalAlignment: Text.AlignHCenter
@@ -98,6 +98,21 @@ ColumnLayout {
                     "wdth": Config.options.background.widgets.clock.digital.font.width,
                     "ROND": Config.options.background.widgets.clock.digital.font.roundness
                 })
+        }
+    }
+
+    // Mainel: the clock cut by a mainel, the bottom half nudged sideways like the
+    // logo's offset transom.
+    MainelClockText {
+        visible: StyleTheme.key === "mainel"
+        Layout.alignment: Qt.AlignHCenter
+        text: clockColumn.isVertical ? DateTime.time.split(":")[0].padStart(2, "0") : DateTime.time
+        color: clockColumn.colText
+        font {
+            pixelSize: Config.options.background.widgets.clock.digital.font.size
+            family: "Google Sans Flex"
+            weight: 700
+            variableAxes: ({ "wdth": 125, "ROND": 0 })
         }
     }
 

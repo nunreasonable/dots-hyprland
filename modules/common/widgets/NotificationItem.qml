@@ -118,7 +118,7 @@ Item { // Notification item area
         id: background
         width: parent.width
         anchors.left: parent.left
-        radius: Appearance.rounding.small
+        radius: StyleTheme.surface.radiusInner ?? Appearance.rounding.small
         anchors.leftMargin: root.xOffset
 
         Behavior on anchors.leftMargin {

@@ -9,7 +9,7 @@ import QtQuick.Layouts
 
 Rectangle {
     id: root
-    radius: Appearance.rounding.normal
+    radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.normal
     StyleShadow {
         radius: root.radius
     }

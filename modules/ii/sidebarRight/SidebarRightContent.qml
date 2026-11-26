@@ -125,7 +125,8 @@ Item {
         anchors.fill: parent
         implicitHeight: parent.height - Appearance.sizes.hyprlandGapsOut * 2
         implicitWidth: sidebarWidth - Appearance.sizes.hyprlandGapsOut * 2
-        color: SekaiTheme.active ? "transparent" : Appearance.colors.colUiBackground
+        color: (SekaiTheme.active || StyleTheme.key === "mainel")
+            ? "transparent" : Appearance.colors.colUiBackground
         border.width: StyleTheme.surface.frame ? 0 : 1
         border.color: Appearance.colors.colLayer0Border
         radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
