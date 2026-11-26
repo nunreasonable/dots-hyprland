@@ -330,29 +330,28 @@ Singleton {
         return out;
     }
 
-    function _walkFix(node, dir, fileSet) {
+    function _walkFix(node, dir, fileMap) {
         if (typeof node === "string") {
             const base = node.split("/").pop();
-            return fileSet.has(base) ? `${dir}/${base}` : node;
+            return fileMap.has(base) ? `${dir}/${fileMap.get(base)}` : node;
         }
         if (Array.isArray(node))
-            return node.map(item => root._walkFix(item, dir, fileSet));
+            return node.map(item => root._walkFix(item, dir, fileMap));
         if (node !== null && typeof node === "object") {
             const out = {};
             for (const key in node)
-                out[key] = root._walkFix(node[key], dir, fileSet);
+                out[key] = root._walkFix(node[key], dir, fileMap);
             return out;
         }
         return node;
     }
 
-    function _fixReferences(obj, dir, filenames) {
-        const fileSet = new Set(filenames);
-        let result = root._walkFix(obj, dir, fileSet);
+    function _fixReferences(obj, dir, fileMap) {
+        let result = root._walkFix(obj, dir, fileMap);
         const tree = result?.background?.collage?.tree;
         if (tree != null) {
             try {
-                const fixedTree = root._walkFix(JSON.parse(tree), dir, fileSet);
+                const fixedTree = root._walkFix(JSON.parse(tree), dir, fileMap);
                 result.background = Object.assign({}, result.background, {
                     collage: Object.assign({}, result.background.collage, { tree: JSON.stringify(fixedTree) })
                 });
@@ -376,17 +375,12 @@ Singleton {
 
         const rootBase = root.activeEntry?.rootWallpapers ? root.activeEntry.rawBase : "";
         const wallpaperAssets = rootBase === "" ? [] : wallpaperFiles.map(f => ({ filename: f.split("/").pop(), url: root.rawUrl(f, rootBase) }));
-        const seen = new Set();
-        const toDownload = [...wallpaperAssets, ...folderAssets].filter(a => {
-            if (!root.safeFileName(a.filename) || seen.has(a.filename)) return false;
-            seen.add(a.filename);
-            return true;
-        });
-        assetsProc.assetFilenames = toDownload.map(a => a.filename);
+        const toDownload = root.dedupeAssets([...wallpaperAssets, ...folderAssets]);
+        assetsProc.assetFileMap = toDownload.map(a => [a.filename, a.destName]);
 
         let cmd = `mkdir -p ${root.shQuote(dir)}`;
         for (const asset of toDownload)
-            cmd += ` && curl -sSL ${root.shQuote(asset.url)} -o ${root.shQuote(dir + "/" + asset.filename)}`;
+            cmd += ` && curl -sSL ${root.shQuote(asset.url)} -o ${root.shQuote(dir + "/" + asset.destName)}`;
         assetsProc.command = ["bash", "-c", cmd];
         assetsProc.running = true;
     }
@@ -533,7 +527,7 @@ Singleton {
         property string entryName: ""
         property string stagingJsonPath: ""
         property string assetCacheDirPath: ""
-        property var assetFilenames: []
+        property var assetFileMap: []
         onExited: code => {
             if (code !== 0) {
                 root.fail(Translation.tr("Failed to download preset assets"));
@@ -542,11 +536,11 @@ Singleton {
             const finalJsonPath = `${root.cacheDir()}/${assetsProc.entryName}.json`;
             const sanitize = root.activeEntry?.sanitize ?? false;
             const fixFilter = '$files as $files | def fix: walk(if type == "string" then '
-                + '((split("/") | last) as $base | if ($files | index($base)) then ($dir + "/" + $base) else . end) else . end); '
+                + '((split("/") | last) as $base | if ($files[$base]) then ($dir + "/" + $files[$base]) else . end) else . end); '
                 + 'fix | if (.background.collage.tree? // null) != null then .background.collage.tree |= (try (fromjson | fix | tojson) catch .) else . end '
                 + '| if has("profile") then .profile.avatarPath = $dir else . end | ._presetMeta.source = "online"';
             const jqFilter = (sanitize ? root.shareFilter() : "") + fixFilter;
-            const filesJson = JSON.stringify(assetsProc.assetFilenames);
+            const filesJson = JSON.stringify(Object.fromEntries(assetsProc.assetFileMap));
             const cmd = `jq --arg dir ${root.shQuote(assetsProc.assetCacheDirPath)} --argjson files ${root.shQuote(filesJson)} ${root.shQuote(jqFilter)} ${root.shQuote(assetsProc.stagingJsonPath)} > ${root.shQuote(finalJsonPath)} && rm -f ${root.shQuote(assetsProc.stagingJsonPath)}`;
             rewriteProc.command = ["bash", "-c", cmd];
             rewriteProc.running = true;
@@ -575,7 +569,7 @@ Singleton {
     property string _winEntryName: ""
     property var _winAssetQueue: []
     property string _winAssetDir: ""
-    property var _winAssetFilenames: []
+    property var _winAssetFileMap: []
 
     function _winDownload(entry) {
         winJsonProc.entryName = entry.name;
@@ -631,6 +625,22 @@ Singleton {
         return /^[A-Za-z0-9 _.()+\-]+$/.test(text) && !/^\.+$/.test(text) && text.length <= 120;
     }
 
+    function safeDestName(filename, index) {
+        if (root.safeFileName(filename))
+            return filename;
+        const ext = filename.match(/\.[A-Za-z0-9]{1,8}$/);
+        return `asset-${index}${ext ? ext[0].toLowerCase() : ""}`;
+    }
+
+    function dedupeAssets(assets) {
+        const seen = new Set();
+        return assets.filter(a => {
+            if (seen.has(a.filename)) return false;
+            seen.add(a.filename);
+            return true;
+        }).map((a, i) => Object.assign({}, a, { destName: root.safeDestName(a.filename, i) }));
+    }
+
     function _winStartAssets(name, stagingText, folderAssets, wallpaperFiles) {
         if (!root.safeFileName(name)) {
             root.fail(Translation.tr("Failed to finalize preset"));
@@ -639,17 +649,12 @@ Singleton {
         const dir = root.assetDir(name);
         const rootBase = root.activeEntry?.rootWallpapers ? root.activeEntry.rawBase : "";
         const wallpaperAssets = rootBase === "" ? [] : wallpaperFiles.map(f => ({ filename: f.split("/").pop(), url: root.rawUrl(f, rootBase) }));
-        const seen = new Set();
-        const toDownload = [...wallpaperAssets, ...folderAssets].filter(a => {
-            if (!root.safeFileName(a.filename) || seen.has(a.filename)) return false;
-            seen.add(a.filename);
-            return true;
-        });
+        const toDownload = root.dedupeAssets([...wallpaperAssets, ...folderAssets]);
 
         root._winEntryName = name;
         root._winStagingText = stagingText;
         root._winAssetDir = dir;
-        root._winAssetFilenames = toDownload.map(a => a.filename);
+        root._winAssetFileMap = toDownload.map(a => [a.filename, a.destName]);
 
         WindowsNative.fsUtils?.makePath(dir);
         root._winAssetQueue = toDownload.slice();
@@ -663,7 +668,7 @@ Singleton {
         }
         const asset = root._winAssetQueue.shift();
         winAssetProc.workingDirectory = root._winAssetDir;
-        winAssetProc.command = [root.curlBin, "-fsSL", "--max-time", "120", asset.url, "-o", asset.filename];
+        winAssetProc.command = [root.curlBin, "-fsSL", "--max-time", "120", asset.url, "-o", asset.destName];
         winAssetProc.running = true;
     }
 
@@ -683,7 +688,7 @@ Singleton {
             let parsed = JSON.parse(root._winStagingText);
             if (root.activeEntry?.sanitize)
                 parsed = root._applyShareFilter(parsed);
-            parsed = root._fixReferences(parsed, root._winAssetDir, root._winAssetFilenames);
+            parsed = root._fixReferences(parsed, root._winAssetDir, new Map(root._winAssetFileMap));
             WindowsNative.fsUtils?.makePath(root.cacheDir());
             winFinalWriteFile.targetPath = "";
             winFinalWriteFile.targetPath = `${root.cacheDir()}/${root._winEntryName}.json`;
