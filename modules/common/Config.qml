@@ -104,6 +104,9 @@ Singleton {
                         "requires_key": true
                     }
                 ]
+                property JsonObject claudePanel: JsonObject {
+                    property bool enable: false
+                }
             }
 
             property JsonObject appearance: JsonObject {

@@ -10,6 +10,7 @@ pragma ComponentBehavior: Bound
 Singleton {
     id: root
     property bool barOpen: true
+    property bool claudePanelOpen: false
     property bool colorPickerOpen: false
     property string colorPickerAction: "copy"
     property bool crosshairOpen: false

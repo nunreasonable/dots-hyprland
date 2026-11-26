@@ -4,6 +4,7 @@ import Quickshell
 import qs.modules.ii.background
 import qs.modules.ii.bar
 import qs.modules.ii.cheatsheet
+import qs.modules.ii.claudePanel
 import qs.modules.ii.colorPicker
 import qs.modules.ii.dock
 import qs.modules.ii.equalizer
