@@ -2,55 +2,232 @@ import QtQuick
 import QtQuick.Layouts
 import QtQuick.Dialogs
 import Quickshell.Io
+import Quickshell.Widgets
 import qs.services
 import qs.modules.common
-import qs.modules.common.widgets as W
+import qs.modules.common.widgets
 import qs.modules.common.functions
-import qs.modules.settingsPc.widgets
 
-Flickable {
+Item {
     id: root
-    clip: true
-    contentWidth: width
-    contentHeight: mainLayout.implicitHeight + 32
-    boundsBehavior: Flickable.StopAtBounds
 
+    required property Item pager
+    property int staggerMs: 45
+    property string source: "mine"
+    property var selected: null
     property bool importDropHover: false
 
-    Component.onCompleted: {
-        if (Config.options.profile.onlinePresets)
-            PresetsOnline.ensureFresh();
+    readonly property var sources: [
+        { id: "mine", name: Translation.tr("My presets"), icon: "person", model: Presets.folderModel, count: Presets.folderModel.count },
+        { id: "downloaded", name: Translation.tr("Downloaded"), icon: "cloud_download", model: Presets.onlineFolderModel, count: Presets.onlineFolderModel.count },
+        { id: "imported", name: Translation.tr("Imported"), icon: "upload", model: Presets.importedFolderModel, count: Presets.importedFolderModel.count },
+        { id: "online", name: Translation.tr("Browse online"), icon: "public", model: null, count: PresetsOnline.pending.length }
+    ]
+    readonly property var currentModel: sources.find(s => s.id === source).model
+    readonly property bool onlineEnabled: Config.options.profile.onlinePresets
+    readonly property string query: pager.searchQuery ?? ""
+    readonly property var tokens: normalizeText(query).split(/\s+/).filter(t => t.length > 0)
+
+    function normalizeText(text) {
+        return String(text ?? "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     }
 
-    function presetMenuActions(name, scope, hasOrigin) {
-        const actions = [];
-        if (scope === "mine") {
-            actions.push({ id: "rename", icon: "edit", label: Translation.tr("Rename") });
-            if (!hasOrigin) {
-                actions.push({ id: "export", icon: "ios_share", label: Translation.tr("Export ZIP"), onTrigger: () => Presets.exportZip(name) });
-                if (Presets.isPublished(name))
-                    actions.push({ id: "unshare", icon: "cloud_off", label: Translation.tr("Remove from gallery"), confirm: true, onTrigger: () => Presets.unpublish(name) });
-                else
-                    actions.push({ id: "upload", icon: "cloud_upload", label: Translation.tr("Upload"), onTrigger: () => Presets.publish(name) });
-            }
-        } else if (scope === "downloaded" || scope === "imported") {
-            actions.push({ id: "install", icon: "download_done", label: Translation.tr("Install"), onTrigger: () => Presets.install(name, scope) });
+    function scoreToken(key, token) {
+        const index = key.indexOf(token);
+        if (index >= 0) {
+            const wordStart = index === 0 || key.charAt(index - 1) === " ";
+            return 200 + (wordStart ? 60 : 0) - Math.min(index, 40) + Math.min(token.length, 12);
         }
-        return actions;
+        if (token.length < 3) return -1;
+        let position = 0;
+        let gaps = 0;
+        let last = -1;
+        for (let i = 0; i < token.length; i++) {
+            const found = key.indexOf(token.charAt(i), position);
+            if (found < 0) return -1;
+            if (last >= 0) gaps += found - last - 1;
+            last = found;
+            position = found + 1;
+        }
+        return Math.max(1, 100 - gaps * 3 - token.length);
+    }
+
+    function scoreItem(key, tokens) {
+        let total = 0;
+        for (const token of tokens) {
+            const score = scoreToken(key, token);
+            if (score < 0) return -1;
+            total += score;
+        }
+        return total;
+    }
+
+    function imageUrl(path) {
+        const value = String(path ?? "");
+        if (value === "" || /^(https?|file|image|qrc|data):/i.test(value)) return value;
+        return FileUtils.folderUrl(value);
+    }
+
+    function rankBy(items, keyOf) {
+        if (tokens.length === 0) return items;
+        const scored = [];
+        items.forEach(item => {
+            const key = normalizeText(keyOf(item)).replace(/[_\-.]+/g, " ");
+            const score = scoreItem(key, tokens);
+            if (score >= 0) scored.push({ item: item, score: score });
+        });
+        scored.sort((a, b) => b.score - a.score);
+        return scored.map(e => e.item);
+    }
+
+    function rankOnline(items) {
+        if (tokens.length === 0) return items;
+        const forceAuthor = tokens.some(t => t.startsWith("@"));
+        const plain = tokens.map(t => t.replace(/^@+/, "")).filter(t => t.length > 0);
+        if (plain.length === 0) return items;
+        const scored = [];
+        items.forEach(entry => {
+            const nameKey = normalizeText(entry.title + " " + entry.name.replace(/^[^\s]+?--/, "")).replace(/[_\-.]+/g, " ");
+            const authorKey = normalizeText(entry.author ?? "").replace(/[_\-.]+/g, " ");
+            if (!forceAuthor) {
+                const nameScore = scoreItem(nameKey, plain);
+                if (nameScore >= 0) {
+                    scored.push({ item: entry, score: 2000 + nameScore });
+                    return;
+                }
+            }
+            if (authorKey !== "") {
+                const authorScore = scoreItem(authorKey, plain);
+                if (authorScore >= 0) {
+                    scored.push({ item: entry, score: authorScore });
+                    return;
+                }
+                if (!forceAuthor) {
+                    const mixedScore = scoreItem(nameKey + " " + authorKey, plain);
+                    if (mixedScore >= 0) scored.push({ item: entry, score: 1000 + mixedScore });
+                }
+            }
+        });
+        scored.sort((a, b) => b.score - a.score);
+        return scored.map(e => e.item);
+    }
+
+    readonly property var localEntries: {
+        const model = currentModel;
+        if (!model) return [];
+        const items = [];
+        for (let i = 0; i < model.count; i++)
+            items.push({ fileName: model.get(i, "fileName"), filePath: model.get(i, "filePath") });
+        return rankBy(items, item => item.fileName.replace(".json", ""));
+    }
+
+    readonly property var onlineEntries: rankOnline(PresetsOnline.pending)
+    readonly property int columns: Math.max(2, Math.round(width / 340))
+
+    readonly property var barPositions: [Translation.tr("Top"), Translation.tr("Bottom"), Translation.tr("Left"), Translation.tr("Right")]
+    readonly property var barStyles: ["Hug", "Float", "Rect", "M3", "M3 Hug", "Panel", "Split Hug"]
+
+    function summaryOf(data) {
+        const bar = data?.bar ?? {};
+        const position = (bar.bottom ? 1 : 0) | (bar.vertical ? 2 : 0);
+        const palette = data?.appearance?.palette ?? {};
+        const named = palette.namedScheme ?? "";
+        const paletteType = (palette.type ?? "auto").replace("scheme-", "").replace(/-/g, " ");
+        const clockStyle = data?.background?.widgets?.clock?.style ?? "";
+        return {
+            description: data?._presetMeta?.description ?? "",
+            origin: data?._presetMeta?.origin ?? "",
+            wallpaper: Presets.previewImage(data),
+            vertical: bar.vertical ?? false,
+            bottom: bar.bottom ?? false,
+            cornerStyle: bar.cornerStyle ?? 0,
+            barPosition: barPositions[position],
+            barStyle: barStyles[bar.cornerStyle ?? 0] ?? "",
+            palette: named !== "" ? (ColorSchemes.schemes[named]?.name ?? named) : paletteType.charAt(0).toUpperCase() + paletteType.slice(1),
+            clock: clockStyle.charAt(0).toUpperCase() + clockStyle.slice(1),
+            dock: data?.dock?.enable ?? false,
+            blur: data?.background?.showBlur ?? false,
+            leftLayout: Array.from(bar.layouts?.leftLayout ?? []),
+            middleLayout: Array.from(bar.layouts?.middleLayout ?? []),
+            rightLayout: Array.from(bar.layouts?.rightLayout ?? [])
+        };
+    }
+
+    function applyPreset(preset) {
+        if (preset.source === "downloaded") Presets.applyOnline(preset.name);
+        else if (preset.source === "imported") Presets.applyImported(preset.name);
+        else Presets.apply(preset.name);
+    }
+
+    function removePreset(preset) {
+        if (preset.source === "downloaded") Presets.removeOnline(preset.name);
+        else if (preset.source === "imported") Presets.removeImported(preset.name);
+        else Presets.remove(preset.name);
+    }
+
+    property bool leaving: false
+
+    function back() {
+        if (Presets.uploadGuideOpen) {
+            Presets.cancelUploadGuide();
+            return;
+        }
+        if (selected === null || leaving) return;
+        leaving = true;
+        detailLoader.item?.requestExit();
+        leaveTimer.restart();
+    }
+
+    Timer {
+        id: leaveTimer
+        interval: 340
+        onTriggered: {
+            root.selected = null;
+            root.leaving = false;
+        }
+    }
+
+    function enableOnline() {
+        Config.options.profile.onlinePresets = true;
+        PresetsOnline.refresh();
+    }
+
+    Component.onCompleted: {
+        if (onlineEnabled) PresetsOnline.ensureFresh();
+    }
+
+    onSourceChanged: {
+        if (source === "online" && onlineEnabled) PresetsOnline.ensureFresh();
+    }
+
+    Connections {
+        target: PresetsOnline
+        function onPendingChanged() {
+            if (root.selected && root.selected.source === "online" && !PresetsOnline.pending.some(p => p.name === root.selected.name)) {
+                root.selected = null;
+                root.source = "downloaded";
+            }
+        }
     }
 
     FileView {
         id: importReadFile
         property string suggestedName: ""
         printErrors: false
-        onLoaded: Presets.importJsonText(importReadFile.text(), importReadFile.suggestedName)
+        onLoaded: {
+            if (Presets.importJsonText(importReadFile.text(), importReadFile.suggestedName))
+                root.source = "mine";
+        }
     }
 
     FileDialog {
         id: zipImportDialog
         title: Translation.tr("Choose a preset ZIP")
         nameFilters: [Translation.tr("Preset ZIP (*.zip)"), Translation.tr("All files (*)")]
-        onAccepted: Presets.importZip(FileUtils.trimFileProtocol(selectedFile.toString()))
+        onAccepted: {
+            Presets.importZip(FileUtils.trimFileProtocol(selectedFile.toString()));
+            root.source = "imported";
+        }
     }
 
     FileDialog {
@@ -67,395 +244,544 @@ Flickable {
             previewPickDialog.pendingName = name;
             previewPickDialog.open();
         }
-    }
-
-    Loader {
-        x: 0
-        y: root.contentY
-        width: root.width
-        height: root.height
-        z: 10
-        active: Presets.uploadGuideOpen
-        sourceComponent: W.PresetUploadGuide {
-            presetName: Presets.uploadGuideName
-            onProceed: Presets.confirmUploadGuide()
-            onCancel: Presets.cancelUploadGuide()
+        function onRenamed(oldName, newName) {
+            if (newName === "" || root.selected === null || root.selected.name !== oldName) return;
+            root.selected = Object.assign({}, root.selected, { name: newName });
         }
     }
 
-    W.PresetGithubSignInDialog {
-        visible: Presets.deviceFlowOpen
-    }
-
     ColumnLayout {
-        id: mainLayout
-        x: 16
-        y: 16
-        width: root.width - 32
-        spacing: 20
+        anchors.fill: parent
+        spacing: 12
+        opacity: root.selected === null || root.leaving ? 1 : 0
+        visible: opacity > 0.01
+
+        Behavior on opacity {
+            NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
+        }
 
         RowLayout {
             Layout.fillWidth: true
-            spacing: 10
+            spacing: 8
 
-            ConfigTextArea {
-                id: presetNameField
-                Layout.fillWidth: true
-                buttonIcon: "newsmode"
-                text: Translation.tr("Save as")
-                placeholderText: Translation.tr("Name, description (optional)")
-                confirmButtonVisible: presetNameField.value.trim() !== ""
-                confirmButtonIcon: "save"
-                onConfirmClicked: {
-                    Presets.save(presetNameField.value);
-                    presetNameField.value = "";
+            Repeater {
+                model: root.sources
+
+                delegate: RippleButton {
+                    id: sourceButton
+                    required property var modelData
+
+                    readonly property bool active: root.source === modelData.id
+
+                    implicitHeight: 44
+                    horizontalPadding: 18
+                    buttonRadius: 22
+                    toggled: active
+                    colBackground: Appearance.colors.colLayer1
+                    colBackgroundHover: Appearance.colors.colLayer1Hover
+                    colBackgroundToggled: Appearance.colors.colPrimary
+                    colBackgroundToggledHover: Appearance.colors.colPrimaryHover
+                    downAction: () => {
+                        const id = modelData.id;
+                        Qt.callLater(() => { root.source = id; });
+                    }
+                    contentItem: RowLayout {
+                        spacing: 8
+                        MaterialSymbol {
+                            text: sourceButton.modelData.icon
+                            iconSize: 20
+                            fill: sourceButton.active ? 1 : 0
+                            color: sourceButton.active ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1
+                        }
+                        StyledText {
+                            text: sourceButton.modelData.name
+                            font.weight: Font.Medium
+                            color: sourceButton.active ? Appearance.colors.colOnPrimary : Appearance.colors.colOnLayer1
+                        }
+                        Rectangle {
+                            implicitWidth: Math.max(22, countText.implicitWidth + 12)
+                            implicitHeight: 22
+                            radius: 11
+                            color: sourceButton.active ? Appearance.colors.colOnPrimary : Appearance.colors.colSecondaryContainer
+
+                            StyledText {
+                                id: countText
+                                anchors.centerIn: parent
+                                text: sourceButton.modelData.count
+                                font.pixelSize: Appearance.font.pixelSize.smaller
+                                font.weight: Font.Bold
+                                color: sourceButton.active ? Appearance.colors.colPrimary : Appearance.colors.colOnSecondaryContainer
+                            }
+                        }
+                    }
                 }
             }
 
-            W.RippleButtonWithIcon {
-                materialIcon: "folder_open"
-                mainText: Translation.tr("Open folder")
-                colBackground: Appearance.colors.colSecondaryContainer
-                colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-                colRipple: Appearance.colors.colSecondaryContainerActive
-                onClicked: Presets.openPresetsFolder()
+            Item { Layout.fillWidth: true }
+
+            StyledText {
+                visible: root.source === "online" && root.onlineEnabled
+                text: PresetsOnline.error !== "" ? PresetsOnline.error
+                    : PresetsOnline.loading ? Translation.tr("Loading…")
+                    : PresetsOnline.pending.length + " " + Translation.tr("presets available")
+                font.pixelSize: Appearance.font.pixelSize.small
+                color: PresetsOnline.error !== "" ? Appearance.colors.colError : Appearance.colors.colSubtext
             }
 
-            W.RippleButtonWithIcon {
-                materialIcon: "folder_zip"
-                mainText: Translation.tr("Import ZIP")
+            RippleButton {
+                visible: root.source === "online" && root.onlineEnabled
+                implicitWidth: 44
+                implicitHeight: 44
+                buttonRadius: 22
+                enabled: !PresetsOnline.loading
                 colBackground: Appearance.colors.colSecondaryContainer
                 colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-                colRipple: Appearance.colors.colSecondaryContainerActive
-                onClicked: zipImportDialog.open()
+                downAction: () => Qt.callLater(() => PresetsOnline.refresh())
+                contentItem: Item {
+                    MaterialSymbol {
+                        anchors.centerIn: parent
+                        text: "refresh"
+                        iconSize: 22
+                        color: Appearance.colors.colOnSecondaryContainer
+                    }
+                }
+            }
+
+            Rectangle {
+                visible: root.source === "mine"
+                Layout.fillWidth: true
+                Layout.maximumWidth: 330
+                Layout.minimumWidth: 160
+                implicitHeight: 44
+                radius: 22
+                color: Appearance.colors.colLayer1
+                border.width: saveInput.activeFocus ? 2 : 0
+                border.color: Appearance.colors.colPrimary
+
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: 16
+                    anchors.rightMargin: 4
+                    spacing: 6
+
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+
+                        TextInput {
+                            id: saveInput
+                            anchors.fill: parent
+                            verticalAlignment: TextInput.AlignVCenter
+                            clip: true
+                            font.pixelSize: Appearance.font.pixelSize.small
+                            font.family: Appearance.font.family.main
+                            color: Appearance.colors.colOnLayer1
+                            selectionColor: Appearance.colors.colPrimary
+                            onAccepted: root.saveCurrent()
+                            Keys.onEscapePressed: {
+                                focus = false;
+                                root.pager.forceActiveFocus();
+                            }
+
+                            StyledText {
+                                anchors.verticalCenter: parent.verticalCenter
+                                visible: saveInput.text === "" && !saveInput.activeFocus
+                                text: Translation.tr("Save current setup as…  name, description")
+                                font.pixelSize: Appearance.font.pixelSize.small
+                                color: Appearance.colors.colSubtext
+                            }
+                        }
+                    }
+
+                    RippleButton {
+                        implicitWidth: 36
+                        implicitHeight: 36
+                        buttonRadius: 18
+                        enabled: saveInput.text.trim() !== ""
+                        colBackground: Appearance.colors.colPrimary
+                        colBackgroundHover: Appearance.colors.colPrimaryHover
+                        downAction: () => Qt.callLater(() => root.saveCurrent())
+                        contentItem: Item {
+                            MaterialSymbol {
+                                anchors.centerIn: parent
+                                text: "save"
+                                iconSize: 20
+                                color: Appearance.colors.colOnPrimary
+                            }
+                        }
+                    }
+                }
+            }
+
+            RippleButton {
+                id: importButton
+                visible: root.source !== "online"
+                implicitWidth: 44
+                implicitHeight: 44
+                buttonRadius: 22
+                colBackground: Appearance.colors.colSecondaryContainer
+                colBackgroundHover: Appearance.colors.colSecondaryContainerHover
+                downAction: () => Qt.callLater(() => zipImportDialog.open())
+                contentItem: Item {
+                    MaterialSymbol {
+                        anchors.centerIn: parent
+                        text: "upload_file"
+                        iconSize: 22
+                        color: Appearance.colors.colOnSecondaryContainer
+                    }
+
+                    StyledToolTip {
+                        extraVisibleCondition: false
+                        alternativeVisibleCondition: importButton.hovered
+                        text: Translation.tr("Import ZIP")
+                    }
+                }
+            }
+
+            RippleButton {
+                id: folderButton
+                visible: root.source === "mine"
+                implicitWidth: 44
+                implicitHeight: 44
+                buttonRadius: 22
+                colBackground: Appearance.colors.colSecondaryContainer
+                colBackgroundHover: Appearance.colors.colSecondaryContainerHover
+                downAction: () => Qt.callLater(() => Presets.openPresetsFolder())
+                contentItem: Item {
+                    MaterialSymbol {
+                        anchors.centerIn: parent
+                        text: "folder_open"
+                        iconSize: 22
+                        color: Appearance.colors.colOnSecondaryContainer
+                    }
+
+                    StyledToolTip {
+                        extraVisibleCondition: false
+                        alternativeVisibleCondition: folderButton.hovered
+                        text: Translation.tr("Open folder")
+                    }
+                }
             }
         }
 
         RowLayout {
             Layout.fillWidth: true
             spacing: 6
-            visible: Presets.githubBusy || Presets.githubError !== ""
+            visible: Presets.githubBusy || Presets.githubError !== "" || Presets.lastSkippedKeys.length > 0
 
-            W.MaterialSymbol {
+            MaterialSymbol {
+                visible: Presets.githubBusy || Presets.githubError !== ""
                 text: Presets.githubError !== "" ? "error" : "cloud_sync"
                 iconSize: Appearance.font.pixelSize.small
                 color: Presets.githubError !== "" ? Appearance.colors.colError : Appearance.colors.colSubtext
             }
-            W.StyledText {
+            StyledText {
                 Layout.fillWidth: true
+                visible: Presets.githubBusy || Presets.githubError !== ""
                 wrapMode: Text.Wrap
                 text: Presets.githubError !== "" ? Presets.githubError : Translation.tr("Talking to GitHub…")
                 color: Presets.githubError !== "" ? Appearance.colors.colError : Appearance.colors.colSubtext
                 font.pixelSize: Appearance.font.pixelSize.smaller
             }
-        }
-
-        Rectangle {
-            id: importDropTarget
-            Layout.fillWidth: true
-            implicitHeight: 48
-            radius: Appearance.rounding.normal
-            color: root.importDropHover ? Appearance.colors.colPrimaryContainerHover : Appearance.colors.colLayer1
-            border.width: root.importDropHover ? 2 : 0
-            border.color: Appearance.colors.colPrimary
-
-            RowLayout {
-                anchors.centerIn: parent
-                spacing: 8
-                W.MaterialSymbol {
-                    text: "upload_file"
-                    iconSize: Appearance.font.pixelSize.larger
-                    color: Appearance.colors.colOnLayer1
-                }
-                W.StyledText {
-                    text: Translation.tr("Drop a preset .json file here to import it")
-                    color: Appearance.colors.colOnLayer1
-                }
-            }
-
-            DropArea {
-                anchors.fill: parent
-                keys: ["text/uri-list"]
-                onEntered: drag => {
-                    drag.accept(Qt.CopyAction);
-                    root.importDropHover = true;
-                }
-                onExited: root.importDropHover = false
-                onDropped: drop => {
-                    root.importDropHover = false;
-                    if (!drop.hasUrls || drop.urls.length === 0)
-                        return;
-                    const cleanPath = FileUtils.trimFileProtocol(drop.urls[0]);
-                    if (!cleanPath.toLowerCase().endsWith(".json"))
-                        return;
-                    const base = cleanPath.split("/").pop().replace(/\.json$/i, "");
-                    importReadFile.suggestedName = base;
-                    importReadFile.path = cleanPath;
-                    importReadFile.reload();
-                }
-            }
-        }
-
-        W.StyledText {
-            Layout.fillWidth: true
-            visible: Presets.lastSkippedKeys.length > 0
-            wrapMode: Text.Wrap
-            text: Translation.tr("Kept your current value for: %1").arg(Presets.lastSkippedKeys.join(", "))
-            color: Appearance.colors.colSubtext
-            font.pixelSize: Appearance.font.pixelSize.smaller
-        }
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: 10
-
-            W.StyledText {
-                text: Translation.tr("My presets")
-                font.pixelSize: Appearance.font.pixelSize.large
-                font.weight: Font.Medium
-                color: Appearance.colors.colOnLayer0
-            }
-
-            W.StyledText {
-                visible: Presets.folderModel.count === 0
-                text: Translation.tr("No presets yet")
-                color: Appearance.colors.colSubtext
-            }
-
-            Flow {
+            StyledText {
                 Layout.fillWidth: true
-                width: parent.width
-                spacing: 12
-
-                Repeater {
-                    model: Presets.folderModel
-                    delegate: W.PresetsCard {
-                        id: presetDelegate
-                        required property string fileName
-                        required property string filePath
-                        property string presetName: fileName.replace(".json", "")
-                        property string presetWallpaper: ""
-                        property string presetDescription: ""
-                        property string presetOrigin: ""
-
-                        FileView {
-                            path: presetDelegate.filePath
-                            printErrors: false
-                            watchChanges: true
-                            onFileChanged: reload()
-                            onLoaded: {
-                                try {
-                                    const data = JSON.parse(text());
-                                    presetDelegate.presetWallpaper = Presets.previewImage(data);
-                                    presetDelegate.presetDescription = data?._presetMeta?.description ?? "";
-                                    presetDelegate.presetOrigin = data?._presetMeta?.origin ?? "";
-                                    PresetThumbs.request(presetDelegate.presetWallpaper);
-                                } catch (e) {}
-                            }
-                        }
-
-                        imageSource: PresetThumbs.thumbFor(presetDelegate.presetWallpaper) || presetDelegate.presetWallpaper
-                        title: presetDelegate.presetName
-                        description: presetDelegate.presetDescription !== "" ? presetDelegate.presetDescription : Translation.tr("Saved preset")
-                        menuActions: root.presetMenuActions(presetDelegate.presetName, "mine", presetDelegate.presetOrigin !== "")
-                        onApply: () => Presets.apply(presetDelegate.presetName)
-                        onRemove: () => Presets.remove(presetDelegate.presetName)
-                        onOverwrite: () => Presets.overwrite(presetDelegate.presetName, { description: presetDelegate.presetDescription, origin: presetDelegate.presetOrigin })
-                        onRename: newName => Presets.rename(presetDelegate.presetName, newName)
-                    }
-                }
-            }
-        }
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: 10
-            visible: Presets.importedFolderModel.count > 0
-
-            W.StyledText {
-                text: Translation.tr("Imported")
-                font.pixelSize: Appearance.font.pixelSize.large
-                font.weight: Font.Medium
-                color: Appearance.colors.colOnLayer0
-            }
-
-            Flow {
-                Layout.fillWidth: true
-                width: parent.width
-                spacing: 12
-
-                Repeater {
-                    model: Presets.importedFolderModel
-                    delegate: W.PresetsCard {
-                        id: importedDelegate
-                        required property string fileName
-                        required property string filePath
-                        property string presetName: fileName.replace(".json", "")
-                        property string presetWallpaper: ""
-                        property string presetDescription: ""
-
-                        FileView {
-                            path: importedDelegate.filePath
-                            printErrors: false
-                            onLoaded: {
-                                try {
-                                    const data = JSON.parse(text());
-                                    importedDelegate.presetWallpaper = Presets.previewImage(data);
-                                    importedDelegate.presetDescription = data?._presetMeta?.description ?? "";
-                                    PresetThumbs.request(importedDelegate.presetWallpaper);
-                                } catch (e) {}
-                            }
-                        }
-
-                        imageSource: PresetThumbs.thumbFor(importedDelegate.presetWallpaper) || importedDelegate.presetWallpaper
-                        title: importedDelegate.presetName
-                        description: importedDelegate.presetDescription !== "" ? importedDelegate.presetDescription : Translation.tr("Imported preset")
-                        menuActions: root.presetMenuActions(importedDelegate.presetName, "imported", false)
-                        onApply: () => Presets.applyImported(importedDelegate.presetName)
-                        onRemove: () => Presets.removeImported(importedDelegate.presetName)
-                    }
-                }
-            }
-        }
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: 10
-            visible: Presets.onlineFolderModel.count > 0
-
-            W.StyledText {
-                text: Translation.tr("Downloaded")
-                font.pixelSize: Appearance.font.pixelSize.large
-                font.weight: Font.Medium
-                color: Appearance.colors.colOnLayer0
-            }
-
-            Flow {
-                Layout.fillWidth: true
-                width: parent.width
-                spacing: 12
-
-                Repeater {
-                    model: Presets.onlineFolderModel
-                    delegate: W.PresetsCard {
-                        id: onlineDelegate
-                        required property string fileName
-                        required property string filePath
-                        property string presetName: fileName.replace(".json", "")
-                        property string presetWallpaper: ""
-                        property string presetDescription: ""
-
-                        FileView {
-                            path: onlineDelegate.filePath
-                            printErrors: false
-                            onLoaded: {
-                                try {
-                                    const data = JSON.parse(text());
-                                    onlineDelegate.presetWallpaper = Presets.previewImage(data);
-                                    onlineDelegate.presetDescription = data?._presetMeta?.description ?? "";
-                                    PresetThumbs.request(onlineDelegate.presetWallpaper);
-                                } catch (e) {}
-                            }
-                        }
-
-                        imageSource: PresetThumbs.thumbFor(onlineDelegate.presetWallpaper) || onlineDelegate.presetWallpaper
-                        title: PresetsOnline.displayName(onlineDelegate.presetName).replace(/_/g, " ")
-                        description: onlineDelegate.presetDescription !== "" ? onlineDelegate.presetDescription : Translation.tr("Downloaded preset")
-                        menuActions: root.presetMenuActions(onlineDelegate.presetName, "downloaded", false)
-                        onApply: () => Presets.applyOnline(onlineDelegate.presetName)
-                        onRemove: () => Presets.removeOnline(onlineDelegate.presetName)
-                    }
-                }
-            }
-        }
-
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: 10
-            visible: Config.options.profile.onlinePresets
-
-            RowLayout {
-                Layout.fillWidth: true
-                W.StyledText {
-                    Layout.fillWidth: true
-                    text: Translation.tr("Browse Online")
-                    font.pixelSize: Appearance.font.pixelSize.large
-                    font.weight: Font.Medium
-                    color: Appearance.colors.colOnLayer0
-                }
-                W.RippleButtonWithIcon {
-                    materialIcon: "refresh"
-                    mainText: PresetsOnline.loading ? Translation.tr("Loading…") : Translation.tr("Refresh")
-                    enabled: !PresetsOnline.loading
-                    colBackground: Appearance.colors.colSecondaryContainer
-                    colBackgroundHover: Appearance.colors.colSecondaryContainerHover
-                    colRipple: Appearance.colors.colSecondaryContainerActive
-                    onClicked: PresetsOnline.refresh()
-                }
-            }
-
-            W.StyledText {
-                text: PresetsOnline.error !== "" ? PresetsOnline.error : Translation.tr("%1 presets available").arg(PresetsOnline.pending.length)
+                visible: Presets.lastSkippedKeys.length > 0
+                wrapMode: Text.Wrap
+                text: Translation.tr("Kept your current value for: %1").arg(Presets.lastSkippedKeys.join(", "))
                 color: Appearance.colors.colSubtext
                 font.pixelSize: Appearance.font.pixelSize.smaller
             }
+        }
 
-            Flow {
-                Layout.fillWidth: true
-                width: parent.width
-                spacing: 12
+        GridView {
+            id: grid
+            visible: root.source !== "online"
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
+            cellWidth: Math.floor(width / root.columns)
+            cellHeight: Math.max(120, Math.floor(height / 2))
+            cacheBuffer: 0
+            model: root.source === "online" ? [] : root.localEntries
 
-                Repeater {
-                    model: PresetsOnline.pending
-                    delegate: Rectangle {
-                        id: onlineCard
-                        required property var modelData
-                        implicitWidth: 240
-                        implicitHeight: 170
-                        radius: Appearance.rounding.normal
-                        color: Appearance.colors.colLayer1
+            delegate: Item {
+                id: cell
+                required property int index
+                required property var modelData
+
+                readonly property string fileName: modelData.fileName
+                readonly property string filePath: modelData.filePath
+                readonly property string presetName: fileName.replace(".json", "")
+                property var summary: ({})
+                property bool loaded: false
+
+                width: grid.cellWidth
+                height: grid.cellHeight
+
+                FileView {
+                    path: cell.filePath
+                    printErrors: false
+                    watchChanges: true
+                    onFileChanged: reload()
+                    onLoaded: {
+                        try {
+                            cell.summary = root.summaryOf(JSON.parse(text()));
+                            cell.loaded = true;
+                            PresetThumbs.request(cell.summary.wallpaper);
+                        } catch (e) {
+                            cell.summary = {};
+                        }
+                    }
+                }
+
+                DashboardCard {
+                    id: card
+                    anchors.fill: parent
+                    anchors.margins: 6
+                    tint: Appearance.colors.colLayer1
+                    pager: root.pager
+                    staggerMs: root.staggerMs
+                    animIndex: cell.index % 6
+                    travelX: 0
+                    travelY: 90
+
+                    ClippingRectangle {
+                        anchors.fill: parent
+                        radius: card.cardRadius
+                        color: "transparent"
+
+                        Image {
+                            anchors.fill: parent
+                            source: root.imageUrl(PresetThumbs.thumbFor(cell.summary.wallpaper) || (cell.summary.wallpaper ?? ""))
+                            fillMode: Image.PreserveAspectCrop
+                            asynchronous: true
+                            cache: true
+                            sourceSize: Qt.size(560, 380)
+                        }
+
+                        MaterialSymbol {
+                            anchors.centerIn: parent
+                            visible: cell.loaded && !(cell.summary.wallpaper ?? "")
+                            text: "wallpaper"
+                            iconSize: 64
+                            color: Appearance.colors.colOnLayer1
+                            opacity: 0.35
+                        }
+
+                        Rectangle {
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            height: parent.height * 0.55
+                            gradient: Gradient {
+                                GradientStop { position: 0; color: "transparent" }
+                                GradientStop { position: 1; color: Qt.rgba(0, 0, 0, 0.78) }
+                            }
+                        }
 
                         ColumnLayout {
-                            anchors.fill: parent
-                            spacing: 0
+                            anchors.left: parent.left
+                            anchors.right: parent.right
+                            anchors.bottom: parent.bottom
+                            anchors.margins: 14
+                            spacing: 2
 
-                            Rectangle {
+                            StyledText {
                                 Layout.fillWidth: true
-                                implicitHeight: 110
-                                color: Appearance.colors.colLayer2
-                                clip: true
-                                W.StyledImage {
-                                    anchors.fill: parent
-                                    fillMode: Image.PreserveAspectCrop
-                                    source: PresetsOnline.thumbFor(onlineCard.modelData) || onlineCard.modelData.screenshot
-                                    cache: true
-                                    sourceSize.width: 400
-                                    sourceSize.height: 220
+                                text: PresetsOnline.displayName(cell.presetName).replace(/_/g, " ")
+                                font.pixelSize: Appearance.font.pixelSize.larger
+                                font.weight: Font.DemiBold
+                                color: "white"
+                                elide: Text.ElideRight
+                            }
+                            StyledText {
+                                Layout.fillWidth: true
+                                visible: (cell.summary.description ?? "") !== ""
+                                text: cell.summary.description ?? ""
+                                font.pixelSize: Appearance.font.pixelSize.smaller
+                                color: Qt.rgba(1, 1, 1, 0.78)
+                                elide: Text.ElideRight
+                            }
+                        }
+
+                        Row {
+                            anchors.right: parent.right
+                            anchors.top: parent.top
+                            anchors.margins: 10
+                            spacing: 6
+
+                            Repeater {
+                                model: [
+                                    { icon: "toast", on: cell.loaded },
+                                    { icon: "dock_to_bottom", on: cell.summary.dock ?? false },
+                                    { icon: "blur_on", on: cell.summary.blur ?? false }
+                                ]
+
+                                delegate: Rectangle {
+                                    required property var modelData
+
+                                    visible: modelData.on
+                                    width: 28
+                                    height: 28
+                                    radius: 14
+                                    color: Qt.rgba(0, 0, 0, 0.5)
+
+                                    MaterialSymbol {
+                                        anchors.centerIn: parent
+                                        text: modelData.icon
+                                        iconSize: 16
+                                        color: "white"
+                                    }
+                                }
+                            }
+                        }
+
+                        MouseArea {
+                            anchors.fill: parent
+                            cursorShape: Qt.PointingHandCursor
+                            onClicked: {
+                                const wallpaper = cell.summary.wallpaper ?? "";
+                                root.selected = { name: cell.presetName, source: root.source, summary: cell.summary, wallpaper: root.imageUrl(wallpaper), thumb: root.imageUrl(PresetThumbs.thumbFor(wallpaper)) };
+                            }
+                        }
+                    }
+                }
+            }
+
+            StyledText {
+                anchors.centerIn: parent
+                visible: root.source !== "online" && root.localEntries.length === 0
+                text: root.tokens.length > 0 ? Translation.tr("No presets match your search") : Translation.tr("No presets here yet")
+                font.pixelSize: Appearance.font.pixelSize.larger
+                color: Appearance.colors.colSubtext
+            }
+        }
+
+        Item {
+            visible: root.source === "online"
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+
+            GridView {
+                id: onlineGrid
+                anchors.fill: parent
+                visible: root.onlineEnabled
+                clip: true
+                boundsBehavior: Flickable.StopAtBounds
+                cellWidth: Math.floor(width / root.columns)
+                cellHeight: Math.max(120, Math.floor(height / 2))
+                cacheBuffer: 0
+                model: root.source === "online" ? root.onlineEntries : []
+
+                delegate: Item {
+                    id: onlineCell
+                    required property int index
+                    required property var modelData
+
+                    readonly property bool busy: PresetsOnline.downloadingName === modelData.name
+
+                    width: onlineGrid.cellWidth
+                    height: onlineGrid.cellHeight
+
+                    DashboardCard {
+                        id: onlineCard
+                        anchors.fill: parent
+                        anchors.margins: 6
+                        tint: Appearance.colors.colLayer1
+                        pager: root.pager
+                        staggerMs: root.staggerMs
+                        animIndex: onlineCell.index % 6
+                        travelX: 0
+                        travelY: 90
+
+                        ClippingRectangle {
+                            anchors.fill: parent
+                            radius: onlineCard.cardRadius
+                            color: "transparent"
+
+                            Image {
+                                id: remoteImage
+                                property bool finished: false
+                                anchors.fill: parent
+                                source: {
+                                    const local = PresetsOnline.thumbFor(onlineCell.modelData);
+                                    if (local !== "") return root.imageUrl(local);
+                                    return onlineCell.index < PresetsOnline.previewLimit ? onlineCell.modelData.screenshot : "";
+                                }
+                                fillMode: Image.PreserveAspectCrop
+                                asynchronous: true
+                                cache: true
+                                sourceSize: Qt.size(560, 380)
+                                onStatusChanged: {
+                                    if (!finished && (status === Image.Ready || status === Image.Error)) {
+                                        finished = true;
+                                        PresetsOnline.previewLimit += 1;
+                                    }
                                 }
                             }
 
-                            RowLayout {
-                                Layout.fillWidth: true
-                                Layout.margins: 8
-                                spacing: 6
-                                W.StyledText {
-                                    Layout.fillWidth: true
-                                    text: onlineCard.modelData.title
-                                    elide: Text.ElideRight
-                                    color: Appearance.colors.colOnLayer1
+                            Rectangle {
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.bottom: parent.bottom
+                                height: parent.height * 0.55
+                                gradient: Gradient {
+                                    GradientStop { position: 0; color: "transparent" }
+                                    GradientStop { position: 1; color: Qt.rgba(0, 0, 0, 0.78) }
                                 }
-                                W.RippleButton {
-                                    implicitWidth: 30
-                                    implicitHeight: 30
-                                    buttonRadius: Appearance.rounding.full
-                                    colBackground: Appearance.colors.colPrimary
-                                    colBackgroundHover: Appearance.colors.colPrimaryHover
-                                    enabled: PresetsOnline.downloadingName === ""
-                                    onClicked: PresetsOnline.download(onlineCard.modelData)
-                                    contentItem: W.MaterialSymbol {
+                            }
+
+                            ColumnLayout {
+                                anchors.left: parent.left
+                                anchors.right: parent.right
+                                anchors.bottom: parent.bottom
+                                anchors.margins: 14
+                                spacing: 4
+
+                                StyledText {
+                                    Layout.fillWidth: true
+                                    text: onlineCell.modelData.title
+                                    font.pixelSize: Appearance.font.pixelSize.larger
+                                    font.weight: Font.DemiBold
+                                    color: "white"
+                                    elide: Text.ElideRight
+                                }
+
+                                PresetAuthorChip {
+                                    Layout.fillWidth: true
+                                    author: onlineCell.modelData.author ?? ""
+                                }
+                            }
+
+                            MouseArea {
+                                anchors.fill: parent
+                                cursorShape: Qt.PointingHandCursor
+                                onClicked: {
+                                    root.selected = { name: onlineCell.modelData.name, source: "online", summary: ({}), wallpaper: onlineCell.modelData.screenshot, thumb: root.imageUrl(PresetsOnline.thumbFor(onlineCell.modelData)), entry: onlineCell.modelData };
+                                }
+                            }
+
+                            RippleButton {
+                                anchors.right: parent.right
+                                anchors.top: parent.top
+                                anchors.margins: 10
+                                implicitWidth: 38
+                                implicitHeight: 38
+                                buttonRadius: 19
+                                enabled: PresetsOnline.downloadingName === ""
+                                colBackground: Appearance.colors.colPrimary
+                                colBackgroundHover: Appearance.colors.colPrimaryHover
+                                colRipple: Appearance.colors.colPrimaryActive
+                                downAction: () => {
+                                    const entry = onlineCell.modelData;
+                                    Qt.callLater(() => PresetsOnline.download(entry));
+                                }
+                                contentItem: Item {
+                                    MaterialSymbol {
                                         anchors.centerIn: parent
-                                        text: PresetsOnline.downloadingName === onlineCard.modelData.name ? "hourglass_top" : "download"
-                                        iconSize: Appearance.font.pixelSize.normal
+                                        text: onlineCell.busy ? "hourglass_top" : "download"
+                                        iconSize: 20
                                         color: Appearance.colors.colOnPrimary
                                     }
                                 }
@@ -463,7 +789,177 @@ Flickable {
                         }
                     }
                 }
+
+                StyledText {
+                    anchors.centerIn: parent
+                    visible: !PresetsOnline.loading && root.onlineEntries.length === 0
+                    text: PresetsOnline.error !== "" ? PresetsOnline.error : root.tokens.length > 0 ? Translation.tr("No presets match your search") : Translation.tr("Nothing new to download")
+                    font.pixelSize: Appearance.font.pixelSize.larger
+                    color: PresetsOnline.error !== "" ? Appearance.colors.colError : Appearance.colors.colSubtext
+                }
+            }
+
+            DashboardCard {
+                anchors.centerIn: parent
+                visible: !root.onlineEnabled
+                width: 420
+                height: 240
+                tint: Appearance.colors.colPrimaryContainer
+                pager: root.pager
+                staggerMs: root.staggerMs
+                travelX: 0
+                travelY: 160
+
+                ColumnLayout {
+                    anchors.fill: parent
+                    anchors.margins: 22
+                    spacing: 10
+
+                    MaterialShapeWrappedMaterialSymbol {
+                        Layout.alignment: Qt.AlignHCenter
+                        wrappedShape: MaterialShape.Shape.SoftBurst
+                        text: "public"
+                        iconSize: 30
+                        fill: 1
+                        padding: 14
+                        color: Appearance.colors.colPrimary
+                        colSymbol: Appearance.colors.colOnPrimary
+                    }
+                    StyledText {
+                        Layout.alignment: Qt.AlignHCenter
+                        text: Translation.tr("Online presets")
+                        font.pixelSize: Appearance.font.pixelSize.larger
+                        font.weight: Font.DemiBold
+                        color: Appearance.colors.colOnPrimaryContainer
+                    }
+                    StyledText {
+                        Layout.fillWidth: true
+                        horizontalAlignment: Text.AlignHCenter
+                        text: Translation.tr("Browse presets shared by the community on blapples.github.io. Nothing is downloaded until you press the button.")
+                        font.pixelSize: Appearance.font.pixelSize.small
+                        color: Appearance.colors.colOnPrimaryContainer
+                        opacity: 0.8
+                        wrapMode: Text.WordWrap
+                    }
+                    Item { Layout.fillHeight: true }
+                    RippleButton {
+                        Layout.alignment: Qt.AlignHCenter
+                        implicitHeight: 44
+                        horizontalPadding: 24
+                        buttonRadius: 22
+                        colBackground: Appearance.colors.colPrimary
+                        colBackgroundHover: Appearance.colors.colPrimaryHover
+                        downAction: () => Qt.callLater(() => root.enableOnline())
+                        contentItem: StyledText {
+                            text: Translation.tr("Enable online presets")
+                            font.weight: Font.Medium
+                            color: Appearance.colors.colOnPrimary
+                        }
+                    }
+                }
             }
         }
+    }
+
+    Loader {
+        id: detailLoader
+        anchors.fill: parent
+        active: root.selected !== null
+        visible: !Presets.uploadGuideOpen
+
+        sourceComponent: DashboardPresetDetail {
+            preset: root.selected
+            pager: root.pager
+            staggerMs: root.staggerMs
+            summarize: root.summaryOf
+            onBack: root.back()
+            onApplyRequested: {
+                if (root.selected.source === "online") PresetsOnline.download(root.selected.entry);
+                else root.applyPreset(root.selected);
+            }
+            onOverwriteRequested: Presets.overwrite(root.selected.name, { description: root.selected.summary?.description ?? "", origin: root.selected.summary?.origin ?? "" })
+            onExportRequested: Presets.exportZip(root.selected.name)
+            onRenameRequested: newName => Presets.rename(root.selected.name, newName)
+            onUploadRequested: Presets.publish(root.selected.name)
+            onUnshareRequested: Presets.unpublish(root.selected.name)
+            onInstallRequested: Presets.install(root.selected.name, root.selected.source)
+            onDeleteRequested: {
+                root.removePreset(root.selected);
+                root.back();
+            }
+        }
+    }
+
+    Loader {
+        anchors.fill: parent
+        active: Presets.uploadGuideOpen
+
+        sourceComponent: PresetUploadGuide {
+            presetName: Presets.uploadGuideName
+            onProceed: Presets.confirmUploadGuide()
+            onCancel: Presets.cancelUploadGuide()
+        }
+    }
+
+    PresetGithubSignInDialog {
+        visible: Presets.deviceFlowOpen
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        visible: root.importDropHover
+        radius: Appearance.rounding.large
+        color: ColorUtils.transparentize(Appearance.colors.colPrimaryContainer, 0.15)
+        border.width: 2
+        border.color: Appearance.colors.colPrimary
+
+        ColumnLayout {
+            anchors.centerIn: parent
+            spacing: 8
+
+            MaterialSymbol {
+                Layout.alignment: Qt.AlignHCenter
+                text: "upload_file"
+                iconSize: 48
+                color: Appearance.colors.colOnPrimaryContainer
+            }
+            StyledText {
+                Layout.alignment: Qt.AlignHCenter
+                text: Translation.tr("Drop a preset .json file here to import it")
+                font.pixelSize: Appearance.font.pixelSize.larger
+                color: Appearance.colors.colOnPrimaryContainer
+            }
+        }
+    }
+
+    DropArea {
+        anchors.fill: parent
+        keys: ["text/uri-list"]
+        onEntered: drag => {
+            drag.accept(Qt.CopyAction);
+            root.importDropHover = true;
+        }
+        onExited: root.importDropHover = false
+        onDropped: drop => {
+            root.importDropHover = false;
+            if (!drop.hasUrls || drop.urls.length === 0)
+                return;
+            const cleanPath = FileUtils.trimFileProtocol(drop.urls[0]);
+            if (!cleanPath.toLowerCase().endsWith(".json"))
+                return;
+            const base = cleanPath.split("/").pop().replace(/\.json$/i, "");
+            importReadFile.suggestedName = base;
+            importReadFile.path = cleanPath;
+            importReadFile.reload();
+        }
+    }
+
+    function saveCurrent() {
+        const text = saveInput.text.trim();
+        if (text === "") return;
+        Presets.save(text);
+        saveInput.text = "";
+        saveInput.focus = false;
+        pager.forceActiveFocus();
     }
 }

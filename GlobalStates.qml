@@ -14,6 +14,8 @@ Singleton {
     property bool colorPickerOpen: false
     property string colorPickerAction: "copy"
     property bool crosshairOpen: false
+    property int dashboardPage: 0
+    property string dashboardGroup: ""
     property bool desktopMenuOpen: false
     property var desktopMenuScreen: null
     property real desktopMenuX: 0

@@ -1,31 +1,82 @@
 import QtQuick
 import QtQuick.Layouts
 import Qt5Compat.GraphicalEffects
-import Quickshell
-import Quickshell.Io
-import Quickshell.Services.Mpris
 import qs.services
 import qs.modules.common
-import qs.modules.common.functions
 import qs.modules.common.widgets
-import qs.modules.common.models
 import qs.modules.common.utils
 import qs.modules.settingsPc.widgets as SP
 
 Item {
     id: root
 
-    readonly property var player: MprisController.activePlayer
-    readonly property bool playing: player?.isPlaying ?? false
+    required property var media
+    required property var colors
+    required property Item pager
+    required property Item blurSource
+    property int staggerMs: 45
+
+    readonly property var player: media.player
     readonly property bool hasShuffle: (player?.shuffleSupported ?? false) && (player?.canControl ?? false)
     readonly property bool hasLoop: (player?.loopSupported ?? false) && (player?.canControl ?? false)
     readonly property bool canSeek: player?.canSeek ?? false
 
     function seekBy(seconds) {
-        if (!player || !canSeek)
-            return;
+        if (!player || !canSeek) return;
         const length = player.length > 0 ? player.length : Number.MAX_VALUE;
         player.position = Math.max(0, Math.min(length, player.position + seconds));
+    }
+
+    SpectrumConsumer {
+        active: root.visible && root.media.playing
+    }
+
+    readonly property color fg: colors.colOnLayer0
+    readonly property color fgDim: colors.colSubtext
+    readonly property color hoverColor: colors.colSecondaryContainerHover
+    readonly property color activeColor: colors.colSecondaryContainerActive
+
+    property string shownTitle: ""
+    property string shownArtist: ""
+    readonly property string trackKey: (player?.trackTitle ?? "") + "|" + (player?.trackArtist ?? "")
+
+    onTrackKeyChanged: trackSwap.restart()
+    Component.onCompleted: {
+        shownTitle = player?.trackTitle ?? "";
+        shownArtist = player?.trackArtist ?? "";
+    }
+
+    SequentialAnimation {
+        id: trackSwap
+        ParallelAnimation {
+            NumberAnimation { target: infoColumn; property: "opacity"; to: 0; duration: 160; easing.type: Easing.InQuad }
+            NumberAnimation { target: infoShift; property: "x"; to: -40; duration: 160; easing.type: Easing.InQuad }
+            NumberAnimation { target: lyricsView; property: "opacity"; to: 0; duration: 160; easing.type: Easing.InQuad }
+        }
+        ScriptAction {
+            script: {
+                root.shownTitle = root.player?.trackTitle ?? "";
+                root.shownArtist = root.player?.trackArtist ?? "";
+                infoShift.x = 40;
+            }
+        }
+        ParallelAnimation {
+            NumberAnimation { target: infoColumn; property: "opacity"; to: 1; duration: 260; easing.type: Easing.OutQuad }
+            NumberAnimation { target: infoShift; property: "x"; to: 0; duration: 420; easing.type: Easing.OutBack }
+            NumberAnimation { target: lyricsView; property: "opacity"; to: 1; duration: 420; easing.type: Easing.OutQuad }
+        }
+    }
+
+    SequentialAnimation {
+        id: artPop
+        ParallelAnimation {
+            NumberAnimation { target: artImage; property: "scale"; to: 0.88; duration: 140; easing.type: Easing.InQuad }
+            NumberAnimation { target: artImage; property: "opacity"; to: 0.2; duration: 140 }
+        }
+        ParallelAnimation {
+            SpringAnimation { target: artImage; property: "scale"; to: 1; spring: 3; damping: 0.28 }
+            NumberAnimation { target: artImage; property: "opacity"; to: 1; duration: 260 }
+        }
     }
 
     function formatTime(seconds) {
@@ -33,68 +84,6 @@ Item {
         const m = Math.floor(total / 60);
         const s = total % 60;
         return m + ":" + (s < 10 ? "0" : "") + s;
-    }
-
-    readonly property string artUrl: root.player?.trackArtUrl ?? ""
-    readonly property bool artIsLocal: Platform.isWindows && String(root.artUrl).startsWith("file:")
-    readonly property string artFilePath: `${Directories.coverArt}/${Qt.md5(root.artUrl)}`
-    property bool artDownloaded: false
-    readonly property string resolvedArtPath: root.artIsLocal ? root.artUrl : (root.artDownloaded ? (Platform.isWindows ? `file:///${root.artFilePath}` : Qt.resolvedUrl(root.artFilePath)) : "")
-
-    onArtUrlChanged: {
-        if (!root.artUrl) {
-            root.artDownloaded = false;
-            return;
-        }
-        if (root.artIsLocal) {
-            root.artDownloaded = true;
-            return;
-        }
-        coverDownloader.targetFile = root.artUrl;
-        coverDownloader.artFilePath = root.artFilePath;
-        root.artDownloaded = false;
-        if (Platform.isWindows && WindowsNative.fsUtils?.classify(root.artFilePath) === "file") {
-            root.artDownloaded = true;
-            return;
-        }
-        coverDownloader.running = true;
-    }
-
-    Process {
-        id: coverDownloader
-        property string targetFile: root.artUrl
-        property string artFilePath: root.artFilePath
-        readonly property string partTag: Math.random().toString(36).slice(2, 10)
-        workingDirectory: Platform.isWindows ? FileUtils.parentDirectory(artFilePath) : ""
-        command: Platform.isWindows
-            ? ["curl", "-4", "-sSL", "-o", WindowsNative.downloadName(artFilePath, partTag), "--url", targetFile]
-            : ["bash", "-c", '[ -f "$2" ] || { curl -4 -sSL -o "$2.part" --url "$1" && mv "$2.part" "$2"; }', "art", targetFile, artFilePath]
-        onExited: (exitCode, exitStatus) => {
-            root.artDownloaded = !Platform.isWindows || WindowsNative.finishDownload(coverDownloader.artFilePath, coverDownloader.partTag, exitCode === 0);
-        }
-    }
-
-    ColorQuantizer {
-        id: artQuantizer
-        source: root.resolvedArtPath
-        depth: 0
-        rescaleSize: 1
-    }
-
-    readonly property color artDominantColor: artQuantizer.colors.length > 0
-        ? ColorUtils.mix(artQuantizer.colors[0], Appearance.colors.colPrimaryContainer, 0.8)
-        : Appearance.colors.colPrimary
-
-    property QtObject blendedColors: AdaptedMaterialScheme {
-        color: root.artDominantColor
-    }
-
-    readonly property var colors: (root.player !== null && root.resolvedArtPath !== "") ? root.blendedColors : Appearance.colors
-
-    readonly property list<real> visualizerPoints: AudioSpectrum.points
-
-    SpectrumConsumer {
-        active: root.player !== null
     }
 
     ColumnLayout {
@@ -120,9 +109,12 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
+        anchors.leftMargin: -16
+        anchors.rightMargin: -16
+        anchors.bottomMargin: -16
         height: parent.height * 0.4
-        live: root.playing
-        points: root.visualizerPoints
+        live: root.media.playing
+        points: AudioSpectrum.points
         color: root.colors.colPrimary
     }
 
@@ -141,29 +133,34 @@ Item {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
 
-                Rectangle {
+                DashboardCard {
                     id: artCard
                     anchors.horizontalCenter: parent.horizontalCenter
                     anchors.bottom: parent.bottom
                     width: Math.min(parent.width, parent.height)
                     height: width
-                    radius: Appearance.rounding.large
-                    color: root.colors.colSecondaryContainer
+                    tint: root.colors.colSecondaryContainer
+                    pager: root.pager
+                    staggerMs: root.staggerMs
+                    animIndex: 0
+                    travelX: -320
+                    travelY: 0
 
                     Image {
                         id: artImage
                         anchors.fill: parent
-                        source: root.resolvedArtPath
+                        source: root.media.displayedArtFilePath
                         fillMode: Image.PreserveAspectCrop
                         asynchronous: true
                         cache: false
                         sourceSize: Qt.size(artCard.width * 2, artCard.height * 2)
+                        onSourceChanged: artPop.restart()
                         layer.enabled: true
                         layer.effect: OpacityMask {
                             maskSource: Rectangle {
                                 width: artCard.width
                                 height: artCard.height
-                                radius: artCard.radius
+                                radius: artCard.cardRadius
                             }
                         }
                     }
@@ -179,37 +176,61 @@ Item {
                 }
             }
 
-            ColumnLayout {
-                id: infoColumn
+            DashboardCard {
                 Layout.fillWidth: true
-                Layout.preferredHeight: implicitHeight
-                spacing: 0
+                Layout.preferredHeight: infoColumn.implicitHeight
+                tint: "transparent"
+                pager: root.pager
+                staggerMs: root.staggerMs
+                animIndex: 1
+                travelX: -300
+                travelY: 100
 
-                StyledText {
-                    Layout.fillWidth: true
-                    text: root.player?.trackTitle || Translation.tr("Nothing playing")
-                    horizontalAlignment: Text.AlignHCenter
-                    font.pixelSize: 34
-                    font.weight: Font.Bold
-                    color: root.colors.colOnLayer0
-                    elide: Text.ElideRight
-                }
+                ColumnLayout {
+                    id: infoColumn
+                    transform: Translate { id: infoShift }
+                    anchors.left: parent.left
+                    anchors.right: parent.right
+                    spacing: 0
 
-                StyledText {
-                    Layout.fillWidth: true
-                    text: root.player?.trackArtist ?? ""
-                    horizontalAlignment: Text.AlignHCenter
-                    font.pixelSize: Appearance.font.pixelSize.larger
-                    color: root.colors.colSubtext
-                    elide: Text.ElideRight
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: root.shownTitle || Translation.tr("Nothing playing")
+                        horizontalAlignment: Text.AlignHCenter
+                        font.pixelSize: 34
+                        font.weight: Font.Bold
+                        color: root.fg
+                        elide: Text.ElideRight
+                    }
+
+                    StyledText {
+                        Layout.fillWidth: true
+                        text: root.shownArtist
+                        horizontalAlignment: Text.AlignHCenter
+                        font.pixelSize: Appearance.font.pixelSize.larger
+                        color: root.fgDim
+                        elide: Text.ElideRight
+                    }
                 }
             }
 
-            Rectangle {
+            DashboardCard {
                 Layout.fillWidth: true
                 Layout.preferredHeight: controlsLayout.implicitHeight + 28
-                radius: Appearance.rounding.large
-                color: Qt.rgba(0, 0, 0, 0.28)
+                tint: root.colors.colSecondaryContainer
+                tintOpacity: 0.45
+                blurSource: root.blurSource
+                pager: root.pager
+                staggerMs: root.staggerMs
+                animIndex: 2
+                travelX: -200
+                travelY: 260
+
+                Rectangle {
+                    anchors.fill: parent
+                    radius: parent.cardRadius
+                    color: Qt.rgba(0, 0, 0, 0.28)
+                }
 
                 ColumnLayout {
                     id: controlsLayout
@@ -224,7 +245,7 @@ Item {
                         StyledText {
                             text: root.formatTime(root.player?.position)
                             font.pixelSize: Appearance.font.pixelSize.smaller
-                            color: root.colors.colOnLayer0
+                            color: root.fg
                         }
 
                         StyledSlider {
@@ -241,7 +262,7 @@ Item {
                         StyledText {
                             text: "-" + root.formatTime((root.player?.length ?? 0) - (root.player?.position ?? 0))
                             font.pixelSize: Appearance.font.pixelSize.smaller
-                            color: root.colors.colOnLayer0
+                            color: root.fg
                         }
                     }
 
@@ -256,37 +277,33 @@ Item {
                             toggled: root.hasShuffle && (root.player?.shuffle ?? false)
                             enabled: root.hasShuffle || root.canSeek
                             colBackground: "transparent"
-                            colBackgroundHover: root.colors.colSecondaryContainerHover
-                            colBackgroundToggled: root.colors.colSecondaryContainerActive
-                            colBackgroundToggledHover: root.colors.colSecondaryContainerActive
-                            colRipple: root.colors.colSecondaryContainerActive
+                            colBackgroundHover: root.hoverColor
+                            colBackgroundToggled: root.activeColor
+                            colBackgroundToggledHover: root.activeColor
+                            colRipple: root.activeColor
                             downAction: () => {
-                                if (root.hasShuffle)
-                                    root.player.shuffle = !root.player.shuffle;
-                                else
-                                    root.seekBy(-10);
+                                if (root.hasShuffle) root.player.shuffle = !root.player.shuffle;
+                                else root.seekBy(-10);
                             }
                             contentItem: Item {
                                 MaterialSymbol {
                                     anchors.centerIn: parent
                                     text: root.hasShuffle ? "shuffle" : "replay_10"
                                     iconSize: 20
-                                    color: root.colors.colOnLayer0
+                                    color: root.fg
                                 }
                             }
                         }
 
-                        Item {
-                            Layout.fillWidth: true
-                        }
+                        Item { Layout.fillWidth: true }
 
                         RippleButton {
                             implicitWidth: 48
                             implicitHeight: 48
                             buttonRadius: 24
                             colBackground: "transparent"
-                            colBackgroundHover: root.colors.colSecondaryContainerHover
-                            colRipple: root.colors.colSecondaryContainerActive
+                            colBackgroundHover: root.hoverColor
+                            colRipple: root.activeColor
                             downAction: () => root.player?.previous()
                             contentItem: Item {
                                 MaterialSymbol {
@@ -294,7 +311,7 @@ Item {
                                     text: "fast_rewind"
                                     iconSize: 26
                                     fill: 1
-                                    color: root.colors.colOnLayer0
+                                    color: root.fg
                                 }
                             }
                         }
@@ -302,7 +319,7 @@ Item {
                         RippleButton {
                             implicitWidth: 64
                             implicitHeight: 64
-                            buttonRadius: root.playing ? Appearance.rounding.large : 32
+                            buttonRadius: root.media.playing ? Appearance.rounding.large : 32
                             colBackground: root.colors.colPrimary
                             colBackgroundHover: root.colors.colPrimaryHover
                             colRipple: root.colors.colPrimaryActive
@@ -310,7 +327,7 @@ Item {
                             contentItem: Item {
                                 MaterialSymbol {
                                     anchors.centerIn: parent
-                                    text: root.playing ? "pause" : "play_arrow"
+                                    text: root.media.playing ? "pause" : "play_arrow"
                                     iconSize: 32
                                     fill: 1
                                     color: root.colors.colOnPrimary
@@ -323,8 +340,8 @@ Item {
                             implicitHeight: 48
                             buttonRadius: 24
                             colBackground: "transparent"
-                            colBackgroundHover: root.colors.colSecondaryContainerHover
-                            colRipple: root.colors.colSecondaryContainerActive
+                            colBackgroundHover: root.hoverColor
+                            colRipple: root.activeColor
                             downAction: () => root.player?.next()
                             contentItem: Item {
                                 MaterialSymbol {
@@ -332,14 +349,12 @@ Item {
                                     text: "fast_forward"
                                     iconSize: 26
                                     fill: 1
-                                    color: root.colors.colOnLayer0
+                                    color: root.fg
                                 }
                             }
                         }
 
-                        Item {
-                            Layout.fillWidth: true
-                        }
+                        Item { Layout.fillWidth: true }
 
                         RippleButton {
                             implicitWidth: 40
@@ -348,22 +363,20 @@ Item {
                             toggled: root.hasLoop && (root.player?.loopState ?? 0) !== 0
                             enabled: root.hasLoop || root.canSeek
                             colBackground: "transparent"
-                            colBackgroundHover: root.colors.colSecondaryContainerHover
-                            colBackgroundToggled: root.colors.colSecondaryContainerActive
-                            colBackgroundToggledHover: root.colors.colSecondaryContainerActive
-                            colRipple: root.colors.colSecondaryContainerActive
+                            colBackgroundHover: root.hoverColor
+                            colBackgroundToggled: root.activeColor
+                            colBackgroundToggledHover: root.activeColor
+                            colRipple: root.activeColor
                             downAction: () => {
-                                if (root.hasLoop)
-                                    root.player.loopState = root.player.loopState === 0 ? 2 : 0;
-                                else
-                                    root.seekBy(10);
+                                if (root.hasLoop) root.player.loopState = root.player.loopState === 0 ? 2 : 0;
+                                else root.seekBy(10);
                             }
                             contentItem: Item {
                                 MaterialSymbol {
                                     anchors.centerIn: parent
                                     text: root.hasLoop ? "repeat" : "forward_10"
                                     iconSize: 20
-                                    color: root.colors.colOnLayer0
+                                    color: root.fg
                                 }
                             }
                         }
@@ -372,11 +385,15 @@ Item {
             }
         }
 
-        Rectangle {
+        DashboardCard {
             Layout.fillWidth: true
             Layout.fillHeight: true
-            radius: Appearance.rounding.large
-            color: "transparent"
+            tint: "transparent"
+            pager: root.pager
+            staggerMs: root.staggerMs
+            animIndex: 3
+            travelX: 320
+            travelY: -60
 
             Lyrics {
                 id: lyricsView
@@ -385,9 +402,11 @@ Item {
                 animateTransitions: true
                 lineSpacing: 28
                 textAlignment: Text.AlignHCenter
-                textColor: root.colors.colOnLayer0
+                textColor: root.fg
                 activeColor: root.colors.colPrimary
+                dimColor: root.fgDim
                 indicatorColor: root.colors.colSecondaryContainer
+                indicatorShapeColor: root.colors.colOnSecondaryContainer
             }
 
             SP.StyledComboBoxSearch {
@@ -395,6 +414,7 @@ Item {
 
                 readonly property var players: Array.from(MprisController.players)
                 readonly property int activeIndex: players.findIndex(p => p === MprisController.activePlayer)
+                readonly property color solid: Qt.rgba(root.colors.colLayer1.r, root.colors.colLayer1.g, root.colors.colLayer1.b, 1)
 
                 visible: players.length > 1
                 anchors.right: parent.right
@@ -421,7 +441,7 @@ Item {
                 colText: root.colors.colOnSecondaryContainer
                 colAccent: root.colors.colPrimary
                 colOnAccent: root.colors.colOnPrimary
-                colPopup: Qt.rgba(root.colors.colLayer1.r, root.colors.colLayer1.g, root.colors.colLayer1.b, 1)
+                colPopup: playerSelector.solid
                 colSelected: root.colors.colSecondaryContainer
                 colSelectedHover: root.colors.colSecondaryContainerHover
                 colSelectedActive: root.colors.colSecondaryContainerActive
