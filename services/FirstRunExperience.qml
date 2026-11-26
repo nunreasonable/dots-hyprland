@@ -14,6 +14,7 @@ Singleton {
     property string defaultWallpaperPath: FileUtils.trimFileProtocol(`${Directories.assetsPath}/images/default_wallpaper.png`)
     property string welcomeQmlPath: FileUtils.trimFileProtocol(Quickshell.shellPath("welcome.qml"))
     property bool welcomePending: false
+    property bool isFirstRun: false
 
     function load() {
         firstRunFileView.reload()
@@ -42,6 +43,7 @@ Singleton {
     }
 
     function handleFirstRun() {
+        root.isFirstRun = true;
         if (Platform.isWindows) {
             Wallpapers.adoptSystemWallpaper();
             root.welcomePending = true;

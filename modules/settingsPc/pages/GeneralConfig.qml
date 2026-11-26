@@ -710,6 +710,36 @@ ContentPage {
         }
 
         ContentSection {
+            icon: "rocket_launch"
+            shape: W.MaterialShape.Shape.Flower
+            title: Translation.tr("Startup")
+
+            GroupedList {
+                ConfigSwitch {
+                    buttonIcon: "waving_hand"
+                    text: Translation.tr("Show the welcome screen when ii starts")
+                    checked: Config.options.welcome.showAtLogin
+                    onCheckedChanged: {
+                        Config.options.welcome.showAtLogin = checked;
+                    }
+                }
+            }
+
+            Flow {
+                Layout.fillWidth: true
+                spacing: 5
+
+                W.RippleButtonWithIcon {
+                    materialIcon: "waving_hand"
+                    mainText: Translation.tr("Show it now")
+                    onClicked: {
+                        Quickshell.execDetached(["qs", "-p", Quickshell.shellPath(""), "ipc", "call", "welcomeScreen", "open"]);
+                    }
+                }
+            }
+        }
+
+        ContentSection {
             icon: "bug_report"
             shape: W.MaterialShape.Shape.Arch
             title: Translation.tr("Troubleshooting")

@@ -34,4 +34,5 @@ Scope {
     PanelLoader { deferPriority: 1; panelSource: "../modules/ii/sidebarRight/SidebarRight.qml" }
     PanelLoader { deferred: false; extraCondition: Config.options.bar.vertical && !(Platform.isWindows && Config.options.windowsPort.nativeTaskbar); panelSource: "../modules/ii/verticalBar/VerticalBar.qml" }
     PanelLoader { panelSource: "../modules/ii/wallpaperSelector/WallpaperSelector.qml" }
+    PanelLoader { panelSource: "../modules/ii/welcome/WelcomeScreen.qml" }
 }

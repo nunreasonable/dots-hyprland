@@ -56,6 +56,7 @@ Singleton {
     property string spotlightMode: ""
     property bool wallpaperSelectorOpen: false
     property string wallpaperSelectorTarget: "wallpaper"
+    property bool welcomeScreenOpen: false
     property bool workspaceShowNumbers: false
     property bool barStyleEditorOpen: false
     property bool barCenterOnly: false

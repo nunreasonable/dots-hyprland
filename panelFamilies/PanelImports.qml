@@ -27,6 +27,7 @@ import qs.modules.ii.sidebarRight
 import qs.modules.ii.spotlight
 import qs.modules.ii.verticalBar
 import qs.modules.ii.wallpaperSelector
+import qs.modules.ii.welcome
 import qs.modules.waffle.actionCenter
 import qs.modules.waffle.background
 import qs.modules.waffle.bar

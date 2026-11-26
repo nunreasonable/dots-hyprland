@@ -58,6 +58,17 @@ ShellRoot {
         onTriggered: FirstRunExperience.launchWelcome()
     }
 
+    property bool welcomeScreenAutoShowDone: false
+    Timer {
+        running: Config.ready && !root.welcomeScreenAutoShowDone
+        interval: PanelLoaderQueue.drained ? 0 : 10000
+        onTriggered: {
+            root.welcomeScreenAutoShowDone = true;
+            if (Config.options.welcome.showAtLogin && !FirstRunExperience.isFirstRun)
+                GlobalStates.welcomeScreenOpen = true;
+        }
+    }
+
 
     Binding {
         when: Platform.isWindows && Config.ready && WindowsNative.ready

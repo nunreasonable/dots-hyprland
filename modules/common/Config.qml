@@ -1058,6 +1058,10 @@ Singleton {
                 property string wallhavenTopRange: "1y"
             }
             
+            property JsonObject welcome: JsonObject {
+                property bool showAtLogin: false
+            }
+
             property JsonObject windows: JsonObject {
                 property bool showTitlebar: true // Client-side decoration for shell apps
                 property bool centerTitle: true
