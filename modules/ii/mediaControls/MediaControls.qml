@@ -103,6 +103,7 @@ Scope {
                 && GlobalStates.mediaControlsAnchorX >= 0
                 && GlobalStates.mediaControlsAnchorScreen === (panelWindow.screen?.name ?? "")
             WlrLayershell.namespace: "quickshell:mediaControls"
+            WlrLayershell.keyboardFocus: GlobalStates.mediaControlsOpen && !root.pinned ? (Platform.isWindows ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.OnDemand) : WlrKeyboardFocus.None
 
             anchors {
                 top: !Config.options.bar.bottom || Config.options.bar.vertical
@@ -157,6 +158,13 @@ Scope {
                 id: playerColumnLayout
                 anchors.fill: parent
                 spacing: -Appearance.sizes.elevationMargin // Shadow overlap okay
+                focus: true
+                Keys.onPressed: event => {
+                    if (event.key === Qt.Key_Escape) {
+                        GlobalStates.mediaControlsOpen = false;
+                        event.accepted = true;
+                    }
+                }
 
                 Repeater {
                     model: ScriptModel {
