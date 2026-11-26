@@ -126,7 +126,16 @@ Item {
 
                 StyledProgressBar {
                     id: valueProgressBar
+                    visible: StyleTheme.key !== "mainel"
                     Layout.fillWidth: true
+                    value: root.value
+                }
+
+                MainelSegmentedBar {
+                    visible: StyleTheme.key === "mainel"
+                    Layout.fillWidth: true
+                    implicitHeight: 10
+                    segmentSpacing: 2
                     value: root.value
                 }
             }

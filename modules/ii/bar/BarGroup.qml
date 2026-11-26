@@ -20,7 +20,7 @@ Item {
             leftMargin: root.vertical ? 4 : 0
             rightMargin: root.vertical ? 4 : 0
         }
-        visible: !SekaiTheme.active
+        visible: !SekaiTheme.active && StyleTheme.key !== "mainel"
         color: Config.options?.bar.borderless ? "transparent" : Appearance.colors.colLayer1
         radius: StyleTheme.surface.radiusInner ?? Appearance.rounding.small
 
@@ -41,6 +41,21 @@ Item {
         sourceComponent: SekaiBlock {
             cornerRadius: root.vertical ? width / 2 : capHeight / 2
         }
+    }
+
+    // Mainel: every bar group is its own floating pane - fully rounded (it's a
+    // standalone group), wallpaper shows through the gaps BarContent already leaves
+    // between groups.
+    StyledRectangularShadow {
+        target: mainelBackground
+        visible: StyleTheme.key === "mainel" && StyleTheme.softShadow
+    }
+    Rectangle {
+        id: mainelBackground
+        anchors.fill: parent
+        visible: StyleTheme.key === "mainel"
+        color: StyleTheme.surface.fill ?? Appearance.colors.colLayer1
+        radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.normal
     }
 
     GridLayout {

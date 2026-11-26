@@ -10,11 +10,21 @@ DockButton {
     innerInset: DockStyle.appsButtonInset
     outerInset: DockStyle.appsButtonInset
 
-    contentItem: MaterialSymbol {
-        anchors.fill: parent
-        horizontalAlignment: Text.AlignHCenter
-        iconSize: parent.width / 2
-        text: "apps"
-        color: Appearance.colors.colOnLayer0
+    contentItem: Item {
+        MaterialSymbol {
+            visible: StyleTheme.key !== "mainel"
+            anchors.fill: parent
+            horizontalAlignment: Text.AlignHCenter
+            iconSize: parent.width / 2
+            text: "apps"
+            color: Appearance.colors.colOnLayer0
+        }
+
+        MainelAsterisk {
+            visible: StyleTheme.key === "mainel"
+            anchors.centerIn: parent
+            size: parent.width / 2
+            color: MainelTheme.jadeMid
+        }
     }
 }
