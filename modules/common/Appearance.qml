@@ -258,7 +258,7 @@ Singleton {
             property string iconNerd: Config.options.appearance.fonts.iconNerd
             property string monospace: Config.options.appearance.fonts.monospace
             property string reading: Config.options.appearance.fonts.reading
-            property string expressive: Config.options.appearance.fonts.expressive
+            property string expressive: StyleTheme.type.display || Config.options.appearance.fonts.expressive
         }
         property QtObject variableAxes: QtObject {
             property var main: StyleTheme.type.uiAxes ?? ({
