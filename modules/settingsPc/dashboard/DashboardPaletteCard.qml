@@ -28,7 +28,7 @@ DashboardCard {
         readonly property bool selected: card.currentValue === option.value
 
         implicitHeight: 40
-        horizontalPadding: 16
+        horizontalPadding: 10
         buttonRadius: 14
         colBackground: selected ? Appearance.colors.colSecondary : Qt.rgba(1, 1, 1, 0.12)
         colBackgroundHover: selected ? Appearance.colors.colSecondary : Qt.rgba(1, 1, 1, 0.22)
@@ -39,25 +39,32 @@ DashboardCard {
             Qt.callLater(() => control.set(value));
         }
 
-        contentItem: RowLayout {
-            spacing: 6
+        contentItem: Item {
+            id: pillContent
 
-            Item { Layout.fillWidth: true }
+            RowLayout {
+                anchors.centerIn: parent
+                width: Math.min(implicitWidth, pillContent.width)
+                spacing: 6
 
-            MaterialSymbol {
-                text: pill.option.icon
-                iconSize: 18
-                fill: pill.selected ? 1 : 0
-                color: pill.selected ? Appearance.colors.colOnSecondary : Appearance.colors.colOnSecondaryContainer
+                MaterialSymbol {
+                    visible: pillContent.width >= pillLabel.implicitWidth + 24
+                    text: pill.option.icon
+                    iconSize: 18
+                    fill: pill.selected ? 1 : 0
+                    color: pill.selected ? Appearance.colors.colOnSecondary : Appearance.colors.colOnSecondaryContainer
+                }
+                StyledText {
+                    id: pillLabel
+                    Layout.fillWidth: true
+                    horizontalAlignment: Text.AlignHCenter
+                    elide: Text.ElideRight
+                    text: pill.option.displayName
+                    font.pixelSize: Appearance.font.pixelSize.small
+                    font.weight: Font.Medium
+                    color: pill.selected ? Appearance.colors.colOnSecondary : Appearance.colors.colOnSecondaryContainer
+                }
             }
-            StyledText {
-                text: pill.option.displayName
-                font.pixelSize: Appearance.font.pixelSize.small
-                font.weight: Font.Medium
-                color: pill.selected ? Appearance.colors.colOnSecondary : Appearance.colors.colOnSecondaryContainer
-            }
-
-            Item { Layout.fillWidth: true }
         }
     }
 
@@ -68,7 +75,7 @@ DashboardCard {
 
         Rectangle {
             Layout.fillHeight: true
-            Layout.preferredWidth: 300
+            Layout.preferredWidth: Math.min(300, root.width * 0.26)
             Layout.maximumWidth: 300
             radius: 18
             color: "transparent"

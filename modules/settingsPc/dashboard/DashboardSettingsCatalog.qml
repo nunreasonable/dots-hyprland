@@ -66,11 +66,11 @@ QtObject {
         { id: "hero:transparency", type: "toggle", key: "appearance.transparency.enable", title: Translation.tr("Transparency"), icon: "opacity", section: Translation.tr("Interface") },
         { id: "hero:tiling", type: "toggle", os: "windows", key: "windowsPort.tiling.enable", title: Translation.tr("Tiling"), icon: "dashboard", section: Translation.tr("System") },
         { id: "hero:collage", type: "toggle", key: "custom:collageEnable", title: Translation.tr("Multiple wallpapers"), icon: "grid_view", section: Translation.tr("Desktop") },
-        { id: "hero:centered", type: "toggle", key: "background.centeredWallpaper", title: Translation.tr("Centered wallpaper"), icon: "filter_center_focus", section: Translation.tr("Desktop") },
         { id: "hero:schemes", type: "schemes", os: "windows", title: Translation.tr("Color scheme"), section: Translation.tr("Interface"), kw: "named color scheme palette primary secondary accent catppuccin gruvbox nord dracula tokyo everforest" },
+        { id: "hero:barpos", type: "barpos", title: Translation.tr("Bar position"), section: Translation.tr("Bar"), kw: "bar position top bottom left right vertical" },
+        { id: "hero:centered", type: "toggle", key: "background.centeredWallpaper", title: Translation.tr("Centered wallpaper"), icon: "filter_center_focus", section: Translation.tr("Desktop") },
         { id: "hero:uibg", type: "select", w: 2, key: "appearance.uiBackground", title: Translation.tr("UI background"), icon: "format_color_fill", section: Translation.tr("Interface"), kw: "ui background oled black amoled themed dark surface layer panels sidebars", options: [{ displayName: Translation.tr("Themed"), icon: "palette", value: "themed" }, { displayName: Translation.tr("OLED"), icon: "contrast", value: "oled" }] },
-        { id: "hero:palette", type: "palette", key: "custom:colorSchemeType", when: () => (Config.options.appearance.palette.namedScheme ?? "") === "", title: Translation.tr("Palette style"), icon: "auto_awesome", section: Translation.tr("Interface"), kw: "palette style scheme auto content expressive fidelity fruit salad monochrome neutral rainbow tonal spot material you dynamic" },
-        { id: "hero:barpos", type: "barpos", title: Translation.tr("Bar position"), section: Translation.tr("Bar"), kw: "bar position top bottom left right vertical" }
+        { id: "hero:palette", type: "palette", key: "custom:colorSchemeType", when: () => (Config.options.appearance.palette.namedScheme ?? "") === "", title: Translation.tr("Palette style"), icon: "auto_awesome", section: Translation.tr("Interface"), kw: "palette style scheme auto content expressive fidelity fruit salad monochrome neutral rainbow tonal spot material you dynamic" }
     ]
 
     readonly property var custom: ({
@@ -236,11 +236,6 @@ QtObject {
           get: () => Config.options.sidebar.cornerOpen.bottomRightAction,
           set: v => { Config.options.sidebar.cornerOpen.bottomRightAction = v; },
           get options() { return GlobalStates.hotCornerOptions; }
-        },
-        "custom:windowsTilingExcludedApps": {
-          type: "text",
-          get: () => Config.options.windowsPort.tiling.excluded.join("\n"),
-          set: v => { Config.options.windowsPort.tiling.excluded = v.split("\n").map(s => s.trim()); }
         },
         "custom:googleLensSelectionType": {
           type: "select",
@@ -2361,7 +2356,7 @@ QtObject {
             { type: "spin", key: "windowsPort.tiling.gapsIn", title: Translation.tr("Gap between windows (px)"), icon: "space_bar", from: 0, to: 64, step: 1 },
             { type: "spin", key: "windowsPort.tiling.gapsOut", title: Translation.tr("Gap to screen edges (px)"), icon: "space_dashboard", from: 0, to: 64, step: 1 },
             { type: "toggle", key: "windowsPort.tiling.preserveSplit", title: Translation.tr("Keep each split's direction"), icon: "splitscreen" },
-            { type: "text", w: 2, key: "custom:windowsTilingExcludedApps", title: Translation.tr("Apps that always float"), icon: "open_in_full", placeholder: Translation.tr("One per line: process name (notepad.exe), app id, window class, or title:<pattern>"), kw: "tiling exclude float always apps process window class title" }
+            { type: "page", w: 2, pageId: "interface", section: "Windows tiling", title: Translation.tr("Apps that always float"), icon: "open_in_full", subtitle: Translation.tr("One per line: process name (notepad.exe), app id, window class, or title:<pattern>"), kw: "tiling exclude float always apps process window class title" }
           ]
         },
         {

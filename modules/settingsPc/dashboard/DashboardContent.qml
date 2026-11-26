@@ -251,6 +251,10 @@ Item {
             }
 
             Rectangle {
+                id: distroPill
+                readonly property real fullWidth: (SystemInfo.logo !== "" ? 30 : 0) + distroName.implicitWidth + 28
+                readonly property real searchRoom: headerBar.width - navToolbar.width - fullWidth - 24 - headerActions.othersWidth
+                readonly property bool compact: root.searchOpen && searchRoom < 120
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
                 radius: height / 2
@@ -258,7 +262,7 @@ Item {
                 border.width: 2
                 border.color: ui.accent
                 implicitHeight: 44
-                implicitWidth: distroPillRow.implicitWidth + 28
+                implicitWidth: compact ? 44 : fullWidth
 
                 RowLayout {
                     id: distroPillRow
@@ -272,6 +276,8 @@ Item {
                     }
 
                     StyledText {
+                        id: distroName
+                        visible: !distroPill.compact
                         text: SystemInfo.distroName
                         font.pixelSize: Appearance.font.pixelSize.normal
                         font.weight: Font.Medium
@@ -282,7 +288,8 @@ Item {
 
             Toolbar {
                 id: navToolbar
-                anchors.centerIn: parent
+                anchors.verticalCenter: parent.verticalCenter
+                x: Math.max(distroPill.width + 12, Math.min((headerBar.width - width) / 2, headerActions.x - width - 12))
                 colBackground: ui.surface
                 outerShadow: true
 
@@ -328,6 +335,7 @@ Item {
 
             RowLayout {
                 id: headerActions
+                readonly property real othersWidth: (root.windowControls ? 4 : 2) * 54
                 anchors.right: parent.right
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 10
@@ -335,7 +343,7 @@ Item {
                 Rectangle {
                     id: searchPill
                     implicitHeight: 44
-                    implicitWidth: root.searchOpen ? Math.max(120, Math.min(220, (headerBar.width - navToolbar.width) / 2 - 12 - (root.windowControls ? 4 : 2) * 54)) : 44
+                    implicitWidth: root.searchOpen ? Math.max(100, Math.min(220, distroPill.searchRoom + (distroPill.compact ? distroPill.fullWidth - 44 : 0))) : 44
                     radius: height / 2
                     color: ui.surface
                     border.width: searchInput.activeFocus ? 2 : 0

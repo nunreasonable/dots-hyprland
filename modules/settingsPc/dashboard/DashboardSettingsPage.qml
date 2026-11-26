@@ -84,7 +84,11 @@ Item {
     }
 
     function spanOf(entry) {
-        return entry.w ? [entry.w, 1] : baseSpan(entry.type);
+        if (entry.w)
+            return [entry.w, 1];
+        if (entry.type === "select" && (catalog.controlFor(entry)?.options ?? []).length >= 4)
+            return [4, 1];
+        return baseSpan(entry.type);
     }
 
     function baseSpan(type) {
@@ -420,7 +424,7 @@ Item {
                 p.col--;
                 p.w++;
             }
-            while (free(p.row + p.h, p.col, p.w, 1)) {
+            while (p.h > 1 && free(p.row + p.h, p.col, p.w, 1)) {
                 mark(p.row + p.h, p.col, p.w, 1);
                 p.h++;
             }

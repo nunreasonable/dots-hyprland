@@ -68,6 +68,9 @@ DashboardCard {
             font.weight: Font.DemiBold
             color: Appearance.colors.colOnLayer1
             elide: Text.ElideRight
+            wrapMode: Text.Wrap
+            maximumLineCount: 2
+            lineHeight: 0.9
         }
         StyledText {
             visible: root.subtitleText !== ""
