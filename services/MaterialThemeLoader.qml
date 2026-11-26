@@ -25,6 +25,15 @@ Singleton {
     property bool applying: false
     readonly property var styleScheme: StyleTheme.palette.scheme
 
+    readonly property var _termKeys: ["term0", "term1", "term2", "term3", "term4", "term5", "term6", "term7",
+        "term8", "term9", "term10", "term11", "term12", "term13", "term14", "term15"]
+    property var _termDefaults: ({})
+
+    Component.onCompleted: {
+        for (const key of root._termKeys)
+            root._termDefaults[key] = Appearance.m3colors[key]
+    }
+
     onStyleSchemeChanged: {
         if (!root.applying && root.generated)
             root.applyGenerated()
@@ -72,6 +81,9 @@ Singleton {
         const scheme = root.styleScheme ?? {}
         for (const key in scheme)
             Appearance.m3colors[key] = scheme[key]
+        for (const key of root._termKeys)
+            if (!(key in scheme) && root._termDefaults[key] !== undefined)
+                Appearance.m3colors[key] = root._termDefaults[key]
         root.applying = false
     }
 

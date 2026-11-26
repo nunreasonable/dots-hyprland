@@ -2,6 +2,7 @@ import qs
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.functions
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -52,6 +53,7 @@ Rectangle {
             active: Config.options.sidebar.quickSliders.showBrightness
             sourceComponent: QuickSlider {
                 materialSymbol: "light_mode"
+                caractereLabel: "lum"
                 secondaryMaterialSymbol: Platform.isWindows ? "" : "wb_twilight"
                 stopIndicatorValues: !Platform.isWindows && Hyprsunset.gamma !== 100 && root.brightnessMonitor?.brightness !== 0 ? [0.3 + root.brightnessMonitor?.brightness * 0.7] : []
                 value: Platform.isWindows ? (root.brightnessMonitor?.brightness ?? 0) : Hyprsunset.gamma === 100? 0.3 + root.brightnessMonitor?.brightness * 0.7 : (Hyprsunset.gamma - Hyprsunset.gammaLowerLimit) / (100 - Hyprsunset.gammaLowerLimit) * 0.3
@@ -92,6 +94,7 @@ Rectangle {
             id: defaultVolume
             QuickSlider {
                 materialSymbol: "volume_up"
+                caractereLabel: "vol"
                 value: Audio.sink.audio.volume
                 onMoved: {
                     Audio.sink.audio.volume = value
@@ -135,6 +138,7 @@ Rectangle {
             active: Config.options.sidebar.quickSliders.showMic
             sourceComponent: QuickSlider {
                 materialSymbol: "mic"
+                caractereLabel: "mic"
                 value: Audio.source.audio.volume
                 onMoved: {
                     Audio.source.audio.volume = value
@@ -143,15 +147,20 @@ Rectangle {
         }
     }
 
-    component QuickSlider: StyledSlider { 
+    component QuickSlider: StyledSlider {
         id: quickSlider
         required property string materialSymbol
         property string secondaryMaterialSymbol
+        property string caractereLabel: ""
+        readonly property bool isCaractere: StyleTheme.key === "caractere"
+        property CaractereCellMetrics caractereMetrics: CaractereCellMetrics {}
         configuration: StyledSlider.Configuration.M
         stopIndicatorValues: []
-        highlightColor: StyleTheme.palette.accent ?? Appearance.colors.colPrimary
-        trackColor: StyleTheme.surface.fillHover ?? Appearance.colors.colSecondaryContainer
-        handleColor: StyleTheme.surface.borderColor ?? Appearance.colors.colPrimary
+        highlightColor: quickSlider.isCaractere ? "transparent" : (StyleTheme.palette.accent ?? Appearance.colors.colPrimary)
+        trackColor: quickSlider.isCaractere ? "transparent" : (StyleTheme.surface.fillHover ?? Appearance.colors.colSecondaryContainer)
+        handleColor: quickSlider.isCaractere ? "transparent" : (StyleTheme.surface.borderColor ?? Appearance.colors.colPrimary)
+        dotColor: quickSlider.isCaractere ? "transparent" : Appearance.m3colors.m3onSecondaryContainer
+        dotColorHighlighted: quickSlider.isCaractere ? "transparent" : Appearance.m3colors.m3onPrimary
         dividerValues: secondaryMaterialSymbol.length > 0 ? [secondaryIcon.iconLocation] : []
 
         Loader {
@@ -165,6 +174,7 @@ Rectangle {
         
         MaterialSymbol {
             id: icon
+            visible: !quickSlider.isCaractere
             property bool nearFull: quickSlider.value >= 0.9
             anchors {
                 verticalCenter: quickSlider.verticalCenter
@@ -185,7 +195,7 @@ Rectangle {
 
         MaterialSymbol {
             id: secondaryIcon
-            visible: secondaryMaterialSymbol.length > 0
+            visible: secondaryMaterialSymbol.length > 0 && !quickSlider.isCaractere
             property real iconLocation: 0.3
             property bool nearIcon: iconLocation - quickSlider.value <= 0.1 && iconLocation - quickSlider.value > (quickSlider.handleWidth + 8 - 14) / quickSlider.effectiveDraggingWidth
             anchors {
@@ -199,6 +209,29 @@ Rectangle {
 
             Behavior on color {
                 animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+            }
+        }
+
+        Loader {
+            anchors.fill: parent
+            active: quickSlider.isCaractere
+            visible: active
+
+            sourceComponent: StyledText {
+                anchors {
+                    verticalCenter: parent.verticalCenter
+                    left: parent.left
+                    leftMargin: quickSlider.leftPadding
+                }
+                color: StyleTheme.current.termFg ?? Appearance.colors.colOnSecondaryContainer
+                font.pixelSize: 11
+
+                readonly property real normalizedValue: (quickSlider.value - quickSlider.from) / (quickSlider.to - quickSlider.from)
+                readonly property string percentText: Math.round(normalizedValue * 100) + "%"
+                readonly property int reservedChars: quickSlider.caractereLabel.length + 2 + percentText.length + 1
+                readonly property int meterCells: Math.max(4, quickSlider.caractereMetrics.cols(quickSlider.width) - reservedChars)
+
+                text: quickSlider.caractereLabel + " " + CaractereGlyphs.meterText(normalizedValue, meterCells) + " " + percentText
             }
         }
     }
