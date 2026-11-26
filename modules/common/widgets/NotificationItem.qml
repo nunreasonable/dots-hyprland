@@ -118,7 +118,7 @@ Item { // Notification item area
         id: background
         width: parent.width
         anchors.left: parent.left
-        radius: Appearance.rounding.small
+        radius: StyleTheme.key === "caractere" ? 0 : Appearance.rounding.small
         anchors.leftMargin: root.xOffset
 
         Behavior on anchors.leftMargin {
@@ -139,6 +139,16 @@ Item { // Notification item area
         implicitHeight: expanded ? (contentColumn.implicitHeight + padding * 2) : summaryRow.implicitHeight
         Behavior on implicitHeight {
             animation: Appearance.animation.elementMove.numberAnimation.createObject(this)
+        }
+
+        Loader {
+            anchors.fill: parent
+            active: StyleTheme.key === "caractere"
+            sourceComponent: CaractereCellFrame {
+                title: root.notificationObject.appName || ""
+                background: background.color
+                animated: false
+            }
         }
 
         ColumnLayout { // Content column

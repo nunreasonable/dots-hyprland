@@ -180,10 +180,10 @@ Scope {
                             anchors.bottomMargin: dockRoot.position === "bottom" ? dockRoot.gap : 0
                             anchors.leftMargin: dockRoot.position === "left" ? dockRoot.gap : dockRoot.position === "right" ? dockRoot.shadowMargin : 0
                             anchors.rightMargin: dockRoot.position === "right" ? dockRoot.gap : dockRoot.position === "left" ? dockRoot.shadowMargin : 0
-                            color: Config.options.dock.showBackground && !SekaiTheme.active ? dockRoot.backgroundColor : "transparent"
-                            border.width: SekaiTheme.active ? 0 : dockRoot.borderWidth
-                            border.color: root.colorFromName(Config.options.dock.borderColor)
-                            radius: Config.options.dock.radius
+                            color: Config.options.dock.showBackground && !SekaiTheme.active ? (StyleTheme.key === "caractere" ? StyleTheme.surface.fill : dockRoot.backgroundColor) : "transparent"
+                            border.width: SekaiTheme.active ? 0 : (StyleTheme.key === "caractere" ? 1 : dockRoot.borderWidth)
+                            border.color: StyleTheme.key === "caractere" ? StyleTheme.surface.borderColor : root.colorFromName(Config.options.dock.borderColor)
+                            radius: StyleTheme.key === "caractere" ? 0 : Config.options.dock.radius
                             topLeftRadius: dockRoot.hug && dockRoot.position === "left" ? 0 : radius
                             bottomLeftRadius: dockRoot.hug && (dockRoot.position === "left" || dockRoot.position === "bottom") ? 0 : radius
                             topRightRadius: dockRoot.hug && dockRoot.position === "right" ? 0 : radius

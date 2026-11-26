@@ -2281,5 +2281,6 @@
   "Weekend mode, %1.": "Modo fim de semana, %1.",
   "No rush today.": "Sem pressa hoje.",
   "Monday again, %1?": "Segunda de novo, %1?",
-  "One step at a time.": "Um passo de cada vez."
+  "One step at a time.": "Um passo de cada vez.",
+  "Caractere draws the whole shell on a character grid, TUI-style, in Departure Mono (JetBrains Mono NF at fractional scales) with the 16 terminal colors generated from your wallpaper": "O Caractere desenha o shell inteiro numa grade de caracteres, estilo TUI, em Departure Mono (JetBrains Mono NF em escalas fracionárias) com as 16 cores de terminal geradas do seu wallpaper"
 }
