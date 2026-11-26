@@ -197,6 +197,17 @@ ButtonMouseArea {
             z: 2
 
             index: root.workspaceIndexInGroup
+
+            Loader {
+                active: StyleTheme.key === "aparelho"
+                anchors.horizontalCenter: activeIndicator.indicatorRectangle.horizontalCenter
+                anchors.bottom: activeIndicator.indicatorRectangle.bottom
+                anchors.bottomMargin: Math.max(2, activeIndicator.indicatorRectangle.height * 0.16)
+                sourceComponent: AparelhoLed {
+                    on: true
+                    size: 5
+                }
+            }
         }
 
         /////////////////// Hover ///////////////////
@@ -531,7 +542,7 @@ ButtonMouseArea {
             property real indicatorThickness: root.activeWorkspaceSize
 
             contentLayer: StyledRectangle.ContentLayer.Group
-            radius: indicatorThickness / 2
+            radius: StyleTheme.surface.radiusInner ?? (indicatorThickness / 2)
             color: StyleTheme.palette.accent ?? Appearance.colors.colPrimary
             border.width: Math.min(2, StyleTheme.surface.borderWidth)
             border.color: StyleTheme.surface.borderColor ?? "transparent"
