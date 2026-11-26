@@ -143,6 +143,14 @@ Item { // Bar content region
             radius: barBackground.radius
         }
     }
+    Loader {
+        active: StyleTheme.key === "aquario" && Config.options.bar.showBackground && StyleTheme.surface.barStrip
+        anchors.fill: barBackground
+        sourceComponent: AquarioGlass {
+            radius: barBackground.radius
+            rim: barBackground.radius > 0
+        }
+    }
 
     FocusedScrollMouseArea { // Left side | scroll to change brightness
         id: barLeftSideMouseArea

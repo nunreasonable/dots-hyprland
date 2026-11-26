@@ -196,6 +196,15 @@ Scope {
                             }
                         }
 
+                        Loader {
+                            active: StyleTheme.key === "aquario" && Config.options.dock.showBackground
+                            anchors.fill: dockVisualBackground
+                            sourceComponent: AquarioGlass {
+                                radius: dockVisualBackground.radius
+                                rim: !dockRoot.hug
+                            }
+                        }
+
                         SekaiBlock {
                             visible: SekaiTheme.active
                             x: dockVisualBackground.x

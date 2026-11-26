@@ -202,6 +202,13 @@ Scope { // Scope
                 border.width: StyleTheme.surface.frame ? 0 : 1
                 border.color: Appearance.colors.colLayer0Border
                 radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
+                Loader {
+                    active: StyleTheme.key === "aquario"
+                    anchors.fill: parent
+                    sourceComponent: AquarioGlass {
+                        radius: sidebarLeftBackground.radius
+                    }
+                }
                 StyleShadow {
                     radius: sidebarLeftBackground.radius
                 }

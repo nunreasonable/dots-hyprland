@@ -144,6 +144,16 @@ MouseArea { // Notification group area
             animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
         }
 
+        Loader {
+            active: StyleTheme.key === "aquario"
+            anchors.fill: parent
+            sourceComponent: AquarioGlass {
+                radius: background.radius
+                rim: true
+                solid: root.popup && AquarioTheme.transparent && !AquarioTheme.blurred
+            }
+        }
+
         RowLayout { // Left column for icon, right column for content
             id: row
             anchors.top: parent.top

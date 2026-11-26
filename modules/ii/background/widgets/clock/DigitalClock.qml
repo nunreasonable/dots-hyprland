@@ -97,7 +97,7 @@ ColumnLayout {
 
     ClockText {
         id: timeTextTop
-        visible: !SekaiTheme.active && !risoClock.active && StyleTheme.key !== "mainel"
+        visible: !SekaiTheme.active && !risoClock.active && StyleTheme.key !== "mainel" && StyleTheme.key !== "aquario"
         text: clockColumn.isVertical ? DateTime.time.split(":")[0].padStart(2, "0") : DateTime.time
         color: clockColumn.colText
         horizontalAlignment: Text.AlignHCenter
@@ -124,6 +124,16 @@ ColumnLayout {
             family: "Google Sans Flex"
             weight: 700
             variableAxes: ({ "wdth": 125, "ROND": 0 })
+        }
+    }
+
+    Loader {
+        active: StyleTheme.key === "aquario"
+        visible: active
+        Layout.alignment: Qt.AlignHCenter
+        sourceComponent: AquarioClock {
+            text: timeTextTop.text
+            pixelSize: timeTextTop.font.pixelSize
         }
     }
 

@@ -92,6 +92,15 @@ GroupButton {
         pressed: root.down
         fillColor: root.sekaiAccent ? SekaiTheme.accentA : root.hovered ? SekaiTheme.fillHover : SekaiTheme.fill
     }
+    Loader {
+        z: -0.5
+        active: StyleTheme.key === "aquario"
+        anchors.fill: parent
+        sourceComponent: AquarioCell {
+            radius: root.leftRadius
+            filled: root.sekaiAccent && root.enabled
+        }
+    }
 
     onClicked: {
         if (root.expandedSize && root.altAction) root.altAction();

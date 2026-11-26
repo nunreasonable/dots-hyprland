@@ -109,11 +109,20 @@ ButtonMouseArea {
         }
     }
 
+    Loader {
+        active: StyleTheme.key === "aquario" && !root.altStyle
+        anchors.centerIn: parent
+        sourceComponent: AquarioWorkspaces {
+            host: root
+            model: wsModel
+        }
+    }
+
     // Indications
     Item {
         id: regularWorkspaces
         anchors.fill: parent
-        visible: !root.altStyle
+        visible: !root.altStyle && StyleTheme.key !== "aquario"
 
         scale: 1 - 0.08 * root.specialBlur
         layer.smooth: true

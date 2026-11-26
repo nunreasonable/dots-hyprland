@@ -28,6 +28,8 @@ MouseArea {
         value: percentage
         rotation: root.vertical ? -90 : 0
         highlightColor: (isLow && !isCharging) ? Appearance.m3colors.m3error : root.contentColor
+        valueBarWidth: StyleTheme.key === "aquario" ? 40 : 30
+        visible: StyleTheme.key !== "aquario"
 
         Item {
             anchors.centerIn: parent
@@ -59,6 +61,20 @@ MouseArea {
                     text: batteryProgress.text
                 }
             }
+        }
+    }
+
+    Loader {
+        active: StyleTheme.key === "aquario"
+        anchors.centerIn: parent
+        rotation: root.vertical ? -90 : 0
+        sourceComponent: AquarioBattery {
+            width: batteryProgress.valueBarWidth
+            height: batteryProgress.valueBarHeight
+            percentage: root.percentage
+            charging: root.isCharging
+            low: root.isLow && !root.isCharging
+            vertical: root.vertical
         }
     }
 
