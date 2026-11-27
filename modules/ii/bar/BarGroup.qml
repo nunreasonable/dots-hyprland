@@ -6,7 +6,7 @@ import QtQuick.Layouts
 Item {
     id: root
     property bool vertical: false
-    property real padding: SekaiTheme.active ? 11 : 5
+    property real padding: SekaiTheme.active ? 11 : (StyleTheme.key === "caractere" ? 10 : 5)
     implicitWidth: vertical ? Appearance.sizes.baseVerticalBarWidth : (gridLayout.implicitWidth + padding * 2)
     implicitHeight: vertical ? (gridLayout.implicitHeight + padding * 2) : Appearance.sizes.baseBarHeight
     default property alias items: gridLayout.children
@@ -20,9 +20,13 @@ Item {
             leftMargin: root.vertical ? 4 : 0
             rightMargin: root.vertical ? 4 : 0
         }
-        visible: !SekaiTheme.active
+        visible: !SekaiTheme.active && StyleTheme.key !== "mainel" && StyleTheme.key !== "caractere"
         color: Config.options?.bar.borderless ? "transparent" : Appearance.colors.colLayer1
-        radius: Appearance.rounding.small
+        radius: StyleTheme.surface.radiusInner ?? Appearance.rounding.small
+
+        StyleFrame {
+            radius: background.radius
+        }
     }
 
     Loader {
@@ -37,6 +41,18 @@ Item {
         sourceComponent: SekaiBlock {
             cornerRadius: root.vertical ? width / 2 : capHeight / 2
         }
+    }
+
+    StyledRectangularShadow {
+        target: mainelBackground
+        visible: StyleTheme.key === "mainel" && StyleTheme.softShadow
+    }
+    Rectangle {
+        id: mainelBackground
+        anchors.fill: parent
+        visible: StyleTheme.key === "mainel"
+        color: StyleTheme.surface.fill ?? Appearance.colors.colLayer1
+        radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.normal
     }
 
     GridLayout {

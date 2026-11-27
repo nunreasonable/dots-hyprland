@@ -18,15 +18,31 @@ Item {
     property real valueIndicatorLeftPadding: 10
     property real valueIndicatorRightPadding: 20 // An icon is circle ish, a column isn't, hence the extra padding
 
-    implicitWidth: Appearance.sizes.osdWidth + 2 * Appearance.sizes.elevationMargin
-    implicitHeight: valueIndicator.implicitHeight + 2 * Appearance.sizes.elevationMargin
+    implicitWidth: aquarioOsd.item?.implicitWidth ?? ((quadrinhoOsd.item?.implicitWidth ?? Appearance.sizes.osdWidth) + 2 * Appearance.sizes.elevationMargin)
+    implicitHeight: aquarioOsd.item?.implicitHeight ?? ((quadrinhoOsd.item?.implicitHeight ?? valueIndicator.implicitHeight) + 2 * Appearance.sizes.elevationMargin)
+
+    Loader {
+        id: aquarioOsd
+        active: StyleTheme.key === "aquario"
+        anchors.fill: parent
+        sourceComponent: AquarioBeaker {
+            value: root.value
+            icon: root.icon
+            name: root.name
+            from: root.from
+            to: root.to
+        }
+    }
+
+    onValueChanged: tintaFlash.flash()
 
     StyledRectangularShadow {
         target: valueIndicator
-        visible: StyleTheme.softShadow
+        visible: StyleTheme.softShadow && !aquarioOsd.active
     }
     Rectangle {
         id: valueIndicator
+        visible: !aquarioOsd.active && !quadrinhoOsd.active
         anchors {
             fill: parent
             margins: Appearance.sizes.elevationMargin
@@ -37,6 +53,10 @@ Item {
         }
         StyleFrame {
             radius: valueIndicator.radius
+        }
+        TintaRefreshFlash {
+            id: tintaFlash
+            flashRadius: valueIndicator.radius
         }
         color: Appearance.colors.colUiBackground
 
@@ -94,20 +114,57 @@ Item {
                         text: root.name
                     }
 
+                    Loader {
+                        Layout.fillWidth: false
+                        sourceComponent: StyleTheme.key === "aparelho" ? aparelhoValue : defaultValue
+                    }
+                }
+
+                Component {
+                    id: defaultValue
                     StyledText {
                         color: Appearance.colors.colOnLayer0
                         font.pixelSize: Appearance.font.pixelSize.small
-                        Layout.fillWidth: false
                         text: Math.round(root.value * 100)
                     }
                 }
-                
+
+                Component {
+                    id: aparelhoValue
+                    AparelhoLcd {
+                        text: Math.round(root.value * 100).toString()
+                        minDigits: 3
+                        pixelSize: 16
+                    }
+                }
+
                 StyledProgressBar {
                     id: valueProgressBar
+                    visible: StyleTheme.key !== "mainel"
                     Layout.fillWidth: true
                     value: root.value
                 }
+
+                MainelSegmentedBar {
+                    visible: StyleTheme.key === "mainel"
+                    Layout.fillWidth: true
+                    implicitHeight: 10
+                    segmentSpacing: 2
+                    value: root.value
+                }
             }
+        }
+    }
+
+    Loader {
+        id: quadrinhoOsd
+        active: QuadrinhoTheme.active
+        anchors.fill: parent
+        anchors.margins: Appearance.sizes.elevationMargin
+        sourceComponent: QuadrinhoOsd {
+            value: root.value
+            icon: root.icon
+            name: root.name
         }
     }
 }

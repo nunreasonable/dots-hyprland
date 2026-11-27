@@ -18,6 +18,14 @@ Item {
     readonly property real dotHeight: 4
 
     Loader {
+        active: StyleTheme.key === "aquario"
+        anchors.centerIn: iconImageLoader
+        sourceComponent: AquarioBubble {
+            diameter: root.iconSize + 12
+        }
+    }
+
+    Loader {
         id: iconImageLoader
         anchors {
             left: parent.left

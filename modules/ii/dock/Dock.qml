@@ -180,14 +180,29 @@ Scope {
                             anchors.bottomMargin: dockRoot.position === "bottom" ? dockRoot.gap : 0
                             anchors.leftMargin: dockRoot.position === "left" ? dockRoot.gap : dockRoot.position === "right" ? dockRoot.shadowMargin : 0
                             anchors.rightMargin: dockRoot.position === "right" ? dockRoot.gap : dockRoot.position === "left" ? dockRoot.shadowMargin : 0
-                            color: Config.options.dock.showBackground && !SekaiTheme.active ? dockRoot.backgroundColor : "transparent"
-                            border.width: SekaiTheme.active ? 0 : dockRoot.borderWidth
-                            border.color: root.colorFromName(Config.options.dock.borderColor)
-                            radius: Config.options.dock.radius
+                            color: Config.options.dock.showBackground && !SekaiTheme.active
+                                && StyleTheme.key !== "mainel" ? (StyleTheme.key === "caractere" ? StyleTheme.surface.fill : dockRoot.backgroundColor) : "transparent"
+                            border.width: (SekaiTheme.active || StyleTheme.key === "mainel")
+                                ? 0 : (StyleTheme.key === "caractere" ? 1 : dockRoot.borderWidth)
+                            border.color: StyleTheme.key === "caractere" ? StyleTheme.surface.borderColor : root.colorFromName(Config.options.dock.borderColor)
+                            radius: StyleTheme.key === "caractere" ? 0 : Config.options.dock.radius
                             topLeftRadius: dockRoot.hug && dockRoot.position === "left" ? 0 : radius
                             bottomLeftRadius: dockRoot.hug && (dockRoot.position === "left" || dockRoot.position === "bottom") ? 0 : radius
                             topRightRadius: dockRoot.hug && dockRoot.position === "right" ? 0 : radius
                             bottomRightRadius: dockRoot.hug && (dockRoot.position === "right" || dockRoot.position === "bottom") ? 0 : radius
+
+                            StyleFrame {
+                                radius: dockVisualBackground.radius
+                            }
+                        }
+
+                        Loader {
+                            active: StyleTheme.key === "aquario" && Config.options.dock.showBackground
+                            anchors.fill: dockVisualBackground
+                            sourceComponent: AquarioGlass {
+                                radius: dockVisualBackground.radius
+                                rim: !dockRoot.hug
+                            }
                         }
 
                         SekaiBlock {
@@ -199,8 +214,34 @@ Scope {
                             cornerRadius: 26
                         }
 
+                        Loader {
+                            active: StyleTheme.key === "riso" && Config.options.dock.showBackground && !dockRoot.hug
+                            anchors.fill: dockVisualBackground
+                            sourceComponent: RisoInk {
+                                radius: dockVisualBackground.radius
+                            }
+                        }
+
+                        Rectangle {
+                            id: mainelDockBackground
+                            visible: Config.options.dock.showBackground && StyleTheme.key === "mainel"
+                            x: dockVisualBackground.x
+                            y: dockVisualBackground.y
+                            width: dockVisualBackground.width
+                            height: dockVisualBackground.height
+                            color: StyleTheme.surface.fill ?? Appearance.colors.colLayer1
+                            radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.normal
+                            topLeftRadius: dockRoot.hug && dockRoot.position === "left" ? 0 : radius
+                            bottomLeftRadius: dockRoot.hug
+                                && (dockRoot.position === "left" || dockRoot.position === "bottom") ? 0 : radius
+                            topRightRadius: dockRoot.hug && dockRoot.position === "right" ? 0 : radius
+                            bottomRightRadius: dockRoot.hug
+                                && (dockRoot.position === "right" || dockRoot.position === "bottom") ? 0 : radius
+                        }
+
                         RoundCorner {
-                            visible: dockRoot.hug && Config.options.dock.showBackground && !SekaiTheme.active
+                            visible: dockRoot.hug && Config.options.dock.showBackground
+                                && !SekaiTheme.active && StyleTheme.key !== "mainel"
                             anchors.right: dockRoot.vertical ? (dockRoot.position === "right" ? dockVisualBackground.right : undefined) : dockVisualBackground.left
                             anchors.bottom: dockRoot.vertical ? dockVisualBackground.top : dockVisualBackground.bottom
                             anchors.left: dockRoot.position === "left" ? dockVisualBackground.left : undefined
@@ -210,7 +251,8 @@ Scope {
                         }
 
                         RoundCorner {
-                            visible: dockRoot.hug && Config.options.dock.showBackground && !SekaiTheme.active
+                            visible: dockRoot.hug && Config.options.dock.showBackground
+                                && !SekaiTheme.active && StyleTheme.key !== "mainel"
                             anchors.left: dockRoot.vertical ? (dockRoot.position === "left" ? dockVisualBackground.left : undefined) : dockVisualBackground.right
                             anchors.bottom: dockRoot.vertical ? undefined : dockVisualBackground.bottom
                             anchors.top: dockRoot.vertical ? dockVisualBackground.bottom : undefined

@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import qs.services
 import qs.modules.common
 import qs.modules.common.widgets
+import qs.modules.common.functions
 import QtQuick
 import QtQuick.Layouts
 
@@ -84,9 +85,36 @@ ColumnLayout {
         }
     }
 
+    Loader {
+        id: risoClock
+        active: StyleTheme.key === "riso"
+        visible: active
+        Layout.alignment: Qt.AlignHCenter
+        sourceComponent: RisoClock {
+            showDate: Config.options.background.widgets.clock.digital.showDate
+            horizontalAlignment: clockColumn.textHorizontalAlignment
+        }
+    }
+
+    readonly property bool caractereBlockClock: StyleTheme.key === "caractere" && !clockColumn.isVertical
+
+    Loader {
+        Layout.alignment: Qt.AlignHCenter
+        active: clockColumn.caractereBlockClock
+        visible: active
+        sourceComponent: Text {
+            color: clockColumn.colText
+            horizontalAlignment: Text.AlignHCenter
+            font.family: Appearance.font.family.main
+            font.pixelSize: Config.options.background.widgets.clock.digital.font.size * 0.22
+            lineHeight: 1
+            text: CaractereGlyphs.blockDigitsText(DateTime.time)
+        }
+    }
+
     ClockText {
         id: timeTextTop
-        visible: !SekaiTheme.active
+        visible: !SekaiTheme.active && !risoClock.active && StyleTheme.key !== "mainel" && StyleTheme.key !== "aquario" && !QuadrinhoTheme.active && !clockColumn.caractereBlockClock
         text: clockColumn.isVertical ? DateTime.time.split(":")[0].padStart(2, "0") : DateTime.time
         color: clockColumn.colText
         horizontalAlignment: Text.AlignHCenter
@@ -101,10 +129,34 @@ ColumnLayout {
         }
     }
 
+    MainelClockText {
+        visible: StyleTheme.key === "mainel"
+        Layout.alignment: Qt.AlignHCenter
+        text: clockColumn.isVertical ? DateTime.time.split(":")[0].padStart(2, "0") : DateTime.time
+        color: clockColumn.colText
+        font {
+            pixelSize: Config.options.background.widgets.clock.digital.font.size
+            family: "Google Sans Flex"
+            weight: 700
+            variableAxes: ({ "wdth": 125, "ROND": 0 })
+        }
+    }
+
+    Loader {
+        active: StyleTheme.key === "aquario"
+        visible: active
+        Layout.alignment: Qt.AlignHCenter
+        sourceComponent: AquarioClock {
+            text: timeTextTop.text
+            pixelSize: timeTextTop.font.pixelSize
+            date: Config.options.background.widgets.clock.digital.showDate ? DateTime.longDate : ""
+        }
+    }
+
     Loader {
         Layout.topMargin: -40
         Layout.fillWidth: true
-        active: clockColumn.isVertical
+        active: clockColumn.isVertical && !risoClock.active && !QuadrinhoTheme.active
         visible: active
         sourceComponent: ClockText {
             id: timeTextBottom
@@ -122,7 +174,7 @@ ColumnLayout {
 
     // Date
     ClockText {
-        visible: Config.options.background.widgets.clock.digital.showDate && !SekaiTheme.active
+        visible: Config.options.background.widgets.clock.digital.showDate && !SekaiTheme.active && !risoClock.active && !QuadrinhoTheme.active && StyleTheme.key !== "aquario"
         Layout.topMargin: -20
         Layout.fillWidth: true
         text: DateTime.longDate
@@ -145,6 +197,19 @@ ColumnLayout {
             color: SekaiTheme.text
             font.pixelSize: Appearance.font.pixelSize.larger
             font.weight: Font.Bold
+        }
+    }
+
+    Loader {
+        active: QuadrinhoTheme.active
+        visible: active
+        Layout.fillWidth: true
+        sourceComponent: QuadrinhoClock {
+            lines: clockColumn.isVertical ? [DateTime.time.split(":")[0].padStart(2, "0"), DateTime.time.split(":")[1].split(" ")[0].padStart(2, "0")] : [DateTime.time]
+            date: DateTime.longDate
+            showDate: Config.options.background.widgets.clock.digital.showDate
+            pixelSize: Config.options.background.widgets.clock.digital.font.size
+            horizontalAlignment: clockColumn.textHorizontalAlignment
         }
     }
 

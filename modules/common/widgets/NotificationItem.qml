@@ -14,6 +14,7 @@ Item { // Notification item area
     property var notificationObject
     property bool expanded: false
     property bool onlyNotification: false
+    property bool popup: false
     property real fontSize: Appearance.font.pixelSize.small
     property real padding: onlyNotification ? 0 : 8
     property real summaryElideRatio: 0.85
@@ -118,8 +119,24 @@ Item { // Notification item area
         id: background
         width: parent.width
         anchors.left: parent.left
-        radius: Appearance.rounding.small
+        radius: StyleTheme.key === "caractere" ? 0 : (StyleTheme.surface.radiusOuter ?? Appearance.rounding.small)
         anchors.leftMargin: root.xOffset
+
+        StyleShadow {
+            radius: background.radius
+        }
+
+        StyleFrame {
+            radius: background.radius
+        }
+
+        TintaRefreshFlash {
+            flashRadius: background.radius
+            Component.onCompleted: {
+                if (root.popup)
+                    flash();
+            }
+        }
 
         Behavior on anchors.leftMargin {
             enabled: !dragManager.dragging
@@ -139,6 +156,16 @@ Item { // Notification item area
         implicitHeight: expanded ? (contentColumn.implicitHeight + padding * 2) : summaryRow.implicitHeight
         Behavior on implicitHeight {
             animation: Appearance.animation.elementMove.numberAnimation.createObject(this)
+        }
+
+        Loader {
+            anchors.fill: parent
+            active: StyleTheme.key === "caractere"
+            sourceComponent: CaractereCellFrame {
+                title: root.notificationObject.appName || ""
+                background: background.color
+                animated: false
+            }
         }
 
         ColumnLayout { // Content column
@@ -161,6 +188,7 @@ Item { // Notification item area
                     Layout.fillWidth: summaryTextMetrics.width >= root.width * root.summaryElideRatio
                     visible: !root.onlyNotification
                     font.pixelSize: root.fontSize
+                    font.family: Appearance.font.family.title
                     color: Appearance.colors.colOnLayer3
                     elide: Text.ElideRight
                     text: root.notificationObject.summary || ""
@@ -173,6 +201,7 @@ Item { // Notification item area
                         animation: Appearance.animation.elementMoveFast.numberAnimation.createObject(this)
                     }
                     font.pixelSize: root.fontSize
+                    font.family: Appearance.font.family.title
                     color: Appearance.colors.colSubtext
                     elide: Text.ElideRight
                     wrapMode: Text.Wrap // Needed for proper eliding????
@@ -200,6 +229,7 @@ Item { // Notification item area
                         }
                         Layout.fillWidth: true
                         font.pixelSize: root.fontSize
+                        font.family: Appearance.font.family.title
                         color: Appearance.colors.colSubtext
                         wrapMode: Text.Wrap
                         elide: Text.ElideRight

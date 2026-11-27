@@ -109,11 +109,20 @@ ButtonMouseArea {
         }
     }
 
+    Loader {
+        active: StyleTheme.key === "aquario" && !root.altStyle
+        anchors.centerIn: parent
+        sourceComponent: AquarioWorkspaces {
+            host: root
+            model: wsModel
+        }
+    }
+
     // Indications
     Item {
         id: regularWorkspaces
         anchors.fill: parent
-        visible: !root.altStyle
+        visible: !root.altStyle && StyleTheme.key !== "aquario"
 
         scale: 1 - 0.08 * root.specialBlur
         layer.smooth: true
@@ -197,6 +206,27 @@ ButtonMouseArea {
             z: 2
 
             index: root.workspaceIndexInGroup
+
+            Loader {
+                active: StyleTheme.key === "aparelho"
+                anchors.horizontalCenter: activeIndicator.indicatorRectangle.horizontalCenter
+                anchors.bottom: activeIndicator.indicatorRectangle.bottom
+                anchors.bottomMargin: Math.max(2, activeIndicator.indicatorRectangle.height * 0.16)
+                sourceComponent: AparelhoLed {
+                    on: true
+                    size: 5
+                }
+            }
+        }
+
+        Loader {
+            z: 2.5
+            active: QuadrinhoTheme.active
+            anchors.fill: parent
+            sourceComponent: QuadrinhoWorkspaceCells {
+                host: root
+                model: wsModel
+            }
         }
 
         /////////////////// Hover ///////////////////
@@ -531,8 +561,8 @@ ButtonMouseArea {
             property real indicatorThickness: root.activeWorkspaceSize
 
             contentLayer: StyledRectangle.ContentLayer.Group
-            radius: indicatorThickness / 2
-            color: StyleTheme.palette.accent ?? Appearance.colors.colPrimary
+            radius: StyleTheme.key === "caractere" ? 0 : (StyleTheme.surface.radiusInner ?? (indicatorThickness / 2))
+            color: StyleTheme.key === "caractere" ? (StyleTheme.current.termWorkspace ?? Appearance.colors.colPrimary) : StyleTheme.key === "aparelho" ? (StyleTheme.current?.keyDarkFill ?? "#2A2B2E") : (StyleTheme.palette.accent ?? Appearance.colors.colPrimary)
             border.width: Math.min(2, StyleTheme.surface.borderWidth)
             border.color: StyleTheme.surface.borderColor ?? "transparent"
 

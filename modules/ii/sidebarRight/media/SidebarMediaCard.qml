@@ -98,6 +98,7 @@ Item {
 
     StyledRectangularShadow {
         target: background
+        visible: !QuadrinhoTheme.active
     }
 
     Rectangle {
@@ -109,7 +110,7 @@ Item {
         }
         implicitHeight: contentColumn.implicitHeight + 32
         radius: Appearance.rounding.normal
-        color: ColorUtils.applyAlpha(root.blendedColors.colLayer0, 1)
+        color: QuadrinhoTheme.active ? "transparent" : ColorUtils.applyAlpha(root.blendedColors.colLayer0, 1)
         clip: true
 
         Rectangle {

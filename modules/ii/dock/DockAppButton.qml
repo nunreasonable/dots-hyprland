@@ -22,6 +22,7 @@ DockButton {
     readonly property real reorderShift: appListRoot.reorderShift(root.pinIndex)
     property bool justReordered: false
     enabled: !isSeparator
+    colBackground: QuadrinhoTheme.active && root.appIsActive ? QuadrinhoTheme.spot : ColorUtils.transparentize(Appearance.colors.colLayer1Hover, 1)
     implicitWidth: isSeparator ? 1 : naturalWidth
     z: root.reordering ? 10 : 0
     scale: root.reordering ? 1.08 : 1

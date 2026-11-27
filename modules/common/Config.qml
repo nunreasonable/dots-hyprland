@@ -116,6 +116,7 @@ Singleton {
                     property string theme: "mint"
                 }
                 property int visualStylePresetVersion: 0
+                property string visualStyleKept: ""
                 property string settingsLayout: "ii"
                 property string uiBackground: "themed"
                 property bool extraBackgroundTint: true

@@ -203,7 +203,7 @@ Item {
     }
 
     Loader {
-        active: Config.options.bar.showBackground && Config.options.bar.cornerStyle === 1 && Config.options.bar.floatStyleShadow && !root.centerOnly
+        active: Config.options.bar.showBackground && Config.options.bar.cornerStyle === 1 && Config.options.bar.floatStyleShadow && !root.centerOnly && StyleTheme.key !== "riso"
         anchors.fill: barBackground
         sourceComponent: StyledRectangularShadow {
             anchors.fill: undefined
@@ -221,6 +221,14 @@ Item {
         radius: Config.options.bar.cornerStyle === 1 ? Appearance.rounding.windowRounding : 0
         border.width: (!root.centerOnly && Config.options.bar.showBackground && Config.options.bar.cornerStyle === 1) ? 1 : 0
         border.color: Appearance.colors.colLayer0Border
+    }
+
+    Loader {
+        active: StyleTheme.key === "riso" && !root.centerOnly && Config.options.bar.showBackground && !root.useTabWrapper && Config.options.bar.cornerStyle < 3
+        anchors.fill: barBackground
+        sourceComponent: RisoBarInk {
+            radius: barBackground.radius
+        }
     }
 
     RoundCorner {

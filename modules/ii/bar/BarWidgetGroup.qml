@@ -1,5 +1,6 @@
 import qs
 import qs.modules.common
+import qs.modules.common.widgets
 import QtQuick
 import QtQuick.Layouts
 
@@ -74,6 +75,13 @@ Item {
         when: root.hasContentOverride
     }
 
+    Binding {
+        target: root.loadedWidget && "contentColor" in root.loadedWidget ? root.loadedWidget : null
+        property: "contentColor"
+        value: QuadrinhoTheme.paper
+        when: root.quadrinhoInk && !root.hasContentOverride
+    }
+
     Connections {
         target: root.loadedWidget
         ignoreUnknownSignals: true
@@ -129,7 +137,9 @@ Item {
     readonly property real currentRadius: background.topLeftRadius
     readonly property real currentBorderWidth: background.border.width
 
-    property real padding: root.style.padding ?? ((root.isMaterial && !root.paintMaterialPill) ? 0 : 5)
+    readonly property bool quadrinho: QuadrinhoTheme.active && root.paintBackground && root.morphEdge === "" && !root.isMaterial && root.widgetName !== "workspaces"
+    readonly property bool quadrinhoInk: root.quadrinho && (root.widgetName === "clockWidget" || root.widgetName === "launcherButton")
+    property real padding: root.style.padding ?? (root.quadrinho ? 10 : (root.isMaterial && !root.paintMaterialPill) ? 0 : 5)
 
     readonly property bool isPanel: Config.options.bar.cornerStyle === 5
     readonly property real panelRadius: Appearance.rounding.unsharpenmore + 4
@@ -174,6 +184,31 @@ Item {
         Behavior on color {
             enabled: root.morphEdge === ""
             animation: Appearance.animation.elementMoveFast.colorAnimation.createObject(this)
+        }
+    }
+
+    Loader {
+        active: root.quadrinho || (QuadrinhoTheme.active && root.widgetName === "workspaces")
+        anchors.fill: background
+        anchors.leftMargin: root.vertical ? 0 : 2
+        anchors.rightMargin: root.vertical ? 0 : 2
+        anchors.topMargin: root.vertical ? 2 : 0
+        anchors.bottomMargin: root.vertical ? 2 : 0
+        opacity: background.opacity
+        sourceComponent: root.quadrinho ? quadrinhoPanel : quadrinhoPaper
+    }
+
+    Component {
+        id: quadrinhoPanel
+        QuadrinhoPanel {
+            fill: root.resolveColorName(root.style.color) ?? (root.quadrinhoInk ? QuadrinhoTheme.ink : QuadrinhoTheme.paper)
+        }
+    }
+
+    Component {
+        id: quadrinhoPaper
+        Rectangle {
+            color: QuadrinhoTheme.paper
         }
     }
 

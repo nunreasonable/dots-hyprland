@@ -10,12 +10,13 @@ import QtQuick.Layouts
 
 Rectangle {
     id: root
-    radius: Appearance.rounding.normal
+    radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.normal
     StyleShadow {
         radius: root.radius
     }
     StyleFrame {
         radius: root.radius
+        visible: StyleTheme.surface.frame && !QuadrinhoTheme.active
     }
     color: StyleTheme.surface.fill ?? Appearance.colors.colLayer1
     implicitHeight: collapsed ? collapsedBottomWidgetGroupRow.implicitHeight : 350

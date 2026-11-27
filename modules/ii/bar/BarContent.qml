@@ -123,6 +123,33 @@ Item { // Bar content region
         radius: Config.options.bar.cornerStyle === 1 ? Appearance.rounding.windowRounding : 0
         border.width: Config.options.bar.showBackground && Config.options.bar.cornerStyle === 1 && StyleTheme.surface.barStrip ? 1 : 0
         border.color: Appearance.colors.colLayer0Border
+
+        Rectangle {
+            visible: StyleTheme.key === "tinta" && Config.options.bar.showBackground
+            anchors {
+                left: parent.left
+                right: parent.right
+                bottom: parent.bottom
+            }
+            height: 2
+            color: StyleTheme.surface.borderColor ?? "transparent"
+        }
+    }
+
+    Loader {
+        active: StyleTheme.key === "riso" && Config.options.bar.showBackground && Config.options.bar.cornerStyle < 3
+        anchors.fill: barBackground
+        sourceComponent: RisoBarInk {
+            radius: barBackground.radius
+        }
+    }
+    Loader {
+        active: StyleTheme.key === "aquario" && Config.options.bar.showBackground && StyleTheme.surface.barStrip
+        anchors.fill: barBackground
+        sourceComponent: AquarioGlass {
+            radius: barBackground.radius
+            rim: barBackground.radius > 0
+        }
     }
 
     FocusedScrollMouseArea { // Left side | scroll to change brightness

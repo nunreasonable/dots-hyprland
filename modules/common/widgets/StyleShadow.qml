@@ -6,9 +6,11 @@ Item {
 
     property Item target: parent
     property real radius: 0
-    readonly property real dx: StyleTheme.elevation.x
-    readonly property real dy: StyleTheme.elevation.y
+    property real lift: 0
+    readonly property real dx: StyleTheme.elevation.x + root.lift
+    readonly property real dy: StyleTheme.elevation.y + root.lift
     readonly property color color: StyleTheme.elevation.color ?? "transparent"
+    readonly property bool dithered: StyleTheme.elevation.kind === "dither"
 
     x: root.target === root.parent ? 0 : (root.target?.x ?? 0)
     y: root.target === root.parent ? 0 : (root.target?.y ?? 0)
@@ -17,6 +19,13 @@ Item {
     z: -3
     visible: StyleTheme.hardShadow
 
+    Loader {
+        active: StyleTheme.key === "riso"
+        sourceComponent: RisoRegister {
+            shadow: root
+        }
+    }
+
     Item {
         y: root.height
         width: root.width + root.dx
@@ -24,6 +33,7 @@ Item {
         clip: true
 
         Rectangle {
+            visible: !root.dithered
             x: root.dx
             y: root.dy - root.height
             width: root.width
@@ -31,6 +41,12 @@ Item {
             radius: root.radius
             color: root.color
             antialiasing: true
+        }
+
+        Loader {
+            anchors.fill: parent
+            active: root.dithered
+            sourceComponent: TintaDitherTile {}
         }
     }
 
@@ -41,6 +57,7 @@ Item {
         clip: true
 
         Rectangle {
+            visible: !root.dithered
             x: root.dx - root.width
             y: root.dy
             width: root.width
@@ -48,6 +65,12 @@ Item {
             radius: root.radius
             color: root.color
             antialiasing: true
+        }
+
+        Loader {
+            anchors.fill: parent
+            active: root.dithered
+            sourceComponent: TintaDitherTile {}
         }
     }
 }

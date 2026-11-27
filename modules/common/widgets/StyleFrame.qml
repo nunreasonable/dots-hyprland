@@ -15,6 +15,14 @@ Rectangle {
     border.color: StyleTheme.surface.borderColor ?? "transparent"
     antialiasing: true
 
+    Loader {
+        anchors.fill: parent
+        active: StyleTheme.key === "riso" && root.width * root.height >= 300000
+        sourceComponent: RisoGrain {
+            radius: root.radius
+        }
+    }
+
     Rectangle {
         anchors.fill: parent
         anchors.margins: root.borderWidth

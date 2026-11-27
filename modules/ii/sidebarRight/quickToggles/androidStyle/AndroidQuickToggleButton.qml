@@ -78,8 +78,8 @@ GroupButton {
     colBackgroundToggled: SekaiTheme.active ? "transparent" : (altAction && expandedSize) ? Appearance.colors.colLayer2 : Appearance.colors.colPrimary
     colBackgroundToggledHover: SekaiTheme.active ? "transparent" : (altAction && expandedSize) ? Appearance.colors.colLayer2Hover : Appearance.colors.colPrimaryHover
     colBackgroundToggledActive: SekaiTheme.active ? "transparent" : (altAction && expandedSize) ? Appearance.colors.colLayer2Active : Appearance.colors.colPrimaryActive
-    buttonRadius: toggled ? Appearance.rounding.large : height / 2
-    buttonRadiusPressed: Appearance.rounding.normal
+    buttonRadius: QuadrinhoTheme.active ? 0 : toggled ? Appearance.rounding.large : height / 2
+    buttonRadiusPressed: QuadrinhoTheme.active ? 0 : Appearance.rounding.normal
     property color colText: SekaiTheme.active ? ColorUtils.transparentize(sekaiAccent ? SekaiTheme.textOnAccent : SekaiTheme.text, enabled ? 0 : 0.6)
         : (toggled && !(altAction && expandedSize) && enabled) ? Appearance.colors.colOnPrimary : ColorUtils.transparentize(Appearance.colors.colOnLayer2, enabled ? 0 : 0.7)
     property color colIcon: SekaiTheme.active ? ((root.toggled) ? SekaiTheme.textOnAccent : SekaiTheme.text)
@@ -91,6 +91,26 @@ GroupButton {
         anchors.fill: parent
         pressed: root.down
         fillColor: root.sekaiAccent ? SekaiTheme.accentA : root.hovered ? SekaiTheme.fillHover : SekaiTheme.fill
+    }
+    Loader {
+        z: -0.5
+        active: StyleTheme.key === "aquario"
+        anchors.fill: parent
+        sourceComponent: AquarioCell {
+            radius: root.leftRadius
+            filled: root.sekaiAccent && root.enabled
+        }
+    }
+
+    Loader {
+        z: 1
+        active: QuadrinhoTheme.active
+        anchors.fill: parent
+        sourceComponent: Rectangle {
+            color: "transparent"
+            border.width: 2
+            border.color: QuadrinhoTheme.ink
+        }
     }
 
     onClicked: {

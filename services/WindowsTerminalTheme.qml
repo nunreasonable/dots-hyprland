@@ -12,6 +12,8 @@ Singleton {
 
     function load() {}
 
+    property var generatedTermColors: ({})
+
     readonly property bool _enabled: Platform.isWindows && Config.ready
         && Config.options.appearance.wallpaperTheming.enableTerminal
         && Config.options.appearance.wallpaperTheming.enableAppsAndShell
@@ -264,6 +266,8 @@ Singleton {
             baseScheme, material.primaryKeyColor, material.surfaceContainerLow, material.onSurface,
             darkMode, props.harmony, props.harmonizeThreshold, props.termFgBoost, monochrome);
 
+        root.generatedTermColors = termColors;
+
         const colorMap = Object.assign({}, termColors, {
             primary: material.primary, primaryContainer: material.primaryContainer,
             secondary: material.secondary, secondaryContainer: material.secondaryContainer,
@@ -481,6 +485,7 @@ Singleton {
     }
 
     function _removeOutputs() {
+        root.generatedTermColors = ({});
         if (!Platform.isWindows) return;
         const fs = WindowsNative.fsUtils;
         const outputs = [Directories.windowsTerminalSequencesPath, Directories.windowsTerminalFragmentPath,

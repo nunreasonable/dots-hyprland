@@ -39,6 +39,15 @@ GroupButton {
         fillColor: button.toggled ? SekaiTheme.accentA : button.hovered ? SekaiTheme.fillHover : SekaiTheme.fill
     }
 
+    AparelhoLed {
+        visible: StyleTheme.key === "aparelho"
+        on: button.toggled
+        size: 5
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 5
+    }
+
     contentItem: MaterialSymbol {
         anchors.centerIn: parent
         iconSize: 22

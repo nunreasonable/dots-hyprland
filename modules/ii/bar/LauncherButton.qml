@@ -33,9 +33,17 @@ RippleButton {
     }
 
     MaterialSymbol {
+        visible: StyleTheme.key !== "mainel"
         anchors.centerIn: parent
         iconSize: 18
         text: "search"
         color: root.contentColor
+    }
+
+    MainelAsterisk {
+        visible: StyleTheme.key === "mainel"
+        anchors.centerIn: parent
+        size: 18
+        color: MainelTheme.jadeMid
     }
 }

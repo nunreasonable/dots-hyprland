@@ -125,24 +125,41 @@ Item {
         anchors.fill: parent
         implicitHeight: parent.height - Appearance.sizes.hyprlandGapsOut * 2
         implicitWidth: sidebarWidth - Appearance.sizes.hyprlandGapsOut * 2
-        color: SekaiTheme.active ? "transparent" : Appearance.colors.colUiBackground
+        color: (SekaiTheme.active || StyleTheme.key === "mainel")
+            ? "transparent" : Appearance.colors.colUiBackground
         border.width: StyleTheme.surface.frame ? 0 : 1
         border.color: Appearance.colors.colLayer0Border
         radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.screenRounding - Appearance.sizes.hyprlandGapsOut + 1
+
+        Loader {
+            active: StyleTheme.key === "aquario"
+            anchors.fill: parent
+            sourceComponent: AquarioGlass {
+                radius: sidebarRightBackground.radius
+            }
+        }
 
         StyleFrame {
             radius: sidebarRightBackground.radius
             visible: StyleTheme.surface.frame && !SekaiTheme.active
         }
 
+        Loader {
+            active: QuadrinhoTheme.active
+            anchors.fill: sectionColumn
+            sourceComponent: QuadrinhoSidebarPanels {
+                column: sectionColumn
+            }
+        }
+
         ReorderableColumn {
             id: sectionColumn
             anchors.fill: parent
             anchors.margins: sidebarPadding
-            anchors.topMargin: SekaiTheme.active ? 18 : sidebarPadding
-            anchors.bottomMargin: SekaiTheme.active ? 18 + SekaiTheme.shadowOffset : sidebarPadding
-            anchors.leftMargin: SekaiTheme.active ? 16 : sidebarPadding
-            anchors.rightMargin: SekaiTheme.active ? 16 : sidebarPadding
+            anchors.topMargin: SekaiTheme.active ? 18 : QuadrinhoTheme.active ? 16 : sidebarPadding
+            anchors.bottomMargin: SekaiTheme.active ? 18 + SekaiTheme.shadowOffset : QuadrinhoTheme.active ? 16 : sidebarPadding
+            anchors.leftMargin: SekaiTheme.active || QuadrinhoTheme.active ? 16 : sidebarPadding
+            anchors.rightMargin: SekaiTheme.active || QuadrinhoTheme.active ? 16 : sidebarPadding
             itemSpacing: StyleTheme.surface.gap ?? sidebarPadding
             order: root.sectionOrder
             editMode: root.editMode && root.editTab === "layout"
@@ -188,7 +205,16 @@ Item {
     Component {
         id: bannerSection
         Loader {
-            sourceComponent: Config.options.sidebar.banner ? bannerComponent : normalComponent
+            sourceComponent: QuadrinhoTheme.active ? quadrinhoHeader : Config.options.sidebar.banner ? bannerComponent : normalComponent
+        }
+    }
+
+    Component {
+        id: quadrinhoHeader
+        QuadrinhoSidebarHeader {
+            editMode: root.editMode
+            settingsQmlPath: root.settingsQmlPath
+            onEditToggled: root.editMode = !root.editMode
         }
     }
 
@@ -457,6 +483,13 @@ Item {
         Item {
             id: quickTogglesItem
             implicitHeight: (classicImpl.item?.implicitHeight ?? 0) + (androidImpl.item?.implicitHeight ?? 0)
+
+            Rectangle {
+                visible: StyleTheme.key === "mainel"
+                anchors.fill: parent
+                color: StyleTheme.surface.fill ?? Appearance.colors.colLayer1
+                radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.normal
+            }
 
             LoaderedQuickPanelImplementation {
                 id: classicImpl
