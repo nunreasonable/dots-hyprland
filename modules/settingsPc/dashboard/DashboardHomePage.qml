@@ -1044,11 +1044,14 @@ Item {
 
                         ColumnLayout {
                             anchors.left: parent.left
+                            anchors.right: sunShape.left
                             anchors.top: parent.top
                             anchors.margins: 16
                             spacing: 0
 
                             StyledText {
+                                Layout.fillWidth: true
+                                elide: Text.ElideRight
                                 text: Qt.locale().toString(DateTime.clock.date, "dddd MMMM d")
                                 font.pixelSize: Appearance.font.pixelSize.normal
                                 font.weight: Font.Medium
