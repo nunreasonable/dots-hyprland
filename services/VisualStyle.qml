@@ -177,12 +177,10 @@ Singleton {
             Config.setNestedValue(key, values[key]);
     }
 
-    function applyTweaks(entry) {
-        for (const other of StyleTheme.all) {
-            for (const key in other.preset) {
-                if (!(key in entry.preset))
-                    Config.setNestedValue(key, other.preset[key][1]);
-            }
+    function applyTweaks(entry, from) {
+        for (const key in from.preset) {
+            if (!(key in entry.preset))
+                Config.setNestedValue(key, from.preset[key][1]);
         }
         for (const key in entry.preset)
             Config.setNestedValue(key, entry.preset[key][0]);
@@ -202,7 +200,7 @@ Singleton {
         Config.options.appearance.settingsLayout = entry.settingsLayout;
         root.applyIsland(entry.island);
         root.applyNewKeys(pc, root.applied);
-        root.applyTweaks(entry);
+        root.applyTweaks(entry, root.entry(root.applied));
         root.restoreChoices(style);
         Config.options.appearance.visualStylePresetVersion = root.presetVersion;
         Config.options.appearance.visualStyleApplied = style;
