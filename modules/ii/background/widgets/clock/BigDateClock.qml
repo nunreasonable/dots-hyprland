@@ -38,7 +38,7 @@ Item {
                 anchors.centerIn: parent
                 rotation: -90
                 text: root.weekdaySpaced
-                color: "white"
+                color: root.colText
                 style: Text.Raised
                 styleColor: Appearance.colors.colShadow
                 renderType: Text.CurveRendering
@@ -104,7 +104,7 @@ Item {
                 id: monthText
                 Layout.topMargin: -digitsText.implicitHeight * 0.32
                 text: root.monthName
-                color: "white"
+                color: root.colText
                 style: Text.Raised
                 styleColor: Appearance.colors.colShadow
                 font {
@@ -119,7 +119,7 @@ Item {
                 id: timeText
                 Layout.topMargin: 10
                 text: DateTime.time
-                color: "white"
+                color: root.colText
                 style: Text.Raised
                 styleColor: Appearance.colors.colShadow
                 font {
@@ -133,7 +133,7 @@ Item {
                 Layout.topMargin: 4
                 implicitWidth: Math.max(24, timeText.implicitWidth * 0.55)
                 implicitHeight: 2
-                color: "white"
+                color: root.colText
                 opacity: 0.8
             }
         }

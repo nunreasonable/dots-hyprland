@@ -92,7 +92,7 @@ AbstractBackgroundWidget {
             shown: root.clockStyle === "bigDate" && (root.shouldShow)
             fade: false
             sourceComponent: BigDateClock {
-                colText: root.resolvedClockColor
+                colText: root.customClockColorKey !== "" ? root.resolvedClockColor : "white"
             }
         }
 
