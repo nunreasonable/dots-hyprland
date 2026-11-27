@@ -484,6 +484,13 @@ Item {
             id: quickTogglesItem
             implicitHeight: (classicImpl.item?.implicitHeight ?? 0) + (androidImpl.item?.implicitHeight ?? 0)
 
+            Rectangle {
+                visible: StyleTheme.key === "mainel"
+                anchors.fill: parent
+                color: StyleTheme.surface.fill ?? Appearance.colors.colLayer1
+                radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.normal
+            }
+
             LoaderedQuickPanelImplementation {
                 id: classicImpl
                 anchors.left: parent.left

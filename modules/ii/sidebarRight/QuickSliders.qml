@@ -22,8 +22,8 @@ Rectangle {
 
     implicitWidth: contentItem.implicitWidth + root.horizontalPadding * 2
     implicitHeight: contentItem.implicitHeight + root.verticalPadding * 2
-    radius: Appearance.rounding.normal
-    color: SekaiTheme.active || QuadrinhoTheme.active ? "transparent" : Appearance.colors.colLayer1
+    radius: StyleTheme.surface.radiusOuter ?? Appearance.rounding.normal
+    color: SekaiTheme.active || QuadrinhoTheme.active ? "transparent" : (StyleTheme.surface.fill ?? Appearance.colors.colLayer1)
     property real verticalPadding: SekaiTheme.active ? 11 : 4
     property real horizontalPadding: SekaiTheme.active ? 16 : 12
 
