@@ -37,27 +37,27 @@ StyleValues {
             "m3surfaceContainerLowest": "#0E0F10",
             "m3surfaceContainerLow": "#2A2B2E",
             "m3surfaceContainer": "#1D1E20",
-            "m3surfaceContainerHigh": "#111214",
-            "m3surfaceContainerHighest": "#0E0F10",
+            "m3surfaceContainerHigh": "#34363A",
+            "m3surfaceContainerHighest": "#44474B",
             "m3onSurface": "#C9CCCE",
             "m3surfaceVariant": "#3A3D40",
-            "m3onSurfaceVariant": "#8C9194",
+            "m3onSurfaceVariant": "#A2A7AE",
             "m3inverseSurface": "#C9CCCE",
             "m3inverseOnSurface": "#1D1E20",
             "m3outline": "#0E0F10",
             "m3outlineVariant": "#3A3D40",
-            "m3primary": "#3CCDAA",
-            "m3onPrimary": "#0E2A22",
-            "m3primaryContainer": "#22977C",
-            "m3onPrimaryContainer": "#0A1F1A",
-            "m3secondary": "#8C9194",
-            "m3onSecondary": "#0E0F10",
-            "m3secondaryContainer": "#111214",
-            "m3onSecondaryContainer": "#C9CCCE",
-            "m3tertiary": "#3CCDAA",
-            "m3onTertiary": "#0E2A22",
-            "m3tertiaryContainer": "#1A1B1D",
-            "m3onTertiaryContainer": "#C9CCCE"
+            "m3primary": "#9DA3A8",
+            "m3onPrimary": "#15171A",
+            "m3primaryContainer": "#3E4246",
+            "m3onPrimaryContainer": "#ECEEEE",
+            "m3secondary": "#838991",
+            "m3onSecondary": "#15171A",
+            "m3secondaryContainer": "#34383C",
+            "m3onSecondaryContainer": "#ECEEEE",
+            "m3tertiary": "#5E6469",
+            "m3onTertiary": "#ECEEEE",
+            "m3tertiaryContainer": "#2B2E31",
+            "m3onTertiaryContainer": "#ECEEEE"
         }) : ({
             "m3background": "#C9CBCC",
             "m3onBackground": "#2A2B2E",
@@ -67,27 +67,27 @@ StyleValues {
             "m3surfaceContainerLowest": "#F2F3F3",
             "m3surfaceContainerLow": "#E9EAEA",
             "m3surfaceContainer": "#C9CBCC",
-            "m3surfaceContainerHigh": "#A4A8AB",
-            "m3surfaceContainerHighest": "#8E9296",
+            "m3surfaceContainerHigh": "#B7BABC",
+            "m3surfaceContainerHighest": "#A4A8AB",
             "m3onSurface": "#2A2B2E",
             "m3surfaceVariant": "#A4A8AB",
-            "m3onSurfaceVariant": "#62676A",
+            "m3onSurfaceVariant": "#43484B",
             "m3inverseSurface": "#2A2B2E",
             "m3inverseOnSurface": "#F2F3F3",
             "m3outline": "#8E9296",
             "m3outlineVariant": "#F2F3F3",
-            "m3primary": "#3CCDAA",
-            "m3onPrimary": "#0E2A22",
-            "m3primaryContainer": "#22977C",
-            "m3onPrimaryContainer": "#F2F3F3",
-            "m3secondary": "#62676A",
-            "m3onSecondary": "#F2F3F3",
-            "m3secondaryContainer": "#A4A8AB",
-            "m3onSecondaryContainer": "#2A2B2E",
-            "m3tertiary": "#3CCDAA",
-            "m3onTertiary": "#0E2A22",
-            "m3tertiaryContainer": "#E9EAEA",
-            "m3onTertiaryContainer": "#2A2B2E"
+            "m3primary": "#868B8F",
+            "m3onPrimary": "#1C1D1F",
+            "m3primaryContainer": "#D9DBDC",
+            "m3onPrimaryContainer": "#1C1D1F",
+            "m3secondary": "#AEB2B4",
+            "m3onSecondary": "#1C1D1F",
+            "m3secondaryContainer": "#DEE0E0",
+            "m3onSecondaryContainer": "#1C1D1F",
+            "m3tertiary": "#C3C6C7",
+            "m3onTertiary": "#1C1D1F",
+            "m3tertiaryContainer": "#E6E7E7",
+            "m3onTertiaryContainer": "#1C1D1F"
         })
 
     type.ui: "Archivo"
@@ -111,7 +111,7 @@ StyleValues {
     property color edgeLight: dark ? "#3A3D40" : "#F2F3F3"
     property color edgeDark: dark ? "#0E0F10" : "#8E9296"
     property color legend: dark ? "#C9CCCE" : "#2A2B2E"
-    property color legendFaint: dark ? "#8C9194" : "#62676A"
+    property color legendFaint: dark ? "#A2A7AE" : "#43484B"
     property color lcdBg: dark ? "#0F1A17" : "#AEB9A8"
     property color lcdOn: dark ? "#6FF0C8" : "#1C211B"
     property color lcdOff: dark ? "#17251F" : "#A5B09F"

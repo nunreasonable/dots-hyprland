@@ -562,7 +562,7 @@ ButtonMouseArea {
 
             contentLayer: StyledRectangle.ContentLayer.Group
             radius: StyleTheme.key === "caractere" ? 0 : (StyleTheme.surface.radiusInner ?? (indicatorThickness / 2))
-            color: StyleTheme.key === "caractere" ? (StyleTheme.current.termWorkspace ?? Appearance.colors.colPrimary) : (StyleTheme.palette.accent ?? Appearance.colors.colPrimary)
+            color: StyleTheme.key === "caractere" ? (StyleTheme.current.termWorkspace ?? Appearance.colors.colPrimary) : StyleTheme.key === "aparelho" ? (StyleTheme.current?.keyDarkFill ?? "#2A2B2E") : (StyleTheme.palette.accent ?? Appearance.colors.colPrimary)
             border.width: Math.min(2, StyleTheme.surface.borderWidth)
             border.color: StyleTheme.surface.borderColor ?? "transparent"
 
