@@ -108,6 +108,7 @@ ColumnLayout {
         sourceComponent: AquarioClock {
             text: timeTextTop.text
             pixelSize: timeTextTop.font.pixelSize
+            date: Config.options.background.widgets.clock.digital.showDate ? DateTime.longDate : ""
         }
     }
 
@@ -132,7 +133,7 @@ ColumnLayout {
 
     // Date
     ClockText {
-        visible: Config.options.background.widgets.clock.digital.showDate && !SekaiTheme.active
+        visible: Config.options.background.widgets.clock.digital.showDate && !SekaiTheme.active && StyleTheme.key !== "aquario"
         Layout.topMargin: -20
         Layout.fillWidth: true
         text: DateTime.longDate
