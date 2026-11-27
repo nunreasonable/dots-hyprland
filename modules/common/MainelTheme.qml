@@ -3,8 +3,6 @@ import QtQuick
 import Quickshell
 import qs.modules.common.functions
 
-// Extra Mainel-only tokens that don't fit StyleValues' shared schema (surface/elevation/
-// type/motion/palette), mirroring how SekaiTheme backs SekaiPopStyle.
 Singleton {
     id: root
 

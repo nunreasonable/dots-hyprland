@@ -2,9 +2,6 @@ import QtQuick
 import qs.modules.common
 import qs.modules.common.widgets
 
-// Mainel's segmented value bar: built on MainelPaneGroup so the lit/unlit segments
-// get the same pane corner rule as everything else. Used read-only by the OSD;
-// `interactive` turns it into a click/drag value setter.
 Item {
     id: root
 

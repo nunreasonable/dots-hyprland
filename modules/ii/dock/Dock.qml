@@ -201,9 +201,6 @@ Scope {
                             cornerRadius: 26
                         }
 
-                        // Mainel: one floating pane for the whole dock (asterisk | apps |
-                        // trash sit on the wallpaper through it), same shape rule as
-                        // dockVisualBackground so hug mode still meets the screen edge flush.
                         Rectangle {
                             id: mainelDockBackground
                             visible: Config.options.dock.showBackground && StyleTheme.key === "mainel"

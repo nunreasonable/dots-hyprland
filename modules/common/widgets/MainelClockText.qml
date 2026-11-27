@@ -1,10 +1,6 @@
 import QtQuick
 import qs.modules.common
 
-// Mainel's "cut clock": the same text drawn twice, each clipped to half its own
-// height with a thin mainel (the window-pane crossbar) left blank between them, and
-// the bottom half nudged sideways - a cheap, static echo of the logo's offset
-// transom. Two clipped Text items, no shaders.
 Item {
     id: root
 
