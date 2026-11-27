@@ -689,7 +689,7 @@ AbstractBackgroundWidget {
                             Layout.alignment: Qt.AlignRight
                             implicitWidth: controlsRow.implicitWidth + 10
                             implicitHeight: root.buttonSize + 8
-                            radius: Appearance.rounding?.full ?? 999
+                            radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.full ?? 999)
                             color: ColorUtils.transparentize(Appearance.colors.colOnPrimaryContainer, 0.9)
 
                             RowLayout {
@@ -838,7 +838,7 @@ AbstractBackgroundWidget {
                             Layout.preferredHeight: 54
                             Layout.alignment: Qt.AlignVCenter
                             color: Appearance.colors.colPrimaryContainer
-                            radius: Appearance.rounding?.normal ?? 12
+                            radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.normal ?? 12)
                             clip: true
                             layer.enabled: true
                             layer.effect: OpacityMask {

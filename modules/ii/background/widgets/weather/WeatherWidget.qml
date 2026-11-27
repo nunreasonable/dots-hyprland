@@ -136,7 +136,7 @@ AbstractBackgroundWidget {
                     Layout.topMargin: 10
                     Layout.bottomMargin: 10
                     Layout.leftMargin: 10
-                    radius: (Appearance.rounding?.verylarge ?? 30) - 6
+                    radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.verylarge ?? 30) - 6
                     color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.75)
 
                     ColumnLayout {
@@ -205,7 +205,7 @@ AbstractBackgroundWidget {
                         Rectangle {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 34
-                            radius: Appearance.rounding?.large ?? 14
+                            radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.large ?? 14)
                             color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                             RowLayout {
@@ -228,7 +228,7 @@ AbstractBackgroundWidget {
                         Rectangle {
                             Layout.fillWidth: true
                             Layout.preferredHeight: 34
-                            radius: Appearance.rounding?.large ?? 14
+                            radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.large ?? 14)
                             color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                             RowLayout {
@@ -332,7 +332,7 @@ AbstractBackgroundWidget {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: Appearance.rounding?.large ?? 14
+                        radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.large ?? 14)
                         color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
@@ -367,7 +367,7 @@ AbstractBackgroundWidget {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: Appearance.rounding?.large ?? 14
+                        radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.large ?? 14)
                         color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
@@ -403,7 +403,7 @@ AbstractBackgroundWidget {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: Appearance.rounding?.large ?? 14
+                        radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.large ?? 14)
                         color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
@@ -438,7 +438,7 @@ AbstractBackgroundWidget {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: Appearance.rounding?.large ?? 14
+                        radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.large ?? 14)
                         color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
@@ -545,7 +545,7 @@ AbstractBackgroundWidget {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 38
-                        radius: Appearance.rounding?.large ?? 14
+                        radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.large ?? 14)
                         color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
@@ -568,7 +568,7 @@ AbstractBackgroundWidget {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 38
-                        radius: Appearance.rounding?.large ?? 14
+                        radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.large ?? 14)
                         color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
@@ -591,7 +591,7 @@ AbstractBackgroundWidget {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 38
-                        radius: Appearance.rounding?.large ?? 14
+                        radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.large ?? 14)
                         color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
@@ -614,7 +614,7 @@ AbstractBackgroundWidget {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.preferredHeight: 38
-                        radius: Appearance.rounding?.large ?? 14
+                        radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.large ?? 14)
                         color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
@@ -733,7 +733,7 @@ AbstractBackgroundWidget {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: Appearance.rounding?.large ?? 18
+                        radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.large ?? 18)
                         color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
@@ -769,7 +769,7 @@ AbstractBackgroundWidget {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: Appearance.rounding?.large ?? 18
+                        radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.large ?? 18)
                         color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
@@ -805,7 +805,7 @@ AbstractBackgroundWidget {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: Appearance.rounding?.large ?? 18
+                        radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.large ?? 18)
                         color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
@@ -841,7 +841,7 @@ AbstractBackgroundWidget {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: Appearance.rounding?.large ?? 18
+                        radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.large ?? 18)
                         color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
@@ -877,7 +877,7 @@ AbstractBackgroundWidget {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: Appearance.rounding?.large ?? 18
+                        radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.large ?? 18)
                         color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
@@ -913,7 +913,7 @@ AbstractBackgroundWidget {
                     Rectangle {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
-                        radius: Appearance.rounding?.large ?? 18
+                        radius: StyleTheme.key === "caractere" ? 0 : (Appearance.rounding?.large ?? 18)
                         color: ColorUtils.transparentize(Appearance.colors.colLayer0, 0.8)
 
                         RowLayout {
