@@ -38,7 +38,9 @@ Item {
                 anchors.centerIn: parent
                 rotation: -90
                 text: root.weekdaySpaced
-                color: root.colText
+                color: "white"
+                style: Text.Raised
+                styleColor: Appearance.colors.colShadow
                 renderType: Text.CurveRendering
                 font {
                     family: Appearance.font.family.main
@@ -117,7 +119,9 @@ Item {
                 id: timeText
                 Layout.topMargin: 10
                 text: DateTime.time
-                color: root.colText
+                color: "white"
+                style: Text.Raised
+                styleColor: Appearance.colors.colShadow
                 font {
                     family: Appearance.font.family.main
                     pixelSize: 26
@@ -129,8 +133,8 @@ Item {
                 Layout.topMargin: 4
                 implicitWidth: Math.max(24, timeText.implicitWidth * 0.55)
                 implicitHeight: 2
-                color: root.colText
-                opacity: 0.6
+                color: "white"
+                opacity: 0.8
             }
         }
     }
