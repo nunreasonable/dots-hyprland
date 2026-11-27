@@ -28,7 +28,7 @@ Singleton {
 
     readonly property var allowedRoots: ["appearance", "background", "bar", "calendar", "cheatsheet", "crosshair", "custom", "dock", "interactions", "lock", "nabyIsland", "notifications", "osd", "overview", "panelFamily", "settings", "sidebar", "time", "waffles", "wallpaperSelector"]
     readonly property var allowedPrefixes: ["windowsPort.decoration", "windowsPort.panelAnimationStyle"]
-    readonly property var stateKeys: ["appearance.visualStyleApplied", "appearance.visualStylePresetVersion", "nabyIsland.keptNativeTaskbar"]
+    readonly property var stateKeys: ["appearance.visualStyleApplied", "appearance.visualStylePresetVersion", "appearance.visualStyleKept", "nabyIsland.keptNativeTaskbar"]
     readonly property var forbiddenParts: ["__proto__", "prototype", "constructor"]
     readonly property var spicyKeys: [
         "background.konachanSpicy",

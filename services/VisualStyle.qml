@@ -129,6 +129,54 @@ Singleton {
         }
     }
 
+    readonly property var managedKeys: ["bar.utilButtons.showColorPicker", "bar.utilButtons.showDarkModeToggle", "bar.utilButtons.showKeyboardToggle", "bar.utilButtons.showWallpaperToggle", "bar.workspaces.alwaysShowNumbers", "bar.workspaces.showAppIcons", "bar.resources.alwaysShowSwap", "bar.resources.showValue", "sidebar.quickSliders.enable", "sidebar.banner", "sidebar.sectionOrder"]
+
+    function rememberedKeys() {
+        const keys = [...root.managedKeys];
+        for (const entry of StyleTheme.all) {
+            for (const key in entry.preset) {
+                if (!keys.includes(key))
+                    keys.push(key);
+            }
+        }
+        return keys;
+    }
+
+    function readKept() {
+        try {
+            return JSON.parse(Config.options.appearance.visualStyleKept || "{}") ?? {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function nestedValue(key) {
+        let value = Config.options;
+        for (const part of key.split("."))
+            value = value?.[part];
+        return value !== null && typeof value === "object" && value.length !== undefined ? Array.from(value) : value;
+    }
+
+    function rememberChoices(style) {
+        const kept = root.readKept();
+        const values = {};
+        for (const key of root.rememberedKeys()) {
+            const value = root.nestedValue(key);
+            if (value !== undefined)
+                values[key] = value;
+        }
+        kept[style] = values;
+        Config.options.appearance.visualStyleKept = JSON.stringify(kept);
+    }
+
+    function restoreChoices(style) {
+        const values = root.readKept()[style];
+        if (!values)
+            return;
+        for (const key in values)
+            Config.setNestedValue(key, values[key]);
+    }
+
     function applyTweaks(entry) {
         for (const other of StyleTheme.all) {
             for (const key in other.preset) {
@@ -141,6 +189,7 @@ Singleton {
     }
 
     function applyPreset(style) {
+        root.rememberChoices(root.applied);
         const entry = root.entry(style);
         const pc = entry.layout === "end4pc";
         Config.options.bar.utilButtons.showColorPicker = pc;
@@ -154,6 +203,7 @@ Singleton {
         root.applyIsland(entry.island);
         root.applyNewKeys(pc, root.applied);
         root.applyTweaks(entry);
+        root.restoreChoices(style);
         Config.options.appearance.visualStylePresetVersion = root.presetVersion;
         Config.options.appearance.visualStyleApplied = style;
     }
